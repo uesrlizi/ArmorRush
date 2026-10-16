@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 360" font-family="'Segoe UI','Microsoft YaHei',sans-serif">
+  <!-- 提案 C · 四脚炮台型：四条蝗虫腿、背部长炮、最低矮宽大。侧视图朝右 -->
+  <!-- 部件组: pack / leg-far x2 / body / leg-near x2 / cannon / head -->
+  <defs>
+    <linearGradient id="eyeC" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#FFD9A0"/>
+      <stop offset="0.5" stop-color="#FF9E2C"/>
+      <stop offset="1" stop-color="#C05E10"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="480" height="360" fill="#101318"/>
+  <text x="18" y="30" font-size="17" font-weight="700" fill="#D8D5CC">提案 C · 四脚炮台型「WHITE HERON」</text>
+  <text x="18" y="49" font-size="10.5" fill="#6E7683">侧视图 · 最低矮宽大 · 四条折叠腿 · 背部轨道炮 · 浮炮台气质</text>
+  <ellipse cx="250" cy="323" rx="140" ry="10" fill="#000000" opacity="0.4"/>
+
+  <g stroke-linejoin="round" stroke-linecap="round">
+    <!-- 远侧双腿 -->
+    <g id="leg-far">
+      <circle cx="286" cy="206" r="12" fill="#9A968B"/>
+      <line x1="286" y1="206" x2="318" y2="252" stroke="#101216" stroke-width="24"/>
+      <line x1="286" y1="206" x2="318" y2="252" stroke="#9A968B" stroke-width="16"/>
+      <circle cx="318" cy="252" r="9" fill="#1A1C20"/>
+      <line x1="318" y1="252" x2="306" y2="296" stroke="#101216" stroke-width="20"/>
+      <line x1="318" y1="252" x2="306" y2="296" stroke="#9A968B" stroke-width="13"/>
+      <rect x="286" y="292" width="60" height="22" rx="8" fill="#9A968B"/>
+      <rect x="286" y="308" width="60" height="6" rx="3" fill="#22262C"/>
+      <circle cx="206" cy="206" r="12" fill="#9A968B"/>
+      <line x1="206" y1="206" x2="174" y2="252" stroke="#101216" stroke-width="24"/>
+      <line x1="206" y1="206" x2="174" y2="252" stroke="#9A968B" stroke-width="16"/>
+      <circle cx="174" cy="252" r="9" fill="#1A1C20"/>
+      <line x1="174" y1="252" x2="186" y2="296" stroke="#101216" stroke-width="20"/>
+      <line x1="174" y1="252" x2="186" y2="296" stroke="#9A968B" stroke-width="13"/>
+      <rect x="152" y="292" width="60" height="22" rx="8" fill="#9A968B"/>
+      <rect x="152" y="308" width="60" height="6" rx="3" fill="#22262C"/>
+    </g>
+
+    <!-- 背包推进器 -->
+    <g id="pack">
+      <rect x="142" y="128" width="54" height="86" rx="14" fill="#6A7280" stroke="#14171B" stroke-width="3"/>
+      <rect x="146" y="136" width="46" height="8" rx="4" fill="#C4303A"/>
+      <rect x="150" y="164" width="34" height="5" rx="2.5" fill="#4E565F"/>
+      <rect x="150" y="174" width="34" height="5" rx="2.5" fill="#4E565F"/>
+      <polygon points="146,202 120,220 130,232 154,214" fill="#22262C" stroke="#14171B" stroke-width="2"/>
+      <ellipse cx="128" cy="226" rx="9" ry="6" fill="#FFB35C" opacity="0.85"/>
+    </g>
+
+    <!-- 背部轨道炮 -->
+    <g id="cannon">
+      <rect x="150" y="112" width="36" height="24" rx="6" fill="#4E565F" stroke="#14171B" stroke-width="2.5"/>
+      <line x1="168" y1="124" x2="330" y2="70" stroke="#14171B" stroke-width="16"/>
+      <line x1="168" y1="124" x2="330" y2="70" stroke="#6A7280" stroke-width="10"/>
+      <rect x="252" y="84" width="14" height="10" rx="2" fill="#22262C"/>
+      <circle cx="334" cy="68" r="7" fill="#14171B"/>
+      <circle cx="334" cy="68" r="3" fill="#0B0D10"/>
+    </g>
+
+    <!-- 躯干 -->
+    <g id="body">
+      <rect x="186" y="140" width="120" height="98" rx="16" fill="#D8D5CC" stroke="#14171B" stroke-width="3"/>
+      <rect x="196" y="132" width="100" height="28" rx="8" fill="#C4C0B4" stroke="#14171B" stroke-width="2.5"/>
+      <polygon points="200,132 244,118 250,134 206,148" fill="#4E565F" stroke="#14171B" stroke-width="2"/>
+      <rect x="258" y="158" width="56" height="60" rx="10" fill="#E4E1D8" stroke="#14171B" stroke-width="2.5"/>
+      <polygon points="262,166 274,168 268,186 256,184" fill="#C4303A"/>
+      <polygon points="278,192 290,194 284,210 272,208" fill="#C4303A" opacity="0.85"/>
+      <rect x="194" y="216" width="106" height="22" rx="10" fill="#B3AFA4"/>
+      <rect x="200" y="170" width="32" height="6" rx="3" fill="#B3AFA4"/>
+      <rect x="200" y="180" width="32" height="6" rx="3" fill="#B3AFA4"/>
+      <rect x="200" y="190" width="32" height="6" rx="3" fill="#B3AFA4"/>
+      <text x="206" y="212" font-size="10" font-weight="700" fill="#6A7280">TP-09</text>
+    </g>
+
+    <!-- 近侧前腿 -->
+    <g id="leg-front-near">
+      <line x1="272" y1="216" x2="306" y2="262" stroke="#14171B" stroke-width="28"/>
+      <line x1="272" y1="216" x2="306" y2="262" stroke="#D8D5CC" stroke-width="20"/>
+      <line x1="286" y1="228" x2="308" y2="252" stroke="#C7CDD6" stroke-width="2.5"/>
+      <circle cx="286" cy="228" r="2.5" fill="#22262C"/>
+      <circle cx="308" cy="252" r="2.5" fill="#22262C"/>
+      <circle cx="306" cy="262" r="10" fill="#22262C" stroke="#14171B" stroke-width="2.5"/>
+      <line x1="306" y1="262" x2="294" y2="302" stroke="#14171B" stroke-width="24"/>
+      <line x1="306" y1="262" x2="294" y2="302" stroke="#C4C0B4" stroke-width="16"/>
+      <circle cx="294" cy="302" r="7" fill="#22262C"/>
+      <circle cx="272" cy="216" r="15" fill="#E4E1D8" stroke="#14171B" stroke-width="3"/>
+      <circle cx="272" cy="216" r="4" fill="#6A7280"/>
+      <rect x="272" y="296" width="66" height="24" rx="9" fill="#D8D5CC" stroke="#14171B" stroke-width="3"/>
+      <rect x="272" y="314" width="66" height="6" rx="3" fill="#22262C"/>
+      <polygon points="322,296 338,302 334,312 320,310" fill="#C4303A"/>
+    </g>
+
+    <!-- 近侧后腿 -->
+    <g id="leg-rear-near">
+      <line x1="214" y1="216" x2="180" y2="262" stroke="#14171B" stroke-width="28"/>
+      <line x1="214" y1="216" x2="180" y2="262" stroke="#D8D5CC" stroke-width="20"/>
+      <circle cx="180" cy="262" r="10" fill="#22262C" stroke="#14171B" stroke-width="2.5"/>
+      <line x1="180" y1="262" x2="192" y2="302" stroke="#14171B" stroke-width="24"/>
+      <line x1="180" y1="262" x2="192" y2="302" stroke="#C4C0B4" stroke-width="16"/>
+      <circle cx="192" cy="302" r="7" fill="#22262C"/>
+      <circle cx="214" cy="216" r="15" fill="#E4E1D8" stroke="#14171B" stroke-width="3"/>
+      <circle cx="214" cy="216" r="4" fill="#6A7280"/>
+      <rect x="172" y="296" width="66" height="24" rx="9" fill="#D8D5CC" stroke="#14171B" stroke-width="3"/>
+      <rect x="172" y="314" width="66" height="6" rx="3" fill="#22262C"/>
+      <polygon points="172,300 186,298 184,310 172,312" fill="#C4303A"/>
+    </g>
+
+    <!-- 小机械臂 -->
+    <g id="arm-near">
+      <line x1="296" y1="190" x2="318" y2="204" stroke="#14171B" stroke-width="18"/>
+      <line x1="296" y1="190" x2="318" y2="204" stroke="#D8D5CC" stroke-width="12"/>
+      <circle cx="322" cy="206" r="7" fill="#22262C" stroke="#14171B" stroke-width="2.5"/>
+    </g>
+
+    <!-- 头部（楔形，琥珀单眼缝） -->
+    <g id="head">
+      <line x1="316" y1="126" x2="304" y2="108" stroke="#22262C" stroke-width="3"/>
+      <circle cx="302" cy="106" r="3" fill="#C4303A"/>
+      <polygon points="304,158 304,136 316,124 340,124 352,136 352,158" fill="#D8D5CC" stroke="#14171B" stroke-width="3"/>
+      <rect x="308" y="138" width="42" height="18" fill="#22262C" stroke="#14171B" stroke-width="2.5"/>
+      <rect x="322" y="141" width="26" height="12" rx="2" fill="url(#eyeC)"/>
+      <rect x="318" y="140" width="32" height="14" rx="3" fill="#FF9E2C" opacity="0.3"/>
+    </g>
+  </g>
+
+  <g font-size="9" fill="#6E7683">
+    <rect x="18" y="337" width="22" height="13" rx="3" fill="#D8D5CC" stroke="#14171B"/>
+    <rect x="46" y="337" width="22" height="13" rx="3" fill="#6A7280" stroke="#14171B"/>
+    <rect x="74" y="337" width="22" height="13" rx="3" fill="#C4303A" stroke="#14171B"/>
+    <rect x="102" y="337" width="22" height="13" rx="3" fill="#22262C" stroke="#14171B"/>
+    <text x="132" y="347">#D8D5CC 灰白 / #6A7280 冷灰 / #C4303A 绯红 / 传感器琥珀</text>
+  </g>
+</svg>

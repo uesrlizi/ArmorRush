@@ -1,0 +1,34 @@
+{
+	"speakers": {
+		"SYSTEM": {
+			"name": "SYSTEM",
+			"voice": "en-US-AriaNeural",
+			"rate": "+10%",
+			"pitch": "-2Hz",
+			"color": "#1f6f99",
+			"piper": {
+				"voice": "en_US-lessac-high",
+				"length_scale": 1.3,
+				"noise_scale": 0.5,
+				"sentence_silence": 0.05
+			}
+		}
+	},
+	"lines": {
+		"sys_combat": {
+			"speaker": "SYSTEM",
+			"text": "主系统，作战模式。",
+			"tts": "Main system, combat mode."
+		},
+		"sys_hp_warn": {
+			"speaker": "SYSTEM",
+			"text": "AP剩余50%",
+			"tts": "AP remaining fifty percent."
+		},
+		"sys_hp_crit": {
+			"speaker": "SYSTEM",
+			"text": "AP剩余25%",
+			"tts": "AP remaining twenty-five percent."
+		}
+	}
+}

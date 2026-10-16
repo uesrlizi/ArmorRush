@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>可读性提案:前景战斗主体 vs 中景分离</title>
+<style>
+  body { background:#141412; color:#ddd6c4; font:15px/1.7 "Microsoft YaHei",sans-serif; margin:0; padding:32px; }
+  h1 { font-size:22px; color:#f0ead8; } h2 { font-size:18px; color:#f0ead8; margin-top:40px; }
+  img { max-width:100%; display:block; margin:12px 0; border:1px solid #333; }
+  .cap { color:#9a927c; font-size:13px; }
+  table { border-collapse:collapse; margin:16px 0; font-size:14px; }
+  td,th { border:1px solid #3a382f; padding:6px 14px; text-align:left; }
+  .sw { display:inline-block; width:14px; height:14px; vertical-align:-2px; margin-right:6px; border:1px solid #000; }
+  code { background:#242420; padding:1px 6px; border-radius:3px; font-size:13px; }
+  .good { color:#a8c78a; } .bad { color:#d98a7a; }
+</style>
+</head>
+<body>
+<h1>可读性提案:前景战斗主体与中景的分离</h1>
+<p>同一游戏画面(主场景实渲染,三块断桥+两只敌人+箱子的摆位),四个方案对比。</p>
+
+<h2>问题诊断(色值账)</h2>
+<table>
+<tr><th>元素</th><th>底色</th><th>亮度 L*</th><th>问题</th></tr>
+<tr><td>玩家机甲</td><td><span class="sw" style="background:#2e3238"></span>#2e3238(冷)</td><td>50</td><td rowspan="3" class="bad">玩家 vs 中景 L 差仅 7,明度带完全重叠;玩家强调橙 #ffa04a 与中景钠灯<strong>同色值</strong>,识别色被场景吃掉</td></tr>
+<tr><td>中景楼群</td><td><span class="sw" style="background:#3b3931"></span>#3b3931(暖)</td><td>57</td></tr>
+<tr><td>敌人</td><td><span class="sw" style="background:#332e2c"></span>#332e2c(暖)</td><td>47</td></tr>
+<tr><td>地表带</td><td><span class="sw" style="background:#5b564a"></span>#5b564a</td><td>86</td><td class="good">亮一档,尚可</td></tr>
+</table>
+<p>根因:场景为"废都氛围"整体压暗,角色按 AC6 军规也是深底色——两条明度带宽重叠。色温(冷 vs 暖)其实已分,差在<strong>明度</strong>与<strong>强调色独占</strong>。</p>
+
+<h2>四方案对比</h2>
+<img src="compare_grid.png" alt="四方案对比">
+<div class="cap">左上 P0 现状 / 右上 P1 雾层推远 / 左下 P2 轮廓光+落影 / 右下 P3 综合(推荐)。单图 1600x720 在 <code>autotest_shots/readability_p0..p3.png</code>。</div>
+
+<h2>P1 · 雾层推远(只动场景)</h2>
+<img src="../../autotest_shots/readability_p1.png">
+<p>天色雾(<span class="sw" style="background:#b3a97f"></span>#b3a97f,近地浓 0.45 → 天顶淡 0.28)插在 MidStrip 与 BridgePiers 之间:只洗远景+中景,前景保持锐利。中景楼群混雾后 L 57→约 107,与玩家 L50 拉开 <strong>57</strong>。代价:楼窗灯点被洗闷一档。</p>
+
+<h2>P2 · 轮廓光 + 接触落影(只动角色,场景零改动)</h2>
+<img src="../../autotest_shots/readability_p2.png">
+<p>玩家/敌人每个贴图件垫一圈 2px 暖白 rim(<span class="sw" style="background:#ffe3b3"></span>#ffe3b3,呼应钠灯天光),脚下加椭圆接触影把主体"钉"在地上。深色装甲剪影获得亮描边,在任何背景上都会跳出来——包括进到最暗的楼群前。<strong>这是性价比最高的一招</strong>:十行 canvas_item shader(<code>art_proposals/readability/outline_rim.gdshader</code>),不改任何美术资产。</p>
+
+<h2>P3 · 综合(推荐)= P1 + P2 + 场景橙让位</h2>
+<img src="../../autotest_shots/readability_p3.png">
+<p>在 P1+P2 基础上,中景钠灯 #ffa04a→<span class="sw" style="background:#c48145"></span>#c48145、#ff8c3a→#b06b3b(变体 <code>assets/env_rust_mid_soft.svg</code>,原文件不动)。全场唯一纯橙 = 玩家,信号红 = 敌人,敌我识别轴更纯粹。</p>
+
+<h2>实装清单(若拍板)</h2>
+<table>
+<tr><th>方案</th><th>改动</th><th>成本</th></tr>
+<tr><td>P1</td><td>main.tscn 在 MidStrip 后加一层渐变雾(Sprite2D+GradientTexture2D,参数见 <code>scripts/readability_preview.gd</code> 的 _add_fog),或直接烘进 env_rust_mid.svg</td><td>~10 行</td></tr>
+<tr><td>P2</td><td>player.tscn / enemy.tscn 每个贴图件加 rim 副本 Sprite2D 挂 <code>outline_rim.gdshader</code>(z 垫底)+ 落影 Polygon2D</td><td>每角色 4 个节点</td></tr>
+<tr><td>P3</td><td>P1+P2 之外,MidStrip 纹理换 env_rust_mid_soft.svg(已烘焙好)</td><td>换一行引用</td></tr>
+</table>
+<p class="cap">提案产物:<code>art_proposals/readability/</code>(shader、烘色脚本、合成脚本)+ <code>scripts/readability_preview.gd</code>(四方案截图场景,可复跑)。注意:P1/P3 效果图为按 Godot 同公式离线合成(引擎窗口进程本机驱动下间歇卡死,截图管线见记忆);P0/P2 为引擎实渲染,实装后以引擎内为准微调雾浓度/rim 宽度即可。</p>
+</body>
+</html>

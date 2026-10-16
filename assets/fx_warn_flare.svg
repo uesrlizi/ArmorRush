@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+<!-- 威胁预警·光晕贴图（fx_warn_flare）：高亮红色光晕，无白芯（白热爆闪被否）。
+     坐标账：画布 64x64，圆心 (32,32) 半径 30（四周留 2px 防采样切边）。
+     渐变账（objectBoundingBox r=0.5 → 30px 实半径）：
+       0    #ff8266 α1.00  亮红热芯（最亮也是红，不进白）
+       0.30 #ff5140 α0.80  信号红主体（敌阵营色）
+       0.65 #992416 α0.28  深红软出
+       1.00 #992416 α0
+     ADD 混合下中心叠出高亮红晕；亮度包络交给 threat_flash.tscn 的 color_ramp。 -->
+<radialGradient id="flare" cx="0.5" cy="0.5" r="0.5">
+  <stop offset="0" stop-color="#ff8266" stop-opacity="1"/>
+  <stop offset="0.3" stop-color="#ff5140" stop-opacity="0.8"/>
+  <stop offset="0.65" stop-color="#992416" stop-opacity="0.28"/>
+  <stop offset="1" stop-color="#992416" stop-opacity="0"/>
+</radialGradient>
+<circle cx="32" cy="32" r="30" fill="url(#flare)"/>
+</svg>

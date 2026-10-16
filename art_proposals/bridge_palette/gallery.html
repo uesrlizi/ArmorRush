@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>高架桥配色提案:与玩家分离、与背景保持层次</title>
+<style>
+  body { background:#141412; color:#ddd6c4; font:15px/1.7 "Microsoft YaHei",sans-serif; margin:0; padding:32px; }
+  h1 { font-size:22px; color:#f0ead8; } h2 { font-size:18px; color:#f0ead8; margin-top:40px; }
+  img { max-width:100%; display:block; margin:12px 0; border:1px solid #333; }
+  table { border-collapse:collapse; margin:16px 0; font-size:14px; }
+  td,th { border:1px solid #3a382f; padding:6px 14px; text-align:left; }
+  .sw { display:inline-block; width:14px; height:14px; vertical-align:-2px; margin-right:6px; border:1px solid #000; }
+  code { background:#242420; padding:1px 6px; border-radius:3px; font-size:13px; }
+  .bad { color:#d98a7a; } .good { color:#a8c78a; }
+</style>
+</head>
+<body>
+<h1>高架桥配色提案</h1>
+<p>方向照你说的:<strong>桥柱变淡</strong>。但只提柱不够——账上真正和玩家撞的是「柱 + 桥面下暗缘」两个暗件,所以四个色一起重排,桥整体仍比雾洗后的中景楼暗一档,和背景的分离不动。</p>
+
+<h2>问题账(玩家 #2e3238,L≈50)</h2>
+<table>
+<tr><th>构件</th><th>现色</th><th>L*</th><th>vs 玩家</th><th>诊断</th></tr>
+<tr><td>桥墩柱 <code>#3d3a32</code></td><td><span class="sw" style="background:#3d3a32"></span>纯色竖条</td><td>58</td><td class="bad">差 8</td><td>跑桥下必叠的 20px 竖条,无描边,和玩家剪影糊死</td></tr>
+<tr><td>桥面下暗缘 <code>#37352d</code></td><td><span class="sw" style="background:#37352d"></span></td><td>53</td><td class="bad">差 3</td><td>玩家跳桥侧时糊;且此色与地块暗条纹同值</td></tr>
+<tr><td>桥面板身 <code>#46433a</code></td><td><span class="sw" style="background:#46433a"></span></td><td>67</td><td>差 17</td><td>勉强</td></tr>
+<tr><td>桥面上亮缘 <code>#5a574b</code></td><td><span class="sw" style="background:#5a574b"></span></td><td>87</td><td class="good">差 37</td><td>工作正常,不动</td></tr>
+</table>
+
+<h2>新色板:在「玩家 50 ↔ 雾后中景楼 107」之间单调排开</h2>
+<table>
+<tr><th>构件</th><th>新色</th><th>L*</th><th>理由</th></tr>
+<tr><td>桥墩柱</td><td><span class="sw" style="background:#645d4c"></span>#645d4c + 1.5px <span class="sw" style="background:#3d3a32"></span>#3d3a32 描边</td><td>93</td><td>你说的"柱变淡"。玩家差 <strong>43</strong>;与雾后楼(107)明度接近,但柱有描边、矢量锐边、暖褐相,楼是雾洗柔边——层次仍分;老柱色复用作描边色</td></tr>
+<tr><td>桥面下暗缘</td><td><span class="sw" style="background:#453f35"></span>#453f35</td><td>64</td><td>不再撞玩家(差 14),仍比板身暗一档保住"板厚"读法</td></tr>
+<tr><td>桥面板身</td><td><span class="sw" style="background:#504b40"></span>#504b40</td><td>75</td><td>微提,与玩家差 25</td></tr>
+<tr><td>桥面上亮缘</td><td><span class="sw" style="background:#5a574b"></span>#5a574b(不动)</td><td>87</td><td>—</td></tr>
+</table>
+<p>整条明度阶梯变成:玩家/敌人 50 → 下暗缘 64 → 板身 75 → 亮缘 87 / 柱 93 → 雾后楼 107 → 天空。单调、无重叠带;桥仍比背景暗、饱和略高,分离语义保持。</p>
+
+<h2>效果图(P0 实渲染图上按色值精确合成)</h2>
+<img src="bridge_compare.png">
+<div class="cap">上排:全画面前/后;下排:柱区特写前/后。合成时按「柱色→中景内置雾」的混合线映射了柱的雾洗段,等效实装观感。大图 <code>bridge_after.png</code>。</div>
+<p class="good">改后:柱在雾洗楼群前靠描边+锐边立住,玩家/敌人深色剪影叠在柱与桥面任一处都有 40+ 明度差;桥面亮缘仍是玩家站桥上时的脚下对比。</p>
+
+<h2>实装点(拍板后改,共 4 个色值 + 1 条描边)</h2>
+<table>
+<tr><th>文件</th><th>改动</th></tr>
+<tr><td><code>assets/env_rust_deck.svg</code></td><td>板身 #46433a→#504b40、下暗缘 #37352d→#453f35(亮缘不动)</td></tr>
+<tr><td><code>scripts/obstacle.gd</code> _rebuild_piers</td><td>pier.color #3d3a32→#645d4c;柱 Polygon2D 改为「柱体 + 后置 2px 描边矩形」(或换 Line2D),描边色 #3d3a32</td></tr>
+</table>
+<p class="cap">注意:#37352d 与地块暗条纹同色源不同资产,只改 deck.svg 不会波及地块(已在本提案合成中验证过边界)。烘焙后跑一次 fog_check_preview 即可在引擎内复核。</p>
+</body>
+</html>

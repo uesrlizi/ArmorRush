@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 16" width="32" height="16">
+<!-- 枪臂 K=0.8 肩轴(28,8)=挂点(-10,-26)u；枪口尖端 canvas x12.8=轴左 15.2px；tscn: centered=false offset=(-28,-8)，Muzzle=(-15,3) -->
+<defs>
+
+</defs>
+<rect x="16.8" y="7.2" width="11.2" height="4.8" fill="#171514"/>
+<rect x="12.8" y="8.0" width="4.0" height="6.4" fill="#171514"/>
+<circle cx="26.0" cy="9.6" r="1.2" fill="#ff5140" opacity="0.9"/>
+<circle cx="28.0" cy="8.0" r="2.5" fill="#282322"/>
+</svg>

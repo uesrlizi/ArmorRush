@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="480" viewBox="0 0 256 480">
+  <rect x="0" y="0" width="256" height="28" fill="#5da05e"/>
+  <rect x="0" y="28" width="256" height="452" fill="#8a6748"/>
+  <!-- 周期性深色小块：纯色地面也需要可感知的滚动参照 -->
+  <rect x="30" y="10" width="8" height="10" fill="#4b854c"/>
+  <rect x="158" y="12" width="8" height="8" fill="#4b854c"/>
+</svg>

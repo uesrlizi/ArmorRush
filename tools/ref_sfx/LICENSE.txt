@@ -1,0 +1,11 @@
+来源与许可（全部 CC0，可商用、免署名）：
+
+1. Kenney "Impact Sounds" 完整资产包（130 个 ogg）
+   https://kenney.nl/assets/impact-sounds
+   License: CC0 1.0 Universal (https://creativecommons.org/publicdomain/zero/1.0/)
+
+2. qubodup 挥风实录（10 个 flac，swosh-*.flac）
+   https://opengameart.org/content/3-swosh-sword-swings （作者 qubodup，CC0）
+   自 https://kenney.nl 与 visual-focused-game 工程转存。
+
+本目录素材经 tools/gen_sfx.py 转换（修剪/变调/叠层）后输出到 assets/sfx/。

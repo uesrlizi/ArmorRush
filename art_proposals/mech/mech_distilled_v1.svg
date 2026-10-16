@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 970" font-family="'Segoe UI','Microsoft YaHei',sans-serif">
+  <!-- 玩家机甲提案 · 形状语言提炼版：从零绘制。语言来源=用户正侧描形，比例为本游戏短粗规格 -->
+  <defs><radialGradient id="eyeV" cx="0.35" cy="0.5" r="0.9"><stop offset="0" stop-color="#D8FFF4"/><stop offset="0.5" stop-color="#52E0C4"/><stop offset="1" stop-color="#189E82"/></radialGradient></defs>
+  <rect width="980" height="970" fill="#14171C"/>
+  <text x="24" y="42" font-size="26" font-weight="700" fill="#C6C0AC">玩家机甲提案 · 形状语言提炼 v1</text>
+  <text x="24" y="70" font-size="14" fill="#7A8290">形状语言提炼自你的描形（肩甲断顶/头下沉/浮胸板/楔形躯干/逆关节刃小腿/护趾脚/低持长枪），从零起稿 · 朝右 · 短粗比例</text>
+  <ellipse cx="500" cy="706" rx="160" ry="16" fill="#000000" opacity="0.4"/>
+  <g transform="translate(150,240) scale(1.15)">
+  <g stroke-linejoin="round" stroke-linecap="round">
+  <g id="leg-far">
+    <polygon points="305,268 340,262 352,300 345,344 306,352 292,312" fill="#3E4232" stroke="#181B20" stroke-width="4"/>
+    <polygon points="318,278 338,274 344,306 330,340 310,336 308,306" fill="#4A4E3A" stroke="#181B20" stroke-width="0"/>
+    <polygon points="280,352 348,348 368,356 366,384 284,386" fill="#3E4232" stroke="#181B20" stroke-width="4"/>
+    <rect x="284" y="380" width="82" height="7" fill="#22251B" rx="3"/>
+  </g>
+  <g id="pack">
+    <polygon points="196,128 224,100 262,106 272,168 258,206 206,202" fill="#4E535A" stroke="#181B20" stroke-width="4"/>
+    <polygon points="204,130 228,108 258,112 266,166 254,196 212,192" fill="#5E646B" stroke="#181B20" stroke-width="0"/>
+    <rect x="216" y="128" width="24" height="6" fill="#52E0C4" rx="3" opacity="0.7"/>
+    <polygon points="202,204 232,198 238,214 206,218" fill="#23262C" stroke="#181B20" stroke-width="4"/>
+    <ellipse cx="214" cy="216" rx="12" ry="5" fill="#FFB35C" opacity="0.85"/>
+  </g>
+  <g id="waist">
+    <rect x="315" y="188" width="54" height="26" fill="#23262C" rx="6"/>
+    <polygon points="322,190 332,190 326,212 316,212" fill="#C43C2C" stroke="#181B20" stroke-width="0"/>
+  </g>
+  <g id="hip">
+    <polygon points="298,212 382,212 390,232 380,250 300,250 290,230" fill="#59626E" stroke="#181B20" stroke-width="4"/>
+    <polygon points="306,218 374,218 380,232 372,244 306,244 300,230" fill="#6B7480" stroke="#181B20" stroke-width="0"/>
+    <circle cx="338" cy="230" r="13" fill="#23262C"/>
+  </g>
+  <g id="thigh">
+    <polygon points="302,232 352,226 362,268 340,286 302,278 294,252" fill="#23262C" stroke="#181B20" stroke-width="4"/>
+    <polygon points="308,238 348,232 356,266 338,278 308,272 302,250" fill="#C6C0AC" stroke="#181B20" stroke-width="0"/>
+    <line x1="330" y1="240" x2="322" y2="272" stroke="#A69E88" stroke-width="2.5"/>
+  </g>
+  <g id="shin">
+    <polygon points="322,258 368,252 382,282 378,318 360,352 330,360 296,352 288,318 296,282 304,244 314,232" fill="#23262C" stroke="#181B20" stroke-width="4"/>
+    <polygon points="328,264 362,258 374,284 370,316 356,344 332,352 304,344 298,316 306,284 310,252" fill="#C6C0AC" stroke="#181B20" stroke-width="0"/>
+    <polygon points="314,246 322,236 330,248 324,262" fill="#9A927C" stroke="#181B20" stroke-width="0"/>
+    <polygon points="336,266 368,262 378,286 372,314 360,336 344,340 352,312 346,286" fill="#D6D1BF" stroke="#181B20" stroke-width="0"/>
+    <circle cx="326" cy="272" r="9" fill="#23262C"/>
+    <line x1="310" y1="258" x2="342" y2="276" stroke="#C7CDD6" stroke-width="2.5"/>
+    <circle cx="310" cy="258" r="3" fill="#23262C"/>
+    <circle cx="342" cy="276" r="3" fill="#23262C"/>
+  </g>
+  <g id="foot">
+    <polygon points="330,352 360,344 396,348 424,362 426,380 420,394 272,394 264,376 272,360" fill="#23262C" stroke="#181B20" stroke-width="4"/>
+    <polygon points="336,358 396,354 416,364 418,378 414,388 280,388 272,374 282,362" fill="#C6C0AC" stroke="#181B20" stroke-width="0"/>
+    <polygon points="396,354 424,362 426,380 420,392 396,390 394,366" fill="#9A927C" stroke="#181B20" stroke-width="0"/>
+    <rect x="282" y="386" width="136" height="8" fill="#23262C" rx="4"/>
+    <circle cx="350" cy="366" r="10" fill="#23262C"/>
+  </g>
+  <g id="gun">
+    <polygon points="300,210 338,200 468,282 478,300 462,318 330,244 296,232" fill="#23262C" stroke="#181B20" stroke-width="6"/>
+    <polygon points="304,214 338,206 458,284 466,298 456,308 334,236 304,224" fill="#3A3E46" stroke="#181B20" stroke-width="0"/>
+    <polygon points="322,204 346,196 352,206 330,214" fill="#2A2D34" stroke="#181B20" stroke-width="0"/>
+    <circle cx="336" cy="204" r="5" fill="#52E0C4"/>
+    <polygon points="456,282 476,294 470,310 452,300" fill="#23262C" stroke="#181B20" stroke-width="4"/>
+    <polygon points="356,240 372,250 364,264 348,254" fill="#2A2D34" stroke="#181B20" stroke-width="0"/>
+  </g>
+  <g id="forearm">
+    <polygon points="302,182 322,172 384,234 372,252" fill="#23262C" stroke="#181B20" stroke-width="4"/>
+    <polygon points="306,184 320,178 376,236 368,244" fill="#B9B29C" stroke="#181B20" stroke-width="0"/>
+    <circle cx="310" cy="182" r="9" fill="#23262C"/>
+    <polygon points="372,240 392,252 382,268 362,256" fill="#23262C" stroke="#181B20" stroke-width="4"/>
+  </g>
+  <g id="upperarm">
+    <polygon points="296,144 320,138 330,190 306,196" fill="#23262C" stroke="#181B20" stroke-width="4"/>
+    <polygon points="300,148 316,144 324,186 308,190" fill="#B9B29C" stroke="#181B20" stroke-width="0"/>
+  </g>
+  <g id="torso">
+    <polygon points="285,108 352,98 394,120 400,166 384,204 330,214 284,208 272,158" fill="#C6C0AC" stroke="#181B20" stroke-width="4"/>
+    <polygon points="294,116 348,108 384,126 388,164 374,196 330,204 294,198 282,158" fill="#D6D1BF" stroke="#181B20" stroke-width="0"/>
+    <polygon points="372,170 388,162 392,196 378,202" fill="#A69E88" stroke="#181B20" stroke-width="0"/>
+    <circle cx="392" cy="140" r="6" fill="#C43C2C" stroke="#181B20" stroke-width="2.5"/>
+    <rect x="356" y="176" width="24" height="5" fill="#8F8975" rx="2.5"/>
+    <rect x="356" y="185" width="24" height="5" fill="#8F8975" rx="2.5"/>
+  </g>
+  <g id="chest-top">
+    <polygon points="296,94 378,82 400,102 392,134 304,132" fill="#D6D1BF" stroke="#181B20" stroke-width="4"/>
+    <polygon points="296,94 302,93 306,130 300,130" fill="#C43C2C" stroke="#181B20" stroke-width="0"/>
+  </g>
+  <g id="head">
+    <polygon points="232,66 244,46 282,40 306,50 312,72 300,88 262,94 236,86" fill="#C6C0AC" stroke="#181B20" stroke-width="3.5"/>
+    <polygon points="238,68 248,52 282,47 302,56 306,72 296,84 264,88 242,82" fill="#A69E88" stroke="#181B20" stroke-width="0"/>
+    <polygon points="296,52 306,60 304,82 294,76" fill="#23262C" stroke="#181B20" stroke-width="0"/>
+    <rect x="294" y="58" width="12" height="7" rx="2" fill="url(#eyeV)"/>
+    <polygon points="258,90 282,88 276,98 260,98" fill="#57544A" stroke="#181B20" stroke-width="0"/>
+  </g>
+  <g id="pauldron">
+    <polygon points="230,136 232,74 248,54 366,44 406,68 416,128 398,148 318,158 260,150" fill="#9A927C" stroke="#181B20" stroke-width="4"/>
+    <polygon points="240,132 242,78 256,62 362,54 398,74 406,124 392,140 320,148 268,142" fill="#ABA48E" stroke="#181B20" stroke-width="0"/>
+    <polygon points="230,136 244,140 262,142 258,150 240,148" fill="#C43C2C" stroke="#181B20" stroke-width="0"/>
+    <circle cx="388" cy="118" r="4.5" fill="#23262C"/>
+  </g>
+  <g id="antenna">
+    <line x1="252" y1="58" x2="294" y2="20" stroke="#23262C" stroke-width="5"/>
+    <circle cx="296" cy="18" r="4" fill="#C43C2C"/>
+  </g>
+  </g>
+  </g>
+  <g font-size="13" fill="#7A8290">
+    <rect x="24" y="906" width="34" height="22" rx="4" fill="#C6C0AC" stroke="#181B20" stroke-width="2"/>
+    <rect x="66" y="906" width="34" height="22" rx="4" fill="#9A927C" stroke="#181B20" stroke-width="2"/>
+    <rect x="108" y="906" width="34" height="22" rx="4" fill="#3A3E46" stroke="#181B20" stroke-width="2"/>
+    <rect x="150" y="906" width="34" height="22" rx="4" fill="#C43C2C" stroke="#181B20" stroke-width="2"/>
+    <rect x="192" y="906" width="34" height="22" rx="4" fill="#52E0C4" stroke="#181B20" stroke-width="2"/>
+    <text x="236" y="922">#C6C0AC 装甲 / #9A927C 肩甲 / #3A3E46 枪铁 / #C43C2C 强调红 / 传感器青</text>
+  </g>
+</svg>

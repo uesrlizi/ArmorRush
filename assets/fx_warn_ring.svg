@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+<!-- 威胁预警·扩散环贴图（fx_warn_ring）：细实线圆环（硬边，非软光带）。
+     坐标账：画布 64x64，圆心 (32,32)，渐变 r=0.5→31px 实半径。
+     环带账：0.75R..0.88R（≈23..27px，带宽 ≈4px），相邻 stop 硬切出实线边：
+       0~0.74 α0 → 0.75 #ff7a5e α0.95（内缘亮一档）→ 0.84 #ff5140 α0.95 → 0.88 α0。
+     ×场景 scale 1.4 ≈ 屏幕半径 33px、线宽 6px。 -->
+<radialGradient id="ring" cx="0.5" cy="0.5" r="0.5">
+  <stop offset="0" stop-color="#ff5140" stop-opacity="0"/>
+  <stop offset="0.74" stop-color="#ff5140" stop-opacity="0"/>
+  <stop offset="0.75" stop-color="#ff7a5e" stop-opacity="0.95"/>
+  <stop offset="0.84" stop-color="#ff5140" stop-opacity="0.95"/>
+  <stop offset="0.88" stop-color="#ff5140" stop-opacity="0"/>
+</radialGradient>
+<circle cx="32" cy="32" r="31" fill="url(#ring)"/>
+</svg>

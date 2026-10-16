@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+<!-- 导弹拉烟·烟团贴图（fx_smoke）：软边灰团，普通混合（非 ADD，烟要压底色不叠亮）。
+     坐标账：画布 32x32，圆心 (16,16) 半径 15（四周留 1px 防采样切边）。
+     渐变账（objectBoundingBox r=0.5 → 15px 实半径）：
+       0    #d9d3c8 α0.80  暖灰芯（锈雨城色调，不发白）
+       0.40 #d9d3c8 α0.55
+       0.70 #d9d3c8 α0.22
+       1.00 #d9d3c8 α0
+     色相/浓度账在 missile_smoke.tscn 的 color_ramp（峰值 α0.30，用户要求"别太浓"）。 -->
+<radialGradient id="smoke" cx="0.5" cy="0.5" r="0.5">
+  <stop offset="0" stop-color="#d9d3c8" stop-opacity="0.8"/>
+  <stop offset="0.4" stop-color="#d9d3c8" stop-opacity="0.55"/>
+  <stop offset="0.7" stop-color="#d9d3c8" stop-opacity="0.22"/>
+  <stop offset="1" stop-color="#d9d3c8" stop-opacity="0"/>
+</radialGradient>
+<circle cx="16" cy="16" r="15" fill="url(#smoke)"/>
+</svg>

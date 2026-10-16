@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 16" width="48" height="16">
+<!-- 枪口焰·主焰贴图（fx_muzzle）：横放泪滴焰，钝头（枪口端）朝左、焰尖朝 +X。
+     旧版 _draw 观感回归（用户拍板"原来的更好"）：淡暖黄主焰条
+     Color(1,0.92,0.55)，白热端在枪口。ADD 混合。
+     坐标账：画布 48x16，中轴 y=8；泪滴左端圆钝（x=1）、右端收尖（x=47），
+     最宽 ±6（y=2..14，x≈13）。
+     渐变账（objectBoundingBox，x 向）：
+       x0 #fffef2 α1 → 0.45 #ffeb8c α0.92 → 1 #ffe27a α0 -->
+<linearGradient id="muzzle" x1="0" y1="0" x2="1" y2="0">
+  <stop offset="0" stop-color="#fffef2" stop-opacity="1"/>
+  <stop offset="0.45" stop-color="#ffeb8c" stop-opacity="0.92"/>
+  <stop offset="1" stop-color="#ffe27a" stop-opacity="0"/>
+</linearGradient>
+<polygon points="1,8 6,3.2 13,2 44,6.6 47,8 44,9.4 13,14 6,12.8" fill="url(#muzzle)"/>
+</svg>

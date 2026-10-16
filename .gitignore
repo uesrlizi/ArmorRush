@@ -1,0 +1,7 @@
+.godot/
+/android/
+autotest_shots/
+/export/
+/autotest_run*.log
+tools/piper_voices/*.onnx
+__pycache__/

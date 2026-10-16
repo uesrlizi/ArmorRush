@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 52" width="56" height="52">
+<!-- 盾卫 K=0.96 px0=36 py0=50（步行者几何右移 7.68px）；盾板 x[-31,-14]u y[-28,-6]u；碰撞盒 52x48 居中、feet_offset=24；ArmPivot=(-4,-2) 肩轴(-12,-27)u，复用 walker_arm -->
+<defs>
+
+</defs>
+<rect x="34.1" y="28.9" width="9.6" height="9.6" fill="#282322"/>
+<polygon points="22.6,50.0 43.7,50.0 43.7,46.2 26.4,45.2" fill="#282322"/>
+<rect x="28.3" y="27.0" width="15.36" height="6.72" fill="#171514"/>
+<polygon points="18.7,9.7 49.4,9.7 53.3,21.2 47.5,32.7 22.6,32.7" fill="#332e2c"/>
+<rect x="37.9" y="13.5" width="7.68" height="1.92" fill="#171514" opacity="0.8"/>
+<rect x="45.6" y="15.4" width="2.88" height="8.64" fill="#ff5140" opacity="0.85"/>
+<circle cx="23.5" cy="18.3" r="5.3" fill="#ff5140" opacity="0.22"/>
+<circle cx="23.5" cy="18.3" r="2.4" fill="#ff5140" opacity="0.95"/>
+<line x1="45.6" y1="9.7" x2="49.4" y2="2.0" stroke="#171514" stroke-width="1.5"/>
+<polygon points="36.0,30.8 24.5,32.7 28.3,42.3 37.9,40.4" fill="#332e2c"/>
+<polygon points="28.3,42.3 25.4,45.2 35.0,50.0 38.9,47.1" fill="#332e2c"/>
+<polygon points="20.6,50.0 45.6,50.0 46.6,46.2 34.1,44.2" fill="#453d39"/>
+<polygon points="6.2,44.2 6.2,23.1 20.6,23.1 22.6,44.2" fill="#282322"/>
+<polygon points="9.1,41.4 9.1,26.0 19.2,26.0 20.6,41.4" fill="#171514"/>
+<rect x="12.0" y="27.0" width="2.88" height="11.52" fill="#ff5140" opacity="0.85"/>
+<line x1="6.2" y1="44.2" x2="6.2" y2="23.1" stroke="#453d39" stroke-width="2.0"/>
+<circle cx="8.6" cy="39.9" r="1.2" fill="#453d39"/>
+<circle cx="8.6" cy="27.4" r="1.2" fill="#453d39"/>
+<circle cx="24.5" cy="24.1" r="3.5" fill="#171514"/>
+</svg>

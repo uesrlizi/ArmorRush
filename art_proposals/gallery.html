@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh"><head><meta charset="utf-8">
+<title>2d-ac 场景美术提案 · AC6 方向</title>
+<style>
+  body { background:#101216; color:#d8dce2; font-family:"Microsoft YaHei",system-ui,sans-serif; margin:32px auto; max-width:1280px; padding:0 20px; }
+  h1 { font-size:22px; } h2 { font-size:18px; margin:0 0 4px; color:#f0f2f5; }
+  .note { color:#9aa2ad; font-size:13px; }
+  section { margin:34px 0; }
+  img { width:100%; border-radius:8px; display:block; box-shadow:0 4px 24px rgba(0,0,0,.5); }
+  .desc { margin:2px 0 10px; color:#b8bfc8; }
+  .meta { font-size:13px; color:#9aa2ad; margin:4px 0; }
+  .chip { display:inline-block; width:14px; height:14px; border-radius:3px; vertical-align:-2px; margin:0 4px 0 10px; border:1px solid rgba(255,255,255,.2);}
+  code { color:#8fa0b8; font-size:12px; }
+</style></head><body>
+<h1>2d-ac 场景美术提案 · AC6 方向（手写矢量）</h1>
+<p class="note">画布 1200×540 = 游戏视口 2400×1080 的一半（20:9）；地面线 y=330 ≈ 画面 61%，对齐游戏内落位。全部几何计算生成，无滤镜/文本，Godot ThorVG 兼容。纯场景，不含机甲。</p>
+
+    <section>
+      <h2>方案一 · 锈雨废都</h2>
+      <p class="desc">第一章废弃都市 vibe：酸雾锈色 + 钠灯橙点，断桥垂缆、层叠废墟天际线。</p>
+      <img src="proposal_1_rust_city.svg" alt="方案一 · 锈雨废都">
+      <p class="meta"><b>调色板：</b><span class="chip" style="background:#c9b88e"></span><code>#c9b88e</code><span class="chip" style="background:#57544a"></span><code>#57544a</code><span class="chip" style="background:#3a382f"></span><code>#3a382f</code><span class="chip" style="background:#ffa04a"></span><code>#ffa04a</code><span class="chip" style="background:#4d4a40"></span><code>#4d4a40</code></p>
+      <p class="meta"><b>分层/视差：</b>远景天际线 0.9 / 中景楼群 0.55 / 地表 0；钠灯橙是唯一的暖色，敌我弹道 readable</p>
+    </section>
+    <section>
+      <h2>方案二 · 精炼所工业带</h2>
+      <p class="desc">工厂/墙 vibe：钢青绿天光 + 红警灯 + 危险黄，桁架栈桥横穿画面。</p>
+      <img src="proposal_2_refinery.svg" alt="方案二 · 精炼所工业带">
+      <p class="meta"><b>调色板：</b><span class="chip" style="background:#7f988e"></span><code>#7f988e</code><span class="chip" style="background:#38504a"></span><code>#38504a</code><span class="chip" style="background:#2c403a"></span><code>#2c403a</code><span class="chip" style="background:#ff4640"></span><code>#ff4640</code><span class="chip" style="background:#d8a021"></span><code>#d8a021</code></p>
+      <p class="meta"><b>分层/视差：</b>远景烟囱群 0.9 / 中景塔群栈桥 0.55 / 前景管排与地表 0；结构感最强，最'工业 AC'</p>
+    </section>
+    <section>
+      <h2>方案三 · 雪原警戒点</h2>
+      <p class="desc">第三章雪原 vibe：高调冰白 + 暗色剪影 + 一点信号红，半埋运输机残骸。</p>
+      <img src="proposal_3_snowfield.svg" alt="方案三 · 雪原警戒点">
+      <p class="meta"><b>调色板：</b><span class="chip" style="background:#f7fafb"></span><code>#f7fafb</code><span class="chip" style="background:#c2d2db"></span><code>#c2d2db</code><span class="chip" style="background:#4d5963"></span><code>#4d5963</code><span class="chip" style="background:#5a6a74"></span><code>#5a6a74</code><span class="chip" style="background:#e23d3d"></span><code>#e23d3d</code></p>
+      <p class="meta"><b>分层/视差：</b>远岭雷达塔 0.9 / 中景残骸雪堆 0.55 / 雪盖公路 0；暗色机体在雪上辨识度最高</p>
+    </section>
+    <section>
+      <h2>方案四 · 珊瑚辐合夜</h2>
+      <p class="desc">后期 Coral vibe：靛蓝夜空 + 碎环巨构 + 地裂珊瑚辉光，最具 AC6 辨识度。</p>
+      <img src="proposal_4_coral_night.svg" alt="方案四 · 珊瑚辐合夜">
+      <p class="meta"><b>调色板：</b><span class="chip" style="background:#090d22"></span><code>#090d22</code><span class="chip" style="background:#182042"></span><code>#182042</code><span class="chip" style="background:#0d1330"></span><code>#0d1330</code><span class="chip" style="background:#ff5a33"></span><code>#ff5a33</code><span class="chip" style="background:#ffb36b"></span><code>#ffb36b</code></p>
+      <p class="meta"><b>分层/视差：</b>碎环+塔群 0.9 / 雾带岩丘 0.55 / 发光地裂地表 0；暗场对弹道可读性是主要风险</p>
+    </section>
+</body></html>

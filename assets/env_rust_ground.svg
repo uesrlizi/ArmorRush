@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 480" width="256" height="480">
+<defs>
+<linearGradient id="deepg" x1="0" y1="0.0" x2="0" y2="1.0"><stop offset="0" stop-color="#45423a" stop-opacity="1"/><stop offset="1" stop-color="#2b2925" stop-opacity="1"/></linearGradient>
+</defs>
+<rect x="0" y="0" width="256" height="56" fill="#4d4a40"/>
+<rect x="0" y="0" width="256" height="3" fill="#6b6659"/>
+<rect x="0" y="51" width="256" height="5" fill="#3a382f"/>
+<path d="M 70,18 L 78.4,27.9 L 89.3,35 L 99.3,43.4" fill="none" stroke="#2e2c26" stroke-width="1.4" opacity="0.9"/>
+<path d="M 150,30 L 158.8,37.5 L 169.3,48.8 L 181,55.4" fill="none" stroke="#2e2c26" stroke-width="1.4" opacity="0.9"/>
+<path d="M 210,12 L 225.4,19.8 L 243.3,26.2 L 259.8,32.6" fill="none" stroke="#2e2c26" stroke-width="1.4" opacity="0.9"/>
+<rect x="30" y="26" width="26" height="4" fill="#c9b23c" opacity="0.16"/>
+<rect x="196" y="25.9" width="3.9" height="2.8" fill="#5b564a" opacity="0.7899721306452063"/>
+<rect x="187.6" y="43.7" width="4.9" height="2" fill="#5b564a" opacity="0.5864947957522509"/>
+<rect x="138" y="36.5" width="4.7" height="1.9" fill="#5b564a" opacity="0.5606957645304839"/>
+<rect x="230.2" y="23" width="2.8" height="2" fill="#5b564a" opacity="0.7655892489623637"/>
+<rect x="106.2" y="21" width="4.5" height="1.6" fill="#5b564a" opacity="0.5869343647234802"/>
+<rect x="232.9" y="9" width="3.6" height="1.6" fill="#5b564a" opacity="0.7587095683905752"/>
+<rect x="181.3" y="44.8" width="3.4" height="2.6" fill="#5b564a" opacity="0.750908089775945"/>
+<rect x="184" y="23.8" width="3.4" height="2.5" fill="#5b564a" opacity="0.7582753113510023"/>
+<rect x="235.9" y="44.2" width="4.8" height="2.8" fill="#5b564a" opacity="0.6969308107179305"/>
+<rect x="183.2" y="44.2" width="4.3" height="1.6" fill="#5b564a" opacity="0.5747729914619382"/>
+<rect x="13.9" y="17.6" width="4.3" height="1.9" fill="#5b564a" opacity="0.5493562169155903"/>
+<rect x="119.4" y="40" width="2.2" height="2.7" fill="#5b564a" opacity="0.526159232756501"/>
+<rect x="103.3" y="39.1" width="4" height="2.9" fill="#5b564a" opacity="0.75051563641504"/>
+<rect x="66.2" y="14.1" width="4" height="1.9" fill="#5b564a" opacity="0.8948540456934921"/>
+<ellipse cx="120" cy="44" rx="26" ry="3.5" fill="#e09a55" opacity="0.1"/>
+<rect x="0" y="56" width="256" height="424" fill="url(#deepg)"/>
+</svg>

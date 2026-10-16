@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>玩家机甲 · 用户绘制组装版（游戏场景）</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; background: #0B0D11; color: #C9CED8; font-family: "Segoe UI", "Microsoft YaHei", sans-serif; }
+  header { padding: 26px 36px 8px; }
+  h1 { font-size: 21px; margin: 0 0 6px; }
+  header p { margin: 0; font-size: 13px; color: #7A8290; line-height: 1.8; }
+  .row { display: flex; gap: 22px; padding: 20px 36px; align-items: flex-start; flex-wrap: wrap; }
+  .card { background: #14171C; border: 1px solid #232830; border-radius: 10px; padding: 12px; }
+  .card h2 { font-size: 14px; margin: 8px 4px 0; font-weight: 600; }
+  .card p { font-size: 12.5px; margin: 4px 4px 0; color: #8E97A3; }
+  /* 游戏场景合成：1600×720 截图按 0.5675 缩放 = 908×408 */
+  .hero { width: 908px; height: 409px; overflow: hidden; position: relative; border-radius: 6px; }
+  .hero .inner { position: absolute; width: 1600px; height: 720px; transform: scale(0.5675); transform-origin: 0 0; background: url("../../autotest_shots/02_run.png") 0 0 no-repeat; }
+  .hero .prop { position: absolute; left: 574px; top: 412px; width: 53px; height: 50px; }
+  /* 2.6x 局部放大：以现役机位置为原点 */
+  .zoom { width: 908px; height: 400px; overflow: hidden; position: relative; border-radius: 6px; background: #101318; }
+  .zoom .inner { position: absolute; width: 1600px; height: 720px; transform: scale(2.6); transform-origin: 600px 462px; background: url("../../autotest_shots/02_run.png") 0 0 no-repeat; }
+  .zoom .prop { position: absolute; left: 574px; top: 412px; width: 53px; height: 50px; }
+  .notes { padding: 4px 36px 40px; font-size: 13px; color: #9AA3AE; line-height: 2; }
+  .notes b { color: #C9CED8; }
+</style>
+</head>
+<body>
+<header>
+  <h1>玩家机甲 · 你的绘制组装版（游戏场景内对比）</h1>
+  <p>形状/部件层级 = 手动绘制机甲.svg 原样保留 · 全部色值归位现役 4 阶 · 背景为真实游戏截图（autotest_shots/02_run.png，左侧深色机=现役占位）</p>
+</header>
+
+<div class="row">
+  <div class="card">
+    <div class="zoom">
+      <div class="inner">
+        <img class="prop" src="player_mech_user_v2.svg?v=7">
+      </div>
+    </div>
+    <h2>2.6x 局部：现役（左） vs 提案（右）</h2>
+    <p>同一地面线、同一屏上比例（机身高 ~47px）</p>
+  </div>
+  <div class="card">
+    <div class="hero">
+      <div class="inner">
+        <img class="prop" src="player_mech_user_v2.svg?v=7">
+      </div>
+    </div>
+    <h2>游戏场景 · 实际大小</h2>
+    <p>提案站在现役右侧同一地面 · 1600×720 截图原比</p>
+  </div>
+  <div class="card">
+    <img src="player_mech_user_v2.svg?v=7" width="264" height="248">
+    <h2>细节 2.2x</h2>
+    <p>色阶：#1d2024 / #26292e / #2e3238 / #3c4148 + 橙 #ffa04a</p>
+  </div>
+</div>
+
+<div class="notes">
+  <b>明度账（v6，全部归位现役 4 阶 #1d2024/#26292e/#2e3238/#3c4148，草图 #4a525e 已移除）：</b><br>
+  · 受光 #3c4148 = 肩甲 + 枪身（枪-上/枪-下一整块单色）<br>
+  · 中值 #2e3238 = 躯干 / 胸 / 近小腿刃<br>
+  · 暗板 #26292e = 胯 / 近大腿 / 近足 / 小臂+手 / 大臂 / 胸-肩 / 喷口 / 枪管（枪口与枪身分开）<br>
+  · 最深 #1d2024 = 腰 / 腿-远<br>
+  相邻部位明度差≥1档：脚/腿、大小臂、枪口/枪身均已分开；肩甲亮压暗臂（现役同款）。<br>
+  <b>加的细节（2 处橙色，现役同款实心+0.18 光晕）：</b>胸口前坡传感器竖条（挂躯干组内胸路径后的正确层级）、喷口辉光。没加头、没加眼睛。<br>
+  <b>拆件账（部件组=你画的层级，直接映射 Godot 节点）：</b>腿-远 / 腿-近 / 腰 / 跨 / 躯干 / 胸-肩 / 喷口 / 手臂整体[大臂关节(大臂+肩) / 小臂关节(小臂+手 / 枪(枪-上/枪-下/枪管))]。手臂整体=一件。<br>
+  <b>组装账：</b>源 bbox 308×308 → scale 0.3377 → 机身高 104（与现役 72×104 同级），viewBox 108×108 透明底，四周 2px 边距。<br>
+  <b>文件：</b>player_mech_user_v2.svg（引擎替换点：scenes/player.tscn 现引用 assets/player_mech_body.svg + player_mech_arm.svg）。原稿 手动绘制机甲.svg 未改动。
+</div>
+</body>
+</html>

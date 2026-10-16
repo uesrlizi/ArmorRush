@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>威胁警告音提案 · AC6 式两声滴滴</title>
+<style>
+  /* 工程平涂规约：纯字+颜色，无框无底板无阴影 */
+  body { background: #b3a97f; color: #1c1a14; font-family: "Microsoft YaHei UI", "SimHei", sans-serif;
+         max-width: 860px; margin: 40px auto; padding: 0 24px; }
+  h1 { font-size: 22px; letter-spacing: 2px; }
+  .note { color: #4a4433; font-size: 14px; line-height: 1.7; }
+  .row { margin: 26px 0; }
+  .name { font-size: 17px; font-weight: bold; }
+  .desc { color: #4a4433; font-size: 14px; margin: 4px 0 6px; }
+  audio { width: 420px; }
+  button { background: none; border: none; color: #7a3016; font: inherit; cursor: pointer;
+           text-decoration: underline; padding: 0; }
+</style>
+</head>
+<body>
+<h1>威胁警告音提案 · AC6 式两声滴滴</h1>
+<p class="note">
+  参考定性：AC6 警告音为 RWR 风格——"beep"=锁定、"chirp"=导弹锁定，功能是"大当量来袭弹，快躲"。
+  七个版本覆盖设计空间：波形（方波 / 失谐蜂鸣 / 谐波）、音高（850–2200Hz）、节奏（单对 / 双对 / 四连发）、走向（同高 / 微降）。
+  全部已归一到同一峰值，响度无差异，只听音色与节奏。循环勾选可测重复听感。
+</p>
+<div class="row"><label><input type="checkbox" id="loopall"> 全部循环播放（测重复听感）</label>
+  <button id="stopall">全部停止</button></div>
+<p class="note">定稿：A 标准款音色 × 双声，间隔 150ms（实装为 threat_warn，见 design/sfx.md）。本页仅留档。</p>
+<div id="list"></div>
+<script>
+const V = [
+  ["a_classic", "标准款", "1.5kHz 方波，90ms/隔 130ms 单对——基准"],
+  ["b_beat",    "蜂鸣款", "失谐双振荡（7Hz 拍频）= 机械蜂鸣器质感，最接近 AC6 蜂鸣味"],
+  ["c_urgent",  "急促款", "2.2kHz 短声快隔（65/85ms）——高威胁，尖"],
+  ["d_heavy",   "低沉款", "850Hz+二次谐波（喇叭感）——重型威胁，沉"],
+  ["e_drop",    "降调款", "两声 1500→1280Hz——威胁确认的落定感"],
+  ["f_double",  "双对款", "哔哔-停-哔哔（蜂鸣配方）——测循环节奏"],
+  ["g_burst",   "连发款", "1.8kHz 四连发（55/70ms）——导弹来袭 RWR 连响"],
+];
+const list = document.getElementById("list");
+for (const [id, name, desc] of V) {
+  const row = document.createElement("div");
+  row.className = "row";
+  row.innerHTML = `<div class="name">${id[0].toUpperCase()} · ${name}</div>
+    <div class="desc">${desc}</div>
+    <audio controls src="../../assets/sfx_proposals/threat_${id}.wav"></audio>`;
+  list.appendChild(row);
+}
+const loop = document.getElementById("loopall");
+loop.onchange = () => document.querySelectorAll("audio").forEach(a => a.loop = loop.checked);
+document.getElementById("stopall").onclick = () => document.querySelectorAll("audio").forEach(a => { a.pause(); a.currentTime = 0; });
+</script>
+</body>
+</html>

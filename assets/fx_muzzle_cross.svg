@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 24" width="8" height="24">
+<!-- 枪口焰·侧焰贴图（fx_muzzle_cross）：竖直短杆（旧版十字侧焰 Color(1,1,0.9)），
+     两端渐隐防硬切；粒子 scale 收缩还原旧版"侧焰 ±(8a+1.5) 随包络缩回"。
+     坐标账：画布 8x24，中轴 x=4，杆宽 3（x=2.5..5.5），y=1..23。
+     渐变账（objectBoundingBox，y 向）：0 α0.25 → 0.25 #ffffe6 α0.95
+       → 0.75 #ffffe6 α0.95 → 1 α0.25。 -->
+<linearGradient id="cross" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#ffffe6" stop-opacity="0.25"/>
+  <stop offset="0.25" stop-color="#ffffe6" stop-opacity="0.95"/>
+  <stop offset="0.75" stop-color="#ffffe6" stop-opacity="0.95"/>
+  <stop offset="1" stop-color="#ffffe6" stop-opacity="0.25"/>
+</linearGradient>
+<rect x="2.5" y="1" width="3" height="22" fill="url(#cross)"/>
+</svg>

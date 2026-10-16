@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+<!-- 通用焰团贴图（fx_flame）：中性白软光团（不带色，色相全交给 color_ramp 调）。
+     ADD 混合下作枪口焰白热芯 / 导弹尾焰 / 推进焰粒子本体。
+     坐标账：画布 32x32，圆心 (16,16) 半径 15（四周留 1px 防采样切边）。
+     渐变账（objectBoundingBox r=0.5 → 15px 实半径）：
+       0 α0.95 → 0.45 α0.55 → 0.75 α0.16 → 1 α0 -->
+<radialGradient id="flame" cx="0.5" cy="0.5" r="0.5">
+  <stop offset="0" stop-color="#ffffff" stop-opacity="0.95"/>
+  <stop offset="0.45" stop-color="#ffffff" stop-opacity="0.55"/>
+  <stop offset="0.75" stop-color="#ffffff" stop-opacity="0.16"/>
+  <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+</radialGradient>
+<circle cx="16" cy="16" r="15" fill="url(#flame)"/>
+</svg>

@@ -1,0 +1,139 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 970" font-family="'Segoe UI','Microsoft YaHei',sans-serif">
+  <!-- 提案 A · 逆关节速攻型：描形自 AC6 侧视实机参考，形状语言：肩块断顶/头下沉/垂臂低枪/逆关节短粗腿 -->
+  <!-- 部件组(可拆件): antenna / pauldron / head / pauldron-far / arm-near / rifle / body / skirt / pack / leg-near / leg-far -->
+  <defs>
+    <radialGradient id="eyeFinal" cx="0.35" cy="0.5" r="0.9">
+      <stop offset="0" stop-color="#D8FFF4"/>
+      <stop offset="0.5" stop-color="#52E0C4"/>
+      <stop offset="1" stop-color="#189E82"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="980" height="970" fill="#14171C"/>
+  <text x="24" y="42" font-size="26" font-weight="700" fill="#C6C0AC">提案 A · 逆关节速攻型「SAND HOUND」v3</text>
+  <text x="24" y="70" font-size="14" fill="#7A8290">侧视图朝右 · 短粗比例 · 大轮廓与甲板切角描形自 AC6 实机参考 · 青色传感器眼 · 步枪低持</text>
+  <ellipse cx="520" cy="748" rx="235" ry="18" fill="#000000" opacity="0.4"/>
+
+  <g transform="translate(1120,40) scale(-1,1)">
+    <g stroke-linejoin="round" stroke-linecap="round">
+      <!-- 远侧腿（暗色） -->
+      <g id="leg-far" stroke="#181B20" stroke-width="4">
+        <polygon points="545,440 605,455 590,530 545,515" fill="#6E6A5C"/>
+        <polygon points="545,525 585,535 560,650 520,640" fill="#7A7668"/>
+        <circle cx="565" cy="530" r="13" fill="#23262C"/>
+        <polygon points="455,652 520,628 630,640 634,682 462,686" fill="#6E6A5C"/>
+        <polygon points="470,630 515,618 522,650 478,654" fill="#57544A"/>
+      </g>
+
+      <!-- 背部单元（接躯干） -->
+      <g id="pack" stroke="#181B20" stroke-width="5">
+        <polygon points="640,150 700,140 700,300 640,320" fill="#23262C" stroke="none"/>
+        <polygon points="630,80 700,60 765,88 772,150 715,198 648,183 628,132" fill="#565B62"/>
+        <polygon points="640,88 700,72 754,96 758,144 712,184 656,173 640,130" fill="#6B7178" stroke="none"/>
+        <circle cx="748" cy="104" r="9" fill="#23262C" stroke="none"/>
+        <circle cx="752" cy="132" r="9" fill="#23262C" stroke="none"/>
+        <polygon points="678,198 750,192 830,225 862,262 845,305 772,318 700,292 675,245" fill="#4E535A"/>
+        <polygon points="688,204 756,199 824,228 846,260 836,294 774,306 704,288" fill="#5E646B" stroke="none"/>
+        <polygon points="780,312 845,300 858,330 845,355 792,348" fill="#3A3E46"/>
+        <ellipse cx="820" cy="352" rx="15" ry="6" fill="#FFB35C" opacity="0.8" stroke="none"/>
+        <rect x="724" y="248" width="26" height="8" rx="4" fill="#52E0C4" stroke="none"/>
+        <rect x="758" y="258" width="26" height="8" rx="4" fill="#52E0C4" opacity="0.8" stroke="none"/>
+        <rect x="742" y="280" width="26" height="8" rx="4" fill="#52E0C4" opacity="0.55" stroke="none"/>
+      </g>
+
+      <!-- 远侧肩甲（填补颈后空隙） -->
+      <g id="pauldron-far" stroke="#181B20" stroke-width="4">
+        <polygon points="610,190 600,88 638,62 678,74 686,130 668,190" fill="#6E6A5C"/>
+        <polygon points="618,176 612,96 642,74 668,82 674,126 660,176" fill="#7A7668" stroke="none"/>
+      </g>
+
+      <!-- 躯干 -->
+      <g id="body" stroke="#181B20" stroke-width="5">
+        <polygon points="505,190 590,170 655,190 672,245 662,305 640,330 622,345 610,368 560,372 528,340 500,295 490,240" fill="#B9B29C"/>
+        <polygon points="512,205 585,188 600,240 585,310 528,296 505,250" fill="#CDC7B2"/>
+        <polygon points="620,340 655,325 672,245 655,190 678,208 692,268 678,328 632,356" fill="#8F8975" stroke="none"/>
+        <polygon points="575,192 640,186 648,204 582,210" fill="#23262C"/>
+        <circle cx="592" cy="238" r="7" fill="#C43C2C" stroke="#181B20" stroke-width="3"/>
+        <rect x="618" y="210" width="30" height="6" rx="3" fill="#8F8975" stroke="none"/>
+        <rect x="618" y="222" width="30" height="6" rx="3" fill="#8F8975" stroke="none"/>
+      </g>
+
+      <!-- 裙甲 -->
+      <g id="skirt" stroke="#181B20" stroke-width="5">
+        <polygon points="545,370 665,375 695,415 670,460 575,465 535,425" fill="#A29B86"/>
+        <polygon points="552,380 605,382 600,460 560,456 540,424" fill="#B3AC97" stroke="none"/>
+        <polygon points="615,383 658,386 678,416 664,450 620,452" fill="#98917D" stroke="none"/>
+      </g>
+
+      <!-- 近侧腿 -->
+      <g id="leg-near" stroke="#181B20" stroke-width="5">
+        <polygon points="600,440 680,455 730,520 715,565 640,540 590,490" fill="#B9B29C"/>
+        <polygon points="612,452 668,464 706,516 694,548 640,528 602,492" fill="#CDC7B2" stroke="none"/>
+        <circle cx="712" cy="552" r="20" fill="#23262C"/>
+        <polygon points="700,530 755,535 760,580 705,580" fill="#8F8975"/>
+        <line x1="645" y1="515" x2="698" y2="545" stroke="#C7CDD6" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="645" cy="515" r="3.5" fill="#23262C" stroke="none"/>
+        <circle cx="698" cy="545" r="3.5" fill="#23262C" stroke="none"/>
+        <circle cx="600" cy="672" r="3" fill="#57544A" stroke="none"/>
+        <circle cx="700" cy="668" r="3" fill="#57544A" stroke="none"/>
+        <polygon points="700,570 745,580 660,655 625,635 665,590" fill="#B9B29C"/>
+        <polygon points="706,578 738,586 668,646 640,632" fill="#CDC7B2" stroke="none"/>
+        <circle cx="640" cy="645" r="13" fill="#23262C"/>
+        <polygon points="505,632 560,618 570,694 512,694" fill="#8F8975"/>
+        <polygon points="540,648 600,632 720,638 770,650 772,688 560,694" fill="#A9A28D"/>
+        <polygon points="552,660 602,646 718,650 762,660 762,678 565,684" fill="#BDB6A1" stroke="none"/>
+      </g>
+
+      <!-- 近侧臂 + 肩关节球 -->
+      <g id="arm-near" stroke="#181B20" stroke-width="5">
+        <circle cx="615" cy="190" r="10" fill="#23262C"/>
+        <polygon points="594,184 634,188 636,280 604,286" fill="#A29B86"/>
+        <circle cx="620" cy="284" r="11" fill="#23262C"/>
+        <polygon points="602,280 634,276 616,428 582,442 574,402" fill="#97917D"/>
+        <polygon points="560,430 598,420 606,452 570,466" fill="#23262C"/>
+      </g>
+
+      <!-- 步枪 -->
+      <g id="rifle" stroke="#181B20" stroke-width="4">
+        <polygon points="445,405 590,380 615,440 555,480 465,470 440,440" fill="#3A3E46"/>
+        <polygon points="458,414 582,392 602,436 550,468 474,458" fill="#4A4F58" stroke="none"/>
+        <polygon points="495,378 555,366 560,392 500,402" fill="#2A2D34"/>
+        <circle cx="540" cy="384" r="7" fill="#52E0C4" stroke="none"/>
+        <polygon points="520,468 560,458 575,505 535,512" fill="#2A2D34"/>
+        <polygon points="468,454 328,659 302,641 442,436" fill="#3A3E46"/>
+        <polygon points="450,470 340,628 326,618 436,460" fill="#4A4F58" stroke="none"/>
+        <polygon points="328,659 302,641 275,662 305,684" fill="#23262C"/>
+      </g>
+
+      <!-- 头（先画，肩甲压住头顶） -->
+      <g id="head" stroke="#181B20" stroke-width="4">
+        <polygon points="590,132 602,110 650,106 664,132 660,166 638,186 606,182 590,164" fill="#C6C0AC"/>
+        <polygon points="598,138 608,124 652,120 662,136 658,160 642,176 614,172 598,156" fill="#A79F8B" stroke="none"/>
+        <polygon points="604,140 614,126 630,126 626,164 610,158" fill="#23262C" stroke="none"/>
+        <rect x="608" y="142" width="16" height="7" rx="2" fill="#52E0C4" stroke="none"/>
+        <polygon points="624,186 648,184 640,198 626,198" fill="#57544A" stroke="none"/>
+      </g>
+
+      <!-- 近侧大肩甲（压住头顶和躯干上缘） -->
+      <g id="pauldron" stroke="#181B20" stroke-width="5">
+        <polygon points="440,185 432,95 468,42 545,24 592,60 596,130 556,190 480,192" fill="#9A927C"/>
+        <polygon points="452,172 446,102 476,52 542,36 580,66 584,124 550,178 488,180" fill="#ABA48E" stroke="none"/>
+        <polygon points="438,168 496,186 493,197 436,180" fill="#C43C2C" stroke="none"/>
+        <circle cx="556" cy="150" r="5" fill="#23262C" stroke="none"/>
+      </g>
+      <g id="antenna" stroke-linejoin="round" stroke-linecap="round">
+        <line x1="628" y1="106" x2="600" y2="48" stroke="#23262C" stroke-width="5"/>
+        <circle cx="598" cy="45" r="5" fill="#C43C2C"/>
+      </g>
+    </g>
+  </g>
+
+  <g font-size="13" fill="#7A8290">
+    <rect x="24" y="906" width="34" height="22" rx="4" fill="#C6C0AC" stroke="#181B20" stroke-width="2"/>
+    <rect x="66" y="906" width="34" height="22" rx="4" fill="#9A927C" stroke="#181B20" stroke-width="2"/>
+    <rect x="108" y="906" width="34" height="22" rx="4" fill="#3A3E46" stroke="#181B20" stroke-width="2"/>
+    <rect x="150" y="906" width="34" height="22" rx="4" fill="#C43C2C" stroke="#181B20" stroke-width="2"/>
+    <rect x="192" y="906" width="34" height="22" rx="4" fill="#52E0C4" stroke="#181B20" stroke-width="2"/>
+    <text x="236" y="922">#C6C0AC 装甲米白 / #9A927C 肩甲卡其 / #3A3E46 枪铁 / #C43C2C 警示红 / 传感器青</text>
+  </g>
+</svg>

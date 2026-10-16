@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+<!-- 威胁预警·警示十字贴图（fx_warn_cross）：细线正十字（实线杆，非星芒非渐变）。
+     坐标账：画布 64x64，中心 (32,32)；竖杆 x=30..34（宽 4）、y=2..62（长 60）；
+     横杆 y=30..34、x=2..62。线宽 4 ×场景 scale 1.6 ≈ 6.4px 屏幕细线。
+     实色 #ff5140 α0.96（信号红）；亮度热区交给底层 Flare 红晕叠加，本层只管形。 -->
+<rect x="30" y="2" width="4" height="60" fill="#ff5140" fill-opacity="0.96"/>
+<rect x="2" y="30" width="60" height="4" fill="#ff5140" fill-opacity="0.96"/>
+</svg>

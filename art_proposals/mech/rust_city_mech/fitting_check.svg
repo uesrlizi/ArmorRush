@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 480" width="300" height="480">
+<rect width="300" height="480" fill="#22262b"/>
+<line x1="0" y1="224" x2="300" y2="224" stroke="#555" stroke-width="1"/>
+<line x1="0" y1="424" x2="300" y2="424" stroke="#555" stroke-width="1"/>
+<g transform="translate(30,20) scale(2)">
+<defs>
+
+</defs>
+<rect x="21.7" y="64.8" width="14.299999999999999" height="17.16" fill="#26292e"/>
+<polygon points="24.6,82.0 33.1,84.8 30.3,99.1 21.7,99.1" fill="#26292e"/>
+<polygon points="16.0,102.0 44.6,102.0 44.6,96.3 21.7,94.8" fill="#26292e"/>
+<rect x="16.0" y="16.2" width="17.16" height="12.87" fill="#26292e"/>
+<rect x="4.5" y="27.6" width="17.16" height="22.88" fill="#1d2024"/>
+<polygon points="7.4,50.5 18.8,50.5 16.0,59.1 10.3,59.1" fill="#1d2024"/>
+<circle cx="13.1" cy="62.0" r="7.1499999999999995" fill="#ffa04a" opacity="0.25"/>
+<circle cx="13.1" cy="62.0" r="3.146" fill="#ffa04a" opacity="0.9"/>
+<rect x="21.7" y="56.2" width="25.74" height="11.44" fill="#1d2024"/>
+<polygon points="24.6,19.1 58.9,23.4 64.6,44.8 50.3,62.0 21.7,62.0" fill="#2e3238"/>
+<rect x="44.6" y="33.4" width="11.44" height="2.86" fill="#1d2024" opacity="0.8"/>
+<rect x="58.9" y="24.8" width="4.29" height="14.299999999999999" fill="#ffa04a" opacity="0.9"/>
+<rect x="53.2" y="3.3" width="14.299999999999999" height="8.58" fill="#ffa04a" opacity="0.18"/>
+<rect x="47.4" y="1.9" width="20.02" height="14.299999999999999" fill="#3c4148"/>
+<rect x="56.0" y="5.5" width="8.58" height="3.5749999999999997" fill="#ffa04a"/>
+<polygon points="41.7,13.3 67.5,16.2 64.6,30.5 41.7,27.6" fill="#3c4148"/>
+<polygon points="38.9,64.8 56.0,67.7 50.3,84.8 36.0,82.0" fill="#2e3238"/>
+<polygon points="50.3,84.8 54.6,89.1 40.3,99.1 34.6,93.4" fill="#2e3238"/>
+<polygon points="30.3,102.0 64.6,102.0 66.0,96.3 47.4,92.0 30.3,94.8" fill="#3c4148"/>
+<circle cx="53.2" cy="24.8" r="6" fill="#1d2024"/>
+</g>
+<g transform="translate(104,132) scale(1.2116)">
+<defs>
+
+</defs>
+<circle cx="10" cy="8" r="4.5" fill="#3c4148"/>
+<rect x="8" y="8" width="7" height="18" fill="#2e3238"/>
+<rect x="11" y="22" width="6" height="8" fill="#1d2024"/>
+<rect x="10" y="28" width="38" height="7" fill="#1d2024"/>
+<rect x="48" y="27" width="5" height="9" fill="#1d2024"/>
+<rect x="16" y="35" width="5" height="5" fill="#1d2024"/>
+<rect x="42" y="29.5" width="3" height="4" fill="#ffa04a" opacity="0.9"/>
+</g>
+<rect x="62" y="104" width="80" height="120" fill="none" stroke="#7a8896" stroke-width="1" stroke-dasharray="4 3"/>
+<g transform="translate(90,270) scale(2)">
+<defs>
+
+</defs>
+<rect x="26.1" y="28.9" width="9.6" height="9.6" fill="#282322"/>
+<polygon points="14.6,50.0 35.7,50.0 35.7,46.2 18.4,45.2" fill="#282322"/>
+<rect x="20.3" y="27.0" width="15.36" height="6.72" fill="#171514"/>
+<polygon points="10.7,9.7 41.4,9.7 45.3,21.2 39.5,32.7 14.6,32.7" fill="#332e2c"/>
+<rect x="29.9" y="13.5" width="7.68" height="1.92" fill="#171514" opacity="0.8"/>
+<rect x="37.6" y="15.4" width="2.88" height="8.64" fill="#ff5140" opacity="0.85"/>
+<circle cx="15.5" cy="18.3" r="5.3" fill="#ff5140" opacity="0.22"/>
+<circle cx="15.5" cy="18.3" r="2.4" fill="#ff5140" opacity="0.95"/>
+<line x1="37.6" y1="9.7" x2="41.4" y2="2.0" stroke="#171514" stroke-width="1.5"/>
+<rect x="14.6" y="23.1" width="7.68" height="7.68" fill="#282322"/>
+<polygon points="28.0,30.8 16.5,32.7 20.3,42.3 29.9,40.4" fill="#332e2c"/>
+<polygon points="20.3,42.3 17.4,45.2 27.0,50.0 30.9,47.1" fill="#332e2c"/>
+<polygon points="12.6,50.0 37.6,50.0 38.6,46.2 26.1,44.2" fill="#453d39"/>
+<circle cx="16.5" cy="24.1" r="3.5" fill="#171514"/>
+</g>
+<g transform="translate(50,302) scale(2)">
+<defs>
+
+</defs>
+<circle cx="36" cy="8" r="3.5" fill="#282322"/>
+<rect x="33" y="8" width="6" height="10" fill="#282322"/>
+<rect x="8" y="12" width="26" height="6" fill="#171514"/>
+<rect x="3" y="10.5" width="5" height="9" fill="#171514"/>
+<circle cx="12" cy="15" r="1.5" fill="#ff5140" opacity="0.9"/>
+</g>
+<rect x="66" y="274" width="80" height="96" fill="none" stroke="#7a8896" stroke-width="1" stroke-dasharray="4 3"/>
+</svg>
