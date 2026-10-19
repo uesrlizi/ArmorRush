@@ -22,13 +22,9 @@ var _base_y := 0.0
 
 
 func _ready() -> void:
-	# 中文提示用系统字体兜底（内置默认字体没有 CJK 字形），同 hud.gd。
-	var font := SystemFont.new()
-	font.font_names = PackedStringArray([
-		"Microsoft YaHei UI", "Microsoft YaHei", "SimHei", "Noto Sans CJK SC", "Arial",
-	])
-	_prompt.add_theme_font_override("font", font)
-	_prompt.text = "触摸屏幕开始" if OS.has_feature("mobile") else "点击屏幕或按任意键开始"
+	# 中文提示用打包的思源黑体子集，同 hud.gd（见 ui_font.gd）。
+	_prompt.add_theme_font_override("font", UIFont.cjk())
+	_prompt.text = "触摸屏幕开始" if Platforms.is_mobile() else "点击屏幕或按任意键开始"
 	_prompt.modulate.a = 0.0
 	_base_y = _prompt.position.y
 	_armed_at = Time.get_ticks_msec() + ARM_DELAY_MS

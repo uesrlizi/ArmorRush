@@ -1,13 +1,14 @@
 [gd_scene format=3 uid="uid://dvl806hn05kp6"]
 
 [ext_resource type="Script" uid="uid://dha35s55i1di2" path="res://scripts/player.gd" id="1"]
-[ext_resource type="Texture2D" uid="uid://bifb8bcsn3kb5" path="res://assets/player_mech_body.svg" id="2"]
+[ext_resource type="Texture2D" uid="uid://by201frislv4b" path="res://assets/player_mech_user_body.svg" id="2"]
 [ext_resource type="Script" uid="uid://blwbdvg72vpxh" path="res://scripts/slash_arc.gd" id="3"]
 [ext_resource type="PackedScene" path="res://scenes/muzzle_flash.tscn" id="4"]
-[ext_resource type="Texture2D" uid="uid://dm6sr0np7hmo0" path="res://assets/player_mech_arm.svg" id="5"]
+[ext_resource type="Texture2D" uid="uid://buq1tn3mcppb4" path="res://assets/player_mech_user_arm.svg" id="5"]
 [ext_resource type="PackedScene" path="res://scenes/thruster_flame.tscn" id="6"]
-[ext_resource type="Script" path="res://scripts/overhead_bar.gd" id="7"]
+[ext_resource type="Script" uid="uid://bpkk5im4wjcam" path="res://scripts/overhead_bar.gd" id="7"]
 [ext_resource type="PackedScene" path="res://scenes/ground_sparks.tscn" id="8"]
+[ext_resource type="Texture2D" uid="uid://ue5pjr78qlte" path="res://assets/player_mech_user_nozzle.svg" id="9"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
 size = Vector2(40, 60)
@@ -17,31 +18,58 @@ collision_layer = 2
 collision_mask = 97
 script = ExtResource("1")
 
-[node name="SlashRoot" type="Node2D" parent="." unique_id=710665348]
+[node name="Visuals" type="Node2D" parent="." unique_id=1484175462]
 
-[node name="SlashFar" type="Node2D" parent="SlashRoot" unique_id=824242273]
+[node name="SlashRoot" type="Node2D" parent="Visuals" unique_id=710665348]
+
+[node name="SlashFar" type="Node2D" parent="Visuals/SlashRoot" unique_id=824242273]
 script = ExtResource("3")
 
-[node name="SlashNear" type="Node2D" parent="SlashRoot" unique_id=1453486963]
+[node name="SlashNear" type="Node2D" parent="Visuals/SlashRoot" unique_id=1453486963]
 script = ExtResource("3")
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1108497758]
-scale = Vector2(0.6057692, 0.6057692)
+[node name="NozzlePivot" type="Node2D" parent="Visuals" unique_id=1997803361]
+position = Vector2(-17.820473, -13)
+
+[node name="Nozzle" type="Sprite2D" parent="Visuals/NozzlePivot" unique_id=1041524604]
+position = Vector2(2.1260796, 0.54917526)
+scale = Vector2(0.5833333, 0.5833333)
+texture = ExtResource("9")
+
+[node name="Thruster" parent="Visuals/NozzlePivot" unique_id=514648799 instance=ExtResource("6")]
+position = Vector2(-2.2386894, 3.1995962)
+rotation = 0.61086524
+scale = Vector2(0.7, 1)
+
+[node name="LegThruster" parent="Visuals" unique_id=1985387049 instance=ExtResource("6")]
+position = Vector2(-9.279721, 21.648956)
+rotation = 1.5707963
+scale = Vector2(0.5, 0.8)
+
+[node name="WaistThruster" parent="Visuals" unique_id=1621288058 instance=ExtResource("6")]
+position = Vector2(6.94597, 1.5540298)
+rotation = -1.5707963
+scale = Vector2(0.5, 0.8)
+
+[node name="Sprite2D" type="Sprite2D" parent="Visuals" unique_id=1108497758]
+position = Vector2(6.1795273, 0)
+scale = Vector2(0.5833333, 0.5833333)
 texture = ExtResource("2")
 
-[node name="ArmPivot" type="Node2D" parent="." unique_id=1262068563]
-position = Vector2(-1, -11)
+[node name="ArmPivot" type="Node2D" parent="Visuals" unique_id=1262068563]
+position = Vector2(-5.750473, -24.38)
 
-[node name="Arm" type="Sprite2D" parent="ArmPivot" unique_id=931358544]
-scale = Vector2(0.6057692, 0.6057692)
+[node name="Arm" type="Sprite2D" parent="Visuals/ArmPivot" unique_id=931358544]
+scale = Vector2(0.5833333, 0.5833333)
 texture = ExtResource("5")
-centered = false
-offset = Vector2(-10, -8)
 
-[node name="Muzzle" type="Marker2D" parent="ArmPivot" unique_id=1582377473]
-position = Vector2(24.5, 14.2)
+[node name="Muzzle" type="Marker2D" parent="Visuals/ArmPivot" unique_id=1582377473]
+position = Vector2(42.06, 11.69)
 
-[node name="Flash" parent="ArmPivot/Muzzle" instance=ExtResource("4")]
+[node name="Flash" parent="Visuals/ArmPivot/Muzzle" unique_id=96916808 instance=ExtResource("4")]
+
+[node name="SlideSparks" parent="Visuals" unique_id=1395716773 instance=ExtResource("8")]
+position = Vector2(-0.96788025, 29.67007)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1055136549]
 shape = SubResource("RectangleShape2D_1")
@@ -55,16 +83,10 @@ monitorable = false
 [node name="CollisionShape2D" type="CollisionShape2D" parent="MeleeHitbox" unique_id=1251727549]
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1880215310]
-top_level = true
 physics_interpolation_mode = 2
+top_level = true
 position_smoothing_enabled = true
 position_smoothing_speed = 8.0
 
-[node name="Thruster" parent="." instance=ExtResource("6")]
-position = Vector2(-13.9, 6.1)
-
-[node name="SlideSparks" parent="." instance=ExtResource("8")]
-position = Vector2(0, 29)
-
-[node name="OverheadBar" type="Node2D" parent="."]
+[node name="OverheadBar" type="Node2D" parent="." unique_id=589084934]
 script = ExtResource("7")

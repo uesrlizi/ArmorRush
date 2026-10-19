@@ -4,8 +4,8 @@ extends Node2D
 ## 「原生朝左」姿态摆放（整体缩放也摆在节点上，绘制恒按单位尺寸）。
 ## 加色混合三层——红色放射晕 + 长拉丝 + 白热芯线，亮度按双正弦微脉动
 ## （同推进焰配方，去静态贴片感）。
-## 拉丝永远水平（变形宽银幕镜头的横向眩光感）：Sprite2D.flip_h 只镜像贴图、
-## 不镜像子节点，本节点每帧对照父级朝向翻转自身 x，敌人脚本零改动。
+## 拉丝永远水平（变形宽银幕镜头的横向眩光感）。朝向镜像随 Visuals 父级
+## 整体翻转，本节点不再自查 flip_h（旧机制随朝向重构除名）。
 ## 顶点渐变条带按项目纪律走 canvas_item_add_triangle_array 显式索引，
 ## 不走 draw_polygon 的耳切三角化。
 
@@ -18,20 +18,15 @@ const STREAK_HALF_H := 1.6 # 拉丝半厚
 const CORE_HALF := 10.0    # 白热芯半长
 
 var _phase := randf() * TAU
-var _home_x := 0.0 # 场景摆下的眼位 x（原生朝左基准，镜像绕它翻符号）
 
 
 func _ready() -> void:
-	_home_x = position.x
 	var mat := CanvasItemMaterial.new()
 	mat.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
 	material = mat
 
 
 func _process(_delta: float) -> void:
-	var sprite := get_parent() as Sprite2D
-	if sprite != null:
-		position.x = -_home_x if sprite.flip_h else _home_x
 	queue_redraw()
 
 

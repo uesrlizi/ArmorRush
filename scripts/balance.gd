@@ -19,6 +19,14 @@ const SLIDE_SPARK_LAND_VY := 450.0   # 重落地踢火花的下坠速度门槛
 const GUN_PITCH_MAX_DEG := 60.0       # 枪臂俯仰上限（度，正=朝上）
 const GUN_PITCH_RETURN_SPEED := 180.0 # 无目标时回平速度（度/秒）
 
+# ---- 喷口可动摆动（玩家） ----
+const NOZZLE_SWING_DEG := 35.0   # 喷口摆幅上限（度）：默认朝左下；纯前进抬向正后(+)，倒退/竖直推进/缓降压向正下(−)
+const NOZZLE_TURN_SPEED := 240.0 # 喷口摆动速度（度/秒）
+const NOZZLE_CRUISE_FLAME := 0.5 # 主焰纯前进巡航档（半焰；倒退时主焰熄火，只出视觉，推进声仍只跟真实推进走）
+const NOZZLE_DASH_FLAME := 1.5   # 近战突进/斩击主焰过烧档（>1 超出旧上限，ThrusterFlame.MAX_LEVEL 放行）
+const VERNIER_CRUISE_FLAME := 1.0 # 腰/腿姿控焰巡航档（全焰）
+const VERNIER_DASH_FLAME := 1.5   # 近战突进/斩击腿焰过烧档（冲刺没有后退，腰焰不跟冲刺）
+
 # ---- 玩家子弹 ----
 const PLAYER_BULLET_SPEED := 2400.0
 const PLAYER_BULLET_DAMAGE := 5
@@ -93,7 +101,7 @@ const SHIELD_SCORE := 25
 
 # ---- 敌人子弹 ----
 const ENEMY_BULLET_SPEED := 1040.0 # 原速 520 的两倍
-const ENEMY_BULLET_DAMAGE := 2     # 扫射多发命中：单发从 5 降为 2（一梭 3~5 发全中 6~10 伤，逼走位）
+const ENEMY_BULLET_DAMAGE := 1     # 扫射多发命中：单发从 5 降为 2（一梭 3~5 发全中 6~10 伤，逼走位）
 
 # ---- 重击通用（精英/BOSS 共用） ----
 # 规约：先预警后伤害；但预警只在发射器上（枪口预警闪光，threat_flash.gd，
@@ -104,23 +112,21 @@ const ENEMY_BULLET_DAMAGE := 2     # 扫射多发命中：单发从 5 降为 2�
 # 加→删→加回——弹体姿态跟炮口不跟速度，后退不会把弹头拽得"朝后飞"，
 # 动量又看得见）。滑行段只受重力拉弧、不喷烟；
 # **按时长开机**（滑行 COAST_TIME 秒即点火，不等过顶——上升段就压弯进拦截，
-# 更果断）——点火喷烟，弹体轴由比例导引转动（转向率=N×视线角速度，自动打
-# 提前量，交叉目标迎头截住而非尾追），速度按**推力-阻力**收敛：沿弹体轴
-# THRUST 推进、线性阻力 DRAG，末速=THRUST/DRAG≈巡航速度（游戏里模拟空气
-# 阻力的通常做法：不真算气动，推力-阻力平衡出巡航速度）；到时锁死直线
-# 扎地、只吃阻力自然减速（不做"飞过即锁直"）。
+# 更果断）——点火喷烟，弹体轴由比例导引从炮口朝向起转（转向率=N×视线角
+# 速度，自动打提前量，交叉目标迎头截住而非尾追），开机后恒速沿弹体轴巡航。
+# **弹体姿态既不朝速度也不朝加速度**：滑行段钉炮口（继承的漂移看得到、姿态
+# 不歪）；**速度模型别再动**——推力/阻力版实测"飞一半停天上"已回退。
+# 到时锁死直线扎地（不做"飞过即锁直"）。
 # 爆炸=球状检测：贴地必中、跳跃顶点逃不掉，必须推进升空拉开球半径。
 const HEAVY_GUN_WARN_TIME := 0.5      # 预警后的出弹窗（预警闪光固定 0.6s 先行，见 threat_flash.gd）
-const HEAVY_MISSILE_SPEED := 1000.0   # 巡航速度（=THRUST/DRAG；转向半径按它导出）
-const HEAVY_MISSILE_THRUST := 3600.0  # 开机推力（px/s²，沿弹体轴）：~0.3s 收敛到巡航速度
-const HEAVY_MISSILE_DRAG := 3.6       # 开机段线性空气阻力（/s）：末速=THRUST/DRAG=1000 恰为巡航速度
-const HEAVY_MISSILE_TURN_RADIUS := 360.0 # 转向半径（px）：直接调弯有多急；角速度=速度/半径
-const HEAVY_MISSILE_TRACK_MAX := 1.4  # 开机后追踪时长上限（秒），到点锁死防缠斗
+const HEAVY_MISSILE_SPEED := 1000.0   # 开机后巡航速度
+const HEAVY_MISSILE_TURN_RADIUS := 280.0 # 转向半径（px）：直接调弯有多急；角速度=速度/半径
+const HEAVY_MISSILE_TRACK_MAX := 3.0  # 开机后追踪时长上限（秒），到点锁死防缠斗
 const HEAVY_MISSILE_FOOT_OFFSET := 36.0 # 瞄准点：玩家碰撞中心下方多少（≈脚底）
 const HEAVY_MISSILE_SPREAD_DEG := 12.0  # 抛掷方向散布半角（度）
-const HEAVY_MISSILE_THROW_SPEED := 1300.0 # 上抛初速大小（px/s，独立于巡航速度）
+const HEAVY_MISSILE_THROW_SPEED := 800.0 # 上抛初速大小（px/s，独立于巡航速度）
 const HEAVY_MISSILE_COAST_GRAVITY := 2600.0 # 滑行段重力（px/s²）：拉弧的急缓
-const HEAVY_MISSILE_COAST_TIME := 0.4   # 滑行时长（秒）：到点开机点火（不等过顶）
+const HEAVY_MISSILE_COAST_TIME := 0.2   # 滑行时长（秒）：到点开机点火（不等过顶）
 const HEAVY_MISSILE_PN_N := 3.5         # 比例导引导航比 N：转向率=N×视线角速度
 const HEAVY_BLAST_LINGER := 0.25      # 爆炸闪光驻留（纯视觉，伤害只在引爆帧结算）
 
@@ -129,17 +135,18 @@ const HEAVY_BLAST_LINGER := 0.25      # 爆炸闪光驻留（纯视觉，伤害�
 # 冲击才开始掉（掉速快，断了节奏就前功尽弃）。失衡恢复后有一段免疫期攒不了，
 # 防连续失衡无限锁死。失衡期：停摆+受伤加深——近战的正式入口。
 const PLAYER_BULLET_IMPACT := 8.0    # 玩家枪弹冲击（≈36/s 注入；BOSS 140 ≈ 4s 命中打满）
-const MELEE_IMPACT_1 := 45.0         # 近战一段冲击（快速垫一格）
-const MELEE_IMPACT_2 := 60.0         # 近战二段冲击
+const MELEE_IMPACT_1 := 40.0         # 近战一段冲击
+const MELEE_IMPACT_2 := 40.0         # 近战二段冲击
 const IMPACT_DECAY_DELAY := 1.4      # 宽限期（秒）：最后一次受击后这么久才开始掉
 const IMPACT_DECAY := 30.0           # 宽限后的衰减速度（/s）：断了节奏清得很快
 const STAGGER_DMG_MULT := 1.5        # 失衡期受伤加深（AC6 同款乘区）
-const IMPACT_RESIST_GRUNT := 30.0    # 杂兵失衡上限：4 发枪弹
-const IMPACT_RESIST_ELITE := 90.0    # 精英：≈12 发
-const IMPACT_RESIST_BOSS := 140.0    # BOSS：≈18 发命中
+const STAGGER_SFX_DELAY := 0.15      # 失衡音延迟（秒）：主击声先落地，钟鸣随后补位
+const IMPACT_RESIST_GRUNT := 40.0    # 杂兵失衡
+const IMPACT_RESIST_ELITE := 40.0    # 精英
+const IMPACT_RESIST_BOSS := 160.0    # BOSS
 const STAGGER_TIME_GRUNT := 0.9      # 失衡硬直时长
 const STAGGER_TIME_ELITE := 1.8
-const STAGGER_TIME_BOSS := 3.2
+const STAGGER_TIME_BOSS := 4.0
 const STAGGER_IMMUNITY_GRUNT := 3.0  # 失衡恢复后的冲击免疫期（攒不了）
 const STAGGER_IMMUNITY_ELITE := 6.0
 const STAGGER_IMMUNITY_BOSS := 8.0
@@ -147,7 +154,7 @@ const BOSS_STAGGER_SINK := 26.0      # BOSS 失衡瘫沉幅度（px，瘫而不�
 
 # ---- 敌人（精英·导弹车：周期导弹齐射，枪口预警） ----
 const ELITE_MIN_DISTANCE := 3000.0  # 玩家跑过这段距离后精英才进选怪池
-const ELITE_MAX_HP := 60
+const ELITE_MAX_HP := 15
 const ELITE_SCORE := 60
 const ELITE_ATTACK_RANGE := 2200.0
 const ELITE_VOLLEY_HALF_LIFE := 2.2 # 齐射触发半衰期（平均 ~3.2s 一轮，泊松采样同杂兵）
@@ -161,9 +168,11 @@ const ELITE_BLAST_RADIUS := 95.0    # 爆炸球半径（玩家判定另加半宽
 # 把 BOSS 压近、倒退把它甩出画面右缘（出画不打断出招，站定它自己踱回来）；
 # 扫射只变高度（压到射高开火）。动作之间只隔各自后摇，无独立间歇；
 # 离玩家过近压住不出招（贴脸反应窗）。
-const BOSS_SCORE_TRIGGER := 20       # 击杀分攒满刷一场 BOSS；打完清零重计
-const BOSS_MAX_HP := 700
-const BOSS_SCORE := 300
+const BOSS_SCORE_TRIGGER := 100       # 击杀分攒满刷一场 BOSS；打完清零重计
+const BOSS_MAX_HP := 600
+const BOSS_DEFENSE := 5             # 防御力
+									# 近战绕盾全额（15/25）——强化"枪射攒失衡→近战爆发"的分工
+const BOSS_SCORE := 100
 const BOSS_HOVER_Y := 240.0         # 悬浮基准高度（绝对世界 y，不随地形成跳变）
 const BOSS_BOB_AMPLITUDE := 6.0     # 悬停浮动幅度
 const BOSS_BOB_SPEED := 2.0
@@ -188,21 +197,23 @@ const BOSS_ATTACK_MIN_DISTANCE := 700.0 # 离玩家水平距小于此不出招�
 # 高位扫射：BOSS 真的机动到射高再开火（本体压下来就是预警），不虚空射击。
 # 射高=枪口 410：最高地形站立头顶（536-66=470）之下余量 60px，
 # 跳跃顶点擦不到，滞空挨打。持续机枪流（不是齐射）：小散布角扫成扇面。
-const BOSS_SWEEP_Y := 390.0         # 扫射期机体中心目标高度（世界 y）
+const BOSS_SWEEP_Y := 350.0         # 扫射期机体中心目标高度（世界 y）
 const BOSS_SWEEP_AIM_TIME := 0.35   # 到射高后到开火的预警窗（与预警闪光同长）
 const BOSS_SWEEP_DURATION := 1.6    # 一阶段扫射持续时长（二阶段 2.2）
 const BOSS_SWEEP_DURATION_P2 := 2.2
 const BOSS_SWEEP_FIRE_INTERVAL := 0.085 # 机枪发弹间隔（≈12 发/秒）
-const BOSS_SWEEP_SPREAD_DEG := 1.0  # 散布半角（度）：弹流扫成窄扇面；@1300px≈±45px，
-									# 最低弹道 455 仍在站立头顶 470 之上——贴地安全
+const BOSS_SWEEP_SPREAD_DEG := 1.0  # 散布半角（度）：弹流扫成窄扇面
 const BOSS_SWEEP_TWIN_OFFSET := 16.0 # 二阶段双机枪：上下枪口各偏移多少
-const BOSS_SWEEP_SPEED := 1500.0
+const BOSS_ROTOR_SPIN := 14.0        # 尾旋翼转速（rad/s，整周旋转）
+const BOSS_ROTOR_WOBBLE := 0.035     # 主旋翼呼吸摆幅（rad：侧视刃边不整周旋转）
+const BOSS_ROTOR_WOBBLE_SPEED := 19.0 # 主旋翼摆动频率
+const BOSS_SWEEP_SPEED := 1000.0
 const BOSS_SWEEP_DAMAGE := 8        # 机枪单发轻（12发/s 持续流）；威胁靠命中数累积
 # 直射=普攻：同一把机枪换瞄准——枪臂真瞄玩家（无预判）朝人扫一短梭，子弹与高扫
 # 同款（SPEED/DAMAGE 共用 BOSS_SWEEP_*），只有射击时长不同。无重击警告（枪臂全程
 # 真瞄，瞄准本身就是预警），技能（扫射/弹雨）之间各插一段。
 const BOSS_DIRECT_DURATION := 0.5    # 普攻直射时长（秒）：短梭填充段，技能间穿插
-# 导弹雨：发射臂充能光晕 → 追踪导弹齐射；没打中就在玩家身后锁向砸地，球状爆伤。
+# 导弹雨：背部导弹舱预警闪光 → 追踪导弹逐孔齐射；没打中就在玩家身后锁向砸地，球状爆伤。
 const BOSS_RAIN_COUNT := 4          # 一轮导弹数
 const BOSS_RAIN_STAGGER := 0.26     # 出膛间隔：拉大发弹节拍，配合各自拱顶读得出"轮次"
 const BOSS_RAIN_DAMAGE := 10        # 单发伤害：满轮吃满 40（二阶段 60），可活但疼
@@ -232,11 +243,15 @@ const HP_BAR_BOOST_COLOR := Color(0.18, 0.49, 0.88)   # 深钴蓝（同理）
 const HP_BAR_GHOST_COLOR := Color(1.0, 1.0, 1.0)      # 虚影满白（亮、显眼）
 const HP_BAR_ENEMY_COLOR := Color(1.0, 0.32, 0.25)    # 阵营信号红
 const HP_BAR_IMPACT_COLOR := Color(1.0, 0.8, 0.22)    # 冲击条黄（AC6 式失衡条）
+const HP_BAR_IMPACT_FILL_COLOR := Color(1.0, 1.0, 1.0) # 冲击条实值白（虚值黄=IMPACT_COLOR，用户定的反转）
 
 # ---- 玩家死亡与结算 ----
 const PLAYER_DAMAGE_SHAKE_STRENGTH := 8.0 # 玩家受击的镜头震动（击毁 6 / 死亡 10 之间）
 const PLAYER_DEATH_SHAKE_STRENGTH := 10.0 # 玩家被毁的镜头震动（比击毁敌人更重）
 const GAME_OVER_DELAY := 1.1              # 死亡→定格的延迟：让玩家爆炸播完再暂停出结算
+
+# ---- 章节转场（击败 BOSS → 延迟 → 黑场 → 下一章；下一章场景路径在各 Main 场景上） ----
+const CHAPTER_CLEAR_DELAY := 1.7          # 击败→黑场的延迟（秒）：连串爆散先播完，胜利余韵一拍再切
 
 # ---- 启动页（小恐龙式站桩待机 → 进战斗） ----
 const COMBAT_INPUT_DELAY := 0.5      # 进战斗后到解锁操作的延迟（秒）：启动演出期不应答输入
@@ -250,7 +265,7 @@ const COMMS_RADIO_FX := false         # 电台后期链总开关（false=干声�
 const COMMS_HP_WARN_T1 := 0.5        # 低 AP 一档：剩余 50%（血量比例）
 const COMMS_HP_WARN_T2 := 0.25       # 低 AP 二档：剩余 25%
 const COMMS_HP_REARM_MARGIN := 0.10  # AP 回升超过一档+余量才允许重新触发（滞回）
-const COMMS_VOICE_VOLUME_DB := 2.0   # 人声在电台总线上的电平
+const COMMS_VOICE_VOLUME_DB := -4.0  # 人声在电台总线上的电平（2026-10-16 实听 +2 太响，降 6dB）
 # 电台链调味（comms.gd 运行时建总线，不依赖 .tres）：临场感=压缩泵感+常驻噪底+轻削波
 const COMMS_RADIO_PRESENCE_DB := 4.0  # EQ ~2kHz 提亮（机电线的"穿透"感）
 const COMMS_RADIO_DRIVE_DB := 5.0     # 软削波 grit：进削波器的预推增益（越大越"隔着机器"，过头会脏）

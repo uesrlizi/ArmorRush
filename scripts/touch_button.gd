@@ -38,16 +38,13 @@ extends Control
 		queue_redraw()
 
 var _pressed_id := -1
-var _font: SystemFont
+var _font: Font
 
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	# 中文按钮文字用系统字体兜底（Godot 内置默认字体没有 CJK 字形）。
-	_font = SystemFont.new()
-	_font.font_names = PackedStringArray([
-		"Microsoft YaHei UI", "Microsoft YaHei", "SimHei", "Noto Sans CJK SC", "Arial",
-	])
+	# 中文按钮文字用打包的思源黑体子集（见 ui_font.gd）。
+	_font = UIFont.cjk()
 
 
 func _input(event: InputEvent) -> void:

@@ -14,7 +14,6 @@ enum FireState { IDLE, BURST }
 
 const ENEMY_BULLET := preload("res://scenes/enemy_bullet.tscn")
 const EXPLOSION := preload("res://scenes/explosion_burst.tscn")
-const FLASH_BURST := preload("res://scenes/flash_burst.tscn")
 
 const IMPACT_TINT := Color(1.0, 0.5, 0.3) # 敌弹命中迸溅的染色（与弹体同族的暗红）
 
@@ -37,11 +36,20 @@ var _bob_t := 0.0        # 浮动相位时钟
 var _player: Node2D
 var _hit_tween: Tween
 var _punch_tween: Tween
+var _tilt_t := -1.0 # >=0 = 失衡歪斜进行中（物理帧驱动，见 _tick_tilt）
 
-@onready var _sprite: Sprite2D = $Sprite2D
-@onready var _arm_pivot: Node2D = $ArmPivot
-@onready var _muzzle: Marker2D = $ArmPivot/Muzzle
-@onready var _muzzle_flash: MuzzleFlash = $ArmPivot/Muzzle/Flash
+## 受击缩放 punch（命中顿挫感）：临时关掉看失衡歪斜的独占效果，要恢复改 true。
+const HIT_SCALE_PUNCH := false
+const STAGGER_TILT_RAD := 0.2   # 失衡歪斜幅度（rad）：快速小幅旋转再回正
+const STAGGER_TILT_UP := 0.1    # 歪到峰值时长（秒）
+const STAGGER_TILT_HOLD := 0.2  # 歪顶保持时长（秒）：愣住的瘫劲
+const STAGGER_TILT_DOWN := 0.7  # 回正时长（秒，带一点过冲晃动）
+
+@onready var _visuals: Node2D = $Visuals
+@onready var _sprite: Sprite2D = $Visuals/Sprite2D
+@onready var _arm_pivot: Node2D = $Visuals/ArmPivot
+@onready var _muzzle: Marker2D = $Visuals/ArmPivot/Muzzle
+@onready var _muzzle_flash: MuzzleFlash = $Visuals/ArmPivot/Muzzle/Flash
 
 
 func on_spawned() -> void:
@@ -65,8 +73,10 @@ func on_spawned() -> void:
 	if _punch_tween != null:
 		_punch_tween.kill()
 		_punch_tween = null
-	_sprite.modulate = Color.WHITE
-	_sprite.scale = Vector2.ONE
+	_tilt_t = -1.0
+	_visuals.modulate = Color.WHITE # 受击红闪目标（池化复用兜底）
+	_visuals.rotation = 0.0 # 失衡歪斜目标（死亡打断歪斜的残角兜底）
+	_sprite.scale = Vector2.ONE # 受击压扁 punch（HIT_SCALE_PUNCH）目标
 	# 悬浮单位：刷怪落点仍是"贴地姿态"，在这里抬到巡航高度；浮动相位随机错开。
 	_hover = _hover_height()
 	if _hover > 0.0:
@@ -106,20 +116,26 @@ func take_damage(amount: int, ignore_defense: bool = false) -> void:
 	if _hit_tween != null:
 		_hit_tween.kill()
 	_hit_tween = create_tween()
-	_hit_tween.tween_property(_sprite, "modulate", Color.WHITE, 0.15).from(Color(1.0, 0.35, 0.35))
+	# 受击红闪打 Visuals 整层（modulate 随树下传，臂/舱/旋翼一起红）：
+	# 只红主精灵的话武器保持原色，受击读不出"整机挨打"。
+	_hit_tween.tween_property(_visuals, "modulate", Color.WHITE, 0.15).from(Color(1.0, 0.35, 0.35))
 	# 受击缩放 punch：近战/子弹命中的顿挫感。
-	if _punch_tween != null:
-		_punch_tween.kill()
-	_sprite.scale = Vector2(1.18, 0.88)
-	_punch_tween = create_tween()
-	_punch_tween.tween_property(_sprite, "scale", Vector2.ONE, 0.14) \
-			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	# （留在本体：squash 读在躯干质量上，臂不随压可接受；挂 Visuals 得给补间
+	# 带朝向符号——scale.x 同时是镜像位，不值得，当前也处于关闭态。）
+	if HIT_SCALE_PUNCH:
+		if _punch_tween != null:
+			_punch_tween.kill()
+		_sprite.scale = Vector2(1.18, 0.88)
+		_punch_tween = create_tween()
+		_punch_tween.tween_property(_sprite, "scale", Vector2.ONE, 0.14) \
+				.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 
 func _physics_process(delta: float) -> void:
 	super(delta)
 	if _despawn_requested or _hp <= 0:
 		return
+	_tick_tilt(delta) # 失衡歪斜独立全程走完（1.0s 可能跨出失衡硬直），不留在失衡分支里
 	# 失衡硬直：AI 两层与浮动全部停摆，只剩击退滑行+重力（挨打攒的硬直，白给近战）。
 	if _staggered:
 		_stagger_t -= delta
@@ -153,16 +169,17 @@ func _physics_process(delta: float) -> void:
 		return # 玩家已毁：停火（死亡演出期间世界照跑，但不朝残骸开火）
 
 	var dx := _player.global_position.x - global_position.x
-	_sprite.flip_h = dx > 0.0 # 敌方美术原生朝左
-	# 枪臂镜像：fdir=朝向符号（镜像与旋转取反）；垂发架等固定射角武器不俯仰
-	var fdir := -1.0 if dx < 0.0 else 1.0
-	_arm_pivot.scale.x = -fdir
+	# 朝向只翻 Visuals 一层（敌方美术原生朝左）：贴图、枪臂、仓口等全部挂件
+	# 随父级整体换边，挂点坐标按原生姿态摆一次即可——flip_h「只翻贴图不翻
+	# 子节点」、逐挂件补镜像/补位移的老坑就此除名。
+	_visuals.scale.x = -1.0 if dx > 0.0 else 1.0
+	# 枪臂俯仰写在画布空间：镜像由 Visuals 承担，不乘朝向符号——面朝哪边，
+	# 抬头都是同一个本地角；垂发架等固定射角武器不俯仰（恒回正）。
 	if _arm_tracks_pitch():
-		# 枪臂可动瞄准：朝玩家做有限俯仰
 		var to := _player.global_position - _arm_pivot.global_position
 		var pitch := clampf(-rad_to_deg(atan2(to.y, maxf(absf(to.x), 40.0))),
 				-Balance.GUN_PITCH_MAX_DEG, Balance.GUN_PITCH_MAX_DEG)
-		_arm_pivot.rotation = -fdir * deg_to_rad(pitch)
+		_arm_pivot.rotation = deg_to_rad(pitch)
 	else:
 		_arm_pivot.rotation = 0.0
 
@@ -209,15 +226,48 @@ func _enter_stagger() -> void:
 	_stagger_t = _stagger_time()
 	_control_vx = 0.0
 	_fire_state = FireState.IDLE # 若在扫射中途失衡，收枪
-	# 失衡反馈：机体位置一记白热爆闪（贴图特效，参数在 flash_burst.tscn 场景里调）
-	var container := get_tree().get_first_node_in_group("projectile_container")
-	if container != null:
-		var flash := FLASH_BURST.instantiate() as Node2D
-		flash.scale = Vector2.ONE * (body_size.x / 44.0) # 按体型放一大档
-		container.add_child(flash) # 先定位再入树：tween 在 _ready 起跑，晚定位会闪在原点
-		flash.global_position = global_position + Vector2(0.0, -body_size.y * 0.2)
-		flash.reset_physics_interpolation()
-	Sfx.play(&"hit_deflect") # 占位失衡声（金属重铛；专用音效后续配方）
+	# 失衡反馈：机体快速小幅歪一下再回正——被玩家打歪的后仰（方向=背离玩家一侧，
+	# 顶被推向远处），回程带一点过冲晃动。不用 Tween：项目开着 2D 物理插值，
+	# 变换写入必须走物理步（idle 帧写 rotation 读数会被插值搅掉），见 _tick_tilt。
+	# 白热爆闪已删（flash_burst 留给爆区闪光）。
+	_tilt_t = 0.0
+	# 失衡音延迟播：命中的受击声先落地，钟鸣随后补位（读"垮下来"，不和主击挤一拍）。
+	# 定时器连到本节点方法——节点先被砍掉时连接自动断开，无需判空。
+	get_tree().create_timer(Balance.STAGGER_SFX_DELAY).timeout.connect(_play_stagger_sfx)
+
+
+## 延迟失衡音（STAGGER_SFX_DELAY 后到点）：等主击声落地；期间被砍死/被重置就不播。
+func _play_stagger_sfx() -> void:
+	if _hp <= 0 or not _staggered:
+		return
+	Sfx.play(_stagger_key()) # 键随体量分档（钟振款，注册见 sfx.gd）
+
+
+## 失衡歪斜的物理帧驱动：0→峰值（快）→歪顶保持（愣住）→过冲回正（晃一下稳住）。
+## 在 _physics_process 里无条件走完整程：全程 1.0s 会超过最短失衡硬直 0.9s——
+## 不挂在失衡分支里，杂兵提前缓过来歪斜也能收尾归零，不留残余倾角。
+## 歪斜写 Visuals 整层：只歪主精灵会让枪臂/喷口/旋翼以原姿态悬空。
+## 符号账：节点自身变换是先 scale 后 rotation（R∘S），镜像态下同一本地角的
+## 世界方向反号——乘回 scale.x 把「顶推向背离玩家一侧」钉在世界侧，
+## 两个朝向同一段代码不用分支。
+func _tick_tilt(delta: float) -> void:
+	if _tilt_t < 0.0:
+		return
+	_tilt_t += delta
+	var r: float
+	if _tilt_t < STAGGER_TILT_UP:
+		var p := _tilt_t / STAGGER_TILT_UP
+		r = STAGGER_TILT_RAD * (1.0 - (1.0 - p) * (1.0 - p)) # 快速歪到峰值
+	elif _tilt_t < STAGGER_TILT_UP + STAGGER_TILT_HOLD:
+		r = STAGGER_TILT_RAD # 歪顶保持：愣住的瘫劲
+	else:
+		var p := (_tilt_t - STAGGER_TILT_UP - STAGGER_TILT_HOLD) / STAGGER_TILT_DOWN
+		if p >= 1.0:
+			_tilt_t = -1.0
+			_visuals.rotation = 0.0
+			return
+		r = STAGGER_TILT_RAD * (1.0 - p) * cos(p * 5.0) # 过冲回正
+	_visuals.rotation = r * _visuals.scale.x
 
 
 func is_staggered() -> bool:
@@ -374,6 +424,11 @@ func _impact_resistance() -> float:
 ## 失衡硬直时长。
 func _stagger_time() -> float:
 	return Balance.STAGGER_TIME_GRUNT
+
+
+## 失衡确立音键：按体量分档（杂兵/精英/BOSS 各配变调文件，注册见 sfx.gd）。
+func _stagger_key() -> StringName:
+	return &"stagger"
 
 
 ## 失衡恢复后的冲击免疫时长（这段时间攒不了冲击，防连续失衡锁死）。

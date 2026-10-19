@@ -7,9 +7,11 @@ extends Node2D
 ## 从缓存窗口边缘按种子迭代即可精确重建，双向走回都一致。
 ## 缓存只保留镜头附近一小段段起点，走远即忘，内存不随路程增长。
 
-const BAND_TEXTURE := preload("res://assets/env_rust_ground_top.svg")
-const FILL_TEXTURE := preload("res://assets/env_rust_ground_fill.svg")
-const BAND_HEIGHT := 56.0    # 表面带高度（锈雨皮肤：破碎沥青路面）
+## 地块皮肤按章走：默认=第一章锈雨废都（破碎沥青路面），
+## 第二章主场景在检查器里换成精炼所钢板/混凝土带。
+@export var band_texture: Texture2D = preload("res://assets/env_rust_ground_top.svg")
+@export var fill_texture: Texture2D = preload("res://assets/env_rust_ground_fill.svg")
+const BAND_HEIGHT := 56.0    # 表面带高度（256 宽纹理横向平铺，块间相位对齐）
 const FILL_DEPTH := 700.0    # 顶面向下的填充深度（覆盖最低档到画面外）
 const SEG_CACHE_MARGIN := 96 # 段起点缓存保留镜头两侧多少段，超出即忘
 
@@ -157,7 +159,7 @@ func _tier_y(tier: int) -> float:
 ## 表面带：按纹理原宽 256 平铺，相位取块的世界 x 取模，块间花纹连续
 func _make_band_sprite(i: int) -> Sprite2D:
 	var s := Sprite2D.new()
-	s.texture = BAND_TEXTURE
+	s.texture = band_texture
 	s.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
 	s.centered = false
 	s.region_enabled = true
@@ -169,7 +171,7 @@ func _make_band_sprite(i: int) -> Sprite2D:
 ## 填充：竖向渐变纹理拉伸到整块深度
 func _make_fill_sprite() -> Sprite2D:
 	var s := Sprite2D.new()
-	s.texture = FILL_TEXTURE
+	s.texture = fill_texture
 	s.centered = false
 	s.position = Vector2(0, BAND_HEIGHT)
 	s.scale = Vector2(Balance.TERRAIN_CHUNK_WIDTH / 16.0, (FILL_DEPTH - BAND_HEIGHT) / 256.0)

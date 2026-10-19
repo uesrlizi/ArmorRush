@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<!-- 拆件还原自检（三件版）：nozzle→body→arm 按各自枢轴叠放，与 v2 原图逐像素 diff。
+     同一浏览器同倍率渲染，理想差异=0；允许贴放取整与烘焙多边形的亚像素 AA 噪声。
+     另含喷口 ±20° 摆动的画布裁切检查（旋转后贴边不得有像素）。
+     结果通过 window.__RESULT__ 交给 playwright.evaluate 读取。 -->
+<html><body><script>
+const PX = 33.5407, PY = 12.2020;   // 肩关节（v2 108 画布坐标，build_user_split_v2.py 输出）
+const NX = 14.8326, NY = 34.4192;   // 喷口枢轴（辉光中心）
+const S2 = 2, BIG = 216;            // 2× 渲染，v2/body 画布 216²
+const BAD = 40;                     // 通道差阈值：>40 记为坏点（结构错误级）
+
+async function loadImg(url) {
+  // SVG in <img> 有解析不完整风险：fetch→Blob→decode() 保证完整解码后再画
+  const blob = await (await fetch(url)).blob();
+  const i = new Image();
+  i.src = URL.createObjectURL(blob);
+  await i.decode();
+  return i;
+}
+function raster(img, w, h) {
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const g = c.getContext('2d', { willReadFrequently: true });
+  g.fillStyle = '#fff'; g.fillRect(0, 0, w, h);
+  g.drawImage(img, 0, 0, w, h);
+  return c;
+}
+function rasterAlpha(img, w, h) {
+  // 旋转件画布保留透明：贴到叠放层时不能带着不透明底把下层盖掉
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const g = c.getContext('2d', { willReadFrequently: true });
+  g.drawImage(img, 0, 0, w, h);
+  return c;
+}
+function nonWhite(c) {
+  const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+  let n = 0;
+  for (let p = 0; p < c.width * c.height; p++) {
+    const i = p * 4;
+    if (d[i] < 250 || d[i+1] < 250 || d[i+2] < 250) n++;
+  }
+  return n;
+}
+function nonTransparent(c) {
+  const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+  let n = 0;
+  for (let p = 0; p < c.width * c.height; p++) if (d[p * 4 + 3] > 0) n++;
+  return n;
+}
+// 旋转件摆动裁切检查：绕画布中心转 deg 后，贴边一圈不得出现像素
+function swingClips(c, deg) {
+  const w = c.width, h = c.height;
+  const g = c.getContext('2d');
+  const t = document.createElement('canvas');
+  t.width = w; t.height = h;
+  const tg = t.getContext('2d', { willReadFrequently: true });
+  tg.translate(w / 2, h / 2);
+  tg.rotate(deg * Math.PI / 180);
+  tg.drawImage(c, -w / 2, -h / 2);
+  const d = tg.getImageData(0, 0, w, h).data;
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      if (x > 0 && x < w - 1 && y > 0 && y < h - 1) continue;
+      if (d[(y * w + x) * 4 + 3] > 0) return true;  // 贴边有像素=被画布裁到
+    }
+  }
+  return false;
+}
+
+(async () => {
+  const bust = '?v=' + Date.now();
+  const [v2, body, arm, noz] = await Promise.all([
+    loadImg('../player_mech_user_v2.svg' + bust),
+    loadImg('../player_mech_user_body.svg' + bust),
+    loadImg('../player_mech_user_arm.svg' + bust),
+    loadImg('../player_mech_user_nozzle.svg' + bust),
+  ]);
+  const v2c = raster(v2, BIG, BIG);
+  const bodyc = rasterAlpha(body, BIG, BIG);   // body 也要透明：白底会把垫在下面的喷口层盖死
+  const armc = rasterAlpha(arm, 320, 320);
+  const nozc = rasterAlpha(noz, 64, 64);
+
+  // 像素数断言：四张图都必须完整渲染（防解析不完整悄悄光栅化半张图）
+  const px = { v2: nonWhite(v2c), body: nonTransparent(bodyc), arm: nonTransparent(armc), noz: nonTransparent(nozc) };
+  if (px.v2 < 16000 || px.body < 13800 || px.arm < 6000 || px.noz < 300) {
+    window.__RESULT__ = { error: 'incomplete raster', px };
+    return;
+  }
+
+  // 叠放：白底 → 喷口(最底) → body → 臂件；偏移=各自枢轴相对画布中心的 2× 取整
+  const stack = document.createElement('canvas');
+  stack.width = BIG; stack.height = BIG;
+  const sg = stack.getContext('2d', { willReadFrequently: true });
+  sg.fillStyle = '#fff'; sg.fillRect(0, 0, BIG, BIG);
+  sg.drawImage(nozc, Math.round((NX - 16) * S2), Math.round((NY - 16) * S2));
+  sg.drawImage(bodyc, 0, 0);
+  sg.drawImage(armc, Math.round((PX - 80) * S2), Math.round((PY - 80) * S2));
+
+  const A = v2c.getContext('2d').getImageData(0, 0, BIG, BIG).data;
+  const B = stack.getContext('2d').getImageData(0, 0, BIG, BIG).data;
+  const heat = document.createElement('canvas');
+  heat.width = BIG; heat.height = BIG;
+  const hg = heat.getContext('2d');
+  const hi = hg.createImageData(BIG, BIG);
+  let maxD = 0, bad = 0, x0 = 1e9, y0 = 1e9, x1 = -1, y1 = -1;
+  for (let p = 0; p < BIG * BIG; p++) {
+    const i = p * 4;
+    const d = Math.max(Math.abs(A[i] - B[i]), Math.abs(A[i+1] - B[i+1]), Math.abs(A[i+2] - B[i+2]));
+    if (d > maxD) maxD = d;
+    if (d > BAD) {
+      bad++;
+      const x = p % BIG, y = (p / BIG) | 0;
+      if (x < x0) x0 = x; if (x > x1) x1 = x;
+      if (y < y0) y0 = y; if (y > y1) y1 = y;
+      hi.data[i] = 255; hi.data[i+3] = 255;         // 坏点标红
+    } else {
+      const v = Math.min(255, d * 6);               // AA 噪声按幅度显示
+      hi.data[i] = v; hi.data[i+1] = v; hi.data[i+2] = v; hi.data[i+3] = 255;
+    }
+  }
+  hg.putImageData(hi, 0, 0);
+
+  // 证据图：v2 | 叠放 | 差异热图
+  const proof = document.createElement('canvas');
+  proof.width = BIG * 3 + 40; proof.height = BIG;
+  const pg = proof.getContext('2d');
+  pg.fillStyle = '#fff'; pg.fillRect(0, 0, proof.width, proof.height);
+  pg.drawImage(v2c, 0, 0); pg.drawImage(stack, BIG + 20, 0); pg.drawImage(heat, BIG * 2 + 40, 0);
+
+  window.__RESULT__ = {
+    px,
+    clip: { noz_m20: swingClips(nozc, -20), noz_p20: swingClips(nozc, 20) },
+    maxD, bad, badPct: (bad * 100 / (BIG * BIG)).toFixed(4) + '%',
+    bbox: bad ? [x0, y0, x1, y1] : null,
+    proof: proof.toDataURL('image/png'),
+  };
+})();
+</script></body></html>

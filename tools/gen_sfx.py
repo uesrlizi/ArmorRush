@@ -488,6 +488,25 @@ def hit_world():
     return normalize(out)
 
 
+def stagger(pitch=1.0):
+    """失衡确立（AC6 式 STAGGER，终稿=B 坍塌双层款换回，+4dB 顶格增益复验）：
+    厚板主击（降调+质量垫）+ 110ms 次级碰撞 + 垮落尾——近战爆发窗开启确认音。
+    三轮史：B(-5 实测被枪炮掩蔽) → D 钟振(换装救掩蔽) → B 换回（+4 顶格
+    增益+0.15s 延迟——掩蔽要因是响度不足，顶格后复验）。变调分层：
+    杂兵 1.05 / 精英 1.0 / BOSS 0.72（清单三行）。
+    感知响度注意：B 是瞬态型（crest 高），同峰值下比钟振款听着轻——
+    换装前后跑 tools/profile_sfx.py 对齐键位，别拿峰值当响度。"""
+    out = [0.0] * int(1.0 * SR)
+    mix_at(out, load_ref("impactPlate_heavy_004.ogg", 0.8 * pitch), 0.0, 1.0)
+    mix_at(out, thump(120.0 * pitch, 50.0, 0.12, 0.09), 0.0, 0.5)
+    mix_at(out, load_ref("impactMetal_medium_002.ogg", 0.6 * pitch), 0.11, 0.45)
+    n = int(0.45 * SR)
+    slump = sweep_lowpass(brown_noise(n), 800.0, 100.0)
+    mix_at(out, [slump[i] * math.exp(-i / SR / 0.13) * 0.6 for i in range(n)], 0.12)
+    out = add_space(out, 0.05, 0.15)
+    return normalize(out)
+
+
 def melee_windup():
     """起手蓄势：中性轻击实录削短——只给"上膛"一瞬的质感。"""
     return normalize(load_ref("impactGeneric_light_001.ogg", 1.1, keep_s=0.1))
@@ -560,6 +579,16 @@ def main():
     render("ui_gameover", ui_gameover)
     render("threat_warn", threat_warn, gap_s=0.15)
     render("amb_rust_loop", amb_rust, loop=True)
+    # 失衡确立（D 钟振款换装）：三键同配方变调分层，不走随机变体。
+    # sfx.gd 以 +4dB 增益播（用户定稿，全库唯一正增益键）——文件母带后按
+    # 4dB 预留峰顶余量，回放恰好满幅；直接 0.92 母带叠正增益会在钟的
+    # 攻击瞬态上削波出破音。想再响只能压 RMS（压缩/加层），不能再加增益。
+    for key, kw in (("stagger", {"pitch": 1.05}),
+                    ("stagger_elite", {}),
+                    ("stagger_boss", {"pitch": 0.72})):
+        random.seed(zlib.crc32(key.encode("utf-8")))
+        x = master(stagger(**kw))
+        write_wav(key, [s * 10.0 ** (-4.0 / 20.0) for s in x])
     print("完成。")
 
 

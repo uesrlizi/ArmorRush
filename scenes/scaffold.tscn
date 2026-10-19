@@ -1,29 +1,27 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene format=3 uid="uid://ywf8ki2rxvjs"]
 
-[ext_resource type="Script" path="res://scripts/obstacle.gd" id="1"]
-[ext_resource type="Texture2D" path="res://assets/env_rust_deck.svg" id="2"]
+[ext_resource type="Script" uid="uid://ctu1sok2hqg4t" path="res://scripts/obstacle.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://cnw70pb6vrs5m" path="res://assets/env_rust_deck.svg" id="2"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
-size = Vector2(700, 16)
+size = Vector2(719.4856, 24.733948)
 
-[node name="Scaffold" type="CharacterBody2D"]
+[node name="Scaffold" type="CharacterBody2D" unique_id=1312735132]
 collision_layer = 0
 collision_mask = 0
-monitoring = false
-monitorable = false
 script = ExtResource("1")
-body_size = Vector2(720, 28)
-feet_offset = 14.0
 floating = true
 pier_xs = PackedFloat32Array(-300, 0, 300)
+feet_offset = 14.0
+body_size = Vector2(720, 28)
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1694011013]
 texture = ExtResource("2")
 
-[node name="Body" type="StaticBody2D" parent="."]
+[node name="Body" type="StaticBody2D" parent="." unique_id=2006666611]
 collision_layer = 32
 collision_mask = 0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Body"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Body" unique_id=214224782]
 shape = SubResource("RectangleShape2D_1")
 one_way_collision = true

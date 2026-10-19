@@ -29,6 +29,7 @@ normal = Vector2(0, 1)
 
 [node name="Main" type="Node2D" unique_id=1447216473]
 script = ExtResource("1")
+next_scene = "res://scenes/main_ch2.tscn"
 
 [node name="HillsStrip" type="Sprite2D" parent="." unique_id=1536382456]
 texture_repeat = 2
@@ -149,9 +150,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -240.0
-offset_top = -120.0
+offset_top = -240.0
 offset_right = 240.0
-offset_bottom = 120.0
+offset_bottom = -240.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 12
@@ -159,28 +160,22 @@ alignment = 1
 
 [node name="GameOverTitle" type="Label" parent="HUD/Root/GameOver" unique_id=1877194774]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.55, 0.15, 0.15, 1)
-theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
-theme_override_constants/outline_size = 12
-theme_override_font_sizes/font_size = 56
+theme_override_colors/font_color = Color(0.48, 0.14, 0.14, 1)
+theme_override_font_sizes/font_size = 72
 text = "游戏结束"
 horizontal_alignment = 1
 
 [node name="GameOverScore" type="Label" parent="HUD/Root/GameOver" unique_id=1590583352]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.13, 0.17, 0.21, 1)
-theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
-theme_override_constants/outline_size = 8
-theme_override_font_sizes/font_size = 30
+theme_override_font_sizes/font_size = 40
 text = "最终得分 0"
 horizontal_alignment = 1
 
 [node name="GameOverHint" type="Label" parent="HUD/Root/GameOver" unique_id=1258330454]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.96, 0.94, 0.88, 1)
-theme_override_colors/font_outline_color = Color(0.13, 0.17, 0.21, 1)
-theme_override_constants/outline_size = 8
-theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(0.13, 0.17, 0.21, 0.8)
+theme_override_font_sizes/font_size = 24
 text = "点击屏幕或按任意键重新开始"
 horizontal_alignment = 1
 
@@ -213,8 +208,6 @@ offset_bottom = -200.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_colors/font_color = Color(0.96, 0.94, 0.88, 1)
-theme_override_colors/font_outline_color = Color(0.13, 0.17, 0.21, 1)
-theme_override_constants/outline_size = 8
 theme_override_font_sizes/font_size = 30
 text = "点击屏幕或按任意键开始"
 horizontal_alignment = 1

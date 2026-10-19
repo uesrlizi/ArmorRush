@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 44" width="110" height="44">
+<!-- 占位方块：追击大型机（BOSS）导弹发射臂（原生朝左，挂 ArmPivot，可俯仰瞄准玩家） -->
+<rect x="30" y="14" width="70" height="22" fill="#332e2c"/>
+<rect x="10" y="8" width="26" height="30" fill="#282322"/>
+<rect x="14" y="2" width="16" height="8" fill="#171514"/>
+<rect x="46" y="20" width="40" height="5" fill="#171514" opacity="0.8"/>
+<rect x="52" y="28" width="14" height="4" fill="#ff5140" opacity="0.85"/>
+<rect x="96" y="18" width="10" height="14" fill="#453d39"/>
+</svg>

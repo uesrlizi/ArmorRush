@@ -34,17 +34,14 @@ var _warning_tween: Tween
 
 func _ready() -> void:
 	add_to_group("hud") # BOSS 按组找到 HUD：入场亮血条+WARNING，击退收血条
-	# 中文界面用系统字体兜底（Godot 内置默认字体没有 CJK 字形）。
-	var font := SystemFont.new()
-	font.font_names = PackedStringArray([
-		"Microsoft YaHei UI", "Microsoft YaHei", "SimHei", "Noto Sans CJK SC", "Arial",
-	])
+	# 中文界面用打包的思源黑体子集（Web 端无系统字体，见 ui_font.gd）。
+	var font := UIFont.cjk()
 	for node in find_children("*", "Label", true, false):
 		(node as Label).add_theme_font_override("font", font)
 	_build_boss_ui(font)
 	_game_over.visible = false
 	_score_home_x = _score_label.position.x
-	if OS.has_feature("mobile"):
+	if Platforms.is_mobile():
 		_help_allowed = false
 		_help_label.visible = false
 	else:
@@ -62,7 +59,7 @@ func _apply_help_text() -> void:
 
 ## BOSS 战 UI 全部程序化搭（main.tscn 不放节点）：顶部居中血条+机名、
 ## 大字 WARNING 闪两轮。全平涂纯字/色块，无底板。
-func _build_boss_ui(font: SystemFont) -> void:
+func _build_boss_ui(font: Font) -> void:
 	var root: Control = $Root
 	_boss_name = Label.new()
 	_boss_name.text = "未登记大型机"
@@ -83,9 +80,13 @@ func _build_boss_ui(font: SystemFont) -> void:
 	_boss_bar.size = Vector2(BOSS_BAR_WIDTH, BOSS_BAR_HEIGHT)
 	root.add_child(_boss_bar)
 
-	# 冲击条（AC6 式失衡条）：血条下方一根黄条，打满=失衡（硬直+受伤加深）
+	# 冲击条（AC6 式失衡条）：血条下方一根条，从中心向两边填充；打满=失衡
+	# （硬直+受伤加深）；实值白、虚值黄（虚影=宽限衰减的拖尾），失衡期整条
+	# 匀速排空当硬直计时器（读数在 boss.gd 换源）
 	_boss_impact_bar = BossBar.new()
-	_boss_impact_bar.fill_color = Balance.HP_BAR_IMPACT_COLOR
+	_boss_impact_bar.center_fill = true
+	_boss_impact_bar.fill_color = Balance.HP_BAR_IMPACT_FILL_COLOR
+	_boss_impact_bar.ghost_color = Balance.HP_BAR_IMPACT_COLOR
 	_boss_impact_bar.anchor_left = 0.5
 	_boss_impact_bar.anchor_right = 0.5
 	_boss_impact_bar.position = Vector2(-BOSS_BAR_WIDTH * 0.5,
@@ -163,9 +164,9 @@ func show_game_over(score: int) -> void:
 ## ---- BOSS 战 UI（Boss 按组调用） ----
 
 func show_boss() -> void:
-	_boss_bar.reset()
+	_boss_bar.reset() # 血条出生满格
 	_boss_bar.visible = true
-	_boss_impact_bar.reset()
+	_boss_impact_bar.reset(0.0) # 冲击条出生空格：满格虚影衰减会演出一段"逐渐变短"
 	_boss_impact_bar.visible = true
 	_boss_name.visible = true
 

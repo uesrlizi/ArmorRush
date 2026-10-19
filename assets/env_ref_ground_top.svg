@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 56" width="256" height="56">
+<!-- 第二章地块表面带 256x56（terrain.gd 平铺，256 相位对齐）。
+精炼所钢板地面：板缝间距 64 + 铆钉 + 排水格栅 + 磨旧危险黄标线 + 刮痕。
+顶缘受光 3px / 底缘压暗 5px；花纹距边 >=6px，接缝纯底色。种子 2023。 -->
+<defs>
+
+</defs>
+<rect x="0" y="0" width="256" height="56" fill="#39453f"/>
+<rect x="0" y="0" width="256" height="3" fill="#55695f"/>
+<rect x="0" y="51" width="256" height="5" fill="#222b28"/>
+<rect x="62" y="3" width="2.5" height="48" fill="#242e29"/>
+<rect x="57.5" y="6" width="1.8" height="1.8" fill="#55695f" opacity="0.55"/>
+<rect x="67.2" y="6" width="1.8" height="1.8" fill="#55695f" opacity="0.55"/>
+<rect x="57.5" y="44" width="1.8" height="1.8" fill="#55695f" opacity="0.45"/>
+<rect x="67.2" y="44" width="1.8" height="1.8" fill="#55695f" opacity="0.45"/>
+<rect x="126" y="3" width="2.5" height="48" fill="#242e29"/>
+<rect x="121.5" y="6" width="1.8" height="1.8" fill="#55695f" opacity="0.55"/>
+<rect x="131.2" y="6" width="1.8" height="1.8" fill="#55695f" opacity="0.55"/>
+<rect x="121.5" y="44" width="1.8" height="1.8" fill="#55695f" opacity="0.45"/>
+<rect x="131.2" y="44" width="1.8" height="1.8" fill="#55695f" opacity="0.45"/>
+<rect x="190" y="3" width="2.5" height="48" fill="#242e29"/>
+<rect x="185.5" y="6" width="1.8" height="1.8" fill="#55695f" opacity="0.55"/>
+<rect x="195.2" y="6" width="1.8" height="1.8" fill="#55695f" opacity="0.55"/>
+<rect x="185.5" y="44" width="1.8" height="1.8" fill="#55695f" opacity="0.45"/>
+<rect x="195.2" y="44" width="1.8" height="1.8" fill="#55695f" opacity="0.45"/>
+<rect x="26" y="24" width="32" height="9" fill="#242e29"/>
+<line x1="28" y1="26" x2="56" y2="26" stroke="#39453f" stroke-width="1.2"/>
+<line x1="28" y1="28.2" x2="56" y2="28.2" stroke="#39453f" stroke-width="1.2"/>
+<line x1="28" y1="30.4" x2="56" y2="30.4" stroke="#39453f" stroke-width="1.2"/>
+<line x1="28" y1="32.6" x2="56" y2="32.6" stroke="#39453f" stroke-width="1.2"/>
+<rect x="148" y="20" width="26" height="4" fill="#d8a021" opacity="0.22"/>
+<rect x="148" y="20" width="12" height="4" fill="#d8a021" opacity="0.3"/>
+<line x1="98.1" y1="43" x2="110.8" y2="42.3" stroke="#55695f" stroke-width="1" opacity="0.41420514722682095"/>
+<line x1="87.6" y1="11.6" x2="94.6" y2="10.8" stroke="#55695f" stroke-width="1" opacity="0.4393578462776449"/>
+<line x1="175.2" y1="18.8" x2="183.1" y2="20.8" stroke="#55695f" stroke-width="1" opacity="0.33533775007366984"/>
+<line x1="13.9" y1="21.1" x2="24.9" y2="21.9" stroke="#55695f" stroke-width="1" opacity="0.4564586550577165"/>
+<line x1="56" y1="43" x2="69.2" y2="43.1" stroke="#55695f" stroke-width="1" opacity="0.40056730965609827"/>
+</svg>

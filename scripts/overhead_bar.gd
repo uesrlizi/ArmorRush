@@ -50,7 +50,7 @@ func _draw_player(player: Player) -> void:
 			Balance.HP_BAR_PLAYER_COLOR)
 	_bar(-w * 0.5, y + Balance.HP_BAR_HEIGHT + Balance.BOOST_BAR_GAP, w, Balance.BOOST_BAR_HEIGHT,
 			clampf(player.boost / Balance.BOOST_CAPACITY, 0.0, 1.0), Balance.HP_BAR_BOOST_COLOR,
-			false) # 气槽不掉血，无虚影
+			false, true) # 气槽：不掉血无虚影；从中心向两边填充
 
 
 func _draw_enemy(enemy: Enemy) -> void:
@@ -63,8 +63,14 @@ func _draw_enemy(enemy: Enemy) -> void:
 
 
 ## 平涂血条（无底板）：实心段 + 掉血虚影段（从当前血量到虚影右缘）。
-## 锚点为条左上角。
-func _bar(x: float, y: float, w: float, h: float, ratio: float, fill: Color, ghost := true) -> void:
+## 锚点为条左上角；center=true 时实/虚段都改为以条中线对称（气槽用法）。
+func _bar(x: float, y: float, w: float, h: float, ratio: float, fill: Color,
+		ghost := true, center := false) -> void:
+	var ghost_rect := Rect2(
+			x + (w * (1.0 - _ghost) * 0.5 if center else w * ratio), y,
+			w * (_ghost if center else _ghost - ratio), h)
+	var fill_rect := Rect2(
+			x + (w * (1.0 - ratio) * 0.5 if center else 0.0), y, w * ratio, h)
 	if ghost and _ghost > ratio:
-		draw_rect(Rect2(x + w * ratio, y, w * (_ghost - ratio), h), Balance.HP_BAR_GHOST_COLOR)
-	draw_rect(Rect2(x, y, w * ratio, h), fill)
+		draw_rect(ghost_rect, Balance.HP_BAR_GHOST_COLOR)
+	draw_rect(fill_rect, fill)

@@ -5,12 +5,13 @@ extends Enemy
 ## 预警只在发射器上（枪口预警闪光，ThreatFlash，不给精灵染色），无虚空区域标记：
 ##   高位扫射：机体真的机动到射高（本体压下来就是预警）→ 枪口闪一下 → 机枪流
 ##     （小散布角扫成扇面），惩罚滞空（射高在最高地形站立头顶之上，贴地/起跳安全）；
-##   导弹雨：发射臂闪一下 → 真追踪导弹齐射（追脚底、过冲锁向、撞地爆、球状爆伤），
-##     惩罚贴地（必须飞起来拉开爆炸球半径）；
+##   导弹雨：背部导弹舱闪一下 → 真追踪导弹齐射（从舱口逐孔出膛、追脚底、
+##     过冲锁向、撞地爆、球状爆伤），惩罚贴地（必须飞起来拉开爆炸球半径）；
 ##   普攻直射：同一把机枪换瞄准——枪臂真瞄玩家（无预判）朝人扫一短梭，跑动/起跳
 ##     即躲。无重击警告：枪臂全程真瞄，瞄准本身就是预警。机枪就一把：子弹永远真从
 ##     枪口出膛，招式之间只有瞄准方向与射击时长不同。枪口姿态随招式：高扫三态放平
-##     （弹流是水平的），直射时枪口朝人。
+##     （弹流是水平的），直射时枪口朝人。导弹与机枪彻底分家：VLS 仓口在背部
+##     （4 孔=一轮弹数 1:1，逐孔轮发），预警闪光也钉在导弹舱上不占机枪口。
 ## 走位（水平=放松的弹簧，BOSS_MOVE_STIFFNESS）：推进把 BOSS 压近构图位内侧，
 ## 倒退把它甩出画面右缘（出画不打断出招，子弹照常飞），站定它自己踱回画内；
 ## 冲刺 900 > 机动上限 700，出招间隙硬追能破防贴脸。
@@ -28,8 +29,6 @@ extends Enemy
 
 enum BState { ENTER, SWEEP_MOVE, SWEEP_AIM, SWEEP_FIRE, RAIN_WARN, RAIN_FIRE, DIRECT_FIRE, RECOVER }
 enum Attack { SWEEP, RAIN, DIRECT }
-
-const SWEEP_ORIGIN_OFFSET := Vector2(-170.0, 20.0) # 机枪出弹点：机体前缘枪座（原点朝左前）
 # ENEMY_BULLET / EXPLOSION / _bob_t 直接继承 Enemy 的同名成员，不重复声明
 
 var _vel := Vector2.ZERO # BOSS 自管速度（水平喂 _control_vx、竖直喂 velocity.y，物理出口积分）
@@ -45,7 +44,11 @@ var _rain_launched := 0
 var _phase2 := false
 var _death_played := false
 
-@onready var _warn: ThreatFlash = $ArmPivot/Muzzle/ThreatFlash
+@onready var _warn: ThreatFlash = $Visuals/ArmPivot/Muzzle/ThreatFlash
+@onready var _rain_warn: ThreatFlash = $Visuals/MissileWarn/ThreatFlash
+@onready var _ports: Node2D = $Visuals/MissilePorts
+@onready var _rotor: Sprite2D = $Visuals/Rotor
+@onready var _tail_rotor: Sprite2D = $Visuals/TailRotor
 
 
 func _species_max_hp() -> int:
@@ -54,6 +57,10 @@ func _species_max_hp() -> int:
 
 func _species_score() -> int:
 	return Balance.BOSS_SCORE
+
+
+func _defense() -> int:
+	return Balance.BOSS_DEFENSE
 
 
 func _hover_height() -> float:
@@ -73,6 +80,7 @@ func on_spawned() -> void:
 	_bob_t = randf() * TAU
 	global_position.y = Balance.BOSS_HOVER_Y
 	_warn.reset() # 池化复用/预警中死亡的残光兜底
+	_rain_warn.reset()
 	var hud := get_tree().get_first_node_in_group("hud") as HUD
 	if hud != null:
 		hud.flash_warning()
@@ -95,7 +103,9 @@ func _physics_process(delta: float) -> void:
 	var hud := get_tree().get_first_node_in_group("hud") as HUD
 	if hud != null:
 		hud.set_boss_hp(hp_ratio())
-		hud.set_boss_impact(impact_ratio())
+		# 失衡期冲击条改读硬直剩余：匀速排空=硬直计时器（失衡条从中心向两边收缩）
+		hud.set_boss_impact(_stagger_t / _stagger_time() if is_staggered()
+				else impact_ratio())
 	if is_staggered():
 		# 失衡硬直：出招/跟随全停，原地缓慢瘫沉——位置留给玩家的近战爆发窗
 		_vel = Vector2.ZERO
@@ -105,8 +115,14 @@ func _physics_process(delta: float) -> void:
 				Balance.BOSS_HOVER_Y + Balance.BOSS_STAGGER_SINK, 60.0 * delta)
 		return
 	_bob_t += delta
-	# 高扫三态枪口放平（弹流是水平的，枪也摆平）；其余状态父类照旧瞄玩家——
-	# 直射时"枪口朝人"本身就是预警。
+	# 旋翼常转：主旋翼侧视是刃边只做呼吸摆动，尾桨盘平行屏幕整周旋转；
+	# 失衡/死亡演出期间也照转（直升机没熄火）。
+	_rotor.rotation = sin(_bob_t * Balance.BOSS_ROTOR_WOBBLE_SPEED) \
+			* Balance.BOSS_ROTOR_WOBBLE
+	_tail_rotor.rotation += Balance.BOSS_ROTOR_SPIN * delta
+	# 高扫三态枪口放平（弹流是水平的，枪也摆平——画布空间本地角，换边不用管）；
+	# 其余状态父类照旧瞄玩家——直射时"枪口朝人"本身就是预警。
+	# 枪臂/旋翼/导弹舱/舱口预警的挂点镜像全部由 Visuals 一层承担，零补镜像。
 	if _bstate in [BState.SWEEP_MOVE, BState.SWEEP_AIM, BState.SWEEP_FIRE]:
 		_arm_pivot.rotation = 0.0
 	_tick_vertical(delta)
@@ -192,7 +208,7 @@ func _rewarn_after_hold() -> void:
 			_warn.warn()
 		BState.RAIN_WARN:
 			_bt = Balance.HEAVY_GUN_WARN_TIME
-			_warn.warn()
+			_rain_warn.warn()
 		_:
 			pass
 
@@ -287,7 +303,7 @@ func _begin_rain() -> void:
 	_next_skill = Attack.SWEEP
 	_bstate = BState.RAIN_WARN
 	_bt = Balance.HEAVY_GUN_WARN_TIME
-	_warn.warn() # 预警统一入口：枪口闪光 + 警告音（扫射/弹雨同一预警语汇）
+	_rain_warn.warn() # 预警统一入口：导弹舱闪光 + 警告音（机枪口留给扫射）
 
 
 ## 普攻直射：无重击警告（枪臂全程真瞄玩家，瞄准本身就是预警），进场即开火，
@@ -333,10 +349,12 @@ func _launch_ticker(delta: float) -> void:
 	var container := get_tree().get_first_node_in_group("projectile_container")
 	if player == null or terrain == null or container == null:
 		return
-	var from := global_position + SWEEP_ORIGIN_OFFSET + Vector2(0.0, -80.0)
+	var ports := _ports.get_children()
+	# 逐孔轮发：前舱→后舱顺序出膛（4 孔=一轮 1:1，二阶段 +2 回绕复用前孔）；
 	# 垂发姿态：近乎竖直、朝玩家一侧微倾 ±扇面——此向量即炮口朝向，弹体姿态
 	# 沿它不动；动量继承 BOSS 速度（_vel）——后退带得动弹，姿态不会"朝后飞"；
 	# 拱顶与追踪由导弹自理
+	var from := (ports[_rain_launched % ports.size()] as Node2D).global_position
 	var lean := signf(player.global_position.x - from.x)
 	var dir := (Vector2.UP + Vector2(0.28 * lean, 0.0)).normalized()
 	dir = dir.rotated(deg_to_rad(randf_range(-Balance.HEAVY_MISSILE_SPREAD_DEG,
@@ -389,12 +407,17 @@ func _stagger_time() -> float:
 	return Balance.STAGGER_TIME_BOSS
 
 
+func _stagger_key() -> StringName:
+	return &"stagger_boss"
+
+
 func _stagger_immunity() -> float:
 	return Balance.STAGGER_IMMUNITY_BOSS
 
 
 ## 击退演出：父类单体爆炸照播，再补一串错峰爆炸 + 收血条，1.4s 后自清。
-## （"击退而非击杀"：本次只做撤退离场，回访机制由 Spawner 的分数调度管。）
+## （本章通关的转场由 Main 监听 Spawner.boss_defeated 排程：延迟→黑场→下一章，
+## 玩家满血来自新章的全新实例——原"击败回血"随章节机制废除。）
 func _explode() -> void:
 	super()
 	if _death_played:

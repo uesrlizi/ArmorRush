@@ -1,9 +1,26 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 44" width="110" height="44">
-<!-- 占位方块：追击大型机（BOSS）导弹发射臂（原生朝左，挂 ArmPivot，可俯仰瞄准玩家） -->
-<rect x="30" y="14" width="70" height="22" fill="#332e2c"/>
-<rect x="10" y="8" width="26" height="30" fill="#282322"/>
-<rect x="14" y="2" width="16" height="8" fill="#171514"/>
-<rect x="46" y="20" width="40" height="5" fill="#171514" opacity="0.8"/>
-<rect x="52" y="28" width="14" height="4" fill="#ff5140" opacity="0.85"/>
-<rect x="96" y="18" width="10" height="14" fill="#453d39"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 32" width="110" height="32">
+<!-- BOSS 机枪臂（独件，挂 ArmPivot 可俯仰镜像，原生朝左）。
+     画布压扁 110x32（offset -95,-20）：枪带贴下颌 y70..101，不遮机顶座舱独眼。
+     枪口轴线在画布 y≈0（枪管 y0..7），枪口尖端 SVG 画布(2,0) →
+     挂点局部(-93,-20)=原弹道高度，Muzzle 节点照此摆。
+     机匣顶受光 #453d39 / 机匣 #332e2c / 枪管肋与弹箱 #282322 / 膛口 #171514，
+     传感器红点 #ff5140。 -->
+  <!-- 枪管 + 散热肋 -->
+  <rect x="10" y="0" width="54" height="7" fill="#282322"/>
+  <rect x="22" y="0" width="4" height="9" fill="#171514"/>
+  <rect x="34" y="0" width="4" height="9" fill="#171514"/>
+  <rect x="46" y="0" width="4" height="9" fill="#171514"/>
+  <!-- 膛口装置 + 枪口 -->
+  <rect x="2" y="0" width="10" height="9" fill="#332e2c"/>
+  <rect x="0" y="2" width="4" height="5" fill="#171514"/>
+  <!-- 机匣 -->
+  <rect x="64" y="0" width="40" height="26" fill="#332e2c"/>
+  <rect x="64" y="0" width="40" height="5" fill="#453d39"/>
+  <rect x="64" y="20" width="40" height="6" fill="#282322"/>
+  <!-- 弹箱 -->
+  <rect x="74" y="26" width="22" height="5" fill="#282322"/>
+  <!-- 挂座（接机体端）+ 通风格栅（不要红点：机身上已有独眼，双红点读成两只眼） -->
+  <rect x="100" y="4" width="10" height="18" fill="#171514"/>
+  <rect x="90" y="8" width="10" height="3" fill="#171514"/>
+  <rect x="90" y="14" width="10" height="3" fill="#171514"/>
 </svg>

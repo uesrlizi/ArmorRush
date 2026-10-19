@@ -12,8 +12,6 @@ signal died
 
 enum MeleePhase { IDLE, WINDUP, DASH, STRIKE, RECOVER }
 
-const THRUSTER_X := 13.9 # 背部喷口相对机体中心的横移（body SVG 喷口 (13.1,62) 经 0.606 精灵缩放换算）
-
 const PLAYER_BULLET := preload("res://scenes/player_bullet.tscn")
 const SPARK_BURST := preload("res://scenes/spark_burst.tscn")
 const TIP_SPARKS := preload("res://scenes/slash_tip_sparks.tscn")
@@ -78,16 +76,20 @@ var _slide_kick := 0.0       # 重落地踢火花的剩余喷射时长（秒）
 var _phys_prev := Vector2.ZERO # 上一个物理步位置（镜头亚步补间用，见 _process）
 var _phys_curr := Vector2.ZERO
 
-@onready var _sprite: Sprite2D = $Sprite2D
-@onready var _arm_pivot: Node2D = $ArmPivot
-@onready var _muzzle: Marker2D = $ArmPivot/Muzzle
-@onready var _muzzle_flash: MuzzleFlash = $ArmPivot/Muzzle/Flash
-@onready var _thruster: ThrusterFlame = $Thruster
-@onready var _slide_sparks: GroundSparks = $SlideSparks
+@onready var _visuals: Node2D = $Visuals
+@onready var _sprite: Sprite2D = $Visuals/Sprite2D
+@onready var _nozzle_pivot: Node2D = $Visuals/NozzlePivot
+@onready var _arm_pivot: Node2D = $Visuals/ArmPivot
+@onready var _muzzle: Marker2D = $Visuals/ArmPivot/Muzzle
+@onready var _muzzle_flash: MuzzleFlash = $Visuals/ArmPivot/Muzzle/Flash
+@onready var _thruster: ThrusterFlame = $Visuals/NozzlePivot/Thruster
+@onready var _leg_thruster: ThrusterFlame = $Visuals/LegThruster     # 腿部姿控焰：向后喷=前进
+@onready var _waist_thruster: ThrusterFlame = $Visuals/WaistThruster # 腰部姿控焰：向前喷=倒退
+@onready var _slide_sparks: GroundSparks = $Visuals/SlideSparks
 @onready var _camera: Camera2D = $Camera2D
-@onready var _slash_root: Node2D = $SlashRoot
-@onready var _slash_far: SlashArc = $SlashRoot/SlashFar
-@onready var _slash_near: SlashArc = $SlashRoot/SlashNear
+@onready var _slash_root: Node2D = $Visuals/SlashRoot
+@onready var _slash_far: SlashArc = $Visuals/SlashRoot/SlashFar
+@onready var _slash_near: SlashArc = $Visuals/SlashRoot/SlashNear
 @onready var _melee_hitbox: Area2D = $MeleeHitbox
 @onready var _melee_hitbox_shape: CollisionShape2D = $MeleeHitbox/CollisionShape2D
 @onready var _overhead_bar: OverheadBar = $OverheadBar
@@ -100,7 +102,7 @@ func _ready() -> void:
 	boost = Balance.BOOST_CAPACITY
 	# 移动端镜头额外下移两档（战斗区抬到屏幕上半躲手指），桌面为 0。
 	_camera_y = Balance.CAMERA_Y \
-			+ (Balance.MOBILE_CAMERA_Y_OFFSET if OS.has_feature("mobile") else 0.0)
+			+ (Balance.MOBILE_CAMERA_Y_OFFSET if Platforms.is_mobile() else 0.0)
 	_camera.global_position = Vector2(
 		global_position.x + Balance.CAMERA_X_OFFSET, _camera_y)
 	# 开机即位：清掉平滑器残差，镜头第一帧就钉在目标点——
@@ -115,6 +117,12 @@ func _ready() -> void:
 	hitbox_rect.size = Vector2(Balance.MELEE_REACH, Balance.MELEE_HEIGHT)
 	_melee_hitbox_shape.shape = hitbox_rect
 	_melee_hitbox.position = Vector2(Balance.MELEE_HITBOX_OFFSET, 0)
+	# 刃光平面：x 镜像交给 Visuals（朝向层），这里只按 MELEE_SQUASH 压扁 y
+	# （挥砍平面投影成椭圆，即 2D 侧视的"贴地横扫"）。
+	_slash_root.scale = Vector2(1.0, Balance.MELEE_SQUASH)
+	# 滑行火花原生朝 +X 喷（滑行后方）：本地固定镜像一次，朝向换边由
+	# Visuals 整体翻转承担（不再随 _face_dir 逐帧重写）。
+	_slide_sparks.scale.x = -1.0
 	# 刃光前后分层：同一道弧画两遍，近段裁掉上半（观众半侧）、远段裁掉下半。
 	_slash_near.clip = SlashArc.Clip.LOWER
 	_slash_far.clip = SlashArc.Clip.UPPER
@@ -223,17 +231,33 @@ func _physics_process(delta: float) -> void:
 			clampf(slide_vx / Balance.PLAYER_MOVE_SPEED, 0.0, 1.0)
 			if is_on_floor() and slide_vx > Balance.SLIDE_SPARK_MIN_SPEED else 0.0)
 
+	# 喷口状态判定（画布空间；朝向镜像由 Visuals 承担）：
+	# 竖直支撑=推进上升/近战悬停/缓沉/下落反推；水平分量分前进/倒退两向。
+	var nozzle_vertical := thrusting or _melee_phase == MeleePhase.WINDUP \
+			or _melee_phase == MeleePhase.RECOVER \
+			or (not is_on_floor() and velocity.y > 20.0)
+	var nozzle_forward := axis != 0.0 and signf(axis) == _face_dir
+	var nozzle_backward := axis != 0.0 and signf(axis) != _face_dir
+
 	# 推进喷焰分档：推进上升全焰；下落=主动反推缓降半焰（下降段重力偏小就是它在反推）；
-	# 近战悬停/缓沉由推进器撑住也出焰；地面与惯性上升段熄火。
+	# 近战悬停/缓沉由推进器撑住出焰，突进/斩击冲锋=主焰/腿焰同拉过烧档；
+	# 纯前进=主焰巡航半档（倒退时主焰熄火，倒退排气由腰焰承担）；地面静止与惯性上升段熄火。
 	var flame_level := 0.0
+	var cruise_flame := false
 	if thrusting:
 		flame_level = 1.0
 	elif _melee_phase == MeleePhase.WINDUP:
 		flame_level = 0.75
 	elif _melee_phase == MeleePhase.RECOVER:
 		flame_level = 0.5
+	elif _melee_phase == MeleePhase.DASH \
+			or _melee_phase == MeleePhase.STRIKE:
+		flame_level = Balance.NOZZLE_DASH_FLAME # 近战推进：突进/斩击冲锋过烧
 	elif not is_on_floor() and velocity.y > 20.0:
 		flame_level = 0.45
+	elif nozzle_forward:
+		flame_level = Balance.NOZZLE_CRUISE_FLAME
+		cruise_flame = true
 	# 待机小喷焰：启动页站桩时机体每隔几秒排一口汽（随包络起落）。
 	if not input_enabled:
 		_idle_puff_cd = maxf(_idle_puff_cd - delta, 0.0)
@@ -245,7 +269,36 @@ func _physics_process(delta: float) -> void:
 		flame_level = maxf(flame_level,
 				Balance.IDLE_PUFF_LEVEL * sin(PI * (1.0 - _idle_puff_t / Balance.IDLE_PUFF_TIME)))
 	_thruster.set_target(flame_level)
-	Sfx.set_thrust(flame_level) # 推进声与喷焰同档同源，平滑在 Sfx 内做
+	# 巡航焰只出视觉不出声（移动系音效宁缺毋滥，跑动已有滑行摩擦声）：
+	# 推进声仍只跟真实推进/悬停/反推走。
+	Sfx.set_thrust(0.0 if cruise_flame else flame_level)
+
+	# 喷口可动摆动（Balance.NOZZLE_SWING_DEG）：默认朝左下（画布正形）；
+	# 纯前进抬向正后(+)；倒退与竖直支撑（推进上升/近战悬停/下落反推缓降）压向正下(−)；
+	# 前进+竖直同时回正中（对角=两者的合成排气向）。摆角写画布空间本地角，
+	# 朝向镜像由 Visuals 承担——面朝哪边，同一个本地角都落到屏幕同一侧。
+	# 近战冲刺按纯前进算：不看移动输入直接抬向正后（冲刺是向前突刺，与焰档同账）。
+	var melee_dashing := _melee_phase == MeleePhase.DASH \
+			or _melee_phase == MeleePhase.STRIKE
+	var nozzle_target := 0.0
+	if melee_dashing:
+		nozzle_target = Balance.NOZZLE_SWING_DEG
+	elif nozzle_backward:
+		nozzle_target = -Balance.NOZZLE_SWING_DEG
+	elif nozzle_forward:
+		nozzle_target = 0.0 if nozzle_vertical else Balance.NOZZLE_SWING_DEG
+	elif nozzle_vertical:
+		nozzle_target = -Balance.NOZZLE_SWING_DEG
+	_nozzle_pivot.rotation = move_toward(
+			_nozzle_pivot.rotation, deg_to_rad(nozzle_target),
+			Balance.NOZZLE_TURN_SPEED * delta)
+
+	# 腰/腿姿控焰（固定喷口，不带可动）：腿焰向后喷=前进推力，腰焰向前喷=倒退推力。
+	# 巡航全焰；近战突进/斩击冲锋没有后退，腰焰不跟冲刺只认倒退巡航，主焰+腿焰同拉过烧档。
+	_leg_thruster.set_target(Balance.VERNIER_DASH_FLAME if melee_dashing
+			else (Balance.VERNIER_CRUISE_FLAME if nozzle_forward else 0.0))
+	_waist_thruster.set_target(
+			Balance.VERNIER_CRUISE_FLAME if nozzle_backward else 0.0)
 
 	_fire_timer = maxf(_fire_timer - delta, 0.0)
 
@@ -306,18 +359,18 @@ func _update_facing() -> void:
 	if target != null:
 		face_left = target.global_position.x < global_position.x
 	_face_dir = -1.0 if face_left else 1.0
-	_sprite.flip_h = face_left
-	# SlashRoot：x 随朝向镜像，y 把挥砍平面压扁成椭圆（2D 侧视的横扫投影）。
-	_slash_root.scale = Vector2(_face_dir, Balance.MELEE_SQUASH)
+	# 朝向只翻 Visuals 一层：身体、枪臂、喷口、刃光、滑行火花全体换边。
+	# 挂件位置按「原生朝右」在场景里手摆一次，不再逐节点补镜像/补位移
+	# （手调多少位移都跟着走，flip_h「只翻贴图不翻子节点」的老坑就此除名）。
+	# 子节点的旋转一律写画布空间本地角，先缩放后旋转的换算由镜像层统一吃掉。
+	_visuals.scale.x = _face_dir
 	_apply_melee_attitude()
-	_arm_pivot.scale.x = _face_dir # 臂随朝向镜像（旋转取负号见 _update_arm）
-	_thruster.position.x = -THRUSTER_X * _face_dir # 喷口在背部，随朝向镜像
-	_slide_sparks.scale.x = -_face_dir # 火花朝 +X（滑行后方），镜像后永远向后刮
 	_update_arm(get_physics_process_delta_time())
 
 
 ## 枪臂可动瞄准：朝锁定目标做有限俯仰，无目标时缓慢回平。
 ## Muzzle 是 ArmPivot 子节点，枪口位置跟随俯仰与镜像。
+## 俯仰写画布空间本地角：正俯仰(朝上)=负角，与朝向无关。
 func _update_arm(delta: float) -> void:
 	var target := _acquire_target()
 	if target != null:
@@ -326,14 +379,15 @@ func _update_arm(delta: float) -> void:
 				-Balance.GUN_PITCH_MAX_DEG, Balance.GUN_PITCH_MAX_DEG)
 	else:
 		_gun_pitch = move_toward(_gun_pitch, 0.0, Balance.GUN_PITCH_RETURN_SPEED * delta)
-	_arm_pivot.rotation = -deg_to_rad(_gun_pitch) * _face_dir
+	_arm_pivot.rotation = -deg_to_rad(_gun_pitch)
 
 
-## 把俯仰角落到表现与判定上：刃光椭圆整体倾斜，判定盒随之旋转、前移。
-##（y 向下为正，"朝上俯仰"= 负旋转；朝左时旋转与镜像叠加后取反。）
+## 把俯仰角落到表现与判定上：刃光椭圆整体倾斜；判定盒挂 Visuals 外
+## （Area2D 不吃负缩放），镜像/俯仰自己补。
+##（y 向下为正，"朝上俯仰"= 负旋转；Visuals 内是画布角，判定盒在世界带朝向。）
 func _apply_melee_attitude() -> void:
+	_slash_root.rotation = -deg_to_rad(_melee_pitch)
 	var rot := -deg_to_rad(_melee_pitch) * _face_dir
-	_slash_root.rotation = rot
 	_melee_hitbox.rotation = rot
 	_melee_hitbox.position = Vector2(Balance.MELEE_HITBOX_OFFSET * _face_dir, 0).rotated(rot)
 
@@ -683,10 +737,11 @@ func is_dead() -> bool:
 func _die() -> void:
 	_dead = true
 	velocity = Vector2.ZERO
-	# 机体在爆炸里炸没：本体与枪臂一起隐藏，不留残骸立全场。
-	_sprite.visible = false
-	_arm_pivot.visible = false
+	# 机体在爆炸里炸没：Visuals 整层隐藏（本体/枪臂/喷口/刃光/火花），不留残骸立全场。
+	_visuals.visible = false
 	_thruster.set_target(0.0) # 推进器熄火
+	_leg_thruster.set_target(0.0)
+	_waist_thruster.set_target(0.0)
 	_slide_sparks.emitting = false # 滑行火花熄火
 	Sfx.set_thrust(0.0)
 	Sfx.set_slide(0.0)

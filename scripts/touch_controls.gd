@@ -30,19 +30,15 @@ var _last_right_tap_ms := -999999999 # 上一次"右"手势（键盘或摇杆）
 func _ready() -> void:
 	_joystick.move_started.connect(_on_move_started)
 	_joystick.tapped.connect(_on_joystick_tapped)
-	# 中文标签用系统字体兜底（Godot 内置默认字体没有 CJK 字形）。
-	var font := SystemFont.new()
-	font.font_names = PackedStringArray([
-		"Microsoft YaHei UI", "Microsoft YaHei", "SimHei", "Noto Sans CJK SC", "Arial",
-	])
-	_auto_label.add_theme_font_override("font", font)
+	# 中文标签用打包的思源黑体子集（见 ui_font.gd）。
+	_auto_label.add_theme_font_override("font", UIFont.cjk())
 	_auto_label.visible = false
 	_apply_touch_visibility(false) # 启动页待机先藏，进战斗 fade_in_controls 依次点亮
 
 
 ## 触控输入件只在移动端显示；桌面保留键盘双击自动前进、点屏重开与自动前进标签。
 func _apply_touch_visibility(interactive: bool) -> void:
-	var show_touch := FORCE_TOUCH_VISIBLE or OS.has_feature("mobile")
+	var show_touch := FORCE_TOUCH_VISIBLE or Platforms.is_mobile()
 	for child in get_children():
 		if child.has_method("release"): # 摇杆 + 按钮（AutoLabel 没有此方法，不参与）
 			child.visible = show_touch and interactive
@@ -57,7 +53,7 @@ func fade_in_controls() -> void:
 		return
 	_combat_on = true
 	_apply_touch_visibility(true)
-	if not (FORCE_TOUCH_VISIBLE or OS.has_feature("mobile")):
+	if not (FORCE_TOUCH_VISIBLE or Platforms.is_mobile()):
 		return
 	var delay := 0.0
 	for child in get_children():
@@ -78,7 +74,7 @@ func fade_out_controls() -> void:
 	if not _combat_on:
 		return
 	_combat_on = false
-	if not (FORCE_TOUCH_VISIBLE or OS.has_feature("mobile")):
+	if not (FORCE_TOUCH_VISIBLE or Platforms.is_mobile()):
 		return
 	var tw := create_tween().set_parallel(true)
 	for child in get_children():

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>失衡音提案 · AC6 式敲钢板</title>
+<style>
+  /* 工程平涂规约：纯字+颜色，无框无底板无阴影 */
+  body { background: #b3a97f; color: #1c1a14; font-family: "Microsoft YaHei UI", "SimHei", sans-serif;
+         max-width: 860px; margin: 40px auto; padding: 0 24px; }
+  h1 { font-size: 22px; letter-spacing: 2px; }
+  h2 { font-size: 17px; letter-spacing: 1px; margin-top: 34px; }
+  .note { color: #4a4433; font-size: 14px; line-height: 1.7; }
+  .row { margin: 26px 0; }
+  .name { font-size: 17px; font-weight: bold; }
+  .desc { color: #4a4433; font-size: 14px; margin: 4px 0 6px; }
+  audio { width: 420px; }
+  button { background: none; border: none; color: #7a3016; font: inherit; cursor: pointer;
+           text-decoration: underline; padding: 0; }
+</style>
+</head>
+<body>
+<h1>失衡音提案 · AC6 式敲钢板</h1>
+<p class="note">
+  参考定性：AC6 失衡确立音是一记大金属撞击——"抡锤敲钢板"：亮瞬态 + 板鸣 + 下坠感。
+  本作只有敌方会失衡（枪射打满冲击条 → 瘫住），这声音是"近战爆发窗开启"的确认音，
+  要在同一拍已有的命中声（hit_enemy -8）之上立住身份。
+  六个版本覆盖设计空间：层数（单层 / 双层坍塌）、走向（平直 / 连续掉速）、
+  标识性格（板鸣 / 钟鸣 / 电子 blip）、重量（亮 clang / 闷质量）。
+  全部归一到同一峰值，响度无差异，只比音色与层数。实录为底 + 合成只做质量垫与标记层。
+  终稿（2026-10-16 三轮）：B 坍塌双层款换回，+4dB 顶格增益（文件预留余量防削波）
+  + 0.15s 延迟实装为 stagger / stagger_elite / stagger_boss（见 design/sfx.md）。
+  D 钟振款一轮替招待档留档。本页仅留档。
+</p>
+<div class="row"><button id="stopall">全部停止</button></div>
+<div id="list"></div>
+<h2>拆件试听</h2>
+<div id="partslist"></div>
+<h2>组合试听</h2>
+<div id="combolist"></div>
+<h2>BOSS 变调示例（同一配方整体 ×0.72，分层用，非独立提案）</h2>
+<p class="note">接线设想：杂兵 ×1.05 / 精英 ×1.0 / BOSS ×0.72——同一配方换算机体体量。</p>
+<div id="bosslist"></div>
+<h2>接线备注（定稿后执行）</h2>
+<p class="note">
+  挂点：enemy.gd <code>_staggered = true</code>（失衡确立，与"歪一下回正"视觉同拍；BOSS 继承同函数）。
+  键名 <code>stagger</code>，走 gen_sfx.py 正式清单后登记 sfx.gd 音库。
+  响度建议 -5dB：命中确认档（近战命中 -4 与 hit_enemy -8 之间）。
+  天然节流：失衡免疫期攒不了冲击，同一机体至多每 3–8s 一声；不同机体齐倒可能叠声，
+  需要时加 80ms 全局节流。杂兵失衡频繁，若嫌稀释可只给精英/BOSS 上全款、杂兵弱化。
+</p>
+<script>
+const V = [
+  ["stagger_a_plate", "A · 敲钢板基准款", "厚板实录降调 + 低频质量垫——AC6 直击，最贴你描述的那一下"],
+  ["stagger_b_slump", "B · 坍塌双层款", "主击 + 110ms 后次级碰撞与垮落噪声尾——读出\"机体塌下去\""],
+  ["stagger_c_sag",   "C · 降调扭曲款", "板鸣尾连续掉速（磁带降速）——结构受压下坠，和 BOSS 瘫沉视觉最搭"],
+  ["stagger_d_bell",  "D · 钟振款", "脆短击 + 工业钟长鸣——持续标识穿透枪声，代价是偏\"乐器\""],
+  ["stagger_e_sting", "E · 电子确认款", "主击 + 下行双音 blip——爆发窗开启的 UI 级标记，电子语言与现有警报系呼应"],
+  ["stagger_f_mass",  "F · 重锤闷击款", "钝击主体 + 亮板点缀——质量位移感，弱 clang，走\"重\"不走\"响\""],
+];
+const B = [
+  ["stagger_a_boss", "A 款 ×0.72", "低半档的钢板，大机体体量"],
+  ["stagger_b_boss", "B 款 ×0.72", "坍塌款的大机体版"],
+];
+const P = [
+  ["stagger_b_second", "B 的第二层（单独）", "次级碰撞（metal_medium ×0.6 变调）+ 10ms 后垮落噪声尾（800→100Hz 下扫）。在 B 里以 0.45/0.6 增益垫在主击后 110ms，此处单独归一方便听清质感"],
+];
+const C = [
+  ["stagger_d_slump", "D + B 的垮落层", "钟振款主体原样，110ms 处叠 B 的第二层（碰撞+垮落尾，配比不动）——钟鸣管穿透标识，垮落管塌落叙事"],
+];
+function fill(id, rows) {
+  const list = document.getElementById(id);
+  for (const [file, name, desc] of rows) {
+    const row = document.createElement("div");
+    row.className = "row";
+    row.innerHTML = `<div class="name">${name}</div>
+      <div class="desc">${desc}</div>
+      <audio controls src="../../assets/sfx_proposals/${file}.wav"></audio>`;
+    list.appendChild(row);
+  }
+}
+fill("list", V);
+fill("partslist", P);
+fill("combolist", C);
+fill("bosslist", B);
+document.getElementById("stopall").onclick = () =>
+  document.querySelectorAll("audio").forEach(a => { a.pause(); a.currentTime = 0; });
+</script>
+</body>
+</html>

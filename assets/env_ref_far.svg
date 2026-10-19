@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1300" width="1024" height="1300">
+<!-- 第二章「精炼所工业带」远景条 1024x1300（HillsStrip，tile 1024 视差 0.9）。
+天空渐变 #a9bcb2→#6f857b；两层烟囱/厂房剪影（FAR_A 细杆 0.5 / FAR_B 块状 0.75）+
+冷却塔地标（双曲收腰 hw 62→44→56，h300）+ 管廊桥 + 地平线雾带。
+两侧 24px 留空=平铺接缝纯天空；画布底 1300=世界 730（低于全部地形顶）。种子 2021。 -->
+<defs>
+<linearGradient id="sky" x1="0" y1="0.0" x2="0" y2="1.0"><stop offset="0" stop-color="#a9bcb2" stop-opacity="1"/><stop offset="0.42" stop-color="#9db1a6" stop-opacity="1"/><stop offset="0.68" stop-color="#8ba398" stop-opacity="1"/><stop offset="1.0" stop-color="#6f857b" stop-opacity="1"/></linearGradient>
+<radialGradient id="rg1"><stop offset="0" stop-color="#c5d2ca" stop-opacity="0.1"/><stop offset="1" stop-color="#c5d2ca" stop-opacity="0.0"/></radialGradient>
+<linearGradient id="hz" x1="0" y1="0.0" x2="0" y2="1.0"><stop offset="0" stop-color="#93a89e" stop-opacity="0"/><stop offset="1" stop-color="#93a89e" stop-opacity="0.38"/></linearGradient>
+<radialGradient id="rg2"><stop offset="0" stop-color="#ff8c3a" stop-opacity="0.1"/><stop offset="1" stop-color="#ff8c3a" stop-opacity="0.0"/></radialGradient>
+<radialGradient id="rg3"><stop offset="0" stop-color="#ffc46a" stop-opacity="0.14"/><stop offset="1" stop-color="#ffc46a" stop-opacity="0.0"/></radialGradient>
+</defs>
+<rect x="0" y="0" width="1024" height="1300" fill="url(#sky)"/>
+<rect x="24" y="896.9" width="32.7" height="403.1" fill="#6f8880" opacity="0.5"/>
+<rect x="58.7" y="1017.8" width="3" height="221.7" fill="#6f8880" opacity="0.45"/>
+<rect x="105.6" y="970" width="35.5" height="330" fill="#6f8880" opacity="0.5"/>
+<rect x="102.6" y="965" width="41.5" height="5" fill="#6f8880" opacity="0.5"/>
+<rect x="143.1" y="1069" width="3" height="181.5" fill="#6f8880" opacity="0.45"/>
+<rect x="184.2" y="1029.4" width="34.3" height="270.6" fill="#6f8880" opacity="0.5"/>
+<rect x="268.7" y="1050.3" width="27" height="249.7" fill="#6f8880" opacity="0.5"/>
+<rect x="328.8" y="976.2" width="34.3" height="323.8" fill="#6f8880" opacity="0.5"/>
+<rect x="399.2" y="989.2" width="22.7" height="310.8" fill="#6f8880" opacity="0.5"/>
+<rect x="396.2" y="984.2" width="28.7" height="5" fill="#6f8880" opacity="0.5"/>
+<rect x="423.9" y="1082.4" width="3" height="171" fill="#6f8880" opacity="0.45"/>
+<rect x="455.9" y="975.9" width="35.7" height="324.1" fill="#6f8880" opacity="0.5"/>
+<rect x="452.9" y="970.9" width="41.7" height="5" fill="#6f8880" opacity="0.5"/>
+<rect x="534.2" y="1034.1" width="21.7" height="265.9" fill="#6f8880" opacity="0.5"/>
+<rect x="531.2" y="1029.1" width="27.7" height="5" fill="#6f8880" opacity="0.5"/>
+<rect x="613.7" y="1027.7" width="19.9" height="272.3" fill="#6f8880" opacity="0.5"/>
+<rect x="680.6" y="903.8" width="23.4" height="396.2" fill="#6f8880" opacity="0.5"/>
+<rect x="677.6" y="898.8" width="29.4" height="5" fill="#6f8880" opacity="0.5"/>
+<rect x="705.9" y="1022.6" width="3" height="217.9" fill="#6f8880" opacity="0.45"/>
+<rect x="736.2" y="927.4" width="27.7" height="372.6" fill="#6f8880" opacity="0.5"/>
+<rect x="823.5" y="1008.9" width="23.9" height="291.1" fill="#6f8880" opacity="0.5"/>
+<rect x="820.5" y="1003.9" width="29.9" height="5" fill="#6f8880" opacity="0.5"/>
+<rect x="895.6" y="883.9" width="29.9" height="416.1" fill="#6f8880" opacity="0.5"/>
+<rect x="892.6" y="878.9" width="35.9" height="5" fill="#6f8880" opacity="0.5"/>
+<rect x="927.4" y="1008.7" width="3" height="228.9" fill="#6f8880" opacity="0.45"/>
+<polygon points="24,1300 24,993.8 39,993.8 51.4,1003.4 66.4,993.8 78.7,1003.4 78.7,1300" fill="#5a736c" opacity="0.75"/>
+<polygon points="130.9,1300 130.9,975.5 143.6,975.5 154,983.6 166.7,975.5 177,983.6 189.7,975.5 200.1,983.6 200.1,1300" fill="#5a736c" opacity="0.75"/>
+<polygon points="240.8,1300 240.8,1092.7 251.4,1092.7 260.2,1099.4 270.8,1092.7 279.6,1099.4 290.3,1092.7 299,1099.4 299,1300" fill="#5a736c" opacity="0.75"/>
+<rect x="364.2" y="1110.8" width="67.1" height="189.2" fill="#5a736c" opacity="0.75"/>
+<rect x="377.6" y="1098.8" width="5" height="12" fill="#5a736c" opacity="0.75"/>
+<rect x="495.6" y="1003.5" width="41.3" height="296.5" fill="#5a736c" opacity="0.75"/>
+<rect x="503.9" y="991.5" width="5" height="12" fill="#5a736c" opacity="0.75"/>
+<polygon points="610,1300 610,1036.5 617.6,1036.5 623.9,1041.4 631.6,1036.5 637.9,1041.4 645.6,1036.5 651.9,1041.4 651.9,1300" fill="#5a736c" opacity="0.75"/>
+<rect x="707.3" y="1170" width="63.9" height="130" fill="#5a736c" opacity="0.75"/>
+<ellipse cx="739.3" cy="1170" rx="32" ry="10" fill="#5a736c" opacity="0.75"/>
+<rect x="845.2" y="1202.8" width="53.5" height="97.2" fill="#5a736c" opacity="0.75"/>
+<ellipse cx="872" cy="1202.8" rx="26.8" ry="10" fill="#5a736c" opacity="0.75"/>
+<polygon points="582,1300 580.6,1275 579.3,1250 578.2,1225 577.3,1200 576.6,1175 576,1150 575.6,1125 575.3,1100 575.2,1075 575.3,1050 575.6,1025 576,1000 464,1000 464.4,1025 464.7,1050 464.8,1075 464.7,1100 464.4,1125 464,1150 463.4,1175 462.7,1200 461.8,1225 460.7,1250 459.4,1275 458,1300" fill="#5a736c" opacity="0.85"/>
+<ellipse cx="520" cy="994" rx="70" ry="18" fill="url(#rg1)"/>
+<rect x="40" y="1110" width="380" height="5" fill="#5a736c" opacity="0.55"/>
+<rect x="87" y="1115" width="6" height="185" fill="#5a736c" opacity="0.55"/>
+<rect x="197" y="1115" width="6" height="185" fill="#5a736c" opacity="0.55"/>
+<rect x="307" y="1115" width="6" height="185" fill="#5a736c" opacity="0.55"/>
+<rect x="402" y="1115" width="6" height="185" fill="#5a736c" opacity="0.55"/>
+<rect x="0" y="1040" width="1024" height="260" fill="url(#hz)"/>
+<ellipse cx="836" cy="1268" rx="80" ry="22" fill="url(#rg2)"/>
+<ellipse cx="836" cy="1268" rx="34" ry="11" fill="url(#rg3)"/>
+<circle cx="394.8" cy="786.4" r="1.1" fill="#c5d2ca" opacity="0.16122935596918303"/>
+<circle cx="610.1" cy="771.9" r="1.6" fill="#c5d2ca" opacity="0.23946036085760508"/>
+<circle cx="358" cy="931" r="2" fill="#c5d2ca" opacity="0.14918767786712342"/>
+<circle cx="361.9" cy="773.7" r="1.9" fill="#c5d2ca" opacity="0.1533184496155001"/>
+<circle cx="375.8" cy="859" r="1.4" fill="#c5d2ca" opacity="0.2842235189010053"/>
+<circle cx="229" cy="802.4" r="1.3" fill="#c5d2ca" opacity="0.19383357057418688"/>
+<circle cx="494.4" cy="642.8" r="1.7" fill="#c5d2ca" opacity="0.17711271740470663"/>
+<circle cx="747.9" cy="965" r="1.5" fill="#c5d2ca" opacity="0.24420322513325154"/>
+<circle cx="292.4" cy="973.1" r="1.4" fill="#c5d2ca" opacity="0.16792197133208467"/>
+<circle cx="843.3" cy="643.8" r="1.6" fill="#c5d2ca" opacity="0.2363347093429427"/>
+</svg>

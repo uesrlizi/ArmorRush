@@ -10,7 +10,38 @@ func _ready() -> void:
 	if not OS.get_cmdline_user_args().has("--autotest"):
 		queue_free()
 		return
+	if _editor_online():
+		printerr("[autotest] 检测到 Godot 编辑器在线，拒绝开跑：并发实例会重写 "
+				+ ".godot/imported 的内存映射页，编辑器会被顶崩。请先关闭编辑器。")
+		get_tree().quit()
+		return
+	RunState.hold_chapter = true # 探针需要世界原地活着：击败 BOSS 不触发章末黑场
 	_run()
+
+
+## 编辑器在线检测：枚举 godot* 进程的命令行，凡不带无头/自测参数的都是编辑器
+## （2026-10-16"编辑器总被杀"的代码级防线）。powershell 缺失/查询失败时静默
+## 放行——兜底仍是"跑任何无头命令前先 tasklist 查编辑器"的人工规矩。
+func _editor_online() -> bool:
+	if not OS.has_feature("windows"):
+		return false
+	var out: PackedStringArray = []
+	OS.execute("powershell", ["-NoProfile", "-Command",
+		"Get-CimInstance Win32_Process | Where-Object {$_.Name -like 'godot*'} "
+		+ "| ForEach-Object { \"$($_.ProcessId)|$($_.CommandLine)\" }"], out, true)
+	var self_pid := OS.get_process_id()
+	for line in out:
+		var l := str(line).strip_edges()
+		if l.find("|") < 0:
+			continue
+		if int(l.get_slice("|", 0)) == self_pid:
+			continue
+		var cmd := l.get_slice("|", 1).to_lower()
+		if cmd.contains("--headless") or cmd.contains("--quit-after") \
+				or cmd.contains("--autotest"):
+			continue
+		return true
+	return false
 
 
 func _run() -> void:
@@ -54,7 +85,7 @@ func _run() -> void:
 				absf(player.global_position.x - start_x) < 1.0,
 				" (待机站桩应=true), airborne=", not player.is_on_floor(),
 				" (按跳键开始不应起跳，解锁延迟内应=false), thrust_target=",
-				player.get_node("Thruster")._target,
+				player.get_node("Visuals/NozzlePivot/Thruster")._target,
 				" (开场无推进焰应=0), score_label=",
 				get_parent().get_node("HUD/Root/ScoreLabel").visible,
 				" spawner_active=", get_parent().get_node("Spawner")._active)
@@ -100,7 +131,7 @@ func _run() -> void:
 			last_x = player.global_position.x
 	await _screenshot("02_run.png")
 	print("[autotest] slide sparks while running: emitting=",
-			player.get_node("SlideSparks").emitting, " saw_slide=", saw_slide,
+			player.get_node("Visuals/SlideSparks").emitting, " saw_slide=", saw_slide,
 			" (贴地疾滑应=true)")
 
 	# 短按跳 + 空中长按跳推进（AC6 式飞行）。先松开移动键原地跳：
@@ -109,7 +140,7 @@ func _run() -> void:
 	# 起跳必须走 parse_input_event：jump 读的是 is_action_just_pressed（边沿触发），
 	# 计时器回调里的 Input.action_press 打的边沿时间戳在下一个物理帧已过期（踩过）。
 	Input.action_release("move_right")
-	var flame_node: ThrusterFlame = player.get_node("Thruster")
+	var flame_node: ThrusterFlame = player.get_node("Visuals/NozzlePivot/Thruster")
 	var jump_ev := InputEventKey.new()
 	jump_ev.physical_keycode = KEY_SPACE
 	jump_ev.pressed = false
@@ -129,7 +160,7 @@ func _run() -> void:
 			" airborne=", not player.is_on_floor(),
 			" jump_held=", Input.is_action_pressed("jump"),
 			" boost=", player.boost, " vy=", player.velocity.y,
-			" slide_sparks=", player.get_node("SlideSparks").emitting,
+			" slide_sparks=", player.get_node("Visuals/SlideSparks").emitting,
 			" (推进态应 level≈1.0 且滑行火花=false)")
 	jump_ev = InputEventKey.new()
 	jump_ev.physical_keycode = KEY_SPACE
@@ -173,8 +204,8 @@ func _run() -> void:
 		await _wait(0.04) # 枪口焰全亮期
 		await _screenshot("04a_muzzle_flash.png")
 		# 回归断言：枪口焰必须钉在枪口上（top_level 后靠脚本显式贴回，曾闪在出生点上空）
-		var flash: Node2D = player.get_node("ArmPivot/Muzzle/Flash")
-		var muzzle: Node2D = player.get_node("ArmPivot/Muzzle")
+		var flash: Node2D = player.get_node("Visuals/ArmPivot/Muzzle/Flash")
+		var muzzle: Node2D = player.get_node("Visuals/ArmPivot/Muzzle")
 		print("[autotest] muzzle flash pinned: ",
 				"OK" if flash.global_position.distance_to(muzzle.global_position) < 2.0 else "FAIL",
 				" flash=", flash.global_position, " muzzle=", muzzle.global_position)
@@ -210,11 +241,21 @@ func _run() -> void:
 	print("[autotest] ", probe_info)
 
 	# 后退再前进，验证负位移会抵消刷怪累加器。
+	# 顺带读三焰：面向随移动方向（无目标时），两相都是朝面向侧移动——
+	# 应=腿焰全档+主焰巡航半档、腰焰 0（纯后退语义人工测：倒退=主焰熄火+腰焰全档）。
 	Input.action_press("move_left")
 	await _wait(1.2)
+	printerr("[autotest] vernier flames (move_left): face_dir=", player._face_dir,
+			" pack=", player.get_node("Visuals/NozzlePivot/Thruster")._level,
+			" leg=", player.get_node("Visuals/LegThruster")._level,
+			" waist=", player.get_node("Visuals/WaistThruster")._level)
 	Input.action_release("move_left")
 	Input.action_press("move_right")
 	await _wait(1.2)
+	printerr("[autotest] vernier flames (move_right): face_dir=", player._face_dir,
+			" pack=", player.get_node("Visuals/NozzlePivot/Thruster")._level,
+			" leg=", player.get_node("Visuals/LegThruster")._level,
+			" waist=", player.get_node("Visuals/WaistThruster")._level)
 	Input.action_release("move_right")
 	await _screenshot("05_back_and_forth.png")
 
@@ -232,6 +273,12 @@ func _run() -> void:
 		await _wait(0.05)
 		Input.action_release("melee")
 		await _wait(0.21) # 前摇 0.2 + 进斩击 ~0.01
+		printerr("[autotest] dash flames: pack=",
+				player.get_node("Visuals/NozzlePivot/Thruster")._level,
+				" leg=", player.get_node("Visuals/LegThruster")._level,
+				" waist=", player.get_node("Visuals/WaistThruster")._level,
+				" phase=", player._melee_phase,
+				" (冲刺主焰+腿焰应≈1.5、腰焰 0；读数在爬坡途中会偏低)")
 		await _screenshot("06_melee_swing1.png")
 		await _wait(0.06) # 斩击中段：刃光半张+刃口碎光（命中闪增要命中才有，另看）
 		await _screenshot("06a_melee_midstrike.png")
@@ -277,6 +324,30 @@ func _run() -> void:
 				" boss_bar=", get_parent().get_node("HUD")._boss_bar.visible,
 				" warning=", get_parent().get_node("HUD")._warning_label.visible,
 				" (入场后均应=true)")
+		# 朝向镜像探针：玩家跳到 BOSS 右侧，Visuals 整层换边——枪臂/尾梁必须
+		# 跟着换到玩家一侧（旧实现只翻主体贴图，武器/挂件钉在原地，本探针防回归）。
+		var player_x_before_flip := player.global_position.x
+		player.global_position = Vector2(boss.global_position.x + 420.0,
+				player.global_position.y)
+		player.velocity = Vector2.ZERO
+		await _wait(0.25) # 面向判定 + 镜像生效（物理帧内完成）
+		var boss_rig: Node2D = boss.get_node("Visuals")
+		var boss_muzzle_x: float = (boss.get_node("Visuals/ArmPivot/Muzzle") as Node2D) \
+				.global_position.x
+		var boss_tail_x: float = (boss.get_node("Visuals/TailRotor") as Node2D) \
+				.global_position.x
+		var boss_flipped := boss_rig.scale.x < 0.0 \
+				and boss_muzzle_x > boss.global_position.x \
+				and boss_tail_x < boss.global_position.x
+		await _screenshot("08c_boss_flip.png")
+		print("[autotest] boss flip: ", "OK" if boss_flipped else "FAIL",
+				" rig_scale_x=", boss_rig.scale.x,
+				" muzzle-boss=", int(boss_muzzle_x - boss.global_position.x),
+				" tail-boss=", int(boss_tail_x - boss.global_position.x),
+				" (玩家在右侧时应全换边：镜像−1、枪口>0、尾梁<0)")
+		player.global_position = Vector2(player_x_before_flip, player.global_position.y)
+		player.velocity = Vector2.ZERO
+		await _wait(0.1)
 		# 高位扫射：等机体压到射高开火（压高 ~0.45 + 蓄力 0.35，3.5s 处首波在屏）；
 		# 玩家站桩贴地应安全（射高 410 在站立头顶 470 之上），只验弹幕在场。
 		await _wait(2.5)
@@ -312,19 +383,24 @@ func _run() -> void:
 			boss.take_damage(10)
 			await _wait(0.05)
 			var applied := roundi((ratio_pre - boss.hp_ratio()) * Balance.BOSS_MAX_HP)
+			var expected := ceili(10 * Balance.STAGGER_DMG_MULT) - Balance.BOSS_DEFENSE
 			await _screenshot("08e_boss_stagger.png")
 			print("[autotest] boss stagger: staggered=", staggered,
 					" impact_bar=", get_parent().get_node("HUD")._boss_impact_bar.visible,
-					" take 10 -> ", applied, " (失衡加深应=15)")
+					" take 10 -> ", applied, " (失衡加深×防御应=", expected, ")")
 		# 立刻击杀快进：站桩吃整轮雨会被追踪导弹打死，污染后面的死亡探针。
-		# 此刻已出膛的 ≤2 发仍会命中（≤40 伤），玩家活。
+		# 此刻已出膛的 ≤2 发仍会命中（≤40 伤），玩家活。击杀触发击败回血，
+		# 击杀瞬间的差值=回血量（可能抵掉已吃的伤）。
+		var hp_before_kill := player.hp
 		if is_instance_valid(boss) and boss.hp_ratio() > 0.0:
 			boss.take_damage(999)
+		var hp_after_kill := player.hp
 		await _wait(1.3) # 已出膛导弹命中+爆闪
 		await _screenshot("08d_boss_blast.png")
 		print("[autotest] boss rain damage: hp ", hp_before_boss, " -> ",
-				player.hp, " (站桩吃追踪雨大幅掉血甚至被击杀——设计使然；",
-				"已出膛的精英残弹/杂兵蹭枪计入)！")
+				player.hp, "；击杀瞬间 ", hp_before_kill, "->", hp_after_kill,
+				" (击败回血 +", hp_after_kill - hp_before_kill, "；",
+				"站桩吃追踪雨/精英残弹蹭伤计入)！")
 
 	print("[autotest] score=", get_parent().score,
 			" player hp=", player.hp,

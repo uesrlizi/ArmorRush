@@ -1,18 +1,68 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 180" width="300" height="180">
-<!-- 占位方块：追击大型机（BOSS）机体（原生朝左）。平涂大块面，信号红传感器 -->
-<rect x="40" y="50" width="230" height="100" fill="#332e2c"/>
-<rect x="70" y="22" width="130" height="30" fill="#453d39"/>
-<rect x="200" y="30" width="56" height="24" fill="#282322"/>
-<rect x="24" y="66" width="18" height="44" fill="#282322"/>
-<rect x="52" y="60" width="34" height="9" fill="#ff5140" opacity="0.92"/>
-<rect x="150" y="70" width="90" height="5" fill="#171514" opacity="0.8"/>
-<rect x="150" y="92" width="70" height="5" fill="#171514" opacity="0.6"/>
-<rect x="60" y="150" width="60" height="18" fill="#282322"/>
-<rect x="190" y="150" width="56" height="18" fill="#282322"/>
-<rect x="60" y="166" width="34" height="10" fill="#171514"/>
-<rect x="200" y="166" width="32" height="10" fill="#171514"/>
-<rect x="104" y="8" width="10" height="16" fill="#171514"/>
-<rect x="130" y="8" width="10" height="16" fill="#171514"/>
-<circle cx="66" cy="100" r="9" fill="#ff5140" opacity="0.22"/>
-<circle cx="66" cy="100" r="4" fill="#ff5140" opacity="0.95"/>
+<!-- 追击大型机（BOSS）：重型武装直升机，仿 AC6 重装武直语言，纯平涂零描边。
+     画布 300x180=碰撞体 body_size，原点(150,90)，原生朝左（玩家来向）。
+     用色：顶面受光 #453d39 / 机体 #332e2c / 腹面 #282322 / 缝隙结构 #171514，
+     信号红 #ff5140。全出自敌营色板，无渐变无滤镜。
+     比例账：机体长 174(28..202)、尾梁 68、垂尾后掠、全高(去旋翼) 26..166；
+     主旋翼直径 304 独件（overshoot 机体两侧各~10）；
+     背部双导弹舱各 2 仓口=BOSS_RAIN_COUNT 4 发 1:1（精英垂发同规约）。
+     仓口位（局部坐标，喂 boss.gd MissilePorts）：
+       (-67,-64) (-45,-64) | (17,-64) (39,-64) —— 前舱两孔/后舱两孔。
+     独眼拉丝 EyeGlow 节点位 (-95,-27) scale 1.2（眼条 40..70 x 60..66）。
+     机顶座舱抬高（眼线 60..66 在机枪带 70..101 之上，不互相吃）；
+     机枪独件 pivot(-70,-20) 枪口(-93,-20)=原弹道高度。
+     主旋翼独件 pivot=局部(-18,-76)=SVG(132,14)，尾旋翼 pivot=局部(122,-28)=SVG(272,62)。 -->
+
+  <!-- 尾梁（先画，被机体后缘压住） -->
+  <polygon points="196,68 264,76 264,100 196,108" fill="#332e2c"/>
+  <polygon points="196,68 264,76 264,82 196,74" fill="#453d39"/>
+  <!-- 垂尾（后掠加大）：前缘后倾、背受光、尾桨盘下方红带 -->
+  <polygon points="242,86 260,32 286,32 292,102 256,108" fill="#332e2c"/>
+  <polygon points="260,32 286,32 288,38 262,38" fill="#453d39"/>
+  <rect x="264" y="88" width="24" height="6" fill="#ff5140" opacity="0.9"/>
+
+  <!-- 起橇（deepest，上端被腹面压住） -->
+  <polygon points="70,136 78,136 84,160 76,160" fill="#171514"/>
+  <polygon points="148,136 156,136 162,160 154,160" fill="#171514"/>
+  <rect x="52" y="158" width="130" height="8" fill="#282322"/>
+  <polygon points="52,148 60,150 66,158 52,158" fill="#282322"/>
+
+  <!-- 主机体 -->
+  <polygon points="64,58 202,58 202,132 168,138 66,138 38,122 28,94" fill="#332e2c"/>
+  <polygon points="64,58 202,58 202,66 64,66" fill="#453d39"/>
+  <polygon points="50,124 202,124 202,132 170,138 64,138 50,132" fill="#282322"/>
+  <!-- 深缝两道（体块分离） -->
+  <rect x="116" y="66" width="4" height="58" fill="#171514" opacity="0.8"/>
+  <rect x="120" y="96" width="76" height="4" fill="#171514" opacity="0.6"/>
+
+  <!-- 下颌装甲（机枪挂装面） -->
+  <polygon points="30,90 80,90 66,108 36,108" fill="#282322"/>
+
+  <!-- 机顶座舱（前倾楔形，抬高让出机枪带）+ 观察窗 + 独眼 -->
+  <polygon points="40,42 96,42 88,70 34,70" fill="#453d39"/>
+  <polygon points="44,46 90,46 82,56 38,56" fill="#171514"/>
+  <rect x="38" y="58" width="34" height="10" fill="#ff5140" opacity="0.18"/>
+  <rect x="40" y="60" width="30" height="6" fill="#ff5140" opacity="0.95"/>
+
+  <!-- 发动机甲板 -->
+  <rect x="92" y="50" width="110" height="10" fill="#282322"/>
+
+  <!-- 主旋翼桅 + 整流罩 -->
+  <rect x="122" y="16" width="20" height="34" fill="#332e2c"/>
+  <rect x="118" y="44" width="28" height="8" fill="#282322"/>
+  <rect x="116" y="10" width="32" height="8" fill="#282322"/>
+  <rect x="116" y="16" width="32" height="2" fill="#171514"/>
+
+  <!-- 背部导弹舱（前）：斜切箱体，顶面受光，2 仓口 + 红色识别条 -->
+  <polygon points="66,26 120,26 114,52 72,52" fill="#332e2c"/>
+  <polygon points="66,26 120,26 118,32 68,32" fill="#453d39"/>
+  <rect x="76" y="28" width="14" height="8" fill="#171514"/>
+  <rect x="98" y="28" width="14" height="8" fill="#171514"/>
+  <rect x="74" y="40" width="40" height="3" fill="#ff5140" opacity="0.85"/>
+  <!-- 背部导弹舱（后） -->
+  <polygon points="150,26 202,26 196,52 156,52" fill="#332e2c"/>
+  <polygon points="150,26 202,26 200,32 152,32" fill="#453d39"/>
+  <rect x="160" y="28" width="14" height="8" fill="#171514"/>
+  <rect x="182" y="28" width="14" height="8" fill="#171514"/>
+  <rect x="158" y="40" width="40" height="3" fill="#ff5140" opacity="0.85"/>
 </svg>

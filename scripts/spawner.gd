@@ -7,6 +7,7 @@ extends Node
 ## 回收的对象不销毁，按场景归类进池子复用。
 
 signal enemy_killed(points: int)
+signal boss_defeated # BOSS 被击败（死亡演出即启）：Main 借此排章末转场
 
 @export var obstacles_enabled := true # 障碍生成开关
 @export var crates_enabled := false   # 两种箱子（方块/长条平台）暂禁用，只刷脚手架平台
@@ -52,6 +53,11 @@ func _ready() -> void:
 func start() -> void:
 	_active = true
 	_last_player_x = _player.global_position.x
+
+
+## 章末转场窗口：彻底停刷（障碍一并停，画面安静等黑场）。
+func stop() -> void:
+	_stopped = true
 
 
 func _physics_process(_delta: float) -> void:
@@ -103,6 +109,7 @@ func debug_spawn_boss() -> Boss:
 	boss.global_position = Vector2(x, Balance.BOSS_HOVER_Y)
 	_container.add_child(boss) # 入树即 _ready→on_spawned：亮血条 + WARNING
 	boss.killed.connect(_on_killed)
+	boss.killed.connect(func(_points: int) -> void: boss_defeated.emit())
 	boss.reset_physics_interpolation()
 	return boss
 
@@ -206,8 +213,14 @@ func debug_probe_obstacle_overlap() -> String:
 		var ok2 := "OK" if absf(deck_enemy_y - (deck_top - 24.0)) < 0.5 else "FAIL"
 		report.append("floating: enemy_y=%.0f top=%.0f [%s]" % [deck_enemy_y, deck_top, ok2])
 		break
-	# 反向：先敌人后障碍，落在长条平台上（平台贴地表生成）
+	# 反向：先敌人后障碍，落在长条平台上（平台贴地表生成）。
+	# 落点避开所有现存障碍（含 720 宽浮空脚手架的 x 范围）——否则敌人被
+	# 合理地抬上更高的旧障碍顶，探针读数取决于跑图时机（世界状态竞态）。
 	var x := _right_edge() + 2000.0
+	for node in get_tree().get_nodes_in_group("obstacles"):
+		var ob := node as Obstacle
+		if ob != null:
+			x = maxf(x, ob.global_position.x + ob.body_size.x * 0.5 + 400.0)
 	_spawn(enemy_scene, true, x)
 	_spawn(platform_scene, false, x)
 	var enemy_y := -1.0

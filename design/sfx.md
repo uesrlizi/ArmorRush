@@ -19,6 +19,11 @@
 - **响度档位纪律**（全库平衡拧总线推子，别散改逐键 dB）：
   命中确认（近战命中/受击/爆炸）> 出手（枪/斩）> 移动（跳/落地/脚步）> 环境。
   最高档给近战命中 -4 与玩家被毁 -2：前者是保命反馈，后者是终局。
+- **感知响度对齐**（2026-10-16 失衡音三轮教训新增）：峰值归一只防削波，不是
+  响度——瞬态声（crest 高）与持续声在同一个键位 dB 上感知差好几 dB，提案页
+  归一峰值听不出，进实战才炸。换装/定档位前先跑 `tools/profile_sfx.py` 看
+  响度列（20ms 短窗 RMS p95）：两支要听成一样响，键位 dB 之差=响度列之差。
+  注意无频率计权——1.5kHz 方波这类音性声的刺耳度读数会低估，终审仍是实战耳朵。
 - **克制规约**："不是每个事件都该有声音"——起跳无音（用户定论：移动系声音宁缺毋滥）、
   前摇只给 -15 的轻上膛咔、连段衔接不配音、打墙声 -14 且 80ms 节流、
   触控按钮不配点击音（有按压视觉+震动，声音是多余的第三层）。
@@ -51,7 +56,8 @@ Master
 | boom_enemy | ×2 | -5 | 40ms | enemy._explode | 合成（用户认可，未动）：棕噪低通下扫+次低+火星噼啪 |
 | boom_player | ×1 | **-2** | — | player._die | 合成（未动）：更大深下扫+38Hz 次低+残骸散落 |
 | ui_gameover | ×1 | -7 | — | hud.show_game_over | 合成下行双音 A2→E2（电子源，合成不失真） |
-| threat_warn | ×1 | -6 | 500ms | 所有重击预警统一入口 `ThreatFlash.warn()`：精英齐射 / BOSS 扫射 / 弹雨 | AC6 式双声滴滴（提案 A 定稿）：1.5kHz 方波 90ms 声+150ms 静（250→200→150 三档实听收敛），pitch 不随机保恒定辨识度。2026-10-16 用户拍板"预警统一入口"：闪光+警告音同拍，**扫射也接**（此前"扫射故意不接"作废） |
+| threat_warn | ×1 | -12（2026-10-16 实听 -6 太吵，大幅拉低；1.5kHz 方波是音性声，宽带枪炮里低响度照样穿） | 500ms | 所有重击预警统一入口 `ThreatFlash.warn()`：精英齐射 / BOSS 扫射 / 弹雨 | AC6 式双声滴滴（提案 A 定稿）：1.5kHz 方波 90ms 声+150ms 静（250→200→150 三档实听收敛），pitch 不随机保恒定辨识度。2026-10-16 用户拍板"预警统一入口"：闪光+警告音同拍，**扫射也接**（此前"扫射故意不接"作废） |
+| stagger / stagger_elite / stagger_boss | 各×1 | **+4**（全库唯一正增益） | 80ms | enemy._enter_stagger → 延迟 0.15s（`Balance.STAGGER_SFX_DELAY`，主击声先落地；被砍死/重置则不播）→ `_stagger_key()` 分档 | 失衡确立终稿（2026-10-16 三轮）：**B 坍塌双层款换回**——厚板主击+110ms 次级碰撞+垮落尾。三轮史：B(-5 被枪炮掩蔽)→D 钟振(救掩蔽)→B 换回(+4 顶格增益+延迟复验；画像数据：同峰值下 B 短窗响度比 D 高 ~6dB，掩蔽要因是当年响度不足)。变调分层 杂兵×1.05/精英×1.0/BOSS×0.72 确定性分档。**+4 是文件侧预留 4dB 峰顶余量（峰 0.58）+回放拉满=满幅不削波，感知响度到顶——想再响只能压 crest（压缩抬 RMS）或加层，不能加增益**。D 钟振款退档留档：配方 gen_stagger_proposals.py make_d，wav 在 sfx_proposals/ |
 | amb_rust_loop | 循环 7.0s | Amb 总线 -18 | — | Sfx._ready 起播；set_amb(key) 换场景 | 合成：细雨颗粒+呼吸风+55Hz 工业低嗡（噪声床） |
 
 已砍：jump（起跳音）、land（落地音）、step（脚步——移动是滑动，配脚步声画不同步，
@@ -80,13 +86,19 @@ Master
 ```
 pip install soundfile numpy                # 实录解码依赖（一次）
 py -3 tools/gen_sfx.py                     # 重生成（字节不变，可复调）
-"G:/Program Files (x86)/Steam/steamapps/common/Godot Engine/godot.windows.opt.tools.64.exe" --headless --import
+"C:/Program Files (x86)/Steam/steamapps/common/Godot Engine/godot.windows.opt.tools.64.exe" --headless --import
 "$G" --headless --check-only --script res://scripts/sfx.gd
 "$G" -- --autotest                          # 带窗口全流程
 ```
 
+（编辑器开着时跳过无头校验——`--import` 与编辑器抢 `.godot/imported` 缓存。）
+
 ## 未做 / 待定
 
+- 失衡（STAGGER）音已定稿实装（2026-10-16 三轮终稿：B 坍塌双层款 +4dB 顶格
+  +0.15s 延迟，见音库表；D 钟振款一轮替招待档留档）。全部提案与试听页留档：
+  `tools/gen_stagger_proposals.py` + `design/proposals/stagger_listen.html`
+  + `tools/profile_sfx.py`（感知响度画像）。
 - BGM：本作声音特色是围城线通讯，暂无音乐层需求；做的话沿 Godot_2D_Space 的
   双播放器交叉淡化 + set_context 状态词曲库模式，别重造。
 - 枪声换血备选：Kenney "Sci-Fi Sounds" 包下载三次断流未成（服务器对它不稳）；

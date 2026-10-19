@@ -3,5 +3,7 @@
 autotest_shots/
 /export/
 /autotest_run*.log
+/at*.txt
 tools/piper_voices/*.onnx
 __pycache__/
+tools/ref_fonts/

@@ -35,15 +35,16 @@ Godot 4.7 制作的 AC（Armored Core）风味 2D 机甲跑酷。一台没登记
 - **全游戏平涂：无描边、无边框、无底板、无阴影。** UI 就是纯字加颜色，不要给任何东西套框或垫底。
 - 美术手写 SVG，AC6 设计语言。四套场景提案全保留，后续都会装（锈雨废都已实装）。
 - **阵营色（敌我识别的统一出处）**：玩家点缀琥珀 `#ffa04a`，敌方点缀锈红 `#ff5140`，命中迸溅继承发射方的阵营色。**子弹当前敌我共用同一颗亮黄 `#ffee58` 细长水滴**（纯色无弹芯，单一资源 `bullet_player.svg`；第一代琥珀/锈红双色水滴存档于 `bullet_enemy.svg`，要恢复区分把 enemy_bullet.tscn 的贴图改回去即可）。敌弹贴图纵向压 0.7（enemy_bullet.tscn 里 Sprite2D scale）：慢弹凝视得住显短粗，快弹拖尾显细长，压细反向补偿观感差；非均匀缩放只能加在 Sprite 上，加在会旋转的 Area2D 上斜飞会被剪切。
-- 字幕/HUD 中文，系统字体兜底（内置默认字体没有 CJK 字形）。
+- 字幕/HUD 中文，统一走 `UIFont.cjk()`（打包的思源黑体子集 `assets/fonts/ui_cjk.ttf`）。Web 导出拿不到系统字体，SystemFont 在网页上全是豆腐块；**改了界面文案/播报台词要重跑 `py -3 tools/subset_font.py`**，否则新字在 Web 端缺字。
 
 ## 架构速览
 
 - **内容开关**：Main 节点的导出参数（编辑器 Inspector 打勾）——`enable_boss`（追击大型机）/ `enable_elite`（精英·导弹车）/ `enable_threat_warnings`（威胁提醒=枪口预警闪光+警告音，统一走 `ThreatFlash.warn()`；关=闪光与警告音都不出、直接出招）。_ready 转发给 Spawner（`boss_enabled`/`elite_enabled` 门控）与预警组件（`ThreatFlash.warnings_enabled` 静态开关，出招节拍不变）。
 - `scripts/balance.gd` — **所有可调数值的唯一出处**（autoload `Balance`）。场景和脚本不存副本，改了没效果先查是不是有副本遮蔽。
 - `scripts/scroll_object.gd` + `spawner.gd` — 按玩家带符号位移刷怪 + 对象池回收；地形 `terrain.gd` 高低三档连续，`world_strip.gd` 平铺背景。
-- `scripts/comms.gd` — 系统播报（autoload `Comms`）：**非人声机电提示，无剧情无角色**。只有三条：作战开始 + 两档低 AP（50%/25%，滞回防重复）。字幕（AC6 式白字+分隔横线）+ 电台总线（320–3200Hz 带通，运行时建，不依赖 .tres）。
+- `scripts/comms.gd` — 系统播报（autoload `Comms`）：**非人声机电提示，无剧情无角色**。只有三条：作战开始 + 两档低 AP（50%/25%，滞回防重复）。字幕（AC6 式白字+分隔横线）+ 电台总线（320–3200Hz 带通，效果链 `Balance.COMMS_RADIO_FX` 开关，当前关）。
 - `scripts/sfx.gd` — 音效总管（autoload `Sfx`）：固定 12 声道池 + 注册字典音库 + 逐键节流，全非定位（镜头即耳朵）；推进连续音吃 Player 喷焰档位，环境床走 Amb 总线。台账见 `design/sfx.md`。
+- `default_bus_layout.tres` — Sfx/Amb/Radio 三条总线的烘焙布局，**必配**：Web 导出上运行时 `AudioServer.add_bus` 建的总线不出声（2026-10-17 实测定罪），代码里 `_ensure_bus`/Comms 的运行时补建只是桌面兜底。
 - `data/comms.json` — 播报单一数据源：`text`=中文字幕，`tts`=英文朗读，说话人含 edge-tts/piper 两套音色参数。
 
 ## 系统播报规约

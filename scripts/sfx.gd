@@ -43,6 +43,8 @@ var _slide_smooth := 0.0
 var _slide_on := false
 var _amb: AudioStreamPlayer
 var _amb_key := &""
+## 实际发声总线：Web 端一律 Master（见 _ready 内注释），桌面走 Sfx 总线。
+var _out_bus: String = SFX_BUS
 
 
 func _ready() -> void:
@@ -50,19 +52,24 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_ensure_bus(SFX_BUS)
 	_ensure_bus(AMB_BUS)
+	# Web 导出上非 Master 总线不出声（引擎级问题：总线存在、.tres 烘焙有效，
+	# 就是不进混音输出——2026-10-17 双频探针定罪）。Web 一律改道 Master：
+	# 当前各总线只承担分组，音量都挂在播放器上、电台效果链关闭，改道无损。
+	# 取舍：若日后开 COMMS_RADIO_FX，其总线效果在 Web 端不生效。
+	_out_bus = "Master" if Platforms.is_web() else SFX_BUS
 	_fill_lib()
 	_preload()
 	for i in POOL_SIZE:
 		var p := AudioStreamPlayer.new()
-		p.bus = SFX_BUS
+		p.bus = _out_bus
 		add_child(p)
 		_pool.append(p)
 		_pool_started.append(0)
 	_thrust = AudioStreamPlayer.new()
-	_thrust.bus = SFX_BUS
+	_thrust.bus = _out_bus
 	add_child(_thrust)
 	_slide = AudioStreamPlayer.new()
-	_slide.bus = SFX_BUS
+	_slide.bus = _out_bus
 	add_child(_slide)
 	_amb = AudioStreamPlayer.new()
 	_amb.bus = AMB_BUS
@@ -204,16 +211,29 @@ func _fill_lib() -> void:
 			"db": -6.0, "pitch": [0.97, 1.05], "throttle": 0}
 	_lib[&"hit_world"] = {"paths": ["hit_world"],
 			"db": -14.0, "pitch": [0.90, 1.15], "throttle": 80}
+	# 失衡确立（D 钟振款，2026-10-16 换装）：近战爆发窗开启的确认音。
+	# B 坍塌双层款 -5dB 实测被枪炮声掩蔽，换持续钟鸣；延迟 0.15s 播（主击声先
+	# 落地，Balance.STAGGER_SFX_DELAY）。+4dB 全库唯一正增益键（用户定稿）——
+	# 对应 wav 母带预留了 4dB 峰顶余量，回放恰好满幅不削波。三键=同一配方按
+	# 机体体量变调（杂兵/精英/BOSS），确定性分档不走随机变体；免疫期攒不了
+	# 冲击=天然节流，80ms 只防多机体同拍齐倒叠声。
+	_lib[&"stagger"] = {"paths": ["stagger"],
+			"db": 4.0, "pitch": [0.97, 1.04], "throttle": 80}
+	_lib[&"stagger_elite"] = {"paths": ["stagger_elite"],
+			"db": 4.0, "pitch": [0.97, 1.04], "throttle": 80}
+	_lib[&"stagger_boss"] = {"paths": ["stagger_boss"],
+			"db": 4.0, "pitch": [0.97, 1.04], "throttle": 80}
 	_lib[&"boom_enemy"] = {"paths": ["boom_enemy_a", "boom_enemy_b"],
 			"db": -5.0, "pitch": [0.94, 1.06], "throttle": 40}
 	_lib[&"boom_player"] = {"paths": ["boom_player"],
 			"db": -2.0, "pitch": [1.0, 1.0], "throttle": 0}
 	_lib[&"ui_gameover"] = {"paths": ["ui_gameover"],
 			"db": -7.0, "pitch": [1.0, 1.0], "throttle": 0}
-	# 威胁警告（AC6 式双声滴滴）：保命提示高档；pitch 不随机——警告要恒定辨识度；
+	# 威胁警告（AC6 式双声滴滴）：实听 -6 太吵，2026-10-16 大幅拉低到 -12——
+	# 1.5kHz 方波是音性声，宽带枪炮噪声里低响度照样穿；pitch 不随机保恒定辨识度；
 	# 节流=文件时长（0.48s 取整），导弹车/BOSS 弹雨的预警确立瞬间触发，循环感由再次触发承担。
 	_lib[&"threat_warn"] = {"paths": ["threat_warn"],
-			"db": -6.0, "pitch": [1.0, 1.0], "throttle": 500}
+			"db": -12.0, "pitch": [1.0, 1.0], "throttle": 500}
 	for key: StringName in _lib:
 		_lib[key]["paths"] = (_lib[key]["paths"] as Array) \
 				.map(func(n: String) -> String: return "%s/%s.wav" % [SFX_DIR, n])
@@ -247,7 +267,8 @@ func _load_wav(path: String, loop: bool) -> AudioStream:
 	return stream
 
 
-## 总线运行时创建（工程不依赖 default_bus_layout.tres，自洽）。
+## 总线兜底创建：正常走 default_bus_layout.tres 烘焙（Web 导出上运行时
+## 建的总线不出声，.tres 是唯一出声路径），这里只在总线缺失时补建。
 func _ensure_bus(bus_name: String) -> void:
 	if AudioServer.get_bus_index(bus_name) != -1:
 		return

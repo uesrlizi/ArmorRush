@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 84 16" width="84" height="16">
+<!-- 第二章 BOSS 尾部涡轮 blade bar 84x16。
+节点位（boss_ch2.tscn）Rotor=(103,-74) → 舰体画布 (253,16)；bar 覆盖 x211..295，
+刃缝槽 217..291，桨尖出槽 6px 读作盘面掠过罩壁。侧视刃边不画椭圆盘面。 -->
+<defs>
+
+</defs>
+<rect x="2" y="5" width="80" height="6" fill="#161811"/>
+<rect x="8" y="6" width="14" height="4" fill="#4d5348" opacity="0.75"/>
+<rect x="46" y="6" width="14" height="4" fill="#4d5348" opacity="0.55"/>
+<rect x="36" y="2" width="12" height="12" fill="#303429"/>
+<rect x="40" y="6" width="4" height="4" fill="#161811"/>
+</svg>

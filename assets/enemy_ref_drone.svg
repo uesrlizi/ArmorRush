@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 38 42" width="38" height="42">
+<!-- 第二章无人机「涵道巡检单元」38x42（悬浮）。
+骨架对齐：眼 (12,14.4) halo r4.4/core r2.0；ArmPivot 画布 (15.2,21)。
+造型：顶置涵道风扇舱（刃缝槽+桨叶反光）+ 泪滴舱体 + 危险黄检修带 + 起落橇。 -->
+<defs>
+
+</defs>
+<polygon points="26,13 34,7 35,11 29,17" fill="#303429"/>
+<polygon points="26,27 33,33 28,34 23,30" fill="#252820"/>
+<rect x="8" y="1" width="22" height="10" fill="#303429"/>
+<rect x="8" y="1" width="22" height="2.5" fill="#4d5348"/>
+<rect x="8" y="3.5" width="2.5" height="7.5" fill="#161811"/>
+<rect x="27.5" y="3.5" width="2.5" height="7.5" fill="#161811"/>
+<rect x="10.5" y="4.5" width="17" height="5" fill="#161811"/>
+<rect x="12" y="6" width="4" height="2" fill="#4d5348" opacity="0.9"/>
+<rect x="20" y="6" width="4" height="2" fill="#4d5348" opacity="0.9"/>
+<rect x="12" y="11" width="3" height="4" fill="#161811"/>
+<rect x="23" y="11" width="3" height="4" fill="#161811"/>
+<polygon points="8,15 30,15 33,23 26,35 12,35 5,23" fill="#303429"/>
+<polygon points="8,15 30,15 31,18 9,18" fill="#4d5348" opacity="0.8"/>
+<polygon points="11,30 27,30 24,35 14,35" fill="#252820"/>
+<rect x="8" y="12.5" width="9" height="4.5" fill="#161811"/>
+<circle cx="12" cy="14.4" r="4.4" fill="#ff4640" opacity="0.22"/>
+<circle cx="12" cy="14.4" r="2" fill="#ff4640" opacity="0.95"/>
+<rect x="15" y="27.5" width="4.5" height="2.5" fill="#d8a021" opacity="0.85"/>
+<rect x="21" y="27.5" width="4.5" height="2.5" fill="#d8a021" opacity="0.85"/>
+<circle cx="20" cy="32" r="4.4" fill="#ff4640" opacity="0.2"/>
+<circle cx="20" cy="32" r="1.9" fill="#ff4640" opacity="0.9"/>
+<rect x="11" y="35" width="2" height="4" fill="#161811"/>
+<rect x="25" y="35" width="2" height="4" fill="#161811"/>
+<rect x="8" y="39" width="22" height="2" fill="#252820"/>
+</svg>

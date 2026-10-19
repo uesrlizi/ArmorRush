@@ -12,6 +12,7 @@ const PIER_LENGTH := 1600.0 # 桥墩超长、下端插到地块之下，由地�
 @export var float_top_max := 420.0   # 顶面允许的最高高度（世界 y）
 @export var pier_xs: PackedFloat32Array = PackedFloat32Array() # 桥墩局部 x（空 = 无墩）
 @export var pier_half_width := 10.0
+@export var pier_color := Color("3d3a32") # 桥墩用色按章走（默认=第一章锈雨废都）
 
 var _piers: Array[Node] = [] # 画在 BridgePiers 层的桥墩节点（本对象回收时一并清掉）
 
@@ -46,7 +47,7 @@ func _rebuild_piers() -> void:
 			# 顶边向上叠进桥面背后 8px：抗锯齿缝隙，重叠部分被桥面盖住
 			Vector2(-hw, -8.0), Vector2(hw, -8.0), Vector2(hw, PIER_LENGTH), Vector2(-hw, PIER_LENGTH),
 		])
-		pier.color = Color("3d3a32")
+		pier.color = pier_color
 		pier.position = Vector2(global_position.x + px, deck_bottom)
 		layer.add_child(pier)
 		_piers.append(pier)

@@ -2,16 +2,15 @@ class_name HeavyMissile
 extends Node2D
 ## 重击导弹：两段式——无动力抛体滑行 + 末段比例导引。
 ## 出膛动量 = 出膛方向（initial_dir=发射器"炮口"的实际朝向，散布由调用方
-## 并入）×THROW_SPEED×随机 + 载机速度继承（carrier_vel）。**弹体姿态钉在
-## 炮口朝向、不随速度偏转**——继承只进步进动量，载机后退带得动弹、却不会
-## 把弹头姿态拽得"朝后飞"。滑行段纯抛体拉弧（无动力不喷烟），**滑行
-## COAST_TIME 秒按时长开机**（不等过顶——上升段就压弯进入拦截，更果断）
-## ——点火喷烟，弹体轴由比例导引转动：转向率 = N×视线角速度（限幅到转向
-## 半径），自动打提前量——玩家横穿弹道时迎头截住，不尾追；速度走
-## **推力-阻力**：沿弹体轴 THRUST 推进、线性阻力 DRAG，收敛到巡航速度
-## THRUST/DRAG（游戏里模拟空气阻力的通常做法），从继承动量连续收敛无跳变；
-## 到时锁死直线、只吃阻力自然减速飞完撞地（不判"飞过即锁直"——早锁会把
-## 弹甩到玩家身后老远）。
+## 并入）×THROW_SPEED×随机 + 载机速度继承（carrier_vel）。**滑行段弹体姿态
+## 钉在炮口朝向、不随速度偏转**——继承只加平动动量（看得到被机体带动），
+## 载机后退不会把弹头姿态拽得"朝后飞"。滑行段纯抛体拉弧（无动力不喷烟），
+## **滑行 COAST_TIME 秒按时长开机**（不等过顶——上升段就压弯进入拦截，
+## 更果断）——点火喷烟，弹体轴由比例导引从炮口朝向起转：转向率 = N×视线
+## 角速度（限幅到转向半径），自动打提前量——玩家横穿弹道时迎头截住，不尾
+## 追；**开机后恒速沿弹体轴巡航（速度模型别动：推力/阻力版实测"飞一半停
+## 天上"已回退）**；到时锁死直线飞完撞地（不判"飞过即锁直"——早锁会把弹
+## 甩到玩家身后老远）。
 ## 开机后的追踪瞄准玩家脚底（瞄脚底让弹道自然往地面收束），只与地面耦合：
 ## 穿过机体不引爆，撞地即爆，球状伤害检测（GroundBlast）。
 ## 规约：预警在发射器上（枪口闪红，见调用方），弹道无区域标记。
@@ -27,7 +26,7 @@ const FLAME := preload("res://scenes/missile_flame.tscn")
 const BODY_COLOR := Color(0.2, 0.18, 0.16)
 const HEAD_COLOR := Color(0.35, 0.3, 0.26)
 
-var speed := 1000.0 # 巡航速度基准（=THRUST/DRAG；只用于导出转向半径，实际速度在 _vel 模长）
+var speed := 1000.0 # 开机后巡航速度（沿弹体轴恒速）
 var damage := 20
 var blast_radius := 110.0
 
@@ -88,10 +87,11 @@ func _physics_process(delta: float) -> void:
 		Phase.HOME:
 			_home(delta)
 		Phase.LOCK:
-			# 燃尽滑行：推力没了，只吃阻力自然减速
-			_vel -= _vel * (Balance.HEAVY_MISSILE_DRAG * delta)
-	# 全程沿 _vel 积分：滑行=纯抛体、开机=推力-阻力，相位切换速度连续无跳变
-	global_position += _vel * delta
+			pass
+	if _phase == Phase.COAST:
+		global_position += _vel * delta
+	else:
+		global_position += _dir * speed * delta
 	rotation = _dir.angle()
 	if _terrain != null and global_position.y >= _terrain.surface_y_at(global_position.x):
 		_detonate()
@@ -128,9 +128,6 @@ func _home(delta: float) -> void:
 	var step := clampf(Balance.HEAVY_MISSILE_PN_N * los_rate * delta,
 			-_turn_rate * delta, _turn_rate * delta)
 	_dir = _dir.rotated(step)
-	# 推力-阻力：沿弹体轴 THRUST 推进、线性阻力 DRAG，末速=THRUST/DRAG=巡航
-	# 速度；从继承动量连续收敛，开机瞬间不再有速度跳变
-	_vel += (_dir * Balance.HEAVY_MISSILE_THRUST - _vel * Balance.HEAVY_MISSILE_DRAG) * delta
 	if _t >= Balance.HEAVY_MISSILE_TRACK_MAX:
 		_phase = Phase.LOCK
 
@@ -153,16 +150,18 @@ func _detonate() -> void:
 			_smoke.reparent(container)
 			get_tree().create_timer(1.2).timeout.connect(_smoke.queue_free)
 	if container != null:
-		var boom := EXPLOSION.instantiate() as Node2D
-		boom.scale = Vector2(1.5, 1.5)
-		boom.position = at + Vector2(0.0, -14.0) # 容器在原点，position 即全局位
-		container.add_child(boom)
+		# 爆区闪光（GroundBlast 的橙闪）先入树垫底：爆炸火球/冲击环/烟压在它
+		# 上面，橙光只从边缘露出当爆区光晕——后入树会画在最顶，把特效全罩住
 		var blast := GroundBlast.new()
 		blast.damage = damage
 		blast.radius = blast_radius
 		container.add_child(blast)
 		blast.global_position = at
 		blast.reset_physics_interpolation()
+		var boom := EXPLOSION.instantiate() as Node2D
+		boom.scale = Vector2(1.5, 1.5)
+		boom.position = at + Vector2(0.0, -14.0) # 容器在原点，position 即全局位
+		container.add_child(boom)
 	Sfx.play(&"boom_enemy")
 	var player := get_tree().get_first_node_in_group("player") as Player
 	if player != null:

@@ -18,7 +18,7 @@ var _volley_t := 0.0
 var _launched := 0
 var _launch_seq := 0 # 仓口轮转序号（随机起步，连轮不总从同一仓开打）
 
-@onready var _warn: ThreatFlash = $ArmPivot/Muzzle/ThreatFlash
+@onready var _warn: ThreatFlash = $Visuals/ArmPivot/Muzzle/ThreatFlash
 
 
 func _species_max_hp() -> int:
@@ -46,6 +46,10 @@ func _impact_resistance() -> float:
 
 func _stagger_time() -> float:
 	return Balance.STAGGER_TIME_ELITE
+
+
+func _stagger_key() -> StringName:
+	return &"stagger_elite"
 
 
 func _stagger_immunity() -> float:

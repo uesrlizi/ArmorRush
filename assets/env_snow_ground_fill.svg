@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 256" width="16" height="256">
+<!-- 第三章地块填充 16x256 竖向渐变（路床向深处压暗，保HUD底衬可读）。 -->
+<defs>
+<linearGradient id="fillg" x1="0" y1="0.0" x2="0" y2="1.0"><stop offset="0" stop-color="#5a6670" stop-opacity="1"/><stop offset="0.45" stop-color="#39434c" stop-opacity="1"/><stop offset="1" stop-color="#232a31" stop-opacity="1"/></linearGradient>
+</defs>
+<rect x="0" y="0" width="16" height="256" fill="url(#fillg)"/>
+</svg>

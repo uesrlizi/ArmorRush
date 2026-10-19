@@ -83,6 +83,8 @@ func _add_fog() -> void:
 
 
 ## P2/P3：给玩家与敌人所有贴图件加轮廓光副本 + 脚下接触落影。
+## 落影/轮廓光挂进角色的 Visuals 镜像层（没有才退回根节点）——挂在根上
+## 会在角色换边时留在原地，不跟贴图走。
 func _add_rims_and_shadows() -> void:
 	var rigs: Array[Node2D] = [_main.get_node("Player") as Node2D]
 	for node in get_tree().get_nodes_in_group("enemies"):
@@ -90,9 +92,12 @@ func _add_rims_and_shadows() -> void:
 		if e != null:
 			rigs.append(e)
 	for rig in rigs:
-		_add_shadow(rig)
-		for sprite in _find_sprites(rig):
-			_add_rim_copy(rig, sprite)
+		var host: Node2D = rig.get_node_or_null("Visuals") as Node2D
+		if host == null:
+			host = rig
+		_add_shadow(host, rig.name)
+		for sprite in _find_sprites(host):
+			_add_rim_copy(host, sprite, rig.name)
 
 
 func _find_sprites(rig: Node2D) -> Array[Sprite2D]:
@@ -107,7 +112,7 @@ func _find_sprites(rig: Node2D) -> Array[Sprite2D]:
 	return found
 
 
-func _add_rim_copy(rig: Node2D, sprite: Sprite2D) -> void:
+func _add_rim_copy(host: Node2D, sprite: Sprite2D, rig_name: String) -> void:
 	var rim := Sprite2D.new()
 	rim.texture = sprite.texture
 	rim.centered = sprite.centered
@@ -119,18 +124,18 @@ func _add_rim_copy(rig: Node2D, sprite: Sprite2D) -> void:
 	mat.shader = _rim_shader
 	mat.set_shader_parameter("rim_color", RIM_COLOR)
 	# 玩家贴图经 0.6 缩放屏显，描边放宽补回；敌人 1:1 用默认宽。
-	mat.set_shader_parameter("width_px", 3.4 if rig.name == "Player" else 2.2)
+	mat.set_shader_parameter("width_px", 3.4 if rig_name == "Player" else 2.2)
 	rim.material = mat
-	rig.add_child(rim)
-	rig.move_child(rim, 1) # index0 是落影 → 影子最底、轮廓光次之、本体部件最上
+	host.add_child(rim)
+	host.move_child(rim, 1) # index0 是落影 → 影子最底、轮廓光次之、本体部件最上
 	_overlay_nodes.append(rim)
 
 
-func _add_shadow(rig: Node2D) -> void:
+func _add_shadow(host: Node2D, rig_name: String) -> void:
 	var pts := PackedVector2Array()
-	var rx := 26.0 if rig.name == "Player" else 30.0
+	var rx := 26.0 if rig_name == "Player" else 30.0
 	var ry := 5.0
-	var foot_y := 32.0 if rig.name == "Player" else 26.0
+	var foot_y := 32.0 if rig_name == "Player" else 26.0
 	for i in 20:
 		var ang := TAU * float(i) / 20.0
 		pts.append(Vector2(cos(ang) * rx, sin(ang) * ry))

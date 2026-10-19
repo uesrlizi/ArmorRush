@@ -21,9 +21,10 @@ func _init() -> void:
 
 
 func _ready() -> void:
-	# 爆闪（视觉）：橙红染色，大小随伤害半径
+	# 爆闪（视觉）：橙红染色垫在爆炸本体下面当爆区光晕（层级由引爆处入树序保证，
+	# 见 heavy_missile._detonate），alpha 压低防整片橙罩住特效；大小随伤害半径
 	var flash := FLASH_BURST.instantiate() as Node2D
-	flash.modulate = Color(1.0, 0.5, 0.25)
+	flash.modulate = Color(1.0, 0.5, 0.25, 0.6)
 	flash.scale = Vector2.ONE * (radius / 48.0)
 	add_child(flash) # 先定位再入树：tween 在 _ready 起跑，晚定位会闪在原点
 	reset_physics_interpolation()

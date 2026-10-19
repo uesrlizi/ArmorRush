@@ -8,7 +8,7 @@ const BUS_NAME := "Radio"
 const DATA_PATH := "res://data/comms.json"
 const VO_DIR := "res://assets/vo"
 
-const SUBTITLE_AT_TOP := true   # true=顶部居中（旧版），false=底部居中；随手切换对比用
+const SUBTITLE_AT_TOP := false  # true=顶部居中（旧版，与 BOSS 血条/WARNING 打架），false=底部居中（AC6 位）
 const SUBTITLE_WIDTH := 640.0   # 视口 2400 下的正文换行宽度；分隔横线同宽（AC6：线=字幕列宽）
 const SPEAKER_FONT_SIZE := 24
 const TEXT_FONT_SIZE := 28
@@ -155,7 +155,9 @@ func _load_data() -> void:
 
 
 func _setup_audio() -> void:
-	# 电台总线运行时创建（不依赖 .tres，换口味改 Balance 常量即可）。
+	# 电台总线：优先吃 default_bus_layout.tres 烘焙的同名总线——Web 导出上
+	# 运行时 add_bus 建的总线不出声（实测全游戏音量喂不出去，2026-10-17 定罪）；
+	# 没有烘焙时才运行时补建（保持工程自洽，双路径等价）。
 	# 链序：带通限频 → EQ 提亮 → 软削波 grit → 重压缩（统一响度+泵感）
 	#   → 拍背延迟（喇叭空间感）→ 限幅。
 	# 临场感的来源是压缩+常驻噪底+grit 的动态，而不是把人声滤窄——
@@ -165,44 +167,49 @@ func _setup_audio() -> void:
 		AudioServer.add_bus(idx)
 		AudioServer.set_bus_name(idx, BUS_NAME)
 		AudioServer.set_bus_send(idx, "Master")
-		# 电台后期链（Balance.COMMS_RADIO_FX 关闭时整段跳过=纯干声空听）
-		if Balance.COMMS_RADIO_FX:
-			var high := AudioEffectHighPassFilter.new()
-			high.cutoff_hz = 320.0
-			var low := AudioEffectLowPassFilter.new()
-			low.cutoff_hz = 3200.0
-			var eq := AudioEffectEQ10.new()
-			eq.set_band_gain_db(6, Balance.COMMS_RADIO_PRESENCE_DB) # ~2kHz 穿透感
-			eq.set_band_gain_db(7, Balance.COMMS_RADIO_PRESENCE_DB * 0.5)
-			var dist := AudioEffectDistortion.new()
-			dist.mode = AudioEffectDistortion.MODE_CLIP
-			dist.pre_gain = Balance.COMMS_RADIO_DRIVE_DB # 推高进削波器=drive
-			var comp := AudioEffectCompressor.new()
-			comp.threshold = Balance.COMMS_RADIO_COMP_THRESHOLD_DB
-			comp.ratio = Balance.COMMS_RADIO_COMP_RATIO
-			comp.attack_us = 8000 # Godot 4 压缩器：攻击微秒/释放毫秒（两单位不同名）
-			comp.release_ms = 120
-			comp.gain = Balance.COMMS_RADIO_COMP_GAIN_DB
-			var slap := AudioEffectDelay.new()
-			slap.dry = 1.0
-			slap.tap1_active = false # 拍背延迟已被用户否掉（听成复读），留参数备复活
-			slap.tap1_delay_ms = Balance.COMMS_RADIO_SLAP_MS
-			slap.tap1_level_db = Balance.COMMS_RADIO_SLAP_LEVEL_DB
-			var limiter := AudioEffectLimiter.new()
-			limiter.ceiling_db = -1.0
-			for effect: AudioEffect in [high, low, eq, dist, comp, slap, limiter]:
-				AudioServer.add_bus_effect(idx, effect)
+	# 电台后期链（Balance.COMMS_RADIO_FX 关闭时整段跳过=纯干声空听）。
+	# 必须独立于总线创建：总线可能来自 .tres 烘焙，效果要挂得上已存在的总线。
+	if Balance.COMMS_RADIO_FX:
+		var fx_bus := AudioServer.get_bus_index(BUS_NAME)
+		var high := AudioEffectHighPassFilter.new()
+		high.cutoff_hz = 320.0
+		var low := AudioEffectLowPassFilter.new()
+		low.cutoff_hz = 3200.0
+		var eq := AudioEffectEQ10.new()
+		eq.set_band_gain_db(6, Balance.COMMS_RADIO_PRESENCE_DB) # ~2kHz 穿透感
+		eq.set_band_gain_db(7, Balance.COMMS_RADIO_PRESENCE_DB * 0.5)
+		var dist := AudioEffectDistortion.new()
+		dist.mode = AudioEffectDistortion.MODE_CLIP
+		dist.pre_gain = Balance.COMMS_RADIO_DRIVE_DB # 推高进削波器=drive
+		var comp := AudioEffectCompressor.new()
+		comp.threshold = Balance.COMMS_RADIO_COMP_THRESHOLD_DB
+		comp.ratio = Balance.COMMS_RADIO_COMP_RATIO
+		comp.attack_us = 8000 # Godot 4 压缩器：攻击微秒/释放毫秒（两单位不同名）
+		comp.release_ms = 120
+		comp.gain = Balance.COMMS_RADIO_COMP_GAIN_DB
+		var slap := AudioEffectDelay.new()
+		slap.dry = 1.0
+		slap.tap1_active = false # 拍背延迟已被用户否掉（听成复读），留参数备复活
+		slap.tap1_delay_ms = Balance.COMMS_RADIO_SLAP_MS
+		slap.tap1_level_db = Balance.COMMS_RADIO_SLAP_LEVEL_DB
+		var limiter := AudioEffectLimiter.new()
+		limiter.ceiling_db = -1.0
+		for effect: AudioEffect in [high, low, eq, dist, comp, slap, limiter]:
+			AudioServer.add_bus_effect(fx_bus, effect)
+	# Web 端非 Master 总线不出声（引擎级，详见 sfx.gd 同款注释），改道 Master；
+	# 代价：COMMS_RADIO_FX 的总线效果在 Web 端不生效（干声直出）。
+	var out_bus := "Master" if Platforms.is_web() else BUS_NAME
 	_voice = AudioStreamPlayer.new()
-	_voice.bus = BUS_NAME
+	_voice.bus = out_bus
 	_voice.volume_db = Balance.COMMS_VOICE_VOLUME_DB
 	_voice.finished.connect(_on_voice_finished)
 	add_child(_voice)
 	_squelch = AudioStreamPlayer.new()
-	_squelch.bus = BUS_NAME
+	_squelch.bus = out_bus
 	_squelch.volume_db = -6.0
 	add_child(_squelch)
 	_bed = AudioStreamPlayer.new()
-	_bed.bus = BUS_NAME
+	_bed.bus = out_bus
 	_bed.volume_db = Balance.COMMS_NOISE_BED_DB
 	_bed.finished.connect(_bed.play) # 循环：缝隙被压缩泵感和语音掩住
 	add_child(_bed)
@@ -234,11 +241,8 @@ func _setup_ui() -> void:
 	_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_box.add_theme_constant_override("separation", BOX_SEPARATION)
 	root.add_child(_box)
-	# 中文界面用系统字体兜底（内置默认字体没有 CJK 字形），同 hud.gd。
-	var font := SystemFont.new()
-	font.font_names = PackedStringArray([
-		"Microsoft YaHei UI", "Microsoft YaHei", "SimHei", "Noto Sans CJK SC", "Arial",
-	])
+	# 中文界面用打包的思源黑体子集，同 hud.gd（见 ui_font.gd）。
+	var font := UIFont.cjk()
 	_speaker_label = Label.new()
 	_speaker_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_speaker_label.mouse_filter = Control.MOUSE_FILTER_IGNORE

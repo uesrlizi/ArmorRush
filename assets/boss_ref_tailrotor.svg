@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 56" width="56" height="56">
+<!-- 第二章 BOSS 尾部环护风扇 56x56（整周旋转，画布心=节点 (272,62)）。
+风扇盘平行屏幕→正圆成立；环护圈（BODY w3.5）+ 三叶 120°（绕 28,28 手工预算）+ 毂。 -->
+<defs>
+
+</defs>
+<polygon points="24.5,22 31.5,22 31.5,9 24.5,9" fill="#4d5348"/>
+<polygon points="21.1,28 24.6,34 13.3,40.5 9.8,34.5" fill="#4d5348"/>
+<polygon points="31.4,22 35,28 46.2,21.5 42.7,15.5" fill="#4d5348"/>
+<circle cx="28" cy="28" r="26" fill="none" stroke="#303429" stroke-width="3.5"/>
+<circle cx="28" cy="28" r="6" fill="#252820"/>
+<circle cx="28" cy="28" r="2.5" fill="#161811"/>
+</svg>
