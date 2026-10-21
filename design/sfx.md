@@ -87,7 +87,7 @@ Master
 pip install soundfile numpy                # 实录解码依赖（一次）
 py -3 tools/gen_sfx.py                     # 重生成（字节不变，可复调）
 "C:/Program Files (x86)/Steam/steamapps/common/Godot Engine/godot.windows.opt.tools.64.exe" --headless --import
-"$G" --headless --check-only --script res://scripts/sfx.gd
+"$G" --headless --check-only --script res://scripts/core/sfx.gd
 "$G" -- --autotest                          # 带窗口全流程
 ```
 

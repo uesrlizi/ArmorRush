@@ -2,7 +2,7 @@
 """Armor Rush 品牌图拼装：游戏图标(512) + 引擎启动画面(2400x1080)。
 全部由现有素材拼装（拿现有素材拼，不改件）：
   玩家机甲 = assets/player_mech_user_{nozzle,body,arm}.svg 按 player.tscn 挂载账组装
-  BOSS     = assets/boss_dreadnought_{body,rotor,tailrotor}.svg
+  BOSS     = assets/boss_rust_{body,rotor,tailrotor}.svg
   环境     = assets/env_rust_far.svg(远景连天空) / env_rust_mid.svg(中景) /
              env_rust_ground_top.svg(地表带) / env_rust_deck.svg(图标地面)
   点缀     = assets/bullet_player.svg(图标黄弹) / assets/fx_smoke.svg(待机汽)

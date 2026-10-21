@@ -1,0 +1,57 @@
+[gd_scene format=3 uid="uid://2aif5n64bfkx"]
+
+[ext_resource type="Script" uid="uid://ddgoamku7vmwk" path="res://scripts/units/enemy.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://bn5gvu1ho4772" path="res://assets/world_1/enemy_rust_walker_body.svg" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/fx/muzzle_flash.tscn" id="3"]
+[ext_resource type="Texture2D" uid="uid://cbfmb5t03rts6" path="res://assets/world_1/enemy_rust_walker_arm.svg" id="4"]
+[ext_resource type="Script" path="res://scripts/units/overhead_bar.gd" id="5"]
+[ext_resource type="Script" path="res://scripts/units/eye_glow.gd" id="6"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
+size = Vector2(44, 48)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_2"]
+size = Vector2(40, 44)
+
+[node name="Enemy" type="CharacterBody2D" unique_id=1001730260]
+collision_layer = 4
+collision_mask = 33
+monitoring = false
+script = ExtResource("1")
+feet_offset = 24.0
+body_size = Vector2(44, 48)
+
+[node name="Visuals" type="Node2D" parent="."]
+
+[node name="Sprite2D" type="Sprite2D" parent="Visuals" unique_id=733553462]
+texture = ExtResource("2")
+
+[node name="EyeGlow" type="Node2D" parent="Visuals/Sprite2D"]
+position = Vector2(-12.5, -7.7)
+script = ExtResource("6")
+
+[node name="ArmPivot" type="Node2D" parent="Visuals" unique_id=663318922]
+position = Vector2(-12, -2)
+
+[node name="Arm" type="Sprite2D" parent="Visuals/ArmPivot" unique_id=2013772823]
+texture = ExtResource("4")
+centered = false
+offset = Vector2(-36, -8)
+
+[node name="Muzzle" type="Marker2D" parent="Visuals/ArmPivot" unique_id=328854089]
+position = Vector2(-30, 7)
+
+[node name="Flash" parent="Visuals/ArmPivot/Muzzle" instance=ExtResource("3")]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1417020331]
+shape = SubResource("RectangleShape2D_1")
+
+[node name="BlockingBody" type="AnimatableBody2D" parent="." unique_id=2057184461]
+collision_layer = 64
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BlockingBody" unique_id=316459093]
+shape = SubResource("RectangleShape2D_2")
+
+[node name="OverheadBar" type="Node2D" parent="."]
+script = ExtResource("5")

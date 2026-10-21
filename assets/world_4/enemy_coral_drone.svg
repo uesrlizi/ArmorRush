@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 38 42" width="38" height="42">
+<!-- 第四章无人机「伞灯浮游机」38x42（悬浮）。
+骨架对齐：眼 (12,14.4) halo r4.4/core r2.0；ArmPivot 画布 (15.2,21)。
+造型：钟形伞体+顶部灯穗+伞缘垂缆×2（端珠）+中央吊舱+腹挂传感器球。 -->
+<defs>
+
+</defs>
+<line x1="20" y1="5.5" x2="20" y2="3.2" stroke="#262f4a" stroke-width="1.2"/>
+<circle cx="20" cy="2.8" r="1.2" fill="#ff7a45" opacity="0.9"/>
+<polygon points="6,16 10,8 20,5 30,8 34,16 30,19 8,19" fill="#5d6d94"/>
+<polygon points="10,8 20,5 30,8 28,10.5 12,10.5" fill="#9fb0d8" opacity="0.8"/>
+<polygon points="6,16 34,16 33,19 7,19" fill="#3f4c6e"/>
+<line x1="11" y1="19" x2="9" y2="35" stroke="#262f4a" stroke-width="1.5" opacity="0.9"/>
+<line x1="26" y1="19" x2="28" y2="36" stroke="#262f4a" stroke-width="1.5" opacity="0.9"/>
+<circle cx="9" cy="36" r="1.6" fill="#262f4a"/>
+<circle cx="28" cy="37" r="1.6" fill="#262f4a"/>
+<polygon points="9,19 29,19 32,24 28,31 10,31 6,24" fill="#5d6d94"/>
+<polygon points="9,19 29,19 30,21 10,21" fill="#9fb0d8" opacity="0.8"/>
+<polygon points="11,28 27,28 25,31 13,31" fill="#3f4c6e"/>
+<rect x="7.5" y="11.5" width="9" height="6" fill="#262f4a"/>
+<circle cx="12" cy="14.4" r="4.4" fill="#ff4640" opacity="0.22"/>
+<circle cx="12" cy="14.4" r="2" fill="#ff4640" opacity="0.95"/>
+<rect x="16" y="22.5" width="6" height="2.5" fill="#ff7a45" opacity="0.85"/>
+<rect x="18" y="31" width="2.5" height="3" fill="#262f4a"/>
+<circle cx="19.2" cy="36" r="3" fill="#3f4c6e"/>
+<circle cx="19.2" cy="36" r="1.2" fill="#ff7a45" opacity="0.9"/>
+</svg>

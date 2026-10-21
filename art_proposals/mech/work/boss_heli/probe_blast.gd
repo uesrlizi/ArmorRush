@@ -9,8 +9,8 @@ func _fail(msg: String) -> void:
 	get_tree().quit(1)
 
 func _ready() -> void:
-	for p in ["res://scripts/heavy_missile.gd", "res://scripts/ground_blast.gd",
-			"res://scripts/flash_burst.gd"]:
+	for p in ["res://scripts/weapons/heavy_missile.gd", "res://scripts/weapons/ground_blast.gd",
+			"res://scripts/fx/flash_burst.gd"]:
 		var s: Script = load(p)
 		if s == null or not s.can_instantiate():
 			return _fail("脚本编译失败 " + p)
@@ -24,7 +24,7 @@ func _ready() -> void:
 	container.add_child(blast)
 	blast.global_position = Vector2(0, 0)
 	blast.reset_physics_interpolation()
-	var boom: Node2D = (load("res://scenes/explosion_burst.tscn") as PackedScene).instantiate()
+	var boom: Node2D = (load("res://scenes/fx/explosion_burst.tscn") as PackedScene).instantiate()
 	boom.scale = Vector2(1.5, 1.5)
 	container.add_child(boom)
 	if container.get_children().find(blast) > container.get_children().find(boom):

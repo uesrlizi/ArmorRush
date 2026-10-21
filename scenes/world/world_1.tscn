@@ -1,0 +1,216 @@
+[gd_scene format=3 uid="uid://dumboh6yb2bal"]
+
+[ext_resource type="Script" uid="uid://cbatnvdf00rqu" path="res://scripts/world/main.gd" id="1"]
+[ext_resource type="Script" uid="uid://ftv0ednc41bs" path="res://scripts/world/spawner.gd" id="2"]
+[ext_resource type="Script" uid="uid://cyf2wmfuwypif" path="res://scripts/ui/hud.gd" id="3"]
+[ext_resource type="Script" uid="uid://dmacs85fg0ibu" path="res://scripts/dev/autotest.gd" id="4"]
+[ext_resource type="PackedScene" uid="uid://dvl806hn05kp6" path="res://scenes/player/player.tscn" id="5"]
+[ext_resource type="PackedScene" uid="uid://2aif5n64bfkx" path="res://scenes/units/enemy_1.tscn" id="6"]
+[ext_resource type="PackedScene" path="res://scenes/props/obstacle.tscn" id="7"]
+[ext_resource type="Texture2D" uid="uid://3vcqkks8x1l" path="res://assets/world_1/env_rust_far.svg" id="8"]
+[ext_resource type="Texture2D" uid="uid://bv8phtn45qn8" path="res://assets/world_1/env_rust_ground.svg" id="9"]
+[ext_resource type="Script" uid="uid://fml7poeh1ye" path="res://scripts/world/world_strip.gd" id="10"]
+[ext_resource type="PackedScene" path="res://scenes/props/platform_crate.tscn" id="11"]
+[ext_resource type="PackedScene" path="res://scenes/props/scaffold_1.tscn" id="12"]
+[ext_resource type="Script" uid="uid://dlchsc085ikvw" path="res://scripts/world/terrain.gd" id="13"]
+[ext_resource type="Texture2D" uid="uid://dfjqnu52grn4h" path="res://assets/world_1/env_rust_mid.svg" id="14"]
+[ext_resource type="PackedScene" uid="uid://bqttcusu8ah3s" path="res://scenes/ui/touch_controls.tscn" id="15"]
+[ext_resource type="PackedScene" uid="uid://cq2drone8wk4t" path="res://scenes/units/enemy_drone_1.tscn" id="16"]
+[ext_resource type="PackedScene" uid="uid://cm5shieleaxr2" path="res://scenes/units/enemy_shield_1.tscn" id="17"]
+[ext_resource type="Script" uid="uid://r1ik6icfrq8y" path="res://scripts/world/aerial_fog.gd" id="18"]
+[ext_resource type="Script" uid="uid://bupymec0yg7rf" path="res://scripts/ui/title_screen.gd" id="19"]
+[ext_resource type="PackedScene" path="res://scenes/units/elite_1.tscn" id="20"]
+[ext_resource type="PackedScene" path="res://scenes/units/boss_1.tscn" id="21"]
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_1"]
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_2"]
+normal = Vector2(0, 1)
+
+[node name="Main" type="Node2D" unique_id=1447216473]
+script = ExtResource("1")
+
+[node name="HillsStrip" type="Sprite2D" parent="." unique_id=1536382456]
+texture_repeat = 2
+position = Vector2(8, 80)
+texture = ExtResource("8")
+region_enabled = true
+region_rect = Rect2(0, 0, 6400, 1300)
+script = ExtResource("10")
+scroll_scale = 0.9
+tile_width = 1024.0
+
+[node name="MidStrip" type="Sprite2D" parent="." unique_id=1276587979]
+texture_repeat = 2
+position = Vector2(0, 440)
+texture = ExtResource("14")
+region_enabled = true
+region_rect = Rect2(0, 0, 6400, 520)
+script = ExtResource("10")
+scroll_scale = 0.55
+tile_width = 1024.0
+
+[node name="AerialFog" type="Sprite2D" parent="." unique_id=1488850028]
+script = ExtResource("18")
+
+[node name="BridgePiers" type="Node2D" parent="." unique_id=1488850027 groups=["bridge_piers"]]
+
+[node name="GroundStrip" type="Sprite2D" parent="." unique_id=2143769193]
+texture_repeat = 2
+position = Vector2(0, 904)
+texture = ExtResource("9")
+region_enabled = true
+region_rect = Rect2(0, 0, 6400, 480)
+script = ExtResource("10")
+
+[node name="Terrain" type="Node2D" parent="." unique_id=1513090223]
+script = ExtResource("13")
+
+[node name="Ground" type="StaticBody2D" parent="." unique_id=1124868883]
+position = Vector2(0, 664)
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ground" unique_id=1610834783]
+shape = SubResource("WorldBoundaryShape2D_1")
+
+[node name="Ceiling" type="StaticBody2D" parent="." unique_id=1939034371]
+position = Vector2(0, -60)
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ceiling" unique_id=900271403]
+shape = SubResource("WorldBoundaryShape2D_2")
+
+[node name="ScrollObjects" type="Node2D" parent="." unique_id=732699890]
+
+[node name="Projectiles" type="Node" parent="." unique_id=275244277 groups=["projectile_container"]]
+
+[node name="Player" parent="." unique_id=1641782393 instance=ExtResource("5")]
+position = Vector2(200, 634)
+
+[node name="Spawner" type="Node" parent="." unique_id=590914462]
+script = ExtResource("2")
+enemy_scene = ExtResource("6")
+drone_scene = ExtResource("16")
+shield_scene = ExtResource("17")
+elite_scene = ExtResource("20")
+boss_scene = ExtResource("21")
+obstacle_scene = ExtResource("7")
+platform_scene = ExtResource("11")
+scaffold_scene = ExtResource("12")
+
+[node name="HUD" type="CanvasLayer" parent="." unique_id=862552411]
+process_mode = 3
+script = ExtResource("3")
+
+[node name="Root" type="Control" parent="HUD" unique_id=276294237]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="ScoreLabel" type="Label" parent="HUD/Root" unique_id=951928817]
+layout_mode = 0
+offset_left = 37.0
+offset_top = 28.0
+offset_right = 389.0
+offset_bottom = 70.0
+theme_override_colors/font_color = Color(0.13, 0.17, 0.21, 1)
+theme_override_font_sizes/font_size = 30
+text = "得分 0"
+
+[node name="ScoreRule" type="ColorRect" parent="HUD/Root" unique_id=1090271060]
+layout_mode = 0
+offset_left = 38.0
+offset_top = 78.0
+offset_right = 258.0
+offset_bottom = 81.0
+mouse_filter = 2
+color = Color(0.13, 0.17, 0.21, 1)
+
+[node name="HelpLabel" type="Label" parent="HUD/Root" unique_id=1700431058]
+layout_mode = 0
+offset_left = 28.0
+offset_top = 1026.0
+offset_right = 1400.0
+offset_bottom = 1058.0
+theme_override_colors/font_color = Color(0.85, 0.82, 0.72, 0.8)
+theme_override_font_sizes/font_size = 17
+text = "A/D 移动 · 空格 跳跃/按住推进 · J 斩击 · K/右键 射击"
+
+[node name="GameOver" type="VBoxContainer" parent="HUD/Root" unique_id=1482949641]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -240.0
+offset_top = -240.0
+offset_right = 240.0
+offset_bottom = -240.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="GameOverTitle" type="Label" parent="HUD/Root/GameOver" unique_id=1877194774]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.48, 0.14, 0.14, 1)
+theme_override_font_sizes/font_size = 72
+text = "游戏结束"
+horizontal_alignment = 1
+
+[node name="GameOverScore" type="Label" parent="HUD/Root/GameOver" unique_id=1590583352]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.13, 0.17, 0.21, 1)
+theme_override_font_sizes/font_size = 40
+text = "最终得分 0"
+horizontal_alignment = 1
+
+[node name="GameOverHint" type="Label" parent="HUD/Root/GameOver" unique_id=1258330454]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.13, 0.17, 0.21, 0.8)
+theme_override_font_sizes/font_size = 24
+text = "点击屏幕或按任意键重新开始"
+horizontal_alignment = 1
+
+[node name="TouchControls" parent="." unique_id=1552960003 instance=ExtResource("15")]
+
+[node name="TitleScreen" type="CanvasLayer" parent="." unique_id=1716003528]
+layer = 9
+script = ExtResource("19")
+
+[node name="Root" type="Control" parent="TitleScreen" unique_id=946650173]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Prompt" type="Label" parent="TitleScreen/Root" unique_id=1631657105]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -600.0
+offset_top = -250.0
+offset_right = 600.0
+offset_bottom = -200.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.96, 0.94, 0.88, 1)
+theme_override_font_sizes/font_size = 30
+text = "点击屏幕或按任意键开始"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="AutoTest" type="Node" parent="." unique_id=298044175]
+script = ExtResource("4")

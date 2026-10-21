@@ -14,10 +14,14 @@
   enemy_snow_drone_arm.svg   32x16     无人机枪臂换皮
   enemy_snow_shield_body.svg 56x52     盾卫换皮：塔盾重步卫
   enemy_snow_elite_body.svg  60x80     精英换皮：铲雪履带垂发车
-  boss_snow_body.svg         300x180   BOSS 换皮：武装飞艇「白鲸」（整体重设计）
-  boss_snow_gun.svg          110x32    BOSS 机枪臂换皮
-  boss_snow_rotor.svg        84x16     BOSS 尾推螺旋桨 blade bar（侧视刃边）
-  boss_snow_tailrotor.svg    56x56     BOSS 侧置风扇（整周旋转，四叶）
+  boss_snow_body.svg         260x180   BOSS v3 强袭悬空机甲「哨兵」（右肩双仓+电浆重炮+布雷舱）
+  boss_snow_gun.svg          130x40    哨兵电浆重炮臂（pivot (112,20)，枪口臂局部 (-104,0)）
+  boss_snow_body.svg         260x180   BOSS v3 强袭悬空机甲「哨兵」（右肩双仓+电浆重炮+布雷舱）
+  boss_snow_gun.svg          130x40    哨兵电浆重炮臂（pivot (112,20)，枪口臂局部 (-104,0)）
+  plasma_bolt.svg            28x10     电浆矢弹（哨兵直射弹 plasma_bolt.tscn 本体）
+  missile_plasma.svg         32x16     电浆矢弹（v2：PlasmaMissile 本体）
+  fx_plasma_bolt.svg         28x10     电弧段贴图（v2：尾迹/爆闪粒子）
+  fx_plasma_mine.svg         44x44     电浆浮雷（v2：PlasmaMine 本体）
 
 骨架对齐账（换皮铁律：美术重画、锚点不动）：
   步行者：眼 (15.5,18.3)；肩 joint (16,24)；地面 y=50
@@ -27,6 +31,7 @@
   BOSS：  眼条带 y60..66 含 (55,63)；导弹仓口画布 x 83/105/167/189 @ y26；
           枪口=臂画布 (2,~4)（flip_v 后贴艇艏下颌）；
           尾推桨 bar 心=节点 (120,-18)→画布(270,72)；侧风扇心=节点 (122,20)→画布(272,110)
+          v2 布雷闸锚画布 (100,140)=BayPort Visuals (-50,50)
 
 色板（提案三「高调冰白」）：天空 #d4e2ea→#f7fafb、远岭 #c2d2db、
 军事剪影 #8ba0ab、机残骸 #5a6a74、信号红 #e23d3d、路中线黄 #c9b23c。
@@ -43,7 +48,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")))
 from generate_proposals import Svg, f  # noqa: E402
 
-ASSETS = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "assets"))
+ASSETS = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "assets", "world_3"))
 
 # ---- 环境色板（提案三「雪原警戒点」） ----
 # 天光账（2026-10-19 三轮修订）：首版 #f7fafb 纸白段拉太宽 → 亮黄弹/焰芯隐形；
@@ -73,6 +78,11 @@ BODY = "#39444d"
 BELLY = "#2a333a"
 GAP = "#161c21"
 CAMO = "#aab8c2"  # 雪地迷彩块
+
+# ---- 电浆系（v2 能力化新增：电浆导弹/浮雷；亮背景章靠饱和冰蓝+白热芯对抗天光） ----
+PLASMA_BLUE = "#7fd0ff"   # 电离鞘（饱和冰蓝）
+PLASMA_WHITE = "#eaf6ff"  # 白热芯
+PLASMA_DEEP = "#2b6ea0"   # 深电蓝（电离球壳/矢弹外壳）
 
 
 def save(s: Svg, name: str, comment: str = "") -> None:
@@ -497,108 +507,184 @@ def _ellipse_pts(cx, cy, rx, ry, n=16):
 TAU_PI = math.tau
 
 
-def boss_body():
-    s = Svg(300, 180)
-    # ---- 尾鳍（先画，被气囊压住）----
-    s.poly([(244, 34), (274, 4), (294, 4), (288, 40)], BODY)       # 上垂尾
-    s.poly([(274, 4), (294, 4), (292, 10), (276, 10)], LIGHT)
-    s.poly([(246, 112), (272, 142), (292, 142), (286, 108)], BELLY)  # 下垂尾
-    # ---- 吊舱（挂在气囊下，先画）----
-    s.rect(80, 108, 4, 12, GAP)                    # 吊杆
-    s.rect(140, 108, 4, 12, GAP)
-    s.poly([(44, 118), (152, 118), (158, 128), (150, 142), (58, 142), (40, 130)], BODY)
-    s.poly([(44, 118), (152, 118), (153, 122), (46, 122)], LIGHT, 0.7)
-    s.rect(70, 124, 62, 6, GAP)                    # 舷窗带
-    s.rect(62, 133, 30, 3, RED, 0.8)               # 敌识别条
-    s.circle(100, 144, 3, RED, 0.22)               # 艇腹灯
-    s.circle(100, 144, 1.4, RED, 0.85)
-    # ---- 侧风扇短舱（右后下，风扇独件整周转）----
-    s.rect(252, 94, 46, 30, BODY)
-    s.rect(252, 94, 46, 4, LIGHT)
-    s.rect(248, 100, 8, 18, BELLY)                 # 支撑
-    # ---- 气囊（大椭球，雪地迷彩）----
-    s.poly(_ellipse_pts(152, 72, 146, 52), BODY)
-    s.poly([(30, 46), (80, 28), (150, 22), (120, 44), (60, 56)], CAMO, 0.4)   # 迷彩块
-    s.poly([(180, 26), (240, 34), (264, 52), (200, 46), (172, 36)], CAMO, 0.32)
-    s.poly([(60, 34), (110, 24), (160, 21), (210, 24), (196, 32), (150, 30), (104, 34), (72, 40)], LIGHT, 0.4)
-    # 板缝
-    s.rect(110, 26, 2.5, 88, GAP, 0.35)
-    s.rect(190, 24, 2.5, 92, GAP, 0.35)
-    s.rect(70, 70, 164, 2.5, GAP, 0.3)
-    # 艇鼻帽
-    s.poly([(6, 66), (22, 58), (22, 86), (6, 78)], BELLY)
-    # ---- 背脊垂发甲板（4 仓口=BOSS_RAIN_COUNT 1:1，仓口画布 x 83/105/167/189 @ y26）----
-    s.poly([(60, 34), (74, 18), (198, 18), (212, 34)], BODY)
-    s.poly([(74, 18), (198, 18), (196, 22), (76, 22)], LIGHT)
-    for mx in (83, 105, 167, 189):                 # 仓口深缝
-        s.rect(mx - 5, 23.5, 10, 5, GAP)
-        s.rect(mx - 7, 29, 14, 2, LIGHT, 0.6)
-    for i, hx in enumerate(range(64, 200, 12)):    # 甲板前缘警示
-        s.rect(hx, 34, 6, 4, YELLOW if i % 2 == 0 else GAP, 0.6)
-    s.rect(120, 38, 28, 3, RED, 0.75)
-    # ---- 独眼条带（眼条 y60..66 含 (55,63)，骑在艇鼻）----
-    s.rect(38, 57, 34, 12, RED, 0.18)
-    s.rect(42, 60, 26, 6, RED, 0.95)
-    # 尾推桨座（桨 bar 独件在画布 (270,72)）
-    s.poly([(286, 60), (300, 60), (300, 84), (286, 84)], BELLY)
+
+
+
+
+# ============================================================
+# 电浆系（v2 能力化新增：电浆导弹 / 浮雷）
+# ============================================================
+def plasma_missile():
+    """电浆矢弹 32x16，原点(16,8)，+X=弹头（rotation 沿速度方向转整弹，同 mortar_shell）。
+    造型账：软电离光晕（rgrad 冰蓝，ADD 粒子层之外的本体辉光）→ 深电蓝矢形壳
+    （尾 x4 → 鼻 x29，最宽 ±3.8 @x16）→ 冰蓝内鞘 → 白热芯（贯穿前段）→
+    尾部三根电弧须（锯齿短线，引擎侧粒子会持续甩弧，本体只给静态根）。"""
+    s = Svg(32, 16)
+    s.glow_ellipse(16, 8, 15, 7, PLASMA_BLUE, 0.55)
+    s.poly([(4, 8), (9, 5.2), (16, 4.2), (23, 5.4), (29, 8), (23, 10.6),
+            (16, 11.8), (9, 10.8)], PLASMA_DEEP)
+    s.poly([(7, 8), (12, 6.1), (18, 5.4), (24, 6.6), (27, 8), (24, 9.4),
+            (18, 10.6), (12, 9.9)], PLASMA_BLUE, 0.9)
+    s.poly([(9, 8), (15, 6.6), (25, 7.6), (25, 8.4), (15, 9.4)], PLASMA_WHITE)
+    s.line(2, 8, 6, 8, PLASMA_BLUE, 1.4, 0.9)
+    s.line(1, 5.5, 5, 7, PLASMA_BLUE, 1.1, 0.7)
+    s.line(1, 10.5, 5, 9, PLASMA_BLUE, 1.1, 0.7)
     return s
 
 
-def boss_gun():
-    """BOSS 机枪臂换皮 110x32（flip_v 后挂艇鼻下颌，枪带画布 y85..117）。
-    枪口轴线画布顶 y0..8，枪口尖端画布 (2,~4)=Muzzle。
-    造型：单管重炮 + 散热套筒孔 + 后座筒（与前二章双管/机匣箱拉开）。"""
-    s = Svg(110, 32)
-    s.rect(8, 1, 48, 6, BODY)            # 单管
-    s.rect(16, 0, 4, 8, GAP)             # 散热环
-    s.rect(26, 0, 4, 8, GAP)
-    s.rect(36, 0, 4, 8, GAP)
-    s.rect(0, 0, 9, 8, BODY)             # 膛口座
-    s.rect(0, 2.5, 3, 3, GAP)            # 膛口
-    s.rect(56, 0, 40, 24, BODY)          # 机匣
-    s.rect(56, 0, 40, 5, LIGHT)
-    s.rect(56, 19, 40, 5, BELLY)
-    s.rect(66, 24, 18, 6, BELLY)         # 弹箱
-    s.rect(96, 6, 12, 12, GAP)           # 后座筒
-    s.rect(92, 9, 5, 3, GAP, 0.9)
-    s.rect(92, 15, 5, 3, GAP, 0.9)
+def plasma_bolt():
+    """电弧段贴图 28x10（粒子用：随机旋转、ADD、短寿）。锯齿折线两遍出层次：
+    底层宽线冰蓝晕 + 顶层细线白热芯；两端收细（首尾点向内半格）。"""
+    s = Svg(28, 10)
+    zig = [(3, 5), (8, 2.5), (13, 7), (18, 3), (23, 6.5), (25.5, 4.8)]
+    for (x1, y1), (x2, y2) in zip(zig, zig[1:]):
+        s.line(x1, y1, x2, y2, PLASMA_BLUE, 3.2, 0.7)
+    for (x1, y1), (x2, y2) in zip(zig, zig[1:]):
+        s.line(x1, y1, x2, y2, PLASMA_WHITE, 1.3, 0.95)
     return s
 
 
-def boss_rotor():
-    """BOSS 尾推螺旋桨 blade bar 84x16（侧视刃边，画布心=节点心）。
-    节点位：boss_ch3.tscn Rotor=(120,-18) → 艇体画布 (270,72)，bar 覆盖 x228..312
-    （桨尖越出画布右缘=推桨在尾鳍之后，正常出画）。"""
-    s = Svg(84, 16)
-    s.rect(2, 6, 80, 4, GAP)             # 桨叶刃条
-    s.rect(4, 6, 12, 4, LIGHT, 0.8)      # 桨尖反光
-    s.rect(68, 6, 12, 4, LIGHT, 0.6)
-    s.rect(38, 3, 8, 10, BODY)           # 桨毂
-    s.rect(40.5, 6, 3, 4, GAP)
-    return s
-
-
-def boss_tailrotor():
-    """BOSS 侧置风扇 56x56（整周旋转，画布心=节点 (272,110)，挂短舱侧面）。
-    侧视语义：风扇盘平行屏幕→正圆成立；四叶 45/135/225/315（绕 28,28 手工预算，
-    内缘 r6 外缘 r19 叶宽半 3.2），毂 BELLY + 红心。"""
-    s = Svg(56, 56)
-
-    def blade(deg):
+def plasma_mine():
+    """电浆浮雷 v2 64x64，原点(32,32)（雷体中心=判定圆心，判定不变纯视觉放大）。
+    水雷剪影签名：球壳 r16 + **8 根电极柱**（r16→r23，宽 4.4，45° 步进；柱尖
+    冰蓝=电离触点）——「浮雷」第一眼就读出来，不再是"卡住的导弹"。
+    造型账：电离光晕（rgrad 冰蓝 r30）→ 电极柱 ×8（LIGHT 柱体+PLASMA_BLUE 尖）
+    → 深电蓝球壳 → 北极高光弧（LIGHT 0.35）→ 赤道缝（GAP 2px 弦线）
+    → 核心独眼红（敌语汇：halo r12 + 红盘 r7 + 白热 r3）。
+    引信快闪/蓄能呼吸由引擎侧 modulate 脉冲，贴图不负责任何状态色。"""
+    s = Svg(64, 64)
+    s.glow_ellipse(32, 32, 30, 30, PLASMA_BLUE, 0.5)
+    for deg in range(0, 360, 45):                   # 8 根电极柱
         a = math.radians(deg)
         dx, dy = math.cos(a), math.sin(a)
         px, py = -dy, dx
-        inner = (28 + 6 * dx, 28 + 6 * dy)
-        outer = (28 + 19 * dx, 28 + 19 * dy)
-        return [(inner[0] + 3.2 * px, inner[1] + 3.2 * py),
-                (inner[0] - 3.2 * px, inner[1] - 3.2 * py),
-                (outer[0] - 3.2 * px, outer[1] - 3.2 * py),
-                (outer[0] + 3.2 * px, outer[1] + 3.2 * py)]
+        inner = (32 + 16 * dx, 32 + 16 * dy)
+        outer = (32 + 23 * dx, 32 + 23 * dy)
+        s.poly([(inner[0] + 2.2 * px, inner[1] + 2.2 * py),
+                (inner[0] - 2.2 * px, inner[1] - 2.2 * py),
+                (outer[0] - 2.2 * px, outer[1] - 2.2 * py),
+                (outer[0] + 2.2 * px, outer[1] + 2.2 * py)], LIGHT)
+        s.circle(outer[0], outer[1], 1.6, PLASMA_BLUE, 0.95)
+    s.circle(32, 32, 16, PLASMA_DEEP)
+    s.circle(29.5, 29.5, 9, PLASMA_BLUE, 0.25)      # 北极高光（左上偏移小内圆）
+    s.line(17, 36, 47, 36, GAP, 2.0, 0.8)           # 赤道缝
+    s.line(22, 24, 28, 30, PLASMA_BLUE, 1.6, 0.9)   # 壳面静态弧 ×3
+    s.line(28, 30, 35, 24, PLASMA_BLUE, 1.6, 0.9)
+    s.line(38, 42, 43, 36, PLASMA_BLUE, 1.3, 0.8)
+    s.line(20, 42, 25, 38, PLASMA_BLUE, 1.3, 0.8)
+    s.glow_ellipse(32, 32, 12, 12, RED, 0.5)
+    s.circle(32, 32, 7, RED)
+    s.circle(32, 32, 3, "#ffd9d4")
+    return s
 
-    for deg in (45, 135, 225, 315):
-        s.poly(blade(deg), LIGHT)
-    s.circle(28, 28, 6, BELLY)
-    s.circle(28, 28, 2.5, RED, 0.9)
+
+def plasma_bolt_fx():
+    """电浆矢弹贴图 28x10（普攻直射弹 plasma_bolt.tscn 本体，+X 弹头）。
+    与亮黄水滴机枪弹彻底分家：六边形能量镖（深电蓝壳+冰蓝鞘+白热芯）+
+    尾部两根电弧须。ADD 混合由场景材质给，贴图只管形。"""
+    s = Svg(28, 10)
+    s.poly([(2, 5), (9, 2), (22, 2.5), (26, 5), (22, 7.5), (9, 8)], PLASMA_DEEP)
+    s.poly([(5, 5), (10, 3.2), (21, 3.6), (24, 5), (21, 6.4), (10, 6.8)],
+           PLASMA_BLUE, 0.9)
+    s.poly([(7, 4.6), (14, 3.9), (22, 4.6), (22, 5.4), (14, 6.1), (7, 5.4)],
+           PLASMA_WHITE)
+    s.line(1, 3.5, 5, 4.6, PLASMA_BLUE, 1.1, 0.8)
+    s.line(1, 6.5, 5, 5.4, PLASMA_BLUE, 1.1, 0.8)
+    return s
+
+
+def sentinel_body():
+    """第三章 BOSS v3 强袭悬空机甲「哨兵」260x180=碰撞体 body_size，原点(130,90)，
+    原生朝左。从零设计（非白鲸改）：右肩单 Pod（双仓）+ 单臂电浆重炮 + 反关节
+    悬垂双腿 + 背包双喷口。比例账见 提案_v3_哨兵重设计.md §1。
+    v3b：砍掉前（左）肩 Pod——弹雨只留右肩双仓口，4 发回绕复用（同 ch1 phase2
+    惯例），前肩腾空后独眼/重炮剪影更突出（用户返工：留右边发射仓+两枪口）。
+    骨架锚点（Visuals = 画布 − (130,90)）：
+      独眼 (70,58)→EyeGlow (-60,-32) scale1.2；
+      弹雨仓口 ×2 (151/167, 26)→(21/37, -64)，弹雨预警 (159,26)→(29,-64)；
+      炮臂枢 (86,86)→ArmPivot (-44,-4)、枪口=臂局部 (-104,0)（见 sentinel_gun）；
+      布雷闸 (122,138)→BayPort (-8,48)；
+      推进焰节点 ×2 (218,62)/(218,90)→(88,-28)/(88,0)（fx_flame 琥珀 ADD，_tick_visual 脉动）。"""
+    s = Svg(260, 180)
+    # ---- 远侧腿（BELLY 压暗，先画被躯干压住）----
+    s.poly([(116, 126), (148, 132), (146, 152), (120, 146)], BELLY)
+    s.poly([(120, 146), (144, 152), (148, 170), (124, 172)], BELLY)
+    s.poly([(120, 170), (150, 172), (152, 178), (118, 178)], BELLY)
+    s.circle(134, 132, 5, GAP)
+    # ---- 背包推进器（挂躯干后，双喷口朝后）----
+    s.poly([(150, 44), (196, 50), (196, 108), (150, 104)], BODY)
+    s.poly([(150, 44), (196, 50), (196, 55), (150, 49)], LIGHT)
+    s.line(152, 50, 152, 104, GAP, 2, 0.7)           # 背包-躯干分缝
+    for y0 in (52, 80):                              # 双喷口（出口心 ~(215,y0+10)）
+        s.poly([(196, y0), (215, y0 + 6), (215, y0 + 14), (196, y0 + 20)], BELLY)
+        s.poly([(197, y0 + 4), (212, y0 + 8), (212, y0 + 12), (197, y0 + 16)], GAP)
+    # ---- 后肩 Pod（双仓）----
+    s.poly([(142, 42), (172, 42), (170, 50), (144, 50)], BODY)        # Pod 颈座
+    s.poly([(140, 46), (138, 24), (143, 16), (171, 16), (176, 24), (174, 46)], BODY)
+    s.poly([(143, 16), (171, 16), (170, 20), (144, 20)], LIGHT)
+    s.rect(146, 23, 10, 6, GAP)                      # 仓口 (151,26)
+    s.rect(162, 23, 10, 6, GAP)                      # 仓口 (167,26)
+    s.rect(144, 29, 14, 2, LIGHT, 0.6)
+    s.rect(160, 29, 14, 2, LIGHT, 0.6)
+    s.poly([(140, 32), (160, 30), (158, 42), (142, 44)], CAMO, 0.3)
+    # ---- 躯干 ----
+    s.poly([(66, 50), (150, 46), (172, 54), (172, 100), (160, 112), (78, 112),
+            (62, 102), (62, 62)], BODY)
+    s.poly([(66, 50), (112, 48), (108, 58), (68, 60)], LIGHT, 0.85)   # 胸甲受光
+    s.rect(78, 108, 82, 4, BELLY)
+    s.rect(120, 52, 2, 56, GAP, 0.5)                 # 板缝
+    s.rect(66, 78, 104, 2, GAP, 0.4)
+    for vy in (60, 70, 80):                          # 后侧散热栅
+        s.rect(150, vy, 16, 3, GAP)
+    s.rect(70, 96, 26, 5, RED, 0.85)                 # 敌识别条
+    s.poly([(80, 64), (120, 60), (112, 76), (76, 80)], CAMO, 0.35)    # 雪地迷彩
+    s.poly([(130, 88), (162, 86), (158, 100), (128, 100)], CAMO, 0.3)
+    s.rect(56, 51.5, 28, 13, GAP)                    # 独眼窝
+    s.circle(70, 58, 6.5, RED)                       # 独眼（halo 走 EyeGlow 节点）
+    s.line(60, 52, 52, 38, LIGHT, 2)                 # 天线
+    s.circle(51.5, 37, 1.5, RED, 0.9)
+    # ---- 裙甲 + 布雷闸 ----
+    s.poly([(84, 112), (150, 112), (154, 126), (146, 142), (88, 142), (80, 126)], BODY)
+    s.rect(84, 112, 66, 3, LIGHT, 0.7)
+    s.rect(104, 134, 36, 8, GAP)                     # 布雷闸（锚 (122,138)=BayPort）
+    s.rect(104, 134, 36, 2, LIGHT, 0.6)
+    for i, bx in enumerate(range(106, 138, 6)):      # 闸口黄黑警示边
+        s.rect(bx, 140, 3, 2, YELLOW if i % 2 == 0 else GAP, 0.85)
+    # ---- 近侧腿（反关节悬垂）----
+    s.poly([(92, 126), (128, 130), (124, 152), (96, 148)], BODY)
+    s.poly([(98, 146), (124, 152), (130, 172), (104, 174)], BODY)
+    s.poly([(100, 172), (132, 174), (134, 178), (96, 178)], BELLY)
+    s.line(98, 146, 124, 152, LIGHT, 1.5, 0.6)
+    s.circle(110, 130, 6, GAP)                       # 髋关节
+    s.circle(118, 150, 5, GAP)                       # 膝关节
+    s.rect(108, 164, 14, 3, GAP)                     # 胫部挂载
+    # ---- 前肩 Pod 已砍（v3b：弹雨只留右肩双仓口；前肩腾空突出独眼与重炮）----
+    return s
+
+
+def sentinel_gun():
+    """哨兵电浆重炮臂 130x40（ArmPivot 挂件，pivot=肩关节画布 (112,20)）。
+    枪口轴线 y20，枪口尖端 (8,20)=Muzzle（臂局部 (-104,0)）。
+    造型：肩关节座 + 机匣 + 重管（L/D≈6.4）+ 三道冰蓝电浆线圈（弹种签名色，
+    与 plasma_bolt/mine 同语言）+ 膛口白热芯。管口径 10（直射矢弹出膛余量）。"""
+    s = Svg(130, 40)
+    s.rect(96, 4, 32, 32, BODY)                      # 肩关节座
+    s.rect(96, 4, 32, 5, LIGHT)
+    s.circle(112, 20, 8, GAP)                        # 枢轴销
+    s.rect(94, 6, 10, 4, GAP)                        # 排气栅
+    s.rect(58, 10, 42, 22, BODY)                     # 机匣
+    s.rect(58, 10, 42, 5, LIGHT)
+    s.rect(58, 27, 42, 5, BELLY)
+    s.rect(64, 28, 16, 3, RED, 0.85)                 # 敌识别条
+    s.rect(14, 15, 48, 11, BODY)                     # 重管
+    s.rect(14, 15, 48, 3, LIGHT, 0.6)
+    for fx in (24, 34, 44):                          # 散热鳍
+        s.rect(fx, 13, 2.5, 15, GAP)
+    for cx in (29, 39, 49):                          # 电浆线圈（签名冰蓝）
+        s.rect(cx, 16, 3, 9, PLASMA_BLUE, 0.9)
+    s.rect(10, 13, 6, 15, LIGHT)                     # 膛口环
+    s.rect(6, 17, 5, 7, GAP)                         # 膛口
+    s.rect(7, 18.5, 3, 4, PLASMA_WHITE, 0.95)        # 白热芯
     return s
 
 
@@ -636,17 +722,21 @@ B 倾覆货运车厢+集装箱+雷达车。剪影 #5a6a74 族 + 信号红。两�
     save(elite_body(), "enemy_snow_elite_body.svg", """第三章精英「铲雪履带垂发车」60x80，地面 y=80。
 骨架对齐：眼 (19,26.5)；两仓口 (38.5,1.5)/(49.5,1.5)=ArmPivot(44,1.5)±5.5；
 造型：垂发方舱（平顶双盖）+ 前置铲雪犁 + 履带裙 + 雷达桅杆。""")
-    save(boss_body(), "boss_snow_body.svg", """第三章 BOSS 武装飞艇「白鲸」300x180=碰撞体 body_size，原点(150,90)，原生朝左。
-整体重设计：椭圆气囊（雪地迷彩块+板缝+艇鼻帽）/ 背脊垂发甲板（4 仓口画布
-x 83/105/167/189 @ y26 = boss.gd MissilePorts 1:1）/ 下挂吊舱（舷窗+识别条）/
-尾鳍×2 + 尾推桨座（bar 独件画布 (270,72)）+ 侧风扇短舱（圆扇独件画布 (272,110)）。
-独眼条带 y60..66 含 (55,63)，EyeGlow 节点 (-95,-27) scale1.2 照摆；
-机枪臂独件 pivot(-51,15) 枪带画布 y85..117（flip_v 贴艇鼻下颌）。""")
-    save(boss_gun(), "boss_snow_gun.svg", """第三章 BOSS 机枪臂 110x32（tscn flip_v=true、offset(-95,-20)）。
-枪口轴线画布顶 y0..8，枪口尖端 (2,~4)=Muzzle(-93,8)。单管重炮+散热环+后座筒。""")
-    save(boss_rotor(), "boss_snow_rotor.svg", """第三章 BOSS 尾推螺旋桨 blade bar 84x16。
-节点位（boss_ch3.tscn）Rotor=(120,-18) → 艇体画布 (270,72)；桨尖越出画布右缘
-=推桨在尾鳍之后（正常出画，同章1旋翼 overshoot 语言）。""")
-    save(boss_tailrotor(), "boss_snow_tailrotor.svg", """第三章 BOSS 侧置风扇 56x56（整周旋转，画布心=节点 (272,110)）。
-风扇盘平行屏幕→正圆成立；四叶 45/135/225/315（绕 28,28 预算）+ 毂 + 红心。""")
+    save(plasma_missile(), "missile_plasma.svg", """电浆矢弹 32x16，原点(16,8)，+X=弹头（PlasmaMissile 挂 Sprite2D 随弹体轴转）。
+白热芯+冰蓝电离鞘+深电蓝壳+尾部电弧须；尾迹/爆闪粒子见 plasma_missile.gd。
+伤害模型=HeavyMissile 原样（换皮不换语法，见提案_v2 §1）。""")
+    save(plasma_bolt(), "fx_plasma_bolt.svg", """电弧段贴图 28x10（fx 规约：粒子贴图，色相不带状态语义）。
+宽线冰蓝晕+细线白热芯；missile_plasma_trail/plasma_burst/fx_plasma_mine 共用。""")
+    save(plasma_mine(), "fx_plasma_mine.svg", """电浆浮雷 v2 64x64，原点(32,32)=判定圆心（plasma_mine.gd Sprite2D 本体；判定不变纯视觉放大）。
+水雷剪影：球壳+8 电极柱（冰蓝触点）+独眼红核（敌语汇）+静态弧；
+蓄能呼吸/引信快闪走 modulate 脉冲。v2=用户反馈"太小读不出是雷"返工。""")
+    save(plasma_bolt_fx(), "plasma_bolt.svg", """电浆矢弹贴图 28x10（plasma_bolt.tscn 直射弹本体，+X 弹头）。
+六边形能量镖：深电蓝壳+冰蓝鞘+白热芯+尾部电弧须；ADD 材质在场景。""")
+    save(sentinel_body(), "boss_snow_body.svg", """第三章 BOSS v3 强袭悬空机甲「哨兵」260x180=碰撞体 body_size，原点(130,90)，原生朝左。
+从零设计（白鲸整体废弃）：宽肩双 Pod（四联电浆垂发仓口 (71/87/151/167,26)）+
+单臂电浆重炮（枢 (86,86)，见 sentinel_gun）+ 腰部布雷闸（锚 (122,138)=BayPort (-8,48)）+
+反关节悬垂双腿 + 背包双喷口（推进焰节点 (218,62)/(218,90)→Visuals (88,-28)/(88,0)）。
+独眼 (70,58)→EyeGlow (-60,-32) scale1.2。设计正本=提案_v3_哨兵重设计.md。""")
+    save(sentinel_gun(), "boss_snow_gun.svg", """哨兵电浆重炮臂 130x40（ArmPivot 挂件，pivot=肩关节 (112,20)，tscn offset(-112,-20)）。
+枪口轴线 y20、尖端 (8,20)=Muzzle（臂局部 (-104,0)）。三道冰蓝电浆线圈=弹种签名。""")
     print("snowfield chapter assets baked.")

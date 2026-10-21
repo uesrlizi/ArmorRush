@@ -1,0 +1,57 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/units/elite_mortar.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/world_1/enemy_rust_elite_body.svg" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/fx/muzzle_flash.tscn" id="3"]
+[ext_resource type="Script" path="res://scripts/units/overhead_bar.gd" id="5"]
+[ext_resource type="Script" path="res://scripts/units/eye_glow.gd" id="6"]
+[ext_resource type="PackedScene" path="res://scenes/fx/threat_flash.tscn" id="7"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
+size = Vector2(52, 72)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_2"]
+size = Vector2(48, 48)
+
+[node name="EliteMortar" type="CharacterBody2D"]
+collision_layer = 4
+collision_mask = 33
+monitoring = false
+script = ExtResource("1")
+feet_offset = 40.0
+body_size = Vector2(60, 80)
+
+[node name="Visuals" type="Node2D" parent="."]
+
+[node name="Sprite2D" type="Sprite2D" parent="Visuals"]
+texture = ExtResource("2")
+
+[node name="EyeGlow" type="Node2D" parent="Visuals/Sprite2D"]
+position = Vector2(-11, -13.5)
+scale = Vector2(0.8, 0.8)
+script = ExtResource("6")
+
+[node name="ArmPivot" type="Node2D" parent="Visuals"]
+position = Vector2(14, -38.5)
+
+[node name="Muzzle" type="Marker2D" parent="Visuals/ArmPivot"]
+position = Vector2(0, 0)
+
+[node name="Flash" parent="Visuals/ArmPivot/Muzzle" instance=ExtResource("3")]
+
+[node name="ThreatFlash" parent="Visuals/ArmPivot/Muzzle" instance=ExtResource("7")]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 4)
+shape = SubResource("RectangleShape2D_1")
+
+[node name="BlockingBody" type="AnimatableBody2D" parent="."]
+collision_layer = 64
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BlockingBody"]
+position = Vector2(0, 16)
+shape = SubResource("RectangleShape2D_2")
+
+[node name="OverheadBar" type="Node2D" parent="."]
+script = ExtResource("5")

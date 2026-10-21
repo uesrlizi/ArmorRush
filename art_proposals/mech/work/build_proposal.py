@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # 玩家机甲提案 · 现有素材画风版
-# 画风账（对齐 assets/player_mech_body.svg / enemy_walker_body.svg）：
+# 画风账（对齐 assets/player_mech_body.svg / enemy_rust_walker_body.svg）：
 #   纯平涂零描边；玩家=冷炭黑 4 阶(#1d2024/#26292e/#2e3238/#3c4148)+橙 #ffa04a；
 #   发光=实心小块+同形低透明(0.18)光晕；体块分离靠明度差和 1px 级深色缝(深色底形)。
 # 比例账：画布 132x112（游戏内尺寸级），朝右，脚底 y=97，整机高 ~95 宽 ~112（含前伸枪）——短粗。

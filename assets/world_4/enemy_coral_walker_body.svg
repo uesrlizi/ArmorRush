@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 52" width="56" height="52">
+<!-- 第四章步行者「潜航重步机」56x52，地面 y=50。
+骨架对齐：眼 (15.5,18.3) halo r5.3/core r2.4；肩 joint (16,24) r3.5。
+造型：圆钝耐压壳舱体 + 头部圆舷窗 + 背部双氧罐 + 逆关节双足（远对 BELLY/近对 BODY）。
+前缘 x<6 留空给枪臂。色板：LIGHT #9fb0d8 / BODY #5d6d94 / BELLY #3f4c6e /
+GAP #262f4a（暗场章敌营转亮钢蓝）+ 红/黄/珊瑚灯。 -->
+<defs>
+
+</defs>
+<polygon points="24,32 29,32 27,41 31,46 26,50 21,41" fill="#3f4c6e"/>
+<polygon points="38,32 43,32 41,41 45,46 40,50 35,41" fill="#3f4c6e"/>
+<rect x="31" y="7" width="5.5" height="10" fill="#3f4c6e"/>
+<rect x="38.5" y="9" width="5.5" height="8" fill="#3f4c6e"/>
+<rect x="30.5" y="5.5" width="6.5" height="2.5" fill="#262f4a"/>
+<line x1="41.5" y1="9" x2="44" y2="5" stroke="#262f4a" stroke-width="1.5"/>
+<circle cx="44.3" cy="4.5" r="1.2" fill="#ff4640" opacity="0.9"/>
+<polygon points="8,14 30,12 42,16 46,24 42,33 10,33 5,26 5,19" fill="#5d6d94"/>
+<polygon points="8,14 30,12 42,16 43.5,19 9.5,17" fill="#9fb0d8"/>
+<circle cx="15.5" cy="18.3" r="6.6" fill="#262f4a"/>
+<rect x="9.5" y="14.5" width="12" height="7.5" fill="#262f4a"/>
+<circle cx="15.5" cy="18.3" r="5.3" fill="#ff4640" opacity="0.22"/>
+<circle cx="15.5" cy="18.3" r="2.4" fill="#ff4640" opacity="0.95"/>
+<rect x="10" y="31.5" width="34" height="1.5" fill="#262f4a" opacity="0.8"/>
+<polygon points="10,33 42,33 38,37 14,37" fill="#3f4c6e"/>
+<rect x="24" y="26" width="2.5" height="3" fill="#ff7a45" opacity="0.85"/>
+<rect x="30" y="26" width="2.5" height="3" fill="#262f4a" opacity="0.85"/>
+<rect x="36" y="26" width="2.5" height="3" fill="#ff7a45" opacity="0.85"/>
+<polygon points="11,33 16,33 15,41 19,46 14,50 8,42" fill="#5d6d94"/>
+<polygon points="30,33 35,33 35,42 39,46 34,50 29,42" fill="#5d6d94"/>
+<rect x="12" y="48.5" width="9" height="1.8" fill="#3f4c6e"/>
+<rect x="30" y="48.5" width="9" height="1.8" fill="#3f4c6e"/>
+<circle cx="16" cy="24" r="3.5" fill="#262f4a"/>
+</svg>

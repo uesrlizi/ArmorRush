@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 56" width="56" height="56">
+<!-- 第四章 BOSS 侧置姿态风扇 56x56（整周旋转，画布心=节点 (272,112)）。
+风扇盘平行屏幕→正圆成立；五叶 0/72/144/216/288（绕 28,28 预算）+ 毂 + 红心。 -->
+<defs>
+
+</defs>
+<polygon points="34,31 34,25 47,25 47,31" fill="#9fb0d8"/>
+<polygon points="27,34.6 32.7,32.8 36.7,45.1 31,47" fill="#9fb0d8"/>
+<polygon points="21.4,29.1 24.9,34 14.4,41.6 10.9,36.7" fill="#9fb0d8"/>
+<polygon points="24.9,22 21.4,26.9 10.9,19.3 14.4,14.4" fill="#9fb0d8"/>
+<polygon points="32.7,23.2 27,21.4 31,9 36.7,10.9" fill="#9fb0d8"/>
+<circle cx="28" cy="28" r="6" fill="#3f4c6e"/>
+<circle cx="28" cy="28" r="2.5" fill="#ff4640" opacity="0.9"/>
+</svg>

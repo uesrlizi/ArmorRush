@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3200 640" width="3200" height="640">
+<!-- 第四章碎环巨构独层 3200x640 透明底（RingStrip，tile 3200 视差 0.9，
+tile 3200 > 视口 2400 → 同屏最多一份，消除平铺重复）。
+主环心画布 (1600,320) r240 + 环周散星。**tex 落位=回绕不弹切带
+[1200+半宽, 3200−1200−半宽] 取 1600**（二轮教训：tex 2400 在回绕瞬间
+环还剩右侧 1/3 在屏，直接弹切消失）。
+tscn 摆位：position(8,270)、region 6400x640（=视口+tile 覆盖账）、
+层级在 HillsStrip 之后（远条不透明）、MidStrip 之前。
+开机环在右屏外，起跑约 1s 从右缘滑入；屏上约 39s / 空档约 14s。种子 4044。 -->
+<defs>
+
+</defs>
+<path d="M 1807.8,200 A 240 240 0 0 1 1641.7,556.4" fill="none" stroke="#1c2547" stroke-width="34"/>
+<path d="M 1579.1,559.1 A 240 240 0 0 1 1392.2,440" fill="none" stroke="#1c2547" stroke-width="34"/>
+<path d="M 1367.1,378.1 A 240 240 0 0 1 1382.5,218.6" fill="none" stroke="#1c2547" stroke-width="34"/>
+<path d="M 1405.8,178.9 A 240 240 0 0 1 1550.1,85.2" fill="none" stroke="#1c2547" stroke-width="34"/>
+<path d="M 1591.6,80.1 A 240 240 0 0 1 1783.9,165.7" fill="none" stroke="#1c2547" stroke-width="34"/>
+<path d="M 1834.5,413.1 A 240 240 0 0 1 1721.7,542.9" fill="none" stroke="#232d55" stroke-width="30"/>
+<path d="M 1488.5,513.1 A 223 223 0 0 1 1397.9,225.8" fill="none" stroke="#ff5a33" stroke-width="9" opacity="0.2"/>
+<path d="M 1488.5,513.1 A 223 223 0 0 1 1397.9,225.8" fill="none" stroke="#ff5a33" stroke-width="2.5" opacity="0.85"/>
+<circle cx="1462.7" cy="495.7" r="4" fill="#ff7a45" opacity="0.35"/>
+<circle cx="1462.7" cy="495.7" r="1.6" fill="#ffb36b" opacity="0.95"/>
+<circle cx="1390.4" cy="396.3" r="4" fill="#ff7a45" opacity="0.35"/>
+<circle cx="1390.4" cy="396.3" r="1.6" fill="#ffb36b" opacity="0.95"/>
+<circle cx="1379.2" cy="289" r="4" fill="#ff7a45" opacity="0.35"/>
+<circle cx="1379.2" cy="289" r="1.6" fill="#ffb36b" opacity="0.95"/>
+<circle cx="2111.1" cy="402.1" r="1.1" fill="#dfe6ff" opacity="0.4404963821155498"/>
+<circle cx="2880" cy="186.2" r="1" fill="#dfe6ff" opacity="0.5385519396413038"/>
+<circle cx="2299.5" cy="140.7" r="1.1" fill="#dfe6ff" opacity="0.3133269029485323"/>
+<circle cx="1304" cy="221.5" r="1.2" fill="#dfe6ff" opacity="0.48121962292387366"/>
+<circle cx="2032.6" cy="230.1" r="1.1" fill="#dfe6ff" opacity="0.3242512982163687"/>
+<circle cx="889" cy="246.7" r="1.4" fill="#dfe6ff" opacity="0.5650404731563776"/>
+<circle cx="506.8" cy="429.7" r="0.8" fill="#dfe6ff" opacity="0.5193699327770249"/>
+<circle cx="2848.2" cy="65.6" r="1" fill="#dfe6ff" opacity="0.33198737790704985"/>
+<circle cx="2080.6" cy="178.6" r="1.4" fill="#dfe6ff" opacity="0.3382878352343248"/>
+<circle cx="2575.1" cy="549.5" r="1.3" fill="#dfe6ff" opacity="0.3084749778844538"/>
+<circle cx="733.8" cy="487" r="1.3" fill="#dfe6ff" opacity="0.39913138523580427"/>
+<circle cx="3054.6" cy="434.1" r="1.2" fill="#dfe6ff" opacity="0.6564511618386059"/>
+<circle cx="1121.4" cy="260.2" r="1.3" fill="#dfe6ff" opacity="0.5255312771519577"/>
+<circle cx="2625.8" cy="519.1" r="1.4" fill="#dfe6ff" opacity="0.4222478332295672"/>
+</svg>

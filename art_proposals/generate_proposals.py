@@ -12,6 +12,8 @@ import math
 import os
 import random
 
+from terrain_blocks import ground_v2
+
 W, H = 1200, 540
 GROUND = 330.0
 OUT = os.path.dirname(os.path.abspath(__file__))
@@ -285,42 +287,19 @@ def rust_city():
     s.path("M 120 227 Q 360 300 585 227", stroke="#2c2a24", w=1.5, opacity=0.8)
     s.path("M 705 227 Q 950 296 1190 227", stroke="#2c2a24", w=1.5, opacity=0.8)
 
-    # ---- 地表 ----
-    gnd = s.vgrad("gnd1", [(0, "#4d4a40", 1), (1, "#2e2c26", 1)])
-    s.rect(0, GROUND, W, H - GROUND, gnd)
-    for _ in range(5):  # 裂缝
-        cx, cy = rng.uniform(40, W - 40), GROUND + rng.uniform(4, 20)
-        seg = [(cx, cy)]
-        for _ in range(4):
-            cx += rng.uniform(-30, 30)
-            cy += rng.uniform(10, 22)
-            seg.append((cx, min(cy, H - 6)))
-        s.path("M " + " L ".join(f"{f(a)},{f(b)}" for a, b in seg), stroke="#242218", w=1.3, opacity=0.9)
-    for _ in range(3):  # 积水反光
-        s.ellipse(rng.uniform(150, 1050), rng.uniform(360, 425), rng.uniform(40, 70), rng.uniform(4, 7), "#e09a55", 0.10)
-    for sx in (170, 620, 1000):  # 灯下湿痕
-        s.rect(sx, GROUND + 2, 7, 38, "#ffcf9a", 0.09)
+    # ---- 地表（拆地块 v2：两侧平地+中段高低差，画法与实机一致）----
+    ground_v2.draw_ground(s, "ch1_rust", bottom=H, k=1.0)
 
-    # 地表剪影道具（两侧，保持中央 gameplay 视野）
-    s.poly([(118, 480), (126, 462), (148, 456), (176, 470), (196, 476), (196, 482), (118, 482)], "#33312a")
-    s.poly([(136, 462), (148, 452), (166, 456), (174, 468)], "#2c2a24")  # 车壳残骸
+    # 地表剪影道具（两侧平地段，落在最低档走道带上）
+    s.poly([(118, 330), (126, 312), (148, 306), (176, 320), (196, 326), (196, 332), (118, 332)], "#33312a")
+    s.poly([(136, 312), (148, 302), (166, 306), (174, 318)], "#2c2a24")  # 车壳残骸
     for bx, bh in ((1054, 16), (1068, 20), (1082, 14)):  # 油桶群
-        s.rect(bx, 482 - bh, 11, bh, "#3a382f")
-        s.line(bx, 482 - bh * 0.35, bx + 11, 482 - bh * 0.35, "#2c2a24", 1.2, 0.8)
+        s.rect(bx, 332 - bh, 11, bh, "#3a382f")
+        s.line(bx, 332 - bh * 0.35, bx + 11, 332 - bh * 0.35, "#2c2a24", 1.2, 0.8)
 
-    # 瓦砾堆（最前景）
-    for _ in range(9):
-        rx = rng.uniform(-20, W)
-        rw = rng.uniform(40, 120)
-        rh = rng.uniform(8, 26)
-        s.poly([(rx, H), (rx + rw * 0.5, H - rh), (rx + rw, H)], "#3a382f")
-    for _ in range(8):
-        s.rect(rng.uniform(0, W), rng.uniform(470, H - 8), rng.uniform(6, 16), rng.uniform(4, 9), "#332f27")
-
-    # 远处火光
-    s.ellipse(950, GROUND - 6, 60, 16, "#ff9b45", 0.12)
-    s.ellipse(950, GROUND - 6, 30, 9, "#ffab5c", 0.18)
-    haze_band(s, GROUND - 30, GROUND + 34, "#cabb8e", 0.22)
+    # 远处火光（贴中段高台天际线，避免落在近处走道带上读成污渍）
+    s.ellipse(450, 262, 50, 12, "#ff9b45", 0.10)
+    s.ellipse(450, 262, 26, 7, "#ffab5c", 0.16)
     for _ in range(14):  # 灰烬飘浮
         s.circle(rng.uniform(0, W), rng.uniform(20, 300), rng.uniform(1, 2), "#ddd3ac", rng.uniform(0.15, 0.4))
     return s
@@ -389,7 +368,7 @@ def refinery():
     glow_dot(s, 75, GROUND - 290, "#ff4640", r=3)
 
     # ---- 右侧火炬塔 + 储罐 ----
-    s.rect(1010, GROUND - 270, 16, 270, "#334741")
+    s.rect(1010, GROUND - 270, 16, 274, "#334741")
     for yy in range(int(GROUND - 240), int(GROUND), 44):
         s.line(1004, yy, 1032, yy + 20, "#2c3f39", 1.5, 0.9)
         s.line(1032, yy, 1004, yy + 20, "#2c3f39", 1.5, 0.9)
@@ -406,16 +385,16 @@ def refinery():
     s.rect(900, GROUND - 66, 92, 32, "#3c524c", rx=15)
     s.line(946, GROUND - 66, 946, GROUND - 34, "#2c3f39", 1.5, 0.8)
     for bx in (912, 966):
-        s.rect(bx, GROUND - 34, 8, 34, "#2f443f")
+        s.rect(bx, GROUND - 34, 8, 38, "#2f443f")
     # 危险警示条纹（黄黑）
     hzx = 912.0
     for i in range(5):
-        s.poly([(hzx + i * 8, GROUND - 12), (hzx + i * 8 + 4, GROUND - 12),
-                (hzx + i * 8 + 8, GROUND), (hzx + i * 8 + 4, GROUND)],
+        s.poly([(hzx + i * 8, GROUND - 10), (hzx + i * 8 + 4, GROUND - 10),
+                (hzx + i * 8 + 8, GROUND + 4), (hzx + i * 8 + 4, GROUND + 4)],
                "#d8a021" if i % 2 == 0 else "#2a2a24")
 
-    # ---- 桁架栈桥（计算网格）----
-    bx0, bx1, by0, by1 = 240.0, 940.0, 238.0, 268.0
+    # ---- 桁架栈桥（计算网格；抬高避让中段 t2 高台顶 268）----
+    bx0, bx1, by0, by1 = 240.0, 940.0, 212.0, 240.0
     s.line(bx0, by0, bx1, by0, "#2c403a", 5)
     s.line(bx0, by1, bx1, by1, "#2c403a", 5)
     n = int((bx1 - bx0) // 35)
@@ -430,40 +409,32 @@ def refinery():
     s.rect(bx0, by1, bx1 - bx0, 5, "#31463f")
     for px in (350, 850):
         s.rect(px - 7, by1 + 5, 14, GROUND - by1 - 5, "#2c403a")
-        for i in range(3):
-            s.poly([(px - 7 + i * 5, GROUND - 12), (px - 7 + i * 5 + 2.5, GROUND - 12),
-                    (px - 7 + i * 5 + 5, GROUND), (px - 7 + i * 5 + 2.5, GROUND)],
-                   "#d8a021" if i % 2 == 0 else "#24241f")
     glow_dot(s, 350, by1 + 8, "#ff4640", r=2.2, halos=((6, 0.3), (11, 0.12)))
     glow_dot(s, 850, by1 + 8, "#ff4640", r=2.2, halos=((6, 0.3), (11, 0.12)))
 
-    # 前景管排（两侧，留出中间 gameplay 视野）
-    for x0, x1 in ((0, 250), (950, 1200)):
+    # 前景管排（两侧平地段，留出中段高低差视野）
+    for x0, x1 in ((0, 215), (950, 1200)):
         for yy in (300, 312):
             s.line(x0, yy, x1, yy, "#354944", 8)
             s.line(x0, yy - 2.5, x1, yy - 2.5, "#4d635d", 2, 0.9)
         px = x0 + 10
         while px < x1:
-            s.rect(px - 3, 314, 6, GROUND - 314, "#2b3b36")
+            s.rect(px - 3, 314, 6, 24, "#2b3b36")
             if (px - x0) % 110 < 55:  # 法兰
                 s.rect(px - 2, 295, 4, 22, "#2b3b36")
             px += 55
 
     # 工作灯锥光
     s.circle(75, GROUND - 160, 2.5, "#ffd9a0")
-    s.poly([(75, GROUND - 158), (28, GROUND), (152, GROUND)], "#ffcf8e", 0.08)
+    s.poly([(75, GROUND - 158), (28, GROUND + 4), (152, GROUND + 4)], "#ffcf8e", 0.08)
 
-    # ---- 地表 ----
-    gnd = s.vgrad("gnd2", [(0, "#39453f", 1), (1, "#222b28", 1)])
-    s.rect(0, GROUND, W, H - GROUND, gnd)
-    for gx in (200, 560, 900):  # 排水格栅
+    # ---- 地表（拆地块 v2）----
+    ground_v2.draw_ground(s, "ch2_ref", bottom=H, k=1.0)
+    for gx, gy in ((200, 342), (560, 278), (1080, 342)):  # 排水格栅（贴所在档走道带）
         for i in range(5):
-            s.line(gx, GROUND + 26 + i * 4, gx + 46, GROUND + 26 + i * 4, "#1c2420", 1.5)
-    for _ in range(4):
-        s.ellipse(rng.uniform(100, 1100), rng.uniform(380, 480), rng.uniform(30, 80), rng.uniform(5, 10), "#141b18", 0.5)
-    haze_band(s, GROUND - 36, GROUND + 34, "#93a89e", 0.28)
-    # 溢散蒸汽
-    for vx, vy in ((430, GROUND - 10), (760, GROUND - 6)):
+            s.line(gx, gy + i * 4, gx + 46, gy + i * 4, "#1c2420", 1.5)
+    # 溢散蒸汽（贴档顶）
+    for vx, vy in ((430, 258), (760, 292)):
         for i in range(3):
             s.circle(vx + i * 12, vy - i * 14, 10 + i * 6, "#c5d2ca", 0.07 - i * 0.015)
     return s
@@ -520,7 +491,7 @@ def snowfield():
     haze_band(s, 200, GROUND, "#dfe9ee", 0.4)
 
     # ---- 中景：半埋运输机残骸（机头朝画面中央、尾部出画，腹埋雪中）----
-    s.group(f"translate(885,{f(GROUND + 38)}) rotate(-6)")
+    s.group(f"translate(885,{f(GROUND + 40)}) rotate(-6)")
     s.rect(0, -86, 300, 46, "#5a6a74", rx=22)          # 机身
     s.rect(0, -56, 300, 8, "#46545e")                   # 腹部阴影
     s.rect(10, -66, 300, 5, "#c24438", 0.8)             # 红色识别带
@@ -534,67 +505,37 @@ def snowfield():
     s.poly([(286, -60), (306, -50), (300, -38), (280, -48)], "#3e4a53")    # 尾部撕裂口
     s.endgroup()
     # 盖上积雪
-    s.poly([(860, GROUND), (940, GROUND - 30), (1030, GROUND - 16), (1120, GROUND), (1120, GROUND + 2), (860, GROUND + 2)], "#e9f1f5")
-    s.ellipse(1010, GROUND - 4, 140, 12, "#eef4f7")
+    s.poly([(860, GROUND + 2), (940, GROUND - 28), (1030, GROUND - 14), (1120, GROUND + 2), (1120, GROUND + 4), (860, GROUND + 4)], "#e9f1f5")
+    s.ellipse(1010, GROUND - 2, 140, 12, "#eef4f7")
 
-    # 中景雪堆
-    for mx, mw, mh in ((240, 160, 22), (520, 120, 14), (760, 200, 26)):
-        s.ellipse(mx, GROUND, mw / 2, mh, "#dbe6ec")
-    # 路侧电线杆（远侧，随地形微倾）
+    # 路侧电线杆（贴所在档顶；700 挪 730 避开掉档墙）
     pole = "#6e8694"
-    poles = [(150, 3), (430, -2), (700, 2), (980, -3)]
-    for i, (pxx, tilt) in enumerate(poles):
+    poles = [(150, 3, 332.0), (430, -2, 268.0), (730, 2, 300.0), (980, -3, 300.0)]
+    for i, (pxx, tilt, pbase) in enumerate(poles):
         ph = 52
-        s.line(pxx, GROUND, pxx + tilt * 0.4, GROUND - ph, pole, 2.5, 0.9)
-        s.line(pxx - 8 + tilt, GROUND - ph + 6, pxx + 8 + tilt, GROUND - ph + 6, pole, 2, 0.9)
-        s.line(pxx + tilt, GROUND - ph, pxx + tilt, GROUND - ph - 6, pole, 1.5, 0.9)
+        s.line(pxx, pbase, pxx + tilt * 0.4, pbase - ph, pole, 2.5, 0.9)
+        s.line(pxx - 8 + tilt, pbase - ph + 6, pxx + 8 + tilt, pbase - ph + 6, pole, 2, 0.9)
+        s.line(pxx + tilt, pbase - ph, pxx + tilt, pbase - ph - 6, pole, 1.5, 0.9)
         if i:
-            qx, qt = poles[i - 1]
+            qx, qt, qbase = poles[i - 1]
             x0w, x1w = qx + qt, pxx + tilt
-            y0w = GROUND - ph - 6
-            s.path(f"M {f(x0w)},{f(y0w)} Q {f((x0w + x1w) / 2)},{f(y0w + 9)} {f(x1w)},{f(y0w)}",
+            y0w = qbase - ph - 6
+            y1w = pbase - ph - 6
+            s.path(f"M {f(x0w)},{f(y0w)} Q {f((x0w + x1w) / 2)},{f((y0w + y1w) / 2 + 9)} {f(x1w)},{f(y1w)}",
                    stroke=pole, w=1.1, opacity=0.7)
 
-    # ---- 地表：雪盖公路 ----
-    road_h = 54.0
-    s.rect(0, GROUND, W, road_h, "#56626c")
-    for _ in range(4):
-        s.ellipse(rng.uniform(60, 1140), GROUND + rng.uniform(8, road_h - 16), rng.uniform(40, 90), rng.uniform(5, 9), "#49555f", 0.45)
-    dx = 12.0
-    while dx < W:  # 中线虚线
-        s.rect(dx, GROUND + 25, 26, 4, "#c9b23c", 0.55)
-        dx += 52
-    s.line(0, GROUND + 4, W, GROUND + 4, "#e8eff3", 2, 0.25)
-    s.line(0, GROUND + road_h - 4, W, GROUND + road_h - 4, "#e8eff3", 2, 0.25)
-    for _ in range(3):  # 路面裂缝
-        cx, cy = rng.uniform(100, 1000), GROUND + 8
-        seg = [(cx, cy)]
-        for _ in range(3):
-            cx += rng.uniform(-24, 24)
-            cy += rng.uniform(12, 18)
-            seg.append((cx, min(cy, GROUND + road_h - 4)))
-        s.path("M " + " L ".join(f"{f(a)},{f(b)}" for a, b in seg), stroke="#333d45", w=1.3, opacity=0.85)
-    # 路缘雪檐
-    ex = 0.0
-    while ex < W:
-        ew = rng.uniform(30, 70)
-        s.rect(ex, GROUND - rng.uniform(3, 7), ew, 10, "#f2f7f9", rx=5)
-        ex += ew + rng.uniform(4, 18)
-    # 路下积雪
-    snow = s.vgrad("snowg", [(0, "#e6eef3", 1), (1, "#c6d6df", 1)])
-    s.rect(0, GROUND + road_h, W, H - GROUND - road_h, snow)
-    for _ in range(5):  # 雪下隐约起伏
-        s.ellipse(rng.uniform(0, W), rng.uniform(GROUND + road_h + 18, H - 20), rng.uniform(60, 140), rng.uniform(6, 10), "#d3e0e8", 0.35)
+    # ---- 地表：拆地块 v2（路板走道带+亮雪断面，画法与实机一致）----
+    ground_v2.draw_ground(s, "ch3_snow", bottom=H, k=1.0)
+    # 中景雪堆（画在块顶之后，落在所在档走道带上）
+    for mx, mw, mh in ((240, 160, 22), (520, 120, 14), (760, 200, 26)):
+        base = 268.0 if mx < 700 else 300.0
+        s.ellipse(mx, base, mw / 2, mh, "#dbe6ec")
 
     # ---- 风雪（向左后掠，强化向右跑的速度感）----
     for _ in range(16):
-        lx, ly = rng.uniform(80, W), rng.uniform(40, GROUND - 40)
+        lx, ly = rng.uniform(80, W), rng.uniform(40, 260)
         ln = rng.uniform(40, 95)
         s.line(lx, ly, lx - ln, ly + ln * 0.12, "#ffffff", 2, rng.uniform(0.3, 0.55), cap="round")
-    for _ in range(8):
-        lx, ly = rng.uniform(120, W), rng.uniform(GROUND + 6, GROUND + road_h)
-        ln = rng.uniform(30, 60)
-        s.line(lx, ly, lx - ln, ly + ln * 0.1, "#ffffff", 2, 0.22, cap="round")
     for _ in range(18):
         s.circle(rng.uniform(0, W), rng.uniform(10, H), rng.uniform(1, 2.2), "#ffffff", rng.uniform(0.5, 0.9))
     return s
@@ -647,9 +588,9 @@ def coral_night():
             s.line(tx + tw * 0.5, top, tx + tw * 0.5, top - rng.uniform(16, 40), "#0d1330", 2)
         for _ in range(rng.randint(2, 5)):
             s.rect(tx + rng.uniform(4, tw - 8), top + rng.uniform(10, th - 14), 2.5, 4, "#ff6a3d", rng.uniform(0.5, 0.9))
-    # 地平线远端珊瑚辉光
-    s.ellipse(140, GROUND - 4, 60, 13, "#ff5a33", 0.10)
-    s.ellipse(140, GROUND - 4, 28, 7, "#ff7a45", 0.18)
+    # 地平线远端珊瑚辉光（贴中段高台天际线，别落在近处走道带上）
+    s.ellipse(450, 262, 60, 13, "#ff5a33", 0.10)
+    s.ellipse(450, 262, 28, 7, "#ff7a45", 0.16)
 
     # ---- 雾带 + 两侧岩丘 ----
     haze_band(s, GROUND - 74, GROUND - 18, "#3a4674", 0.30)
@@ -666,15 +607,8 @@ def coral_night():
             if y0 < GROUND and y1 < GROUND:
                 s.line(x0, y0, x1, y1, "#4a5890", 1.2, 0.35)
 
-    # ---- 地表：玄武岩 + 珊瑚地裂 ----
-    gnd = s.vgrad("gnd4", [(0, "#161c34", 1), (1, "#0a0d1c", 1)])
-    s.rect(0, GROUND, W, H - GROUND, gnd)
-    s.glow_ellipse(640, 420, 300, 70, "#ff5a33", 0.10)   # 大范围地表泛光
-    s.glow_ellipse(610, 356, 190, 30, "#ff5a33", 0.14)
-    tail = fissure(s, rng, 620, GROUND + 4, 165, 7.0, H - 16)
-    fissure(s, rng, tail[0] - 10, min(tail[1], H - 60), 78, 4.0, H - 8)
-    fissure(s, rng, 340, 412, 95, 5.0, H - 24)
-    fissure(s, rng, 870, 465, 70, 4.0, H - 20)
+    # ---- 地表：拆地块 v2（暗玄武岩块 + 走道带珊瑚辉光裂纹 + 断面辉光脉）----
+    ground_v2.draw_ground(s, "ch4_coral", bottom=H, k=1.0)
     # 上升余烬
     for _ in range(15):
         ex, ey = rng.uniform(480, 820), rng.uniform(190, 330)

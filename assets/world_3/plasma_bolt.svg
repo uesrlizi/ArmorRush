@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 10" width="28" height="10">
+<!-- 电浆矢弹贴图 28x10（plasma_bolt.tscn 直射弹本体，+X 弹头）。
+六边形能量镖：深电蓝壳+冰蓝鞘+白热芯+尾部电弧须；ADD 材质在场景。 -->
+<defs>
+
+</defs>
+<polygon points="2,5 9,2 22,2.5 26,5 22,7.5 9,8" fill="#2b6ea0"/>
+<polygon points="5,5 10,3.2 21,3.6 24,5 21,6.4 10,6.8" fill="#7fd0ff" opacity="0.9"/>
+<polygon points="7,4.6 14,3.9 22,4.6 22,5.4 14,6.1 7,5.4" fill="#eaf6ff"/>
+<line x1="1" y1="3.5" x2="5" y2="4.6" stroke="#7fd0ff" stroke-width="1.1" opacity="0.8"/>
+<line x1="1" y1="6.5" x2="5" y2="5.4" stroke="#7fd0ff" stroke-width="1.1" opacity="0.8"/>
+</svg>

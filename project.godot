@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Armor Rush"
-run/main_scene="res://scenes/main.tscn"
+run/main_scene="res://scenes/entry.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 boot_splash/bg_color=Color(0.702, 0.663, 0.498, 1)
 boot_splash/image="res://assets/branding/boot_splash.png"
@@ -19,11 +19,11 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-Balance="*res://scripts/balance.gd"
-RunState="*res://scripts/run_state.gd"
-Comms="*res://scripts/comms.gd"
-Sfx="*res://scripts/sfx.gd"
-Fade="*res://scripts/scene_fade.gd"
+Balance="*res://scripts/core/balance.gd"
+RunState="*res://scripts/core/run_state.gd"
+Comms="*res://scripts/core/comms.gd"
+Sfx="*res://scripts/core/sfx.gd"
+Fade="*res://scripts/core/scene_fade.gd"
 
 [display]
 

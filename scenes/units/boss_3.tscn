@@ -1,0 +1,90 @@
+[gd_scene format=3 uid="uid://bdeqen1luep42"]
+
+[ext_resource type="Script" uid="uid://87a1ad54nqxy" path="res://scripts/units/boss_sentinel.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://bixuorjtl4etf" path="res://assets/world_3/boss_snow_body.svg" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/fx/muzzle_flash.tscn" id="3"]
+[ext_resource type="Texture2D" uid="uid://d10eqbbrs05b5" path="res://assets/world_3/boss_snow_gun.svg" id="4"]
+[ext_resource type="Script" uid="uid://ddkwn874rndm4" path="res://scripts/units/eye_glow.gd" id="5"]
+[ext_resource type="PackedScene" path="res://scenes/fx/threat_flash.tscn" id="6"]
+[ext_resource type="Texture2D" uid="uid://cssh5mjnems4m" path="res://assets/common/fx_flame.svg" id="7"]
+
+[sub_resource type="CanvasItemMaterial" id="addmat"]
+blend_mode = 1
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
+size = Vector2(246, 168)
+
+[node name="BossSentinel" type="CharacterBody2D" unique_id=1162512689]
+collision_layer = 4
+collision_mask = 0
+script = ExtResource("1")
+feet_offset = 90.0
+body_size = Vector2(260, 180)
+
+[node name="Visuals" type="Node2D" parent="." unique_id=934284804]
+
+[node name="Sprite2D" type="Sprite2D" parent="Visuals" unique_id=757040699]
+texture = ExtResource("2")
+
+[node name="EyeGlow" type="Node2D" parent="Visuals/Sprite2D" unique_id=1780932220]
+position = Vector2(-60, -32)
+scale = Vector2(1.2, 1.2)
+script = ExtResource("5")
+
+[node name="Thruster1" type="Sprite2D" parent="Visuals" unique_id=1742529144]
+modulate = Color(1, 0.62, 0.28, 0.6)
+material = SubResource("addmat")
+position = Vector2(88, -28)
+scale = Vector2(1.1, 1.1)
+texture = ExtResource("7")
+
+[node name="Thruster2" type="Sprite2D" parent="Visuals" unique_id=616606298]
+modulate = Color(1, 0.62, 0.28, 0.6)
+material = SubResource("addmat")
+position = Vector2(88, 0)
+scale = Vector2(1.1, 1.1)
+texture = ExtResource("7")
+
+[node name="ArmPivot" type="Node2D" parent="Visuals" unique_id=69339862]
+position = Vector2(-23, 4)
+
+[node name="Arm" type="Sprite2D" parent="Visuals/ArmPivot" unique_id=1011248616]
+texture = ExtResource("4")
+centered = false
+offset = Vector2(-112, -20)
+
+[node name="Muzzle" type="Marker2D" parent="Visuals/ArmPivot" unique_id=2118766678]
+position = Vector2(-104, 0)
+
+[node name="Flash" parent="Visuals/ArmPivot/Muzzle" unique_id=237223626 instance=ExtResource("3")]
+
+[node name="ThreatFlash" parent="Visuals/ArmPivot/Muzzle" unique_id=1723189636 instance=ExtResource("6")]
+
+[node name="MissilePorts" type="Node2D" parent="Visuals" unique_id=664187848]
+
+[node name="Port1" type="Marker2D" parent="Visuals/MissilePorts" unique_id=1071256622]
+position = Vector2(-59, -64)
+
+[node name="Port2" type="Marker2D" parent="Visuals/MissilePorts" unique_id=642676528]
+position = Vector2(-43, -64)
+
+[node name="Port3" type="Marker2D" parent="Visuals/MissilePorts" unique_id=296169469]
+position = Vector2(21, -64)
+
+[node name="Port4" type="Marker2D" parent="Visuals/MissilePorts" unique_id=1103479717]
+position = Vector2(37, -64)
+
+[node name="MissileWarn" type="Marker2D" parent="Visuals" unique_id=567269421]
+position = Vector2(29, -64)
+
+[node name="ThreatFlash" parent="Visuals/MissileWarn" unique_id=1219992892 instance=ExtResource("6")]
+
+[node name="BayPort" type="Marker2D" parent="Visuals" unique_id=1731676035]
+position = Vector2(-8, 48)
+
+[node name="Flash" parent="Visuals/BayPort" unique_id=1565043499 instance=ExtResource("3")]
+
+[node name="ThreatFlash" parent="Visuals/BayPort" unique_id=964941921 instance=ExtResource("6")]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1560075851]
+shape = SubResource("RectangleShape2D_1")

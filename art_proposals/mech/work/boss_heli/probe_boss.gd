@@ -1,13 +1,13 @@
 extends Node2D
 
 ## BOSS 场景探针（场景启动版，autoload 齐全 → boss.gd/threat_flash.gd 真编译）：
-## 实例化 boss.tscn，验证导弹仓口/预警/旋翼节点齐全，再直接调一次出弹节拍
+## 实例化 boss_ch1.tscn，验证导弹仓口/预警/旋翼节点齐全，再直接调一次出弹节拍
 ## 看导弹是否真从仓口出。用法：
 ##   godot --headless --path <项目> res://art_proposals/mech/work/boss_heli/probe_boss.tscn
 
 func _ready() -> void:
-	var ps: PackedScene = load("res://scenes/boss.tscn")
-	assert(ps != null, "boss.tscn 载入失败")
+	var ps: PackedScene = load("res://scenes/units/boss_1.tscn")
+	assert(ps != null, "boss_ch1.tscn 载入失败")
 	var boss := ps.instantiate()
 	add_child(boss) # 触发 _ready/@onready：缺节点/脚本编译失败这里就炸
 	var ok := true

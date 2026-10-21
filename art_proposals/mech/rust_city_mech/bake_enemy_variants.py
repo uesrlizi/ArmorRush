@@ -6,7 +6,7 @@
   （提案 C 的"悬空视觉解释"原样保留，静态焰）。
 - 盾卫：复用提案 A 步行者的全部几何（px0 28→36 右移 7.68px 给盾让位），
   正面加防暴盾板（盖住枪座/骨盆前段，红眼在上不留遮挡）；枪臂直接复用
-  enemy_walker_arm.svg（枪口伸出盾缘 ~12px，读作"盾上炮位"）。
+  enemy_rust_walker_arm.svg（枪口伸出盾缘 ~12px，读作"盾上炮位"）。
 
 比例账（提案局部单位，y 向上、脚底 y=0，K 为到世界像素的换算）：
 - 无人机 K=0.8：舱体宽 40u→32px、高 20u→16px；连鳍全高 52u→41.6px、含焰全宽 47u→37.6px。
@@ -14,9 +14,9 @@
 - 盾卫 K=0.96（与步行者同档）：盾板 17u 宽→16.3px、22u 高→21.1px，占本体前缘 2/3 高。
 
 产物（写入 2d-ac/assets/）：
-  enemy_drone.svg       38x42  舱体/侧鳍/顶盖/单眼/推进器+静态红焰（原生朝左）
-  enemy_drone_arm.svg   32x16  前下挂炮，肩轴 (28,8)（原生朝左）
-  enemy_shield_body.svg 56x52  步行者本体右移 + 正面盾板（原生朝左）
+  enemy_rust_drone.svg       38x42  舱体/侧鳍/顶盖/单眼/推进器+静态红焰（原生朝左）
+  enemy_rust_drone_arm.svg   32x16  前下挂炮，肩轴 (28,8)（原生朝左）
+  enemy_rust_shield_body.svg 56x52  步行者本体右移 + 正面盾板（原生朝左）
 """
 import os
 
@@ -83,7 +83,7 @@ def drone_body():
     poly(b, [(px(-11), py(-19)), (px(5), py(-19)), (px(-3), py(-4))], E_ACC, 0.12)
     circle(b, px(-3), py(-21), 2.4, E_ACC, 0.9)
     circle(b, px(-3), py(-21), 5.2, E_ACC, 0.22)
-    write("enemy_drone.svg", 38, 42, d, b,
+    write("enemy_rust_drone.svg", 38, 42, d, b,
           "无人机 K=0.8 px0=29K py0=52K；舱体 y[-46,-26]u、焰尖 y-4u、鳍顶 y-52u；"
           "碰撞盒 34x18 @sprite(2,-8) 盖舱体；feet_offset=2；ArmPivot=(-3.8,0)")
 
@@ -97,7 +97,7 @@ def drone_arm():
     rect(b, 12.8, 8.0, 4.0, 6.4, ED)    # 枪口（比枪身薄、往下坠 0.8px）
     circle(b, 26.0, 9.6, 1.2, E_ACC, 0.9)  # 枪身红点
     circle(b, 28.0, 8.0, 2.5, EB_D)     # 轴盖
-    write("enemy_drone_arm.svg", 32, 16, d, b,
+    write("enemy_rust_drone_arm.svg", 32, 16, d, b,
           "枪臂 K=0.8 肩轴(28,8)=挂点(-10,-26)u；枪口尖端 canvas x12.8=轴左 15.2px；"
           "tscn: centered=false offset=(-28,-8)，Muzzle=(-15,3)")
 
@@ -141,7 +141,7 @@ def shield_body():
     circle(b, px(-28.5), py(-23.5), 1.2, EB_L)
     # 肩轴关节（臂的旋转中心，被臂根盖住）
     circle(b, px(-12), py(-27), 3.5, ED)
-    write("enemy_shield_body.svg", 56, 52, d, b,
+    write("enemy_rust_shield_body.svg", 56, 52, d, b,
           "盾卫 K=0.96 px0=36 py0=50（步行者几何右移 7.68px）；盾板 x[-31,-14]u y[-28,-6]u；"
           "碰撞盒 52x48 居中、feet_offset=24；ArmPivot=(-4,-2) 肩轴(-12,-27)u，复用 walker_arm")
 

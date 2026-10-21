@@ -1,0 +1,89 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/units/boss_barge.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/world_2/boss_ref_body.svg" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/fx/muzzle_flash.tscn" id="3"]
+[ext_resource type="Texture2D" path="res://assets/world_2/boss_ref_gun.svg" id="4"]
+[ext_resource type="Script" path="res://scripts/units/eye_glow.gd" id="5"]
+[ext_resource type="PackedScene" path="res://scenes/fx/threat_flash.tscn" id="6"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
+size = Vector2(290, 170)
+
+[node name="BossBarge" type="CharacterBody2D"]
+collision_layer = 4
+collision_mask = 0
+script = ExtResource("1")
+feet_offset = 90.0
+body_size = Vector2(300, 180)
+
+[node name="Visuals" type="Node2D" parent="."]
+
+[node name="Sprite2D" type="Sprite2D" parent="Visuals"]
+texture = ExtResource("2")
+
+[node name="EyeGlow" type="Node2D" parent="Visuals/Sprite2D"]
+position = Vector2(-95, -27)
+scale = Vector2(1.2, 1.2)
+script = ExtResource("5")
+
+[node name="ArmPivot" type="Node2D" parent="Visuals"]
+position = Vector2(-51, 15)
+
+[node name="Arm" type="Sprite2D" parent="Visuals/ArmPivot"]
+texture = ExtResource("4")
+centered = false
+offset = Vector2(-95, -20)
+flip_v = true
+
+[node name="Muzzle" type="Marker2D" parent="Visuals/ArmPivot"]
+position = Vector2(-93, 8)
+
+[node name="Flash" parent="Visuals/ArmPivot/Muzzle" instance=ExtResource("3")]
+
+[node name="ThreatFlash" parent="Visuals/ArmPivot/Muzzle" instance=ExtResource("6")]
+
+[node name="SlagPorts" type="Node2D" parent="Visuals"]
+
+[node name="Port1" type="Marker2D" parent="Visuals/SlagPorts"]
+position = Vector2(-67, -64)
+
+[node name="Port2" type="Marker2D" parent="Visuals/SlagPorts"]
+position = Vector2(-45, -64)
+
+[node name="Port3" type="Marker2D" parent="Visuals/SlagPorts"]
+position = Vector2(17, -64)
+
+[node name="Port4" type="Marker2D" parent="Visuals/SlagPorts"]
+position = Vector2(39, -64)
+
+[node name="SlagWarn" type="Marker2D" parent="Visuals"]
+position = Vector2(27, -64)
+
+[node name="ThreatFlash" parent="Visuals/SlagWarn" instance=ExtResource("6")]
+
+[node name="WallPorts" type="Node2D" parent="Visuals"]
+
+[node name="Port1" type="Marker2D" parent="Visuals/WallPorts"]
+position = Vector2(-123, -20)
+
+[node name="Flash" parent="Visuals/WallPorts/Port1" instance=ExtResource("3")]
+
+[node name="ThreatFlash" parent="Visuals/WallPorts/Port1" instance=ExtResource("6")]
+
+[node name="Port2" type="Marker2D" parent="Visuals/WallPorts"]
+position = Vector2(-130, 10)
+
+[node name="Flash" parent="Visuals/WallPorts/Port2" instance=ExtResource("3")]
+
+[node name="ThreatFlash" parent="Visuals/WallPorts/Port2" instance=ExtResource("6")]
+
+[node name="Port3" type="Marker2D" parent="Visuals/WallPorts"]
+position = Vector2(-115, 33)
+
+[node name="Flash" parent="Visuals/WallPorts/Port3" instance=ExtResource("3")]
+
+[node name="ThreatFlash" parent="Visuals/WallPorts/Port3" instance=ExtResource("6")]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_1")

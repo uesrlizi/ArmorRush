@@ -19,7 +19,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from generate_proposals import Svg, f  # noqa: E402
 
-ASSETS = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "assets"))
+ASSETS = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "assets", "world_1"))
 
 INK = "#57544a"       # 中景楼体
 INK_FAR_A = "#9a9078" # 远景第一层（最远，最浅）

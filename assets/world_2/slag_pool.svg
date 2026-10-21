@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 40" width="200" height="40">
+<!-- 熔渣火区 200x40：判定球 r=90 → SlagPool 按 radius/90 缩放 Visual（画布=满幅
+外包盒：横向 rx92+焦壳、纵向 ry14）。贴地平铺语汇：外缘焦壳（暗）→ 熔芯（亮）
+→ 高温芯（浅），浮焦板块三块破型。色板=精炼所熔渣族（熔橙/高温黄/焦壳棕），
+与机体色板（敌营绿灰）分族。坐标账：中心 (100,22)，rx 92/72/52，ry 14/11/8。 -->
+<polygon points="14,24 32,13 62,8 100,6 140,9 170,14 186,24 168,33 130,37 86,38 44,35 22,30" fill="#3a2a1c" opacity="0.92"/>
+<ellipse cx="100" cy="22" rx="92" ry="14" fill="#b4451f"/>
+<ellipse cx="100" cy="22" rx="72" ry="11" fill="#e8722e"/>
+<ellipse cx="100" cy="22" rx="52" ry="8" fill="#ffb35a"/>
+<polygon points="42,26 60,19 78,27 60,32" fill="#3a2a1c" opacity="0.82"/>
+<polygon points="122,15 142,11 156,19 138,24" fill="#3a2a1c" opacity="0.82"/>
+<polygon points="86,30 104,27 112,32 94,35" fill="#3a2a1c" opacity="0.72"/>
+</svg>

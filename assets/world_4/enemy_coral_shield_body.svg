@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 52" width="56" height="52">
+<!-- 第四章盾卫「蜂巢堡盾」56x52，地面 y=50。
+骨架对齐：眼 (23.5,18.3) halo r5.3/core r2.4（盾/舱交界窝）；肩 joint (24,24)（复用本章枪臂）。
+造型：通高塔盾（前缘受光+蜂窝穴+盾面珊瑚发光缝）+ 后置舱体 + 双足 + 滑鞋。 -->
+<defs>
+
+</defs>
+<polygon points="12,42 18,42 16,50 9,50" fill="#3f4c6e"/>
+<rect x="46" y="18" width="6" height="15" fill="#3f4c6e"/>
+<rect x="45.5" y="15" width="7" height="3.5" fill="#262f4a"/>
+<line x1="43" y1="10" x2="46" y2="3" stroke="#262f4a" stroke-width="1.5"/>
+<circle cx="46.3" cy="2.5" r="1.2" fill="#ff4640" opacity="0.9"/>
+<polygon points="25,10 45,10 49,18 49,36 42,42 28,42 25,38" fill="#5d6d94"/>
+<polygon points="25,10 45,10 46.5,13.5 26.5,13.5" fill="#9fb0d8"/>
+<rect x="31" y="17" width="11" height="3.5" fill="#262f4a"/>
+<polygon points="5,10 22,10 25,14 25,44 21,47 7,47 4,42 4,14" fill="#5d6d94"/>
+<polygon points="4,14 7,11.5 7,45 4,40" fill="#9fb0d8" opacity="0.6"/>
+<polygon points="9,17 14,17 15.5,20 14,23 9,23 7.5,20" fill="#262f4a"/>
+<polygon points="9,27 14,27 15.5,30 14,33 9,33 7.5,30" fill="#262f4a"/>
+<polygon points="17,22 21,22 22,25 21,28 17,28 15.5,25" fill="#262f4a"/>
+<line x1="11" y1="35" x2="13" y2="46" stroke="#ff5a33" stroke-width="1.4" opacity="0.75"/>
+<circle cx="13" cy="46" r="1.2" fill="#ffb36b" opacity="0.9"/>
+<rect x="6" y="47" width="13" height="3" fill="#3f4c6e"/>
+<rect x="18" y="14" width="10" height="8" fill="#262f4a"/>
+<circle cx="23.5" cy="18.3" r="5.3" fill="#ff4640" opacity="0.22"/>
+<circle cx="23.5" cy="18.3" r="2.4" fill="#ff4640" opacity="0.95"/>
+<circle cx="24" cy="24" r="3.5" fill="#262f4a"/>
+<polygon points="30,42 36,42 38,49 31,49" fill="#5d6d94"/>
+<rect x="29" y="47.5" width="11" height="2.2" fill="#3f4c6e"/>
+<rect x="32" y="34" width="9" height="2.5" fill="#ff4640" opacity="0.8"/>
+</svg>

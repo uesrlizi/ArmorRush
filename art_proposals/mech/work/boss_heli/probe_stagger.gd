@@ -8,9 +8,9 @@ func _fail(msg: String) -> void:
 	get_tree().quit(1)
 
 func _ready() -> void:
-	var ps: PackedScene = load("res://scenes/elite_mortar.tscn")
+	var ps: PackedScene = load("res://scenes/units/elite_1.tscn")
 	if ps == null:
-		return _fail("elite_mortar.tscn 载入失败")
+		return _fail("elite_mortar_ch1.tscn 载入失败")
 	var enemy := ps.instantiate()
 	add_child(enemy)
 	enemy.on_spawned()

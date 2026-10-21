@@ -9,8 +9,8 @@
 产物（写入 2d-ac/assets/）：
   player_mech_body.svg  72x104  肩轴在画外由 tscn 定位；含头部/躯干/双腿/推进器（静焰）
   player_mech_arm.svg   64x36   肩轴像素 (8,10)；肩甲+臂+步枪
-  enemy_walker_body.svg 56x52    含单眼/舱体/双腿/天线/枪座
-  enemy_walker_arm.svg  56x24    肩轴像素 (44,8)；枪臂（原生朝左）
+  enemy_rust_walker_body.svg 56x52    含单眼/舱体/双腿/天线/枪座
+  enemy_rust_walker_arm.svg  56x24    肩轴像素 (44,8)；枪臂（原生朝左）
 """
 import os
 
@@ -132,7 +132,7 @@ def enemy_body():
     poly(b, [(px(-16), py(0)), (px(10), py(0)), (px(11), py(-4)), (px(-2), py(-6))], EB_L)
     # 肩轴关节
     circle(b, px(-12), py(-27), 3.5, ED)
-    write("enemy_walker_body.svg", 56, 52, d, b)
+    write("enemy_rust_walker_body.svg", 56, 52, d, b)
 
 
 def enemy_arm():
@@ -144,7 +144,7 @@ def enemy_arm():
     rect(b, 8, 12, 26, 6, ED)          # 枪身（x8..34）
     rect(b, 3, 10.5, 5, 9, ED)         # 枪口
     circle(b, 12, 15, 1.5, E_ACC, 0.9) # 枪身红点
-    write("enemy_walker_arm.svg", 48, 28, d, b)
+    write("enemy_rust_walker_arm.svg", 48, 28, d, b)
 
 
 if __name__ == "__main__":

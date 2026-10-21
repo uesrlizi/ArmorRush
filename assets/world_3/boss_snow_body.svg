@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 180" width="260" height="180">
+<!-- 第三章 BOSS v3 强袭悬空机甲「哨兵」260x180=碰撞体 body_size，原点(130,90)，原生朝左。
+从零设计（白鲸整体废弃）：宽肩双 Pod（四联电浆垂发仓口 (71/87/151/167,26)）+
+单臂电浆重炮（枢 (86,86)，见 sentinel_gun）+ 腰部布雷闸（锚 (122,138)=BayPort (-8,48)）+
+反关节悬垂双腿 + 背包双喷口（推进焰节点 (218,62)/(218,90)→Visuals (88,-28)/(88,0)）。
+独眼 (70,58)→EyeGlow (-60,-32) scale1.2。设计正本=提案_v3_哨兵重设计.md。 -->
+<defs>
+
+</defs>
+<polygon points="116,126 148,132 146,152 120,146" fill="#2a333a"/>
+<polygon points="120,146 144,152 148,170 124,172" fill="#2a333a"/>
+<polygon points="120,170 150,172 152,178 118,178" fill="#2a333a"/>
+<circle cx="134" cy="132" r="5" fill="#161c21"/>
+<polygon points="150,44 196,50 196,108 150,104" fill="#39444d"/>
+<polygon points="150,44 196,50 196,55 150,49" fill="#5d6c76"/>
+<line x1="152" y1="50" x2="152" y2="104" stroke="#161c21" stroke-width="2" opacity="0.7"/>
+<polygon points="196,52 215,58 215,66 196,72" fill="#2a333a"/>
+<polygon points="197,56 212,60 212,64 197,68" fill="#161c21"/>
+<polygon points="196,80 215,86 215,94 196,100" fill="#2a333a"/>
+<polygon points="197,84 212,88 212,92 197,96" fill="#161c21"/>
+<polygon points="142,42 172,42 170,50 144,50" fill="#39444d"/>
+<polygon points="140,46 138,24 143,16 171,16 176,24 174,46" fill="#39444d"/>
+<polygon points="143,16 171,16 170,20 144,20" fill="#5d6c76"/>
+<rect x="146" y="23" width="10" height="6" fill="#161c21"/>
+<rect x="162" y="23" width="10" height="6" fill="#161c21"/>
+<rect x="144" y="29" width="14" height="2" fill="#5d6c76" opacity="0.6"/>
+<rect x="160" y="29" width="14" height="2" fill="#5d6c76" opacity="0.6"/>
+<polygon points="140,32 160,30 158,42 142,44" fill="#aab8c2" opacity="0.3"/>
+<polygon points="66,50 150,46 172,54 172,100 160,112 78,112 62,102 62,62" fill="#39444d"/>
+<polygon points="66,50 112,48 108,58 68,60" fill="#5d6c76" opacity="0.85"/>
+<rect x="78" y="108" width="82" height="4" fill="#2a333a"/>
+<rect x="120" y="52" width="2" height="56" fill="#161c21" opacity="0.5"/>
+<rect x="66" y="78" width="104" height="2" fill="#161c21" opacity="0.4"/>
+<rect x="150" y="60" width="16" height="3" fill="#161c21"/>
+<rect x="150" y="70" width="16" height="3" fill="#161c21"/>
+<rect x="150" y="80" width="16" height="3" fill="#161c21"/>
+<rect x="70" y="96" width="26" height="5" fill="#e23d3d" opacity="0.85"/>
+<polygon points="80,64 120,60 112,76 76,80" fill="#aab8c2" opacity="0.35"/>
+<polygon points="130,88 162,86 158,100 128,100" fill="#aab8c2" opacity="0.3"/>
+<rect x="56" y="51.5" width="28" height="13" fill="#161c21"/>
+<circle cx="70" cy="58" r="6.5" fill="#e23d3d"/>
+<line x1="60" y1="52" x2="52" y2="38" stroke="#5d6c76" stroke-width="2"/>
+<circle cx="51.5" cy="37" r="1.5" fill="#e23d3d" opacity="0.9"/>
+<polygon points="84,112 150,112 154,126 146,142 88,142 80,126" fill="#39444d"/>
+<rect x="84" y="112" width="66" height="3" fill="#5d6c76" opacity="0.7"/>
+<rect x="104" y="134" width="36" height="8" fill="#161c21"/>
+<rect x="104" y="134" width="36" height="2" fill="#5d6c76" opacity="0.6"/>
+<rect x="106" y="140" width="3" height="2" fill="#c9b23c" opacity="0.85"/>
+<rect x="112" y="140" width="3" height="2" fill="#161c21" opacity="0.85"/>
+<rect x="118" y="140" width="3" height="2" fill="#c9b23c" opacity="0.85"/>
+<rect x="124" y="140" width="3" height="2" fill="#161c21" opacity="0.85"/>
+<rect x="130" y="140" width="3" height="2" fill="#c9b23c" opacity="0.85"/>
+<rect x="136" y="140" width="3" height="2" fill="#161c21" opacity="0.85"/>
+<polygon points="92,126 128,130 124,152 96,148" fill="#39444d"/>
+<polygon points="98,146 124,152 130,172 104,174" fill="#39444d"/>
+<polygon points="100,172 132,174 134,178 96,178" fill="#2a333a"/>
+<line x1="98" y1="146" x2="124" y2="152" stroke="#5d6c76" stroke-width="1.5" opacity="0.6"/>
+<circle cx="110" cy="130" r="6" fill="#161c21"/>
+<circle cx="118" cy="150" r="5" fill="#161c21"/>
+<rect x="108" y="164" width="14" height="3" fill="#161c21"/>
+</svg>

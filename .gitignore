@@ -2,7 +2,7 @@
 /android/
 autotest_shots/
 /export/
-/autotest_run*.log
+/autotest_*.log
 /at*.txt
 tools/piper_voices/*.onnx
 __pycache__/

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 16" width="32" height="16">
+<!-- 电浆矢弹 32x16，原点(16,8)，+X=弹头（PlasmaMissile 挂 Sprite2D 随弹体轴转）。
+白热芯+冰蓝电离鞘+深电蓝壳+尾部电弧须；尾迹/爆闪粒子见 plasma_missile.gd。
+伤害模型=HeavyMissile 原样（换皮不换语法，见提案_v2 §1）。 -->
+<defs>
+<radialGradient id="rg1"><stop offset="0" stop-color="#7fd0ff" stop-opacity="0.55"/><stop offset="1" stop-color="#7fd0ff" stop-opacity="0.0"/></radialGradient>
+</defs>
+<ellipse cx="16" cy="8" rx="15" ry="7" fill="url(#rg1)"/>
+<polygon points="4,8 9,5.2 16,4.2 23,5.4 29,8 23,10.6 16,11.8 9,10.8" fill="#2b6ea0"/>
+<polygon points="7,8 12,6.1 18,5.4 24,6.6 27,8 24,9.4 18,10.6 12,9.9" fill="#7fd0ff" opacity="0.9"/>
+<polygon points="9,8 15,6.6 25,7.6 25,8.4 15,9.4" fill="#eaf6ff"/>
+<line x1="2" y1="8" x2="6" y2="8" stroke="#7fd0ff" stroke-width="1.4" opacity="0.9"/>
+<line x1="1" y1="5.5" x2="5" y2="7" stroke="#7fd0ff" stroke-width="1.1" opacity="0.7"/>
+<line x1="1" y1="10.5" x2="5" y2="9" stroke="#7fd0ff" stroke-width="1.1" opacity="0.7"/>
+</svg>

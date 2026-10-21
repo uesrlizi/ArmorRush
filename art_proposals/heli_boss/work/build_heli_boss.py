@@ -16,7 +16,7 @@ PIECE = {  # name: (svg, canvas w, h)
     'tailrotor': ('heli_boss_tailrotor.svg', 72, 72),
     'gun':       ('heli_boss_gun.svg', 104, 104),
 }
-ELITE = os.path.join(ROOT, 'assets', 'elite_mortar_body.svg')  # 60×80 现役同框
+ELITE = os.path.join(ROOT, 'assets', 'enemy_rust_elite_body.svg')  # 60×80 现役同框
 
 # 组装账（body 画布坐标 → 各件画布 TL = 挂点 − pivot）
 MOUNT = {  # piece: (挂点x, 挂点y, pivotx, pivoty)

@@ -1,7 +1,7 @@
 extends SceneTree
 
 ## 通用探针：把 SVG 光栅成 PNG（与 Godot 引擎同源渲染），供美术自验与提案评审。
-## 用法：godot --headless --path <项目> --script res://tests/raster_svg.gd -- <in.svg> <out.png> [scale]
+## 用法：godot --headless --path <项目> --script res://art_proposals/raster_svg.gd -- <in.svg> <out.png> [scale]
 ## 注：Godot 4.x 的 Image.load_svg_from_string 须实例调用（静态调用直接 parse error）。
 ## 来源：svg-game-art skill；原版 Space_War_Ship/tests/probe_svg_raster.gd。
 

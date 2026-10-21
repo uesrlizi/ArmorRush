@@ -5,12 +5,12 @@ extends Node2D
 ## 跑法：godot --path . res://tools/eye_check.tscn（须带窗口，截图依赖渲染帧）
 
 const SCENES := [
-	preload("res://scenes/enemy.tscn"),
-	preload("res://scenes/enemy_drone.tscn"),
-	preload("res://scenes/enemy_shield.tscn"),
-	preload("res://scenes/elite_mortar.tscn"),
+	preload("res://scenes/units/enemy_1.tscn"),
+	preload("res://scenes/units/enemy_drone_1.tscn"),
+	preload("res://scenes/units/enemy_shield_1.tscn"),
+	preload("res://scenes/units/elite_1.tscn"),
 ]
-const BOSS := preload("res://scenes/boss.tscn")
+const BOSS := preload("res://scenes/units/boss_1.tscn")
 
 
 func _ready() -> void:

@@ -23,27 +23,27 @@ Godot 4.7 制作的 AC（Armored Core）风味 2D 机甲跑酷。一台没登记
 - **精英·导弹车**：跑过 `ELITE_MIN_DISTANCE` 后进选怪池（15%）。继承步行炮台的车体与受击/死亡全套（击退响应 0.25，重甲钝感），攻击层替换为周期导弹齐射：枪口预警闪光（0.6s 固定）+ 0.5s 出弹窗 → 真追踪导弹 → 落地**球状爆伤**（半径 95+玩家宽限：跳跃顶点逃不掉，必须推进升空）。
 - **BOSS 追击大型机**：`BOSS_FIRST_DISTANCE`（6000）首遇，击退后 12000 再遇。锁画面右缘与玩家同行——跑酷不断、镜头不接管。**平时钉在构图位**（镜头中心右侧 1000，画面右 5/6）：不追人不压进，距离由玩家是否推进决定。**移动是真物理**（速度+加速度+比例趋近，无坐标吸附/瞬移），横向速度上限 640；**扫射全程锚点冻结**（开炮停稳）——玩家推进自然拉近，这就是近战窗口：冲刺 900 > 它的上限 640，停驻期能破防贴脸。锚点从玩家位置直算不经 Camera2D：玩家死亡的震屏（offset）不会把 BOSS 抽得瞬移。两招交替：**高位扫射**（机体真的压到射高 390 再开火——本体机动就是预警，枪口预警 0.35s 后**机枪流**：≈12 发/秒持续 1.6s、散布半角 2° 扫成扇面；枪口 410 在最高地形站立头顶 470 之上，贴地/起跳安全、滞空挨打；二阶段双机枪 2.2s）⇄ **导弹雨**（发射臂闪光 → 追踪导弹齐射：追玩家脚底、飞过即锁向砸地、撞地爆球）。半血进二阶段：节奏加快、双机枪、导弹+2。击退得 300 分，血条在 HUD 顶部（遭遇时 WARNING 闪字）。
 - **追踪导弹规约**（`heavy_missile.gd`）：有限转向率（3.2rad/s，可甩但甩不干净）追玩家脚底（瞄脚底让弹道自然收束地面）；目标落到弹道后方（已飞过）或追踪超时 3s 即锁死朝向直线飞行，必撞地不缠斗；只与地面耦合（穿过机体不引爆），撞地即爆，球状检测（`ground_blast.gd`，引爆帧一次结算）。
-- 数值全部在 `balance.gd` 的 `HEAVY_*` / `ELITE_*` / `BOSS_*` 段。实现：导弹 `heavy_missile.gd`、爆伤 `ground_blast.gd`；精英继承 `Enemy` 只换攻击层，BOSS 也继承 `Enemy`（瞄准/受击/死亡复用），画面锚定/纵向机动/出招状态机自管；调度在 `spawner.gd`（BOSS 非池化）。
-- **占位美术**：BOSS 机体仍为平涂方块 SVG（`assets/boss_dreadnought_*.svg`）；精英导弹车已出正式图 `assets/elite_mortar_body.svg`（60×80 车体+肩部垂发舱一体构图：小头前置红眼缝、两仓垂发舱后置高过头=一轮 2 发，发射方向跟仓口实际朝向）；特效全部是贴图素材（`assets/fx_*.svg`）+ 场景参数（`threat_flash.tscn` / `flash_burst.tscn` / `muzzle_flash.tscn` 枪口焰（旧版淡暖黄观感+粒子曲线） / `missile_smoke.tscn` 拉烟 + `missile_flame.tscn` 导弹尾焰），编辑器里直接调；**例外：推进焰 `thruster_flame.gd` 经用户拍板保留 `_draw` 固定形态焰**（火箭引擎焰直接绘制比粒子合适，粒子版已回退）；正式美术后补。
+- 数值全部在 `balance.gd` 的 `HEAVY_*` / `ELITE_*` / `BOSS_*` 段。实现：导弹 `scripts/weapons/heavy_missile.gd`、爆伤 `scripts/weapons/ground_blast.gd`；精英继承 `Enemy` 只换攻击层，BOSS 也继承 `Enemy`（瞄准/受击/死亡复用），画面锚定/纵向机动/出招状态机自管；调度在 `scripts/world/spawner.gd`（BOSS 非池化）。
+- **占位美术**：BOSS 机体仍为平涂方块 SVG（`assets/boss_rust_*.svg`）；精英导弹车已出正式图 `assets/enemy_rust_elite_body.svg`（60×80 车体+肩部垂发舱一体构图：小头前置红眼缝、两仓垂发舱后置高过头=一轮 2 发，发射方向跟仓口实际朝向）；特效全部是贴图素材（`assets/fx_*.svg`）+ 场景参数（`threat_flash.tscn` / `flash_burst.tscn` / `muzzle_flash.tscn` 枪口焰（旧版淡暖黄观感+粒子曲线） / `missile_smoke.tscn` 拉烟 + `missile_flame.tscn` 导弹尾焰），编辑器里直接调；**例外：推进焰 `thruster_flame.gd` 经用户拍板保留 `_draw` 固定形态焰**（火箭引擎焰直接绘制比粒子合适，粒子版已回退）；正式美术后补。
 
 ## 启动流程（小恐龙式）
 
-开机即从全黑渐亮（0.5s）进启动页：机甲在原点平地待命（不刷怪、UI 藏起、锈雨照下），屏幕提示"点击屏幕或按任意键开始"（移动端为"触摸屏幕开始"）。任意输入后进战斗——"主系统，作战模式。"播报 + HUD 依次点亮 + 头顶条渐亮 + 触控按钮渐显（开场无喷焰——推进器点火演出已删，全焰+推进音会被读成误触发推进）；操作延迟约半秒解锁（COMBAT_INPUT_DELAY），开始那一下的按键不会直接变成跳跃/攻击。死亡时机体失控，触控 UI 渐隐停用（全屏开火区不闭嘴会吃掉重开输入）。死亡重开（任意键 / 点屏，结算出现后 0.4s 防抖挡残留输入）完整渐黑（0.5s）→ 全黑略停一拍（0.25s）→ 重载 → 从黑渐亮回到启动页，再点一次才开始。转场黑屏在全局 autoload 层（`scripts/scene_fade.gd`，名 `Fade`）——放场景内会随旧场景卸载，reload 空档帧闪清屏色（踩过）。待机时机体每隔几秒排一口待机汽（推进器小喷焰）。
+开机即从全黑渐亮（0.5s）进启动页：机甲在原点平地待命（不刷怪、UI 藏起、锈雨照下），屏幕提示"点击屏幕或按任意键开始"（移动端为"触摸屏幕开始"）。任意输入后进战斗——"主系统，作战模式。"播报 + HUD 依次点亮 + 头顶条渐亮 + 触控按钮渐显（开场无喷焰——推进器点火演出已删，全焰+推进音会被读成误触发推进）；操作延迟约半秒解锁（COMBAT_INPUT_DELAY），开始那一下的按键不会直接变成跳跃/攻击。死亡时机体失控，触控 UI 渐隐停用（全屏开火区不闭嘴会吃掉重开输入）。死亡重开（任意键 / 点屏，结算出现后 0.4s 防抖挡残留输入）完整渐黑（0.5s）→ 全黑略停一拍（0.25s）→ 重载 → 从黑渐亮回到启动页，再点一次才开始。转场黑屏在全局 autoload 层（`scripts/core/scene_fade.gd`，名 `Fade`）——放场景内会随旧场景卸载，reload 空档帧闪清屏色（踩过）。待机时机体每隔几秒排一口待机汽（推进器小喷焰）。
 
 ## 风格规约（做任何视觉/UI 前先读）
 
 - **全游戏平涂：无描边、无边框、无底板、无阴影。** UI 就是纯字加颜色，不要给任何东西套框或垫底。
-- 美术手写 SVG，AC6 设计语言。四套场景提案全保留，后续都会装（锈雨废都已实装）。
+- 美术手写 SVG，AC6 设计语言。四套场景提案全部实装：锈雨废都（场景1）→ 精炼所工业带（场景2）→ 雪原警戒点（场景3）→ 珊瑚辐合夜（场景4）。**场景轮换为洗牌袋制**：开机经入口跳板 `entry.tscn` 抽第一关（只从开局白名单抽，末位场景不当首关），此后每次通关从 `RunState` 轮换袋黑场抽下一关——每 4 关全场景恰好各一遍，无固定顺序、无末章。
 - **阵营色（敌我识别的统一出处）**：玩家点缀琥珀 `#ffa04a`，敌方点缀锈红 `#ff5140`，命中迸溅继承发射方的阵营色。**子弹当前敌我共用同一颗亮黄 `#ffee58` 细长水滴**（纯色无弹芯，单一资源 `bullet_player.svg`；第一代琥珀/锈红双色水滴存档于 `bullet_enemy.svg`，要恢复区分把 enemy_bullet.tscn 的贴图改回去即可）。敌弹贴图纵向压 0.7（enemy_bullet.tscn 里 Sprite2D scale）：慢弹凝视得住显短粗，快弹拖尾显细长，压细反向补偿观感差；非均匀缩放只能加在 Sprite 上，加在会旋转的 Area2D 上斜飞会被剪切。
 - 字幕/HUD 中文，统一走 `UIFont.cjk()`（打包的思源黑体子集 `assets/fonts/ui_cjk.ttf`）。Web 导出拿不到系统字体，SystemFont 在网页上全是豆腐块；**改了界面文案/播报台词要重跑 `py -3 tools/subset_font.py`**，否则新字在 Web 端缺字。
 
 ## 架构速览
 
 - **内容开关**：Main 节点的导出参数（编辑器 Inspector 打勾）——`enable_boss`（追击大型机）/ `enable_elite`（精英·导弹车）/ `enable_threat_warnings`（威胁提醒=枪口预警闪光+警告音，统一走 `ThreatFlash.warn()`；关=闪光与警告音都不出、直接出招）。_ready 转发给 Spawner（`boss_enabled`/`elite_enabled` 门控）与预警组件（`ThreatFlash.warnings_enabled` 静态开关，出招节拍不变）。
-- `scripts/balance.gd` — **所有可调数值的唯一出处**（autoload `Balance`）。场景和脚本不存副本，改了没效果先查是不是有副本遮蔽。
-- `scripts/scroll_object.gd` + `spawner.gd` — 按玩家带符号位移刷怪 + 对象池回收；地形 `terrain.gd` 高低三档连续，`world_strip.gd` 平铺背景。
-- `scripts/comms.gd` — 系统播报（autoload `Comms`）：**非人声机电提示，无剧情无角色**。只有三条：作战开始 + 两档低 AP（50%/25%，滞回防重复）。字幕（AC6 式白字+分隔横线）+ 电台总线（320–3200Hz 带通，效果链 `Balance.COMMS_RADIO_FX` 开关，当前关）。
-- `scripts/sfx.gd` — 音效总管（autoload `Sfx`）：固定 12 声道池 + 注册字典音库 + 逐键节流，全非定位（镜头即耳朵）；推进连续音吃 Player 喷焰档位，环境床走 Amb 总线。台账见 `design/sfx.md`。
+- `scripts/core/balance.gd` — **所有可调数值的唯一出处**（autoload `Balance`）。场景和脚本不存副本，改了没效果先查是不是有副本遮蔽。
+- `scripts/world/scroll_object.gd` + `scripts/world/spawner.gd` — 按玩家带符号位移刷怪 + 对象池回收；地形 `scripts/world/terrain.gd` 高低三档连续，`scripts/world/world_strip.gd` 平铺背景。
+- `scripts/core/comms.gd` — 系统播报（autoload `Comms`）：**非人声机电提示，无剧情无角色**。只有三条：作战开始 + 两档低 AP（50%/25%，滞回防重复）。字幕（AC6 式白字+分隔横线）+ 电台总线（320–3200Hz 带通，效果链 `Balance.COMMS_RADIO_FX` 开关，当前关）。
+- `scripts/core/sfx.gd` — 音效总管（autoload `Sfx`）：固定 12 声道池 + 注册字典音库 + 逐键节流，全非定位（镜头即耳朵）；推进连续音吃 Player 喷焰档位，环境床走 Amb 总线。台账见 `design/sfx.md`。
 - `default_bus_layout.tres` — Sfx/Amb/Radio 三条总线的烘焙布局，**必配**：Web 导出上运行时 `AudioServer.add_bus` 建的总线不出声（2026-10-17 实测定罪），代码里 `_ensure_bus`/Comms 的运行时补建只是桌面兜底。
 - `data/comms.json` — 播报单一数据源：`text`=中文字幕，`tts`=英文朗读，说话人含 edge-tts/piper 两套音色参数。
 
@@ -93,7 +93,7 @@ py -3 tools/gen_sfx.py         # 实录转换+合成垫，输出 assets/sfx/（�
 
 ```
 G="C:/Program Files (x86)/Steam/steamapps/common/Godot Engine/godot.windows.opt.tools.64.exe"
-"$G" --headless --check-only --script res://scripts/xxx.gd   # 单脚本语法
+"$G" --headless --check-only --script res://scripts/core/xxx.gd   # 单脚本语法
 "$G" --headless --quit-after 120                              # 整场景跑，看报错
 "$G" -- --autotest                                            # 全流程自测（必须带窗口！）
 ```

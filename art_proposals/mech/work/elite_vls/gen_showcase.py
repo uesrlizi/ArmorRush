@@ -65,7 +65,7 @@ def near(c, ref, tol=3):
 
 
 # ---- 1) 一体车身：渲染 + 像素断言 ----
-elite, EW, EH = draw_svg(os.path.join(ASSETS, "elite_mortar_body.svg"), scale=SS)
+elite, EW, EH = draw_svg(os.path.join(ASSETS, "enemy_rust_elite_body.svg"), scale=SS)
 assert (EW, EH) == (60 * SS, 80 * SS), "viewBox 与 width/height 不一致"
 
 checks = [
@@ -112,7 +112,7 @@ if not ok:
     fails.append("画布=包围盒")
 
 # ---- 2) showcase ----
-walker, WW, WH = draw_svg(os.path.join(ASSETS, "enemy_walker_body.svg"), scale=SS)
+walker, WW, WH = draw_svg(os.path.join(ASSETS, "enemy_rust_walker_body.svg"), scale=SS)
 player, PW2, PH2 = draw_svg(os.path.join(ASSETS, "player_mech_body.svg"), scale=SS)
 
 DARK = (20, 19, 18, 255)

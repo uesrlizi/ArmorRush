@@ -38,7 +38,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")))
 from generate_proposals import Svg, f  # noqa: E402
 
-ASSETS = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "assets"))
+ASSETS = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "assets", "world_2"))
 
 # ---- 环境色板（提案二「精炼所工业带」） ----
 SKY_STOPS = [(0, "#a9bcb2", 1), (0.42, "#9db1a6", 1), (0.68, "#8ba398", 1), (1.0, "#6f857b", 1)]

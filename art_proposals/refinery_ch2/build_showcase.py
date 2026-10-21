@@ -42,12 +42,12 @@ def fit(img, w=None, h=None):
 
 # 想看的单位对（章1 资产名, 章2 资产名, 展示名）
 UNITS = [
-    ("enemy_walker_body", "enemy_ref_walker_body", "步行者"),
-    ("enemy_drone", "enemy_ref_drone", "无人机"),
-    ("enemy_shield_body", "enemy_ref_shield_body", "盾卫"),
-    ("elite_mortar_body", "enemy_ref_elite_body", "精英·导弹车"),
+    ("enemy_rust_walker_body", "enemy_ref_walker_body", "步行者"),
+    ("enemy_rust_drone", "enemy_ref_drone", "无人机"),
+    ("enemy_rust_shield_body", "enemy_ref_shield_body", "盾卫"),
+    ("enemy_rust_elite_body", "enemy_ref_elite_body", "精英·导弹车"),
 ]
-BOSSES = [("boss_dreadnought_body", "boss_ref_body", "BOSS")]
+BOSSES = [("boss_rust_body", "boss_ref_body", "BOSS")]
 
 pad = 28
 cell_w, cell_h = 300, 280
@@ -63,8 +63,8 @@ label(draw, (pad, 16), "第二章「精炼所工业带」换皮对照 —— 每
 y0 = 60
 for c, (old, new, name) in enumerate(UNITS):
     x = pad + c * cell_w
-    old_img = fit(raster(f"assets/{old}.svg", f"show_{old}.png", 2.0), cell_w - 60, 100)
-    new_img = fit(raster(f"assets/{new}.svg", f"show_{new}.png", 2.0), cell_w - 60, 100)
+    old_img = fit(raster(f"assets/world_2/{old}.svg", f"show_{old}.png", 2.0), cell_w - 60, 100)
+    new_img = fit(raster(f"assets/world_2/{new}.svg", f"show_{new}.png", 2.0), cell_w - 60, 100)
     draw.rectangle([x, y0, x + cell_w - 12, y0 + cell_h - 16], fill=(33, 38, 35, 255))
     sheet.alpha_composite(old_img, (x + (cell_w - 12 - old_img.width) // 2, y0 + 8))
     sheet.alpha_composite(new_img, (x + (cell_w - 12 - new_img.width) // 2, y0 + 118))
@@ -74,18 +74,18 @@ for c, (old, new, name) in enumerate(UNITS):
 y1 = y0 + cell_h + 24
 bx = pad
 draw.rectangle([bx, y1, bx + 560, y1 + 320], fill=(33, 38, 35, 255))
-old_boss = fit(raster("assets/boss_dreadnought_body.svg", "show_boss_old.png", 1.6), 520, 130)
-new_boss = fit(raster("assets/boss_ref_body.svg", "show_boss_new.png", 1.6), 520, 130)
+old_boss = fit(raster("assets/world_1/boss_rust_body.svg", "show_boss_old.png", 1.6), 520, 130)
+new_boss = fit(raster("assets/world_2/boss_ref_body.svg", "show_boss_new.png", 1.6), 520, 130)
 sheet.alpha_composite(old_boss, (bx + (560 - old_boss.width) // 2, y1 + 12))
 sheet.alpha_composite(new_boss, (bx + (560 - new_boss.width) // 2, y1 + 168))
 label(draw, (bx + 8, y1 + 288), "BOSS：重型武直（上）→「钢嵴」浮空炮舰（下）", 22)
 
 # ---- 环境条带（章2）----
 label(draw, (bx + 600, y1 - 2), "环境（章2 新皮）", 24)
-env_far = fit(raster("assets/env_ref_far.svg", "show_far.png", 0.28), 520, 180)
-env_mid = fit(raster("assets/env_ref_mid.svg", "show_mid.png", 0.28), 520, 90)
-ground = fit(raster("assets/env_ref_ground_top.svg", "show_ground.png", 1.2), 520, 40)
-deck = fit(raster("assets/env_ref_deck.svg", "show_deck.png", 0.7), 520, 30)
+env_far = fit(raster("assets/world_2/env_ref_far.svg", "show_far.png", 0.28), 520, 180)
+env_mid = fit(raster("assets/world_2/env_ref_mid.svg", "show_mid.png", 0.28), 520, 90)
+ground = fit(raster("assets/world_2/env_ref_ground_top.svg", "show_ground.png", 1.2), 520, 40)
+deck = fit(raster("assets/world_2/env_ref_deck.svg", "show_deck.png", 0.7), 520, 30)
 sheet.alpha_composite(env_far, (bx + 600, y1 + 26))
 sheet.alpha_composite(env_mid, (bx + 600, y1 + 26 + env_far.height + 10))
 sheet.alpha_composite(ground, (bx + 600, y1 + 26 + env_far.height + 10 + env_mid.height + 12))
