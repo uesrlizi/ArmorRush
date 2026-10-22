@@ -1,0 +1,92 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://scripts/units/boss_redwheel.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/world_6/boss_red_body.svg" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/fx/muzzle_flash.tscn" id="3"]
+[ext_resource type="Texture2D" path="res://assets/world_6/boss_red_wheel.svg" id="4"]
+[ext_resource type="Script" path="res://scripts/units/eye_glow.gd" id="5"]
+[ext_resource type="PackedScene" path="res://scenes/fx/threat_flash.tscn" id="6"]
+[ext_resource type="Texture2D" path="res://assets/world_6/boss_red_rack.svg" id="7"]
+[ext_resource type="Texture2D" path="res://assets/common/fx_flame.svg" id="8"]
+
+; 第六章 BOSS·斗轮采集舰「赤轮」（BossRedwheel，矿区电网与输送能力套件）：
+; 独眼条带 y60..66 含 (55,63)（EyeGlow (-95,-27) 沿用）；
+; ArmPivot=斗轮毂座画布 (44,120)→局部 (-106,30)（固定不俯仰；斗轮=独立旋转件
+; Wheel，Muzzle=毂心 (0,0)，弹石出膛点）；Rack=背甲炮架画布 (210,38)→局部
+; (60,-52)（架画布 60x54 枢端 (30,50)→offset(-30,-50)，固定射角，
+; Muzzle=架局部 (0,-46)=管口 (30,4)，Flash+ThreatFlash=电网闸预警）；
+; BayPort=腹舱口画布 (150,170)→局部 (0,80)（ThreatFlash=溜矿车预警）；
+; Thruster1/2=局部 (-30,64)/(80,64)（通用 fx_flame+加色，金琥珀呼吸）。
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
+size = Vector2(280, 150)
+
+[sub_resource type="CanvasItemMaterial" id="addmat"]
+blend_mode = 1
+
+[node name="BossRedwheel" type="CharacterBody2D"]
+collision_layer = 4
+collision_mask = 0
+script = ExtResource("1")
+feet_offset = 90.0
+body_size = Vector2(300, 180)
+
+[node name="Visuals" type="Node2D" parent="."]
+
+[node name="Sprite2D" type="Sprite2D" parent="Visuals"]
+texture = ExtResource("2")
+
+[node name="EyeGlow" type="Node2D" parent="Visuals/Sprite2D"]
+position = Vector2(-95, -27)
+scale = Vector2(1.2, 1.2)
+script = ExtResource("5")
+
+[node name="ArmPivot" type="Node2D" parent="Visuals"]
+position = Vector2(-106, 30)
+
+[node name="Wheel" type="Sprite2D" parent="Visuals/ArmPivot"]
+texture = ExtResource("4")
+
+[node name="Muzzle" type="Marker2D" parent="Visuals/ArmPivot"]
+position = Vector2(0, 0)
+
+[node name="Flash" parent="Visuals/ArmPivot/Muzzle" instance=ExtResource("3")]
+
+[node name="ThreatFlash" parent="Visuals/ArmPivot/Muzzle" instance=ExtResource("6")]
+
+[node name="Rack" type="Node2D" parent="Visuals"]
+position = Vector2(60, -52)
+
+[node name="Sprite2D" type="Sprite2D" parent="Visuals/Rack"]
+texture = ExtResource("7")
+centered = false
+offset = Vector2(-30, -50)
+
+[node name="Muzzle" type="Marker2D" parent="Visuals/Rack"]
+position = Vector2(0, -46)
+
+[node name="Flash" parent="Visuals/Rack/Muzzle" instance=ExtResource("3")]
+
+[node name="ThreatFlash" parent="Visuals/Rack/Muzzle" instance=ExtResource("6")]
+
+[node name="BayPort" type="Marker2D" parent="Visuals"]
+position = Vector2(0, 80)
+
+[node name="ThreatFlash" parent="Visuals/BayPort" instance=ExtResource("6")]
+
+[node name="Thruster1" type="Sprite2D" parent="Visuals"]
+modulate = Color(1, 0.75, 0.45, 0.6)
+material = SubResource("addmat")
+position = Vector2(-30, 64)
+scale = Vector2(1.1, 1.1)
+texture = ExtResource("8")
+
+[node name="Thruster2" type="Sprite2D" parent="Visuals"]
+modulate = Color(1, 0.75, 0.45, 0.6)
+material = SubResource("addmat")
+position = Vector2(80, 64)
+scale = Vector2(1.1, 1.1)
+texture = ExtResource("8")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_1")

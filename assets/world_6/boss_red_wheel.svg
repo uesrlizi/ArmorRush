@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+<!-- 第六章 BOSS 斗轮 120x120（独立旋转件，中心 (60,60)=轮毂）。
+轮缘 r54：局部最低点 +84=世界 454（bob 后对 t536 台阶净空 76）。
+旋转由代码驱动（恒转+直射加速）；斗沿矿灯金热斑=采掘高温读法。 -->
+<defs>
+
+</defs>
+<circle cx="60" cy="60" r="58" fill="#33180e"/>
+<circle cx="60" cy="60" r="44" fill="#4e2418" opacity="0.55"/>
+<line x1="60" y1="60" x2="106" y2="60" stroke="#6e3424" stroke-width="5"/>
+<rect x="106" y="51" width="18" height="18" fill="#6e3424"/>
+<rect x="106" y="51" width="18" height="3.5" fill="#a85a3a" opacity="0.8"/>
+<line x1="60" y1="60" x2="92.5" y2="92.5" stroke="#6e3424" stroke-width="5"/>
+<rect x="89.9" y="89.9" width="18" height="18" fill="#6e3424"/>
+<rect x="89.9" y="89.9" width="18" height="3.5" fill="#a85a3a" opacity="0.8"/>
+<line x1="60" y1="60" x2="60" y2="106" stroke="#6e3424" stroke-width="5"/>
+<rect x="51" y="106" width="18" height="18" fill="#6e3424"/>
+<rect x="51" y="106" width="18" height="3.5" fill="#a85a3a" opacity="0.8"/>
+<line x1="60" y1="60" x2="27.5" y2="92.5" stroke="#6e3424" stroke-width="5"/>
+<rect x="12.1" y="89.9" width="18" height="18" fill="#6e3424"/>
+<rect x="12.1" y="89.9" width="18" height="3.5" fill="#a85a3a" opacity="0.8"/>
+<line x1="60" y1="60" x2="14" y2="60" stroke="#6e3424" stroke-width="5"/>
+<rect x="-4" y="51" width="18" height="18" fill="#6e3424"/>
+<rect x="-4" y="51" width="18" height="3.5" fill="#a85a3a" opacity="0.8"/>
+<line x1="60" y1="60" x2="27.5" y2="27.5" stroke="#6e3424" stroke-width="5"/>
+<rect x="12.1" y="12.1" width="18" height="18" fill="#6e3424"/>
+<rect x="12.1" y="12.1" width="18" height="3.5" fill="#a85a3a" opacity="0.8"/>
+<line x1="60" y1="60" x2="60" y2="14" stroke="#6e3424" stroke-width="5"/>
+<rect x="51" y="-4" width="18" height="18" fill="#6e3424"/>
+<rect x="51" y="-4" width="18" height="3.5" fill="#a85a3a" opacity="0.8"/>
+<line x1="60" y1="60" x2="92.5" y2="27.5" stroke="#6e3424" stroke-width="5"/>
+<rect x="89.9" y="12.1" width="18" height="18" fill="#6e3424"/>
+<rect x="89.9" y="12.1" width="18" height="3.5" fill="#a85a3a" opacity="0.8"/>
+<circle cx="60" cy="60" r="12" fill="#4e2418"/>
+<circle cx="60" cy="60" r="5" fill="#33180e"/>
+<circle cx="27.6" cy="104.5" r="3.2" fill="#ffb347" opacity="0.9"/>
+<circle cx="92.4" cy="15.5" r="2.4" fill="#ffb347" opacity="0.75"/>
+</svg>

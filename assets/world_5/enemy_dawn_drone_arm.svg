@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 16" width="32" height="16">
+<!-- 第五章无人机枪臂 32x16。肩 joint (28,8)、枪口尖端 ~(12,9.5)
+（Muzzle=臂画布 (13,11)）。 -->
+<defs>
+
+</defs>
+<circle cx="28" cy="8" r="2.5" fill="#3a2c50"/>
+<rect x="18" y="6.5" width="10" height="5.5" fill="#4e3c64"/>
+<rect x="18" y="6.5" width="10" height="2" fill="#7a6090"/>
+<rect x="13.5" y="8" width="5" height="3" fill="#2a1f3e"/>
+<rect x="11" y="7.5" width="3" height="4.5" fill="#4e3c64"/>
+<circle cx="11.8" cy="9.5" r="1" fill="#2a1f3e"/>
+<circle cx="25" cy="10.5" r="1" fill="#ffc46a" opacity="0.9"/>
+</svg>

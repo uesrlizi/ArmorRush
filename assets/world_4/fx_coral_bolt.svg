@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 10" width="28" height="10">
+<!-- 钓灯能量束矢弹 28x10（coral_bolt.tscn 直射弹本体，+X 弹头）。
+几何=world_3/plasma_bolt.svg 六边形能量镖同款（用户钦定"像电浆弹一样只换色"，
+波浪 noodle 版被否），只换珊瑚家配色：深珊瑚壳+珊瑚鞘+白热芯+尾部弧须；
+ADD 材质在场景。碰撞=胶囊沿 +X，r2.6×长24（同 plasma_bolt 规格）。 -->
+<polygon points="2,5 9,2 22,2.5 26,5 22,7.5 9,8" fill="#b53722"/>
+<polygon points="5,5 10,3.2 21,3.6 24,5 21,6.4 10,6.8" fill="#ff7a45" opacity="0.9"/>
+<polygon points="7,4.6 14,3.9 22,4.6 22,5.4 14,6.1 7,5.4" fill="#fff1dd"/>
+<line x1="1" y1="3.5" x2="5" y2="4.6" stroke="#ff7a45" stroke-width="1.1" opacity="0.8"/>
+<line x1="1" y1="6.5" x2="5" y2="5.4" stroke="#ff7a45" stroke-width="1.1" opacity="0.8"/>
+</svg>

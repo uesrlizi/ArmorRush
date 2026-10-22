@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3200 900" width="3200" height="900">
+<!-- 第五章独层地标：天梯缆塔 3200x900（视差 0.9，tile 3200 同屏一份）。
+地标 tex_x=1600（含斜缆半宽 ~300：∈[1500,1700]，防回绕弹切，worlds.md §5）。
+条带位 (8,270) 居中挂载：画布 y0=世界 -180；塔基画布 840=世界 660 沉云海。
+种子 5052。 -->
+<defs>
+
+</defs>
+<rect x="1548" y="828" width="104" height="14" fill="#443258" opacity="0.9"/>
+<rect x="1548" y="828" width="104" height="2.5" fill="#e8b48a" opacity="0.8"/>
+<ellipse cx="1600" cy="840" rx="78" ry="9" fill="#fbeef0" opacity="0.45"/>
+<polygon points="1583,828 1592,120 1597,120 1593,828" fill="#443258" opacity="0.95"/>
+<polygon points="1617,828 1608,120 1603,120 1607,828" fill="#443258" opacity="0.95"/>
+<line x1="1585.5" y1="800" x2="1614.5" y2="800" stroke="#443258" stroke-width="3" opacity="0.9"/>
+<line x1="1585.5" y1="800" x2="1614.5" y2="766" stroke="#443258" stroke-width="1.6" opacity="0.7"/>
+<line x1="1585.9" y1="766" x2="1614.1" y2="766" stroke="#443258" stroke-width="3" opacity="0.9"/>
+<line x1="1585.9" y1="766" x2="1614.1" y2="732" stroke="#443258" stroke-width="1.6" opacity="0.7"/>
+<line x1="1586.3" y1="732" x2="1613.7" y2="732" stroke="#443258" stroke-width="3" opacity="0.9"/>
+<line x1="1586.3" y1="732" x2="1613.7" y2="698" stroke="#443258" stroke-width="1.6" opacity="0.7"/>
+<line x1="1586.8" y1="698" x2="1613.2" y2="698" stroke="#443258" stroke-width="3" opacity="0.9"/>
+<line x1="1586.8" y1="698" x2="1613.2" y2="664" stroke="#443258" stroke-width="1.6" opacity="0.7"/>
+<line x1="1587.2" y1="664" x2="1612.8" y2="664" stroke="#443258" stroke-width="3" opacity="0.9"/>
+<line x1="1587.2" y1="664" x2="1612.8" y2="630" stroke="#443258" stroke-width="1.6" opacity="0.7"/>
+<line x1="1587.6" y1="630" x2="1612.4" y2="630" stroke="#443258" stroke-width="3" opacity="0.9"/>
+<line x1="1587.6" y1="630" x2="1612.4" y2="596" stroke="#443258" stroke-width="1.6" opacity="0.7"/>
+<line x1="1588" y1="596" x2="1612" y2="596" stroke="#443258" stroke-width="3" opacity="0.9"/>
+<line x1="1588" y1="596" x2="1612" y2="562" stroke="#443258" stroke-width="1.6" opacity="0.7"/>
+<line x1="1588.5" y1="562" x2="1611.5" y2="562" stroke="#443258" stroke-width="3" opacity="0.9"/>
+<line x1="1588.5" y1="562" x2="1611.5" y2="528" stroke="#443258" stroke-width="1.6" opacity="0.7"/>
+<line x1="1588.9" y1="528" x2="1611.1" y2="528" stroke="#443258" stroke-width="3" opacity="0.9"/>
+<line x1="1588.9" y1="528" x2="1611.1" y2="494" stroke="#443258" stroke-width="1.6" opacity="0.7"/>
+<line x1="1589.3" y1="494" x2="1610.7" y2="494" stroke="#443258" stroke-width="3" opacity="0.9"/>
+<line x1="1589.3" y1="494" x2="1610.7" y2="460" stroke="#443258" stroke-width="1.6" opacity="0.7"/>
+<line x1="1589.8" y1="460" x2="1610.2" y2="460" stroke="#443258" stroke-width="3" opacity="0.9"/>
+<line x1="1589.8" y1="460" x2="1610.2" y2="426" stroke="#443258" stroke-width="1.6" opacity="0.7"/>
+<line x1="1590.2" y1="426" x2="1609.8" y2="426" stroke="#443258" stroke-width="3" opacity="0.9"/>
+<line x1="1590.2" y1="426" x2="1609.8" y2="392" stroke="#443258" stroke-width="1.6" opacity="0.7"/>
+<line x1="1590.6" y1="392" x2="1609.4" y2="392" stroke="#443258" stroke-width="3" opacity="0.9"/>
+<line x1="1590.6" y1="392" x2="1609.4" y2="358" stroke="#443258" stroke-width="1.6" opacity="0.7"/>
+<line x1="1591" y1="358" x2="1609" y2="358" stroke="#443258" stroke-width="3" opacity="0.9"/>
+<line x1="1591" y1="358" x2="1609" y2="324" stroke="#443258" stroke-width="1.6" opacity="0.7"/>
+<line x1="1591.5" y1="324" x2="1608.5" y2="324" stroke="#443258" stroke-width="3" opacity="0.9"/>
+<line x1="1591.5" y1="324" x2="1608.5" y2="290" stroke="#443258" stroke-width="1.6" opacity="0.7"/>
+<line x1="1591.9" y1="290" x2="1608.1" y2="290" stroke="#443258" stroke-width="3" opacity="0.9"/>
+<line x1="1591.9" y1="290" x2="1608.1" y2="256" stroke="#443258" stroke-width="1.6" opacity="0.7"/>
+<line x1="1592.3" y1="256" x2="1607.7" y2="256" stroke="#443258" stroke-width="3" opacity="0.9"/>
+<line x1="1592.3" y1="256" x2="1607.7" y2="222" stroke="#443258" stroke-width="1.6" opacity="0.7"/>
+<line x1="1592.7" y1="222" x2="1607.3" y2="222" stroke="#443258" stroke-width="3" opacity="0.9"/>
+<line x1="1592.7" y1="222" x2="1607.3" y2="188" stroke="#443258" stroke-width="1.6" opacity="0.7"/>
+<line x1="1593.2" y1="188" x2="1606.8" y2="188" stroke="#443258" stroke-width="3" opacity="0.9"/>
+<line x1="1593.2" y1="188" x2="1606.8" y2="154" stroke="#443258" stroke-width="1.6" opacity="0.7"/>
+<line x1="1593.6" y1="154" x2="1606.4" y2="154" stroke="#443258" stroke-width="3" opacity="0.9"/>
+<line x1="1593.6" y1="154" x2="1606.4" y2="120" stroke="#443258" stroke-width="1.6" opacity="0.7"/>
+<rect x="1586" y="108" width="28" height="16" fill="#443258" opacity="0.95"/>
+<rect x="1586" y="108" width="28" height="2.5" fill="#e8b48a" opacity="0.85"/>
+<line x1="1594" y1="108" x2="1300" y2="-40" stroke="#5a446e" stroke-width="3" opacity="0.9"/>
+<line x1="1606" y1="108" x2="1800" y2="-40" stroke="#5a446e" stroke-width="2" opacity="0.7"/>
+<rect x="1420" y="340" width="26" height="12" fill="#443258" opacity="0.95"/>
+<rect x="1700" y="480" width="16" height="12" fill="#443258" opacity="0.95"/>
+<rect x="1703" y="483" width="10" height="4" fill="#ffc46a" opacity="0.85"/>
+<circle cx="1600" cy="104" r="8" fill="#ff4640" opacity="0.3"/>
+<circle cx="1600" cy="104" r="16" fill="#ff4640" opacity="0.13"/>
+<circle cx="1600" cy="104" r="2.4" fill="#ff4640"/>
+<circle cx="1433" cy="346" r="8" fill="#ff4640" opacity="0.3"/>
+<circle cx="1433" cy="346" r="16" fill="#ff4640" opacity="0.13"/>
+<circle cx="1433" cy="346" r="1.8" fill="#ff4640"/>
+<ellipse cx="1540" cy="836" rx="70" ry="12" fill="#fbeef0" opacity="0.5"/>
+<ellipse cx="1540" cy="843.2" rx="59.5" ry="6" fill="#a87c96" opacity="0.3"/>
+<ellipse cx="1655" cy="844" rx="60" ry="10" fill="#fbeef0" opacity="0.4"/>
+<ellipse cx="1655" cy="850" rx="51" ry="5" fill="#a87c96" opacity="0.3"/>
+<ellipse cx="1610" cy="814" rx="90" ry="14" fill="#fbeef0" opacity="0.3"/>
+<ellipse cx="1610" cy="822.4" rx="76.5" ry="7" fill="#a87c96" opacity="0.3"/>
+</svg>

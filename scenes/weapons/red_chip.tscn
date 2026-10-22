@@ -1,0 +1,23 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/weapons/bullet.gd" id="1"]
+; 赤轮斗轮弹石的直射弹（bullet.gd 纯换皮：语法/速度/伤害由发射方赋值不变）。
+; 红砂弹石语汇：暗壳岩体+受光棱面（fx_red_chip.svg），亮沙底靠暗壳剪影读。
+; 贴图 22x12；碰撞 = 胶囊沿 +X（飞行方向），r4×长16 贴合石形。
+[ext_resource type="Texture2D" path="res://assets/world_6/fx_red_chip.svg" id="2"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_1"]
+radius = 4.0
+height = 16.0
+
+[node name="RedChip" type="Area2D"]
+collision_layer = 16
+collision_mask = 3
+script = ExtResource("1")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_1")

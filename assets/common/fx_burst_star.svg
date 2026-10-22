@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+<!-- 爆闪六芒星（平涂；中性白，色相全交 color_ramp；ADD 下作白芯爆闪——
+     替代平涂圆盘白芯：圆盘 2~3 粒同尺寸叠加读成"大饼/月亮"，星形射线
+     给能量不给面积）。
+     坐标账：画布 64x64，星心 (32,32)；6 根尖刺每 60° 一根，尖端 r=29、
+     根部 r=7、半宽 3.5；中央圆 r=7 收芯。ThorVG 禁 g rotate——全部烘焙坐标：
+     尖=心+29·dir(θ)，根=心±7·dir(θ±22°)，θ∈{90,30,150,210,270,330}°（y 向下取负 sin）。
+     四周留 3px 防采样切边。 -->
+<polygon points="32,3 29.4,25.5 34.6,25.5" fill="#ffffff"/>
+<polygon points="57.1,17.5 36.3,26.5 38.9,31" fill="#ffffff"/>
+<polygon points="6.9,17.5 25.1,31 27.7,26.5" fill="#ffffff"/>
+<polygon points="6.9,46.5 27.7,37.5 25.1,33" fill="#ffffff"/>
+<polygon points="32,61 34.6,38.5 29.4,38.5" fill="#ffffff"/>
+<polygon points="57.1,46.5 38.9,33 36.3,37.5" fill="#ffffff"/>
+<circle cx="32" cy="32" r="7" fill="#ffffff"/>
+</svg>

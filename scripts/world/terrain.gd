@@ -19,6 +19,17 @@ extends Node2D
 ## 块间缝与立面细节（露头钢筋/冰脉）颜色按章配（ch2/3/4 场景里覆盖）
 @export var seam_color := Color("1f1d16")
 @export var detail_color := Color("6a5a48")
+## ---- 桥式模式（可选，world_5 用）----
+## bridge_girder_texture 非空即启用：每块画 箱梁+排架柱（挡位选贴图）+剪刀撑，
+## 不再画 fill 立面/露头横杆/块间缝（块间接缝烘在箱梁贴图两端）。
+## 排架柱选挡：需要长度 = bridge_sea_y − 柱顶，取贴图数组里高度最接近且
+## 不短于它的那张（柱底统一钉在海面固定线上=「海面固定、柱随地形换挡」）。
+## 云海本体是场景里的独立固定条（GroundStrip，scroll=1 钉屏幕），不归块管。
+@export var bridge_girder_texture: Texture2D
+@export var bridge_brace_texture: Texture2D
+@export var bridge_column_textures: Array[Texture2D] = []
+@export var bridge_column_xs: PackedFloat32Array = PackedFloat32Array([48.0, 244.0])
+@export var bridge_sea_y := 860.0 # 海面固定线（世界 y）：柱脚目标深度
 const BAND_HEIGHT := 66.0    # 表面带 56 + 立面 AO 渐隐 10（都烘在纹理里）
 const FILL_DEPTH := 700.0    # 顶面向下的填充深度（覆盖最低档到画面外）
 const SEG_CACHE_MARGIN := 96 # 段起点缓存保留镜头两侧多少段，超出即忘
@@ -80,11 +91,54 @@ func _spawn_chunk(i: int) -> void:
 	chunk.add_child(shape)
 
 	chunk.add_child(_make_band_sprite(i))
-	chunk.add_child(_make_fill_sprite())
-	_add_chunk_decor(chunk, i)
+	if _bridge_mode():
+		_add_bridge_parts(chunk, i, top)
+	else:
+		chunk.add_child(_make_fill_sprite())
+		_add_chunk_decor(chunk, i)
 
 	add_child(chunk)
 	_chunks[i] = chunk
+
+
+func _bridge_mode() -> bool:
+	return bridge_girder_texture != null and not bridge_column_textures.is_empty()
+
+
+## 桥式件（块的局部坐标）：箱梁整幅宽 + 剪刀撑挂两柱之间梁下 + 排架柱
+## ×2 按挡位选贴图（柱底统一钉在 bridge_sea_y），柱身按 (块序+柱序) 奇偶
+## 镜像微错，破一破等距柱列的复制感。
+func _add_bridge_parts(chunk: StaticBody2D, i: int, top: float) -> void:
+	var girder := Sprite2D.new()
+	girder.texture = bridge_girder_texture
+	girder.centered = false
+	girder.position = Vector2(0.0, BAND_HEIGHT)
+	chunk.add_child(girder)
+	var girder_bottom := BAND_HEIGHT + bridge_girder_texture.get_size().y
+	if bridge_brace_texture != null:
+		var brace := Sprite2D.new()
+		brace.texture = bridge_brace_texture
+		brace.centered = false
+		brace.position = Vector2(76.0, girder_bottom - 8.0)
+		chunk.add_child(brace)
+	var columns := bridge_column_textures.duplicate()
+	columns.sort_custom(func(a: Texture2D, b: Texture2D) -> bool:
+		return a.get_size().y < b.get_size().y)
+	for j in bridge_column_xs.size():
+		var need := bridge_sea_y - (top + girder_bottom)
+		var tex: Texture2D = columns[columns.size() - 1] # 比最长挡还深时兜底最长柱
+		for t: Texture2D in columns:
+			if t.get_size().y >= need:
+				tex = t
+				break
+		var col := Sprite2D.new()
+		col.texture = tex
+		col.centered = false
+		col.flip_h = (i + j) & 1 == 1
+		# 柱底钉在 bridge_sea_y（世界线）：子节点坐标是块的局部系，须减块顶
+		col.position = Vector2(bridge_column_xs[j] - tex.get_size().x * 0.5,
+				bridge_sea_y - top - tex.get_size().y)
+		chunk.add_child(col)
 
 
 # ---- 段的纯函数：长度与高度档只取决于 (种子, 段索引) ----
@@ -176,13 +230,17 @@ func _make_band_sprite(i: int) -> Sprite2D:
 	return s
 
 
-## 填充：竖向渐变纹理（含烘焙层理）拉伸到整块深度
+## 填充：竖向渐变纹理（含烘焙层理）拉伸到整块深度。
+## 缩放按贴图实际尺寸算（默认 16x256；章可用原生分辨率贴图画桥式
+## 排架柱等实体结构，见 world_5 的 env_dawn_ground_fill 320x634）。
 func _make_fill_sprite() -> Sprite2D:
 	var s := Sprite2D.new()
 	s.texture = fill_texture
 	s.centered = false
 	s.position = Vector2(0, BAND_HEIGHT)
-	s.scale = Vector2(Balance.TERRAIN_CHUNK_WIDTH / 16.0, (FILL_DEPTH - BAND_HEIGHT) / 256.0)
+	var tex_size := fill_texture.get_size()
+	s.scale = Vector2(Balance.TERRAIN_CHUNK_WIDTH / tex_size.x,
+			(FILL_DEPTH - BAND_HEIGHT) / tex_size.y)
 	return s
 
 

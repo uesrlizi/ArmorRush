@@ -1,0 +1,28 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/weapons/bullet.gd" id="1"]
+; 鮟鱇钓灯能量束的直射弹（bullet.gd 纯换皮：语法/速度/伤害由发射方赋值不变）。
+; 珊瑚能量镖语汇：fx_coral_bolt.svg=plasma_bolt 几何换珊瑚家配色（波浪 noodle
+; 版被否），ADD 混合下白热芯提亮。贴图 28x10；碰撞 = 胶囊沿 +X（飞行方向），
+; r2.6×长24 贴合镖形（同 plasma_bolt 规格）。
+[ext_resource type="Texture2D" path="res://assets/world_4/fx_coral_bolt.svg" id="2"]
+
+[sub_resource type="CanvasItemMaterial" id="addmat"]
+blend_mode = 1
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_1"]
+radius = 2.6
+height = 24.0
+
+[node name="CoralBolt" type="Area2D"]
+collision_layer = 16
+collision_mask = 3
+script = ExtResource("1")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+material = SubResource("addmat")
+texture = ExtResource("2")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_1")

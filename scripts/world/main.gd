@@ -3,7 +3,7 @@ extends Node2D
 ## 小恐龙式启动：开机先进启动页（机甲在原点平地待命，不刷怪、不播报、UI 藏起），
 ## 点击/任意键才进战斗（系统播报 + HUD 依次点亮；操作延迟解锁，
 ## 开始那一下的按键不许直接变成跳跃/攻击）。
-## 死亡重开：全局黑屏转场（Fade autoload）回到启动页，再点一次才开始。
+## 死亡重开：全局黑屏转场（Fade autoload）进重掷的新一关启动页（哪里死不再哪里复活），再点一次才开始。
 ## 黑屏放全局的原因：场景内的转场层会随旧场景卸载，reload 空档帧闪清屏色。
 ## 章节推进：击败 BOSS → 延迟 → 全局黑场 → RunState.draw_next()（轮换袋
 ## 抽下一关场景）；分数跨关累计走 RunState，新关跳过启动页落地即战
@@ -87,13 +87,14 @@ func _on_player_died() -> void:
 	)
 
 
-## 重开：Fade 渐黑 → 全黑略停一拍 → 重载；新场景 _ready 里 Fade.reveal()
-## 接棒渐亮。树先解除暂停（否则转场 tween 不跑）；世界短暂复活无碍——
-## 玩家已毁、敌人见尸停火。章内重开 = 这一行从头再来，跨章累计的分数清零。
+## 重开：死亡即新一局——RunState.start_run() 清分+整袋重洗+白名单重掷首关
+## （不再原地复活同一关），Fade 渐黑 → 全黑略停一拍 → 切入新关；新场景
+## _ready 里 Fade.reveal() 接棒渐亮。树先解除暂停（否则转场 tween 不跑）；
+## 世界短暂复活无碍——玩家已毁、敌人见尸停火。
 func _on_restart_requested() -> void:
-	RunState.score = 0
 	get_tree().paused = false
-	Fade.transition(func() -> void: get_tree().reload_current_scene())
+	Fade.transition(func() -> void:
+		get_tree().change_scene_to_file(RunState.start_run()))
 
 
 ## 本章通关（BOSS 被击败）：延迟让爆散演出播完 → 全局黑场 → 轮换袋抽下一关

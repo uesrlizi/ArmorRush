@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 480" width="256" height="480">
+<!-- 第六章兜底地面条 256x480（GroundStrip）：沙层断面渐变+层理+
+半埋矿石闪点。种子 6064。 -->
+<defs>
+<linearGradient id="grd" x1="0" y1="0.0" x2="0" y2="1.0"><stop offset="0" stop-color="#9a4527" stop-opacity="1"/><stop offset="0.42" stop-color="#62281a" stop-opacity="1"/><stop offset="1" stop-color="#3f1a10" stop-opacity="1"/></linearGradient>
+</defs>
+<rect x="0" y="0" width="256" height="480" fill="url(#grd)"/>
+<rect x="0" y="60" width="256" height="2" fill="#7a321e" opacity="0.3"/>
+<rect x="0" y="140" width="256" height="2" fill="#7a321e" opacity="0.24"/>
+<rect x="0" y="240" width="256" height="2" fill="#7a321e" opacity="0.18"/>
+<rect x="0" y="360" width="256" height="2" fill="#7a321e" opacity="0.12"/>
+<polygon points="76.4,382.8 93.9,377.8 111.5,382.8 93.9,387.8" fill="#3f1d12"/>
+<circle cx="93.9" cy="381.8" r="1.4" fill="#ffb347" opacity="0.7"/>
+<polygon points="117.8,254.3 133.3,249.3 148.8,254.3 133.3,259.3" fill="#3f1d12"/>
+<circle cx="133.3" cy="253.3" r="1.4" fill="#ffb347" opacity="0.7"/>
+<polygon points="50.3,352.2 60.8,347.2 71.3,352.2 60.8,357.2" fill="#3f1d12"/>
+<circle cx="60.8" cy="351.2" r="1.4" fill="#ffb347" opacity="0.7"/>
+<polygon points="35.8,113 50.4,108 65.1,113 50.4,118" fill="#3f1d12"/>
+<circle cx="50.4" cy="112" r="1.4" fill="#ffb347" opacity="0.7"/>
+<polygon points="183.7,160.8 196.5,155.8 209.3,160.8 196.5,165.8" fill="#3f1d12"/>
+<circle cx="196.5" cy="159.8" r="1.4" fill="#ffb347" opacity="0.7"/>
+<polygon points="71.6,280.8 83.4,275.8 95.2,280.8 83.4,285.8" fill="#3f1d12"/>
+<polygon points="192.5,370.1 201.9,365.1 211.3,370.1 201.9,375.1" fill="#3f1d12"/>
+<circle cx="201.9" cy="369.1" r="1.4" fill="#ffb347" opacity="0.7"/>
+<polygon points="90.1,238.4 98.6,233.4 107,238.4 98.6,243.4" fill="#3f1d12"/>
+<circle cx="98.6" cy="237.4" r="1.4" fill="#ffb347" opacity="0.7"/>
+<polygon points="108.6,278.9 122.1,273.9 135.5,278.9 122.1,283.9" fill="#3f1d12"/>
+<circle cx="122.1" cy="277.9" r="1.4" fill="#ffb347" opacity="0.7"/>
+<polygon points="60.1,156.8 72.8,151.8 85.6,156.8 72.8,161.8" fill="#3f1d12"/>
+</svg>

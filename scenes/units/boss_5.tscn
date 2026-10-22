@@ -1,0 +1,92 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/units/boss_interceptor.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/world_5/boss_dawn_body.svg" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/fx/muzzle_flash.tscn" id="3"]
+[ext_resource type="Texture2D" path="res://assets/world_5/boss_dawn_gun.svg" id="4"]
+[ext_resource type="Script" path="res://scripts/units/eye_glow.gd" id="5"]
+[ext_resource type="PackedScene" path="res://scenes/fx/threat_flash.tscn" id="6"]
+[ext_resource type="Texture2D" path="res://assets/world_5/boss_dawn_cannon.svg" id="7"]
+[ext_resource type="Texture2D" path="res://assets/common/fx_flame.svg" id="8"]
+
+; 第五章 BOSS·高空截击机「断云」（BossInterceptor，防空截击能力套件）：
+; 独眼条带 y60..66 含 (55,63)（EyeGlow (-95,-27) 沿用）；
+; ArmPivot=机鼻炮座画布 (60,74)→局部 (-90,-16)，直射臂 offset(-34,-9)
+; （臂画布 44x18 枢端 (34,9)），Muzzle=臂局部 (-24,0)=管口 (10,9)；
+; Cannon=背炮塔画布 (150,34)→局部 (0,-56)（塔身独件俯仰跟随，
+; Muzzle 局部 (0,-16)=管口白热尖，Flash+ThreatFlash）；Nose=机鼻画布
+; (14,84)→局部 (-136,-6)（俯冲预警 ThreatFlash）；Thruster1/2=局部
+; (136,-4)/(136,16)（通用 fx_flame+加色，金琥珀脉动）；无旋翼。
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
+size = Vector2(280, 150)
+
+[sub_resource type="CanvasItemMaterial" id="addmat"]
+blend_mode = 1
+
+[node name="BossInterceptor" type="CharacterBody2D"]
+collision_layer = 4
+collision_mask = 0
+script = ExtResource("1")
+feet_offset = 90.0
+body_size = Vector2(300, 180)
+
+[node name="Visuals" type="Node2D" parent="."]
+
+[node name="Sprite2D" type="Sprite2D" parent="Visuals"]
+texture = ExtResource("2")
+
+[node name="EyeGlow" type="Node2D" parent="Visuals/Sprite2D"]
+position = Vector2(-95, -27)
+scale = Vector2(1.2, 1.2)
+script = ExtResource("5")
+
+[node name="Cannon" type="Node2D" parent="Visuals"]
+position = Vector2(0, -56)
+
+[node name="Sprite2D" type="Sprite2D" parent="Visuals/Cannon"]
+texture = ExtResource("7")
+
+[node name="Muzzle" type="Marker2D" parent="Visuals/Cannon"]
+position = Vector2(0, -16)
+
+[node name="Flash" parent="Visuals/Cannon/Muzzle" instance=ExtResource("3")]
+
+[node name="ThreatFlash" parent="Visuals/Cannon/Muzzle" instance=ExtResource("6")]
+
+[node name="Nose" type="Marker2D" parent="Visuals"]
+position = Vector2(-136, -6)
+
+[node name="ThreatFlash" parent="Visuals/Nose" instance=ExtResource("6")]
+
+[node name="ArmPivot" type="Node2D" parent="Visuals"]
+position = Vector2(-90, -16)
+
+[node name="Arm" type="Sprite2D" parent="Visuals/ArmPivot"]
+texture = ExtResource("4")
+centered = false
+offset = Vector2(-34, -9)
+
+[node name="Muzzle" type="Marker2D" parent="Visuals/ArmPivot"]
+position = Vector2(-24, 0)
+
+[node name="Flash" parent="Visuals/ArmPivot/Muzzle" instance=ExtResource("3")]
+
+[node name="ThreatFlash" parent="Visuals/ArmPivot/Muzzle" instance=ExtResource("6")]
+
+[node name="Thruster1" type="Sprite2D" parent="Visuals"]
+modulate = Color(1, 0.72, 0.4, 0.6)
+material = SubResource("addmat")
+position = Vector2(136, -4)
+scale = Vector2(1.1, 1.1)
+texture = ExtResource("8")
+
+[node name="Thruster2" type="Sprite2D" parent="Visuals"]
+modulate = Color(1, 0.72, 0.4, 0.6)
+material = SubResource("addmat")
+position = Vector2(136, 16)
+scale = Vector2(1.1, 1.1)
+texture = ExtResource("8")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_1")

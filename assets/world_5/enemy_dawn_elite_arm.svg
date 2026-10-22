@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 22" width="40" height="22">
+<!-- 第五章精英双管高炮臂 40x22（俯仰跟踪）。
+枢端画布 (28,13)=炮塔环心；双管左伸，管口画布 (6,10)=Muzzle
+（臂局部 (-22,-3)）。出膛焰/预警闪光落管口（真实枪口律）。 -->
+<defs>
+
+</defs>
+<rect x="22" y="6" width="12" height="14" fill="#4e3c64"/>
+<rect x="22" y="6" width="12" height="2.5" fill="#7a6090"/>
+<rect x="10" y="8" width="14" height="3.2" fill="#2a1f3e"/>
+<rect x="10" y="13.5" width="14" height="3.2" fill="#2a1f3e"/>
+<rect x="4" y="7.6" width="7" height="4" fill="#4e3c64"/>
+<rect x="4" y="13.1" width="7" height="4" fill="#4e3c64"/>
+<rect x="2" y="8.4" width="2.6" height="2.4" fill="#ffd9a0" opacity="0.9"/>
+<rect x="2" y="13.9" width="2.6" height="2.4" fill="#ffd9a0" opacity="0.9"/>
+<circle cx="28" cy="13" r="2.2" fill="#3a2c50"/>
+<circle cx="20" cy="20" r="1.2" fill="#ffc46a" opacity="0.85"/>
+</svg>

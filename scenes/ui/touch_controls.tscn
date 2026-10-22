@@ -3,6 +3,9 @@
 [ext_resource type="Script" uid="uid://btc26jindue0" path="res://scripts/ui/touch_controls.gd" id="1"]
 [ext_resource type="Script" uid="uid://mqtslog42f4q" path="res://scripts/ui/virtual_joystick.gd" id="2"]
 [ext_resource type="Script" uid="uid://i7i30yw3kiow" path="res://scripts/ui/touch_button.gd" id="3"]
+[ext_resource type="Texture2D" path="res://assets/common/ui_btn_fire.svg" id="4"]
+[ext_resource type="Texture2D" path="res://assets/common/ui_btn_thrust.svg" id="5"]
+[ext_resource type="Texture2D" path="res://assets/common/ui_btn_melee.svg" id="6"]
 
 [node name="TouchControls" type="CanvasLayer" unique_id=2082947377]
 process_mode = 3
@@ -63,7 +66,7 @@ grow_horizontal = 0
 grow_vertical = 0
 mouse_filter = 2
 script = ExtResource("3")
-label = "射击"
+icon = ExtResource("4")
 radius = 100.0
 
 [node name="JumpButton" type="Control" parent="." unique_id=713902862]
@@ -83,7 +86,7 @@ grow_vertical = 0
 mouse_filter = 2
 script = ExtResource("3")
 action = "jump"
-label = "跳跃"
+icon = ExtResource("5")
 radius = 100.0
 
 [node name="MeleeButton" type="Control" parent="." unique_id=184160373]
@@ -103,5 +106,5 @@ grow_vertical = 0
 mouse_filter = 2
 script = ExtResource("3")
 action = "melee"
-label = "斩击"
+icon = ExtResource("6")
 radius = 100.0

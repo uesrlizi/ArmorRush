@@ -13,6 +13,15 @@ extends Control
 	set(v):
 		label = v
 		queue_redraw()
+## 图标（设置后取代文字标签绘制；240 画布 SVG 按 120 显示 = 2px/单位密度档）
+@export var icon: Texture2D:
+	set(v):
+		icon = v
+		queue_redraw()
+@export var icon_size := 120.0:
+	set(v):
+		icon_size = v
+		queue_redraw()
 @export var radius := 90.0:
 	set(v):
 		radius = v
@@ -100,7 +109,13 @@ func _draw() -> void:
 	draw_circle(c, radius, pressed_color if pressed else base_color)
 	draw_arc(c, radius, 0.0, TAU, 48,
 			(pressed_color if pressed else base_color).lightened(0.15), 3.0, true)
-	var text_size := _font.get_string_size(label, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size)
-	draw_string(_font, c - Vector2(text_size.x * 0.5, -text_size.y * 0.35),
-			label, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size,
-			Color(0.92, 0.9, 0.82, 0.85))
+	if icon != null:
+		# 按下微缩+提亮，给指尖一个"吃进去了"的回弹；平时降一档透明度融进底色。
+		var s := icon_size * (0.94 if pressed else 1.0)
+		draw_texture_rect(icon, Rect2(c - Vector2(s, s) * 0.5, Vector2(s, s)),
+				false, Color(1.0, 1.0, 1.0, 1.0 if pressed else 0.92))
+	elif not label.is_empty():
+		var text_size := _font.get_string_size(label, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size)
+		draw_string(_font, c - Vector2(text_size.x * 0.5, -text_size.y * 0.35),
+				label, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size,
+				Color(0.92, 0.9, 0.82, 0.85))

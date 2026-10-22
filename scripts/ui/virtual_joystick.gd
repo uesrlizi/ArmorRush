@@ -122,8 +122,11 @@ func release() -> void:
 func _release() -> void:
 	_touch_id = -1
 	_knob_dx = 0.0
-	Input.action_release(MOVE_LEFT)
-	Input.action_release(MOVE_RIGHT)
+	# 编辑器 --import 上下文没有项目 InputMap（布局恢复会实例化再销毁本节点），
+	# 没有该动作时静默跳过。
+	if InputMap.has_action(MOVE_LEFT):
+		Input.action_release(MOVE_LEFT)
+		Input.action_release(MOVE_RIGHT)
 	queue_redraw()
 
 
@@ -136,3 +139,11 @@ func _draw() -> void:
 	track.border_color = track_color.lightened(0.1)
 	track.draw(get_canvas_item(), Rect2(c - track_size * 0.5, track_size))
 	draw_circle(c + Vector2(_knob_dx, 0.0), knob_radius, knob_color)
+	# 轨道两端 ‹ › 方向提示（解释"按这里=左右移动"）；圆钮行程到不了端头，不互抢。
+	var hint := knob_color
+	hint.a = 0.45
+	for side: float in [-1.0, 1.0]:
+		var x: float = c.x + side * (track_size.x * 0.5 - 34.0)
+		draw_polyline(PackedVector2Array([
+			Vector2(x, c.y - 15.0), Vector2(x + side * 9.0, c.y), Vector2(x, c.y + 15.0),
+		]), hint, 7.0, true)

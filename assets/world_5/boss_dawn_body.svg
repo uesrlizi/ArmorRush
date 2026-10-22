@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 180" width="300" height="180">
+<!-- 第五章 BOSS 高空截击机「断云」300x180=碰撞体，原点(150,90)，原生朝左。
+能力布挂件：背部啸雷炮塔座（塔身独立件画布 (150,34)=Cannon 局部 (0,-56)）
++ 机鼻炮座（直射臂独立件，ArmPivot 画布 (60,74)）+ 尾部双发短舱（尾焰独件
+画布 (286,86)/(286,106)=通用 fx_flame）。沿用锚点：独眼条带 y60..66 含
+(55,63)，机身前段顶缘抬到 y52 包住条带。无旋翼（推进焰脉动）。
+提案=同目录 提案_v1_破晓云廊.md §3。 -->
+<defs>
+
+</defs>
+<polygon points="238,72 282,10 296,16 288,82" fill="#4e3c64"/>
+<polygon points="282,10 296,16 292,22 280,18" fill="#7a6090" opacity="0.85"/>
+<polygon points="238,96 270,146 290,138 284,98" fill="#3a2c50"/>
+<polygon points="120,76 232,40 266,52 168,88" fill="#4e3c64"/>
+<polygon points="120,76 232,40 240,43 132,80" fill="#7a6090" opacity="0.7"/>
+<polygon points="150,104 196,130 208,122 172,100" fill="#3a2c50"/>
+<polygon points="8,84 36,52 150,58 240,62 292,74 296,92 250,108 60,104 16,96" fill="#4e3c64"/>
+<polygon points="36,52 150,58 240,62 288,73 284,78 238,66 150,62 42,56" fill="#7a6090" opacity="0.7"/>
+<polygon points="16,96 60,104 250,108 240,100 60,96" fill="#3a2c50"/>
+<rect x="120" y="62" width="2.5" height="42" fill="#2a1f3e" opacity="0.35"/>
+<rect x="196" y="60" width="2.5" height="44" fill="#2a1f3e" opacity="0.35"/>
+<rect x="80" y="92" width="170" height="2" fill="#2a1f3e" opacity="0.3"/>
+<rect x="160" y="72" width="7" height="6" fill="#ffc46a" opacity="0.8"/>
+<rect x="176" y="72" width="7" height="6" fill="#ffc46a" opacity="0.8"/>
+<rect x="192" y="72" width="7" height="6" fill="#ffc46a" opacity="0.8"/>
+<rect x="208" y="72" width="7" height="6" fill="#ffc46a" opacity="0.8"/>
+<rect x="224" y="72" width="7" height="6" fill="#ffc46a" opacity="0.8"/>
+<polygon points="0,82 14,74 18,74 18,98 6,92" fill="#3a2c50"/>
+<line x1="0" y1="82" x2="6" y2="92" stroke="#7a6090" stroke-width="2" opacity="0.7"/>
+<rect x="38" y="57" width="34" height="12" fill="#ff4640" opacity="0.18"/>
+<rect x="42" y="60" width="26" height="6" fill="#ff4640" opacity="0.95"/>
+<polygon points="76,58 112,56 110,70 80,72" fill="#2a1f3e" opacity="0.9"/>
+<polygon points="78,60 108,58 107,62 80,64" fill="#7a6090" opacity="0.5"/>
+<rect x="136" y="48" width="28" height="12" fill="#3a2c50"/>
+<rect x="138" y="46" width="24" height="3" fill="#7a6090" opacity="0.7"/>
+<circle cx="150" cy="54" r="2" fill="#ffd9a0" opacity="0.9"/>
+<circle cx="60" cy="74" r="4" fill="#2a1f3e"/>
+<polygon points="52,70 70,70 68,80 54,80" fill="#3a2c50" opacity="0.9"/>
+<rect x="268" y="76" width="26" height="18" fill="#4e3c64"/>
+<rect x="268" y="76" width="26" height="3" fill="#7a6090" opacity="0.6"/>
+<rect x="288" y="79" width="6" height="12" fill="#2a1f3e"/>
+<rect x="266" y="98" width="24" height="16" fill="#3a2c50"/>
+<rect x="266" y="98" width="24" height="3" fill="#7a6090" opacity="0.5"/>
+<rect x="284" y="101" width="6" height="10" fill="#2a1f3e"/>
+<rect x="132" y="78" width="26" height="3" fill="#ff4640" opacity="0.8"/>
+</svg>

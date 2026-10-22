@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+<!-- 冲击环·爆蕗（平涂细环 v2：环带 4→2.5px——上版缩放到爆径后环带过厚读成
+     厚甜甜圈；细环扩散才读冲击波。中性白，色相全交 color_ramp；与 fx_warn_ring
+     预警环分家：预警环语汇专用，本环整圆等宽作冲击波读法）。
+     坐标账：画布 64x64，环心 (32,32) 半径 28，带宽 2.5（26.75..29.25），
+     四周留 2px 防采样切边。扩散缩放交粒子 scale_curve。 -->
+<circle cx="32" cy="32" r="28" fill="none" stroke="#ffffff" stroke-width="2.5"/>
+</svg>

@@ -10,6 +10,9 @@ var linger := 0.25
 # 爆区闪光染色（FlashBurst 的 modulate）：默认橙红=现役三处（导弹/臼炮/击毁补爆）
 # 不变；电浆系爆（PlasmaMissile/PlasmaMine）染冰蓝。只管视觉，伤害判定同源。
 var flash_color := Color(1.0, 0.5, 0.25, 0.6)
+# 平涂爆闪开关：珊瑚系爆蕗的爆区闪由 coral_burst 的 Bloom 粒子层接管
+#（这张硬边大盘放大后和粒子群读成两回事），调用方置 false。
+var show_flash := true
 
 # 玩家判定宽限（比碰撞盒半宽略宽：手感从宽，宁可"擦边也算躲过"也不反向）
 const PLAYER_RADIUS := 26.0
@@ -24,12 +27,15 @@ func _init() -> void:
 
 
 func _ready() -> void:
-	# 爆闪（视觉）：flash_color 染色垫在爆炸本体下面当爆区光晕（层级由引爆处
-	# 入树序保证，见 heavy_missile._detonate），alpha 压低防罩住特效；大小随伤害半径
-	var flash := FLASH_BURST.instantiate() as Node2D
-	flash.modulate = flash_color
-	flash.scale = Vector2.ONE * (radius / 48.0)
-	add_child(flash) # 先定位再入树：tween 在 _ready 起跑，晚定位会闪在原点
+	if show_flash:
+		# 爆闪（视觉）：flash_color 染色垫在爆炸本体下面当爆区光晕（层级由引爆处
+		# 入树序保证，见 heavy_missile._detonate），alpha 压低防罩住特效；大小随
+		# 伤害半径（size_scale 走 FlashBurst 补间两端——预置 scale 会被补间覆盖，
+		# 且大爆径首帧闪出全尺寸大圈，踩过）
+		var flash := FLASH_BURST.instantiate() as FlashBurst
+		flash.modulate = flash_color
+		flash.size_scale = radius / 48.0
+		add_child(flash) # 先定位再入树：tween 在 _ready 起跑，晚定位会闪在原点
 	reset_physics_interpolation()
 
 

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 32" width="16" height="32">
+<!-- 火星流·拖长条（平涂竖向梭形；中性白，色相全交 color_ramp；
+     配 ParticleProcessMaterial particle_flag_align_y=true 让梭形长轴对齐
+     速度方向=火星拖尾，替代平涂圆点火星——圆点散开读波点，拉长对齐速度
+     才读"溅射的火星"）。
+     坐标账：画布 16x32，梭形长轴沿 y（默认姿态向上），宽 ~7（x4.5..11.5）、
+     长 28（y2..30）；四周留 ≥2px 防采样切边。 -->
+<path d="M8 2
+         C 11 10 11.5 20 8 30
+         C 4.5 20 5 10 8 2 Z" fill="#ffffff"/>
+</svg>

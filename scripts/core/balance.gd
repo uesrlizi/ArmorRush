@@ -237,7 +237,7 @@ const ELITE_SLAG_MAX_HP := 15
 const ELITE_SLAG_SCORE := 60
 const ELITE_SLAG_ATTACK_RANGE := 2200.0
 const ELITE_SLAG_VOLLEY_HALF_LIFE := 2.4 # 齐射触发半衰期（同 ch1 精英的泊松节奏）
-const ELITE_SLAG_VOLLEY_COUNT := 2
+const ELITE_SLAG_VOLLEY_COUNT := 3   # v2.1 2→3（弹数下限统一上调，ch1 基准不动）
 const ELITE_SLAG_VOLLEY_STAGGER := 0.35
 const ELITE_SLAG_SHELL_DAMAGE := 0    # 落地无溅射伤害（火区才是威胁，教学纯净版）
 const ELITE_SLAG_LEAD_MAX := 850.0    # 提前量上限（封路落点最远在前方这段）
@@ -292,7 +292,7 @@ const ELITE_MINE_MAX_HP := 15
 const ELITE_MINE_SCORE := 60
 const ELITE_MINE_ATTACK_RANGE := 2200.0
 const ELITE_MINE_VOLLEY_HALF_LIFE := 2.4 # 齐射触发半衰期（同 ch1/ch2 精英的泊松节奏）
-const ELITE_MINE_VOLLEY_COUNT := 2     # 双仓同帧齐布（一次性撒布，非逐孔梯次）
+const ELITE_MINE_VOLLEY_COUNT := 3     # 同帧齐布（v2.1 2→3 弹数下限上调；一次性撒布，非逐孔梯次）
 const ELITE_MINE_LEAD_MIN := 150.0     # 承诺带基点距玩家最近（停着不动雷也落在脚下前方）
 const ELITE_MINE_LEAD_MAX := 700.0
 const ELITE_MINE_FLIGHT := 0.85        # 高抛飞行时长（弹道解算用，弧顶≈+370px 屏内）
@@ -312,13 +312,170 @@ const SENTINEL_RAIN_STAGGER := 0.26
 const SENTINEL_RAIN_DAMAGE := 10
 const SENTINEL_RAIN_BLAST_RADIUS := 70.0
 const SENTINEL_RAIN_RECOVER := 1.4
-const SENTINEL_MINE_COUNT := 3         # 一轮齐撒雷数（phase2 +1）
+const SENTINEL_MINE_COUNT := 4         # 一轮齐撒雷数（v2.1 3→4 弹数下限上调；phase2 +1）
 const SENTINEL_MINE_LEAD_MIN := 150.0
 const SENTINEL_MINE_LEAD_MAX := 1000.0
 const SENTINEL_MINE_FLIGHT := 0.55     # 齐撒抛送-悬停入位时长（ST_MINE_FIRE 窗=此值+0.35）
 const SENTINEL_MINE_RECOVER := 1.3
 const SENTINEL_PHASE2_RAIN_BONUS := 2
 const SENTINEL_PHASE2_MINE_BONUS := 1
+
+# ---- 珊瑚重弹（第四章精英/BOSS 共用：慢速可见能量重球，lead 瞄准，撞地爆蕗） ----
+# 惩罚账（art_proposals/coral_ch4/提案_v2_珊瑚重设计.md §2 + v2.1 调参）：弹速
+# 900 慢于机枪流=弹体自读（看得见、侧移即躲）；爆区翻倍（90/80→180/160）=
+# 慢+大=压制面读法（实机"又慢又弱"打回，2026-10-21）。lead=玩家速度×飞行
+# 时长在出膛瞬间一次解算、clamp 承诺带——BOSS 炮口距 ~1300 → 飞行 ~1.45s →
+# 满速跑 lead ~870 ≤ LEAD_MAX 950（clamp 不吃满=惩罚成立）。急停/变向=免，
+# 站桩吃脚下（承诺带哲学，同臼炮 lead 账）。
+const CORAL_ORB_SPEED := 900.0        # 重弹恒速（px/s）
+
+# ---- 珊瑚潮（第四章 BOSS 专属危险件：固定高度的能量涌浪墙，飞越=反制） ----
+# v2.1 重做（实机"像甲虫爬+地块间高低瞬移"打回）：**不管地面**——浪墙钉在
+# 绝对高度带 [BAND_TOP, BAND_BOTTOM]（纵跨 120，覆盖三档地块站立带中心
+# 634/570/506），只沿 x 涌动、台阶零瞬移。反制=推进升空飞越（纯跳 apex
+# 只在最高档擦得过得 439<458，低档必须飞）；浮空脚手架高台=合法掩体
+# （平台顶中心 ~440 在带上缘之外）。后撤跑 600>涌速 520 甩得开，射程到点
+# 哑熄（无伤）——等待永远合法。
+const CORAL_TIDE_SPEED := 520.0       # 涌速（px/s，≈玩家跑速 0.87 倍）
+const CORAL_TIDE_RANGE := 1500.0      # 射程（涌满即哑熄）
+const CORAL_TIDE_BAND_TOP := 520.0    # 浪墙高度带上缘（绝对世界 y）
+const CORAL_TIDE_BAND_BOTTOM := 640.0 # 浪墙高度带下缘（绝对世界 y）
+const CORAL_TIDE_RADIUS := 36.0       # 判定半厚（带缘外扩，+玩家半宽 26 宽限）
+const CORAL_TIDE_DAMAGE := 8          # 灼烧一次即溃散（浪墙不是驻留区）
+
+# ---- 第四章精英·炮台车「海葵」（背驮海葵发射器，三连珊瑚重弹 lead 瞄准） ----
+# 教学位：把「鮟鱇」的珊瑚重炮提前教给玩家——读炮口预警+看慢弹落点，
+# 变向/急停离承诺带，匀速直线跑被逐发压在路径上。
+# 弹数下限 v2.1 统一上调（用户：憋半天就两发太少；ch1 基准不动）。
+const ELITE_ANEMONE_MAX_HP := 15
+const ELITE_ANEMONE_SCORE := 60
+const ELITE_ANEMONE_ATTACK_RANGE := 2200.0
+const ELITE_ANEMONE_VOLLEY_HALF_LIFE := 2.4 # 齐射触发半衰期（同前三章精英的泊松节奏）
+const ELITE_ANEMONE_VOLLEY_COUNT := 3 # 轮内三发梯次
+const ELITE_ANEMONE_VOLLEY_STAGGER := 0.5
+const ELITE_ANEMONE_ORB_DAMAGE := 8
+const ELITE_ANEMONE_BLAST_RADIUS := 160.0 # 爆区球（v2.1 翻倍：慢+大=压制面读法）
+const ELITE_ANEMONE_LEAD_BACK := 240.0   # 承诺带后沿：急退也追一段（站桩不豁免）
+const ELITE_ANEMONE_LEAD_MAX := 620.0    # 承诺带前沿上限
+
+# ---- 第四章 BOSS·深海猎杀舰「鮟鱇」（v2 舰体=背炮+钓灯+腹闸；300×180 ----
+# hover 370：船底 460=t2 站立头顶上方 10px、对最高台阶 536 净空 76px，同
+# 驳船/哨兵档。招式=珊瑚重炮 ⇄ 珊瑚潮（腹下放电舱吐贴地涌浪），间插钓灯
+# 能量束直射（coral_bolt.tscn=bullet.gd 纯换皮，复用 BOSS_DIRECT_*/BOSS_SWEEP_*）。
+# 重弹出膛瞬间 lead 解算（瞄准锁定在开火时机，真实枪口律）。
+const ANGLER_MAX_HP := 750
+const ANGLER_HOVER_Y := 370.0
+const ANGLER_VOLLEY_COUNT := 4        # 一轮重弹数（v2.1 3→4，对齐 ch1/ch3 弹雨档；phase2 +1）
+const ANGLER_VOLLEY_STAGGER := 0.55
+const ANGLER_ORB_DAMAGE := 10
+const ANGLER_ORB_BLAST_RADIUS := 180.0 # 爆区球（v2.1 翻倍：慢+大=压制面读法）
+const ANGLER_ORB_LEAD_BACK := 280.0
+const ANGLER_ORB_LEAD_MAX := 950.0    # 满速跑 lead ~870 落带内（clamp 不吃满）
+const ANGLER_VOLLEY_RECOVER := 1.4
+const ANGLER_TIDE_COUNT := 2          # 一轮珊瑚潮波数（v2.1 1→2；phase2 +1=三波）
+const ANGLER_TIDE_DROP_STAGGER := 0.9 # 波间隔：连波逼持续滞空
+const ANGLER_TIDE_RECOVER := 1.3
+const ANGLER_PHASE2_VOLLEY_BONUS := 1
+const ANGLER_PHASE2_TIDE_BONUS := 1
+
+# ---- 啸雷弹（第五章精英/BOSS 共用：定距空爆的防空重击弹，见 flak_shell.gd） ----
+# 惩罚账（art_proposals/dawn_ch5/提案_v1_破晓云廊.md §2 几何数字表）：直线无
+# 重力+定距引信（出膛瞬间按炮口→玩家当时位置的距离解算爆点）——**停=吃/动=免**，
+# 与 ch4 重弹的 lead 惩罚互为镜像（那边罚匀速跑，这边罚不跑）。全速跑在
+# 预警 0.6s+飞行 ~0.58s 内位移 708px ≫ 爆区 136，必过；站桩/近战硬直
+# （RECOVER_CONTROL 0.35 → ~126px）在猎杀半径内；悬停=吃（防空语义）。
+# 射线撞台阶立面=早爆（掩体合法，不校平）。追踪语汇零涉及。
+const FLAK_SHELL_SPEED := 2400.0      # 弹速（=玩家弹速档：读法靠炮口预警+引信芯快闪）
+
+# ---- 第五章精英·防空炮车「响哨」（双管高炮俯仰跟踪，双连啸雷弹） ----
+# 教学位：把「断云」的啸雷提前教给玩家——读炮口预警+引信芯快闪，
+# 爆点=开火瞬间自己所在点：听到/看到预警就保持移动，停=吃。
+const ELITE_SIREN_MAX_HP := 15
+const ELITE_SIREN_SCORE := 60
+const ELITE_SIREN_ATTACK_RANGE := 2200.0
+const ELITE_SIREN_VOLLEY_HALF_LIFE := 2.4 # 齐射触发半衰期（同前四章精英的泊松节奏）
+const ELITE_SIREN_VOLLEY_COUNT := 2 # 轮内双发梯次
+const ELITE_SIREN_VOLLEY_STAGGER := 0.45
+const ELITE_SIREN_FLAK_DAMAGE := 8
+const ELITE_SIREN_FLAK_BLAST_RADIUS := 90.0 # 爆区球（+玩家半宽 26 宽限）
+
+# ---- 第五章 BOSS·高空截击机「断云」（300×180 机体 hover 370：机腹 460=t2 ----
+# 站立头顶上方 10px、对最高台阶 536 净空 76px，同驳船/哨兵/鮟鱇档。招式=
+# 啸雷齐射 ⇄ 俯冲突袭（首次机体冲撞：预警 0.6s→锁定出手点→2100px/s 直线
+# 通场扫地面通道→过冲拉起返锚），间插机鼻曳光直射（dawn_bolt.tscn=bullet.gd
+# 纯换皮，速度/伤害复用 BOSS_SWEEP_*）。分工账：啸雷 hunts 空中与驻停
+# （爆在玩家当时所在点），俯冲 hunts 地面通道（飞行玩家不在通场带）——
+# 玩家被迫两头换层。俯冲线每帧 clamp 中心 y ≤ 当地地表−120（滑过台阶上缘
+# 不穿模）；通场带覆盖 [地表−210, 地表−30]：站立=被撞、纯跳 apex −127=被撞
+# （压"跳过一切"）、推进 ≥204px 或横移出锁定线=免。
+const INTERCEPTOR_MAX_HP := 750
+const INTERCEPTOR_HOVER_Y := 370.0
+const INTERCEPTOR_FLAK_COUNT := 3        # 一轮啸雷数（phase2 +1）
+const INTERCEPTOR_FLAK_STAGGER := 0.35   # 弹串节拍（追赶读法：每 840px 一朵）
+const INTERCEPTOR_FLAK_DAMAGE := 10
+const INTERCEPTOR_FLAK_BLAST_RADIUS := 110.0
+const INTERCEPTOR_FLAK_RECOVER := 1.3
+const INTERCEPTOR_DIVE_WARN := 0.6       # 机鼻预警+尾焰增亮时长
+const INTERCEPTOR_DIVE_SPEED := 2100.0   # 俯冲速度（直线锁定线，出手瞬间锁一次）
+const INTERCEPTOR_DIVE_CLEAR := 120.0    # 通场净空：中心线压在当地地表上空这么高
+const INTERCEPTOR_DIVE_OVERSHOOT := 500.0 # 过冲距离（穿过锁定点后继续冲这么远再拉起）
+const INTERCEPTOR_DIVE_DAMAGE := 12      # 机体冲撞（每次俯冲至多结算一次）
+const INTERCEPTOR_DIVE_RECOVER := 1.2
+const INTERCEPTOR_PHASE2_FLAK_BONUS := 1
+
+# ---- 电网闸（第六章精英/BOSS 共用：锚桩落点→竖直电幕围栏，见 arc_fence.gd） ----
+# 惩罚账（art_proposals/red_desert_ch6/提案_v1_赤沙矿区.md §2）：两桩钉玩家
+# 当时位置两侧（无 lead——「桩钉住你现在的位置」就是机制），预警→桩飞→蓄能
+# 全程 ~1.3s 后幕立起：全速跑位移 780 > 半宽——**跑=免**；站桩/近战后摇
+# （RECOVER_CONTROL 0.35）位移 ~270 留在带内=**被围**，出笼=触幕交税或
+# 推进飞越（幕高 200：纯跳 apex 底 −103 跳不过）或等哑熄。触幕一次即整套
+# 溃散（同潮墙「灼烧即溃」）；到点哑熄（无伤）——等待永远合法。
+
+# ---- 第六章精英·打桩车「锚桩」（双桩炮架固定射角，落点围栏预教电网闸） ----
+# 教学位：把「赤轮」的电网闸提前教给玩家——读桩落点与蓄能火花，
+# 桩钉住的是你现在的位置：看到落桩就保持移动，停=被围。
+const ELITE_PILER_MAX_HP := 15
+const ELITE_PILER_SCORE := 60
+const ELITE_PILER_ATTACK_RANGE := 2200.0
+const ELITE_PILER_VOLLEY_HALF_LIFE := 2.4 # 齐射触发半衰期（同前五章精英的泊松节奏）
+const ELITE_PILER_FENCE_HALF := 140.0  # 桩落点半宽（笼内=被围）
+const ELITE_PILER_FENCE_TOP := 150.0   # 幕高（纯跳 apex 底 −103 跳不过，教学纯净版幕稍矮）
+const ELITE_PILER_FENCE_WARMUP := 0.8  # 桩上火花蓄能（二段预警，比 BOSS 版多留 0.1s 读）
+const ELITE_PILER_FENCE_LIFE := 1.6    # 幕存活时长，到点哑熄（无伤）
+const ELITE_PILER_FENCE_DAMAGE := 8
+const ELITE_PILER_STAKE_FLIGHT := 0.5  # 桩抛体飞行时长（弹道解算用）
+
+# ---- 第六章 BOSS·斗轮采集舰「赤轮」（300×180 机体 hover 370：船底 460=t2 ----
+# 站立头顶上方 10px；最低点=斗轮缘 454（bob 后对最高台阶 536 净空 76），同
+# 驳船/哨兵/鮟鱇/断云档。招式=电网闸 ⇄ 溜矿车（腹舱倾泻贴地滚向玩家），间插
+# 斗轮弹石直射（red_chip.tscn=bullet.gd 纯换皮，速度/伤害复用 BOSS_SWEEP_*）。
+# 分工账：电网闸 hunts 滞留者（笼+税：停=围/动=免/出笼交税或飞越），溜矿车
+# hunts 地面驻留节奏（跳的拍子：纯跳可过、双车节拍减半）——玩家被迫在
+# 跑/跳/飞三态间换挡（全部走地面轴，与 ch5 啸雷/俯冲的换层账同构）。
+const REDWHEEL_MAX_HP := 750
+const REDWHEEL_HOVER_Y := 370.0
+const REDWHEEL_FENCE_HALF := 200.0     # 桩落点半宽（笼内=被围）
+const REDWHEEL_FENCE_TOP := 200.0      # 幕高（推进 ≥204 飞越=免）
+const REDWHEEL_FENCE_WARMUP := 0.7     # 桩上火花蓄能（p2 0.55：跑=免的窗口收窄）
+const REDWHEEL_FENCE_LIFE := 2.2       # 幕存活时长
+const REDWHEEL_FENCE_DAMAGE := 10
+const REDWHEEL_FENCE_LEAD_MAX := 400.0 # 半 lead：落带中心按玩家速度前/后移的上限
+                                       # （惩罚缓移与后撤，全速跑仍出带）
+const REDWHEEL_FENCE_RECOVER := 1.3
+const REDWHEEL_STAKE_FLIGHT := 0.55    # 桩抛体飞行时长（弹道解算用）
+const REDWHEEL_PHASE2_FENCE_WARMUP := 0.55
+const REDWHEEL_CART_COUNT := 1         # 一轮矿车数（p2 2，间隔 0.55：跳窗减半）
+const REDWHEEL_CART_STAGGER := 0.55
+const REDWHEEL_CART_RECOVER := 1.2
+const REDWHEEL_PHASE2_CART_BONUS := 1
+
+# ---- 溜矿车（第六章 BOSS 专属危险件：贴地滚向玩家的可跳矿车，见 ore_cart.gd） ----
+# 惩罚账（提案 §2）：滚速 520（≈跑速 0.87）对滚合速 1120，碰撞 64×84——
+# 纯跳 apex 底 −103 vs 车顶 −84 跳得过（余量 19px）；站桩=吃（一次结算，
+# 车继续滚）；寿命到点脱轨哑熄（无伤）——等待永远合法。
+const ORE_CART_SPEED := 520.0
+const ORE_CART_DAMAGE := 10
+const ORE_CART_LIFETIME := 4.0
 
 # ---- 击毁反馈（爆炸特效本体参数在 explosion_burst.gd，这里只管手感） ----
 const KILL_SHAKE_STRENGTH := 6.0  # 击毁镜头震动幅度（近战命中 7，这里略低）

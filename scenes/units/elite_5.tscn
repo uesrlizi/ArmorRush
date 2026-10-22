@@ -1,11 +1,17 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=8 format=3]
 
-[ext_resource type="Script" path="res://scripts/units/elite_mortar.gd" id="1"]
-[ext_resource type="Texture2D" path="res://assets/world_3/enemy_snow_elite_body.svg" id="2"]
+[ext_resource type="Script" path="res://scripts/units/elite_siren.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/world_5/enemy_dawn_elite_body.svg" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/fx/muzzle_flash.tscn" id="3"]
+[ext_resource type="Texture2D" path="res://assets/world_5/enemy_dawn_elite_arm.svg" id="4"]
 [ext_resource type="Script" path="res://scripts/units/overhead_bar.gd" id="5"]
 [ext_resource type="Script" path="res://scripts/units/eye_glow.gd" id="6"]
 [ext_resource type="PackedScene" path="res://scenes/fx/threat_flash.tscn" id="7"]
+
+; 第五章精英·防空炮车「响哨」（EliteSiren，啸雷预教）：眼 (19,26.5)；
+; ArmPivot=炮塔基画布 (44,12)→局部 (14,-28)（双管高炮臂独立件，俯仰跟踪），
+; 臂画布 40x22 枢端 (28,13)→offset(-28,-13)，Muzzle=臂局部 (-22,-3)
+; =管口画布 (6,10)。预警闪光/枪口焰/啸雷出膛都在双管口。
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
 size = Vector2(52, 72)
@@ -13,7 +19,7 @@ size = Vector2(52, 72)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_2"]
 size = Vector2(48, 48)
 
-[node name="EliteMortar" type="CharacterBody2D"]
+[node name="EliteSiren" type="CharacterBody2D"]
 collision_layer = 4
 collision_mask = 33
 monitoring = false
@@ -32,10 +38,15 @@ scale = Vector2(0.8, 0.8)
 script = ExtResource("6")
 
 [node name="ArmPivot" type="Node2D" parent="Visuals"]
-position = Vector2(14, -38.5)
+position = Vector2(14, -28)
+
+[node name="Arm" type="Sprite2D" parent="Visuals/ArmPivot"]
+texture = ExtResource("4")
+centered = false
+offset = Vector2(-28, -13)
 
 [node name="Muzzle" type="Marker2D" parent="Visuals/ArmPivot"]
-position = Vector2(0, 0)
+position = Vector2(-22, -3)
 
 [node name="Flash" parent="Visuals/ArmPivot/Muzzle" instance=ExtResource("3")]
 

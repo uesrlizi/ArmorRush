@@ -1,9 +1,11 @@
 extends Node
 ## 关卡轮换端到端探针（无头）：洗牌袋纯 API 直测 ×200（首抽必在开局白名单、
-## 同周期不重复、整袋轮全）→ 入口跳板自动抽关 → 连续通关 N+2 关，逐关验证
-## 不变式：落地都在场景池、白名单只锁首关、同周期不重复、通关永远滚动进
-## 下一关（无末章）、分数跨关累计、首关照常带启动页（入口纯跳板不交接）、
-## 后续关交接跳启动页、落地满血。
+## 同周期不重复、整袋轮全、相邻永不相同——含跨袋边界连抽 10N 长跑）→ 入口
+## 跳板自动抽关 → 首关死一次验"死亡重开=重掷新一局"（白名单首关+清分+
+## 启动页，非原地复活）→ 连续通关 N+2 关，逐关验证不变式：落地都在场景池、
+## 白名单只锁首关、同周期不重复、相邻不重复、通关永远滚动进下一关（无末章）、
+## 分数跨关累计、首关照常带启动页（入口纯跳板不交接）、后续关交接跳启动页、
+## 落地满血。
 ## 场景先后是随机的，所以只断言不变式，不断言固定链；RunState.SCENES 加新
 ## 场景后本探针自动覆盖，无需改这里。
 ## 用法：godot --headless res://tests/transition_probe.tscn
@@ -49,18 +51,28 @@ func _run() -> void:
 	# ---- 袋逻辑直测（纯 API，不进场景）----
 	for trial in 200:
 		var seen := {}
-		var first := RunState.start_run()
-		if not RunState.FIRST_POOL.has(first):
-			return _fail("start_run 首抽不在白名单: %s" % first)
-		seen[first] = true
+		var prev := RunState.start_run()
+		if not RunState.FIRST_POOL.has(prev):
+			return _fail("start_run 首抽不在白名单: %s" % prev)
+		seen[prev] = true
 		for _k in RunState.SCENES.size() - 1:
 			var s := RunState.draw_next()
+			if s == prev:
+				return _fail("相邻两关相同: %s（trial %d）" % [s, trial])
 			if seen.has(s):
 				return _fail("纯 API 周期内重复抽到 %s（trial %d）" % [s, trial])
 			seen[s] = true
+			prev = s
 		if seen.size() != RunState.SCENES.size():
 			return _fail("纯 API 一周期未轮全: %s" % [seen.keys()])
-	printerr("[probe] bag sim x200 OK (t=%.1fs)" % _elapsed())
+	# 跨袋边界连抽 10×N 关：重洗后首张撞上一关是老翻车点，长跑压测防回归
+	var prev2 := ""
+	for _i in RunState.SCENES.size() * 10:
+		var s2 := RunState.draw_next()
+		if s2 == prev2:
+			return _fail("跨袋边界相邻相同: %s" % s2)
+		prev2 = s2
+	printerr("[probe] bag sim x200 + 10N 连抽防相邻 OK (t=%.1fs)" % _elapsed())
 
 	# ---- 真实流程：入口跳板自动抽关 → 连续通关 N+2 关 ----
 	# 入口是纯跳板：装载完当帧末就 change_scene 到抽中的第一关，全程只有
@@ -76,18 +88,44 @@ func _run() -> void:
 	if first == null or first.scene_file_path == ENTRY:
 		return _fail("入口未跳转到第一关（5s 超时）")
 	printerr("[probe] first scene landed: %s (t=%.1fs)" % [first.scene_file_path, _elapsed()])
-
 	var cycle_seen := {}
-	var hops := RunState.SCENES.size() + 2 # 整轮一遍 + 新周期两关证"通关永远滚动"
+	_current = first
+	printerr("[probe] landed #0 = %s (t=%.1fs)" % [first.scene_file_path, _elapsed()])
+	if not _check_landing(0, first, cycle_seen):
+		return
+
+	# ---- 死亡重开探针：首关死一次，重开必须重掷新一局（非原地复活）----
+	# 重开输入路由（任意键/点屏+防抖）由带窗 autotest 覆盖，这里直呼重开逻辑。
+	var old_id := first.get_instance_id()
+	(first.get_node("Player") as Player).take_damage(999)
+	await _wait(1.4) # GAME_OVER_DELAY=1.1s：爆炸演出播完定格暂停（结算出现）
+	first._on_restart_requested()
+	var rerolled := await _await_landing_by_instance(old_id)
+	if rerolled == null:
+		return
+	_current = rerolled
+	cycle_seen = {} # 重掷=新一局：整袋重洗，周期从零起算
+	printerr("[probe] rerolled new run: %s (t=%.1fs)" % [rerolled.scene_file_path, _elapsed()])
+	if not _check_landing(0, rerolled, cycle_seen):
+		return
+
+	# ---- 连续通关 N+2 关：整轮一遍 + 新周期两关证"通关永远滚动" ----
+	var hops := RunState.SCENES.size() + 2
+	# 上一关路径先存字符串：change_scene 会立刻释放旧场景节点，
+	# 落地等待后再解引用 _current 必踩 previously freed（踩过）。
+	var prev_path := rerolled.scene_file_path
 	for i in hops:
 		var scene: Node
 		if i == 0:
-			scene = first # 首关落地已在上面等到
+			scene = rerolled # 首关落地已在上面等到
 		else:
 			scene = await _await_next_scene()
 			if scene == null:
 				return # _await_next_scene 已报错
+		if i > 0 and scene.scene_file_path == prev_path:
+			return _fail("相邻两关相同: %s" % scene.scene_file_path)
 		_current = scene
+		prev_path = scene.scene_file_path
 		printerr("[probe] landed #%d = %s (t=%.1fs)"
 				% [i + 1, scene.scene_file_path, _elapsed()])
 		if not _check_landing(i, scene, cycle_seen):
@@ -96,9 +134,29 @@ func _run() -> void:
 			break # 末次落地本身即证明"又一关滚动进来了"
 		if not await _kill_boss(scene):
 			return
-	printerr("[probe] PASS: %d 落地全过——白名单/整轮不重复/永远滚动/跨关分数/交接满血 (t=%.1fs)"
-			% [hops, _elapsed()])
+	printerr("[probe] PASS: 死亡重掷 + %d 落地全过——白名单/整轮不重复/相邻不同/永远滚动/跨关分数/交接满血 (t=%.1fs)"
+			% [hops + 1, _elapsed()])
 	get_tree().quit(0)
+
+
+## 等重开转场落地：以实例身份判别——重掷可能抽中死掉的同一关（跨局掷骰
+## 自由），同路径的新实例也算落地成功。
+func _await_landing_by_instance(old_id: int) -> Node:
+	var deadline := _elapsed() + 8.0
+	while _elapsed() < deadline:
+		await get_tree().process_frame
+		var cur := get_tree().current_scene
+		if cur != null and cur.get_instance_id() != old_id:
+			await get_tree().process_frame
+			await get_tree().process_frame
+			return cur
+	_fail("重开转场未发生（8s 内仍原地）")
+	return null
+
+
+## 秒级等待（真实时间；默认 process_always，结算暂停期照走）。
+func _wait(seconds: float) -> void:
+	await get_tree().create_timer(seconds).timeout
 
 
 ## 等当前场景被转场换走，返回新落地的场景节点。
@@ -118,7 +176,7 @@ func _await_next_scene() -> Node:
 
 
 ## 逐关不变式检查。cycle_seen 跨调用持有：逢周期边界（i % N == 0）清空，
-## 周期内不允许重复（袋边界首尾相接是 Tetris 式合法行为，不清就会误报）。
+## 周期内不允许重复。
 func _check_landing(i: int, scene: Node, cycle_seen: Dictionary) -> bool:
 	var path := scene.scene_file_path
 	if not RunState.SCENES.has(path):

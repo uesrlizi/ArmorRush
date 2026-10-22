@@ -296,17 +296,21 @@ func _run() -> void:
 
 	# ---- 精英探针：拉一只当前章的精英车，验证枪口预警后出重击弹 ----
 	# （ch1=导弹车追踪导弹 HeavyMissile；ch2=熔渣臼炮车迫击炮弹 MortarShell；
-	# ch3=布雷车电浆浮雷 PlasmaMine——PlasmaMissile 是 HeavyMissile 子类，自然命中）
-	# 齐射触发是半衰期掷骰（平均 ~3.5s 一轮）+ 蓄力 0.5s，12s 窗口覆盖 ~98%。
+	# ch3=布雷车电浆浮雷 PlasmaMine——PlasmaMissile 是 HeavyMissile 子类，自然命中；
+	# ch4=海葵炮台车珊瑚重弹 CoralOrb；ch5=响哨防空炮车啸雷弹 FlakShell；
+	# ch6=锚桩打桩车电网闸 ArcFence）
+	# 齐射触发是半衰期掷骰（平均 ~3.5s 一轮）+ 蓄力 0.5s，16s 窗口覆盖 ~99%。
 	var elite: Enemy = spawner.debug_spawn_elite(player.global_position.x + 500.0)
 	if elite != null:
 		var saw_missile := false
 		waited = 0.0
-		while waited < 12.0 and not saw_missile:
+		while waited < 16.0 and not saw_missile:
 			await _wait(0.1)
 			waited += 0.1
 			saw_missile = _count_projectiles(func(c: Node) -> bool:
-				return c is HeavyMissile or c is MortarShell or c is PlasmaMine) > 0
+				return c is HeavyMissile or c is MortarShell \
+						or c is PlasmaMine or c is CoralOrb \
+						or c is FlakShell or c is ArcFence) > 0
 		await _screenshot("07_elite_volley.png")
 		print("[autotest] elite heavy shot: ", saw_missile,
 				" (当前章精英在场应出重击弹)")
@@ -330,6 +334,12 @@ func _run() -> void:
 		# 白鲸也是 PursuitBoss，先匹配会被驳船分支错误接走并在取 WallPorts 时炸）
 		if boss is BossSentinel:
 			await _probe_boss_sentinel(boss as BossSentinel)
+		elif boss is BossAngler:
+			await _probe_boss_angler(boss as BossAngler)
+		elif boss is BossInterceptor:
+			await _probe_boss_interceptor(boss as BossInterceptor)
+		elif boss is BossRedwheel:
+			await _probe_boss_redwheel(boss as BossRedwheel)
 		elif boss is Boss:
 			await _probe_boss_heli(boss as Boss)
 		elif boss is PursuitBoss:
@@ -572,6 +582,331 @@ func _probe_boss_sentinel(boss: BossSentinel) -> void:
 		var expected := ceili(10 * Balance.STAGGER_DMG_MULT) - Balance.BOSS_DEFENSE
 		await _screenshot("08e_boss_stagger.png")
 		print("[autotest] sentinel stagger: staggered=", staggered,
+				" impact_bar=", get_parent().get_node("HUD")._boss_impact_bar.visible,
+				" take 10 -> ", applied, " (失衡加深×防御应=", expected, ")")
+
+
+## ch4 鮟鱇：镜像换边（钓灯+背炮+腹闸，无尾梁）→ 珊瑚重炮（CoralOrb 慢弹）
+## → 珊瑚潮（CoralTide 涌浪）→ 失衡加深（账同 ch2/ch3：加深×1.5 前置、
+## 防御 5 后置）。
+func _probe_boss_angler(boss: BossAngler) -> void:
+	var player := get_tree().get_first_node_in_group("player") as Player
+	# 给巨量血：鮟鱇轮换深（珊瑚潮排第二技能），站桩探针期全程吃直射/重弹
+	# 蹭血——回满 100 也扛不住 ~20s 磨血，玩家一死全局暂停冻结世界，后续
+	# 探针全部落空（踩过：预警冻在腹闸、潮永不到来）。探针收尾还原满血，
+	# 让结尾的一刀必死死亡探针照常工作。
+	player.hp = 99999
+	# 朝向镜像探针：Visuals 整层换边——钓灯炮口与臂根（肩座）都换到玩家一侧；
+	# 背炮炮口与腹闸都在船体中轴（局部 x=0），镜像后仍居中（≈0）。各归其位
+	# 即证明挂件随整层镜像（没随层的挂件会停在原侧，此处必 FAIL）。
+	var player_x_before_flip := player.global_position.x
+	player.global_position = Vector2(boss.global_position.x + 420.0,
+			player.global_position.y)
+	player.velocity = Vector2.ZERO
+	await _wait(0.25)
+	var rig: Node2D = boss.get_node("Visuals")
+	var muzzle_x: float = (boss.get_node("Visuals/ArmPivot/Muzzle") as Node2D) \
+			.global_position.x
+	var pivot_x: float = (boss.get_node("Visuals/ArmPivot") as Node2D) \
+			.global_position.x
+	var cannon_x: float = (boss.get_node("Visuals/Cannon/Muzzle") as Node2D) \
+			.global_position.x
+	var bay_x: float = (boss.get_node("Visuals/BayPort") as Node2D) \
+			.global_position.x
+	var flipped := rig.scale.x < 0.0 \
+			and muzzle_x > boss.global_position.x \
+			and pivot_x > boss.global_position.x \
+			and absf(cannon_x - boss.global_position.x) < 4.0 \
+			and absf(bay_x - boss.global_position.x) < 4.0
+	await _screenshot("08c_boss_flip.png")
+	print("[autotest] angler flip: ", "OK" if flipped else "FAIL",
+			" rig_scale_x=", rig.scale.x,
+			" muzzle-boss=", int(muzzle_x - boss.global_position.x),
+			" pivot-boss=", int(pivot_x - boss.global_position.x),
+			" cannon-boss=", int(cannon_x - boss.global_position.x),
+			" bay-boss=", int(bay_x - boss.global_position.x),
+			" (玩家在右侧时应换边：镜像−1、艏部钓灯/臂根>0、背炮口与腹闸居中)")
+	player.global_position = Vector2(player_x_before_flip, player.global_position.y)
+	player.velocity = Vector2.ZERO
+	await _wait(0.1)
+	# 珊瑚重炮：入场第一手（skill_a），贴脸压招解除后重走预警 → 逐发慢弹；
+	# hover 恒 370 不压高（同 ch2/ch3 的构图区别），验珊瑚重弹在场。
+	await _wait(2.5)
+	var orbs := 0
+	var waited := 0.0
+	while waited < 12.0 and orbs == 0:
+		await _wait(0.05) # 慢弹寿命长（飞抵 ~1.5s）：0.05s 轮询稳逮到
+		waited += 0.05
+		orbs = _count_projectiles(func(c: Node) -> bool:
+			return c is CoralOrb)
+	await _screenshot("08a_angler_volley.png")
+	print("[autotest] angler volley: y=", int(boss.global_position.y),
+			" coral_orbs=", orbs > 0, " count=", orbs,
+			" (重炮期应 ≥1，慢速能量弹在飞)")
+	# 珊瑚潮：自然轮换里它排第二技能（重炮→直射→潮 ≈ +7s），探针直接戳
+	# _begin_skill_b 走完整链路（预警→腹舱出潮→涌浪贴地爬）——确定性，
+	# 不吃轮换时序漂移。
+	if is_instance_valid(boss) and boss.hp_ratio() > 0.0:
+		boss._begin_skill_b()
+	var tides := 0
+	waited = 0.0
+	while waited < 8.0 and tides == 0:
+		await _wait(0.1)
+		waited += 0.1
+		tides = get_tree().get_nodes_in_group("coral_tides").size()
+	await _wait(0.4) # 涌浪爬出一段再截
+	await _screenshot("08c_angler_tide.png")
+	print("[autotest] angler tide: dropped=", tides > 0, " count=", tides,
+			" (珊瑚潮期应 ≥1 且贴地涌动)")
+	player.hp = Balance.PLAYER_MAX_HP # 还原：结尾死亡探针要一刀必死
+	# 失衡探针：加深×1.5 在前、减防御在后（10 → ceili(15)−5 = 10）
+	if is_instance_valid(boss) and boss.hp_ratio() > 0.0:
+		boss.add_impact(999)
+		await _wait(0.15)
+		var staggered := boss.is_staggered()
+		var ratio_pre := boss.hp_ratio()
+		boss.take_damage(10)
+		await _wait(0.05)
+		var applied := roundi((ratio_pre - boss.hp_ratio()) * Balance.ANGLER_MAX_HP)
+		var expected := ceili(10 * Balance.STAGGER_DMG_MULT) - Balance.BOSS_DEFENSE
+		await _screenshot("08e_boss_stagger.png")
+		print("[autotest] angler stagger: staggered=", staggered,
+				" impact_bar=", get_parent().get_node("HUD")._boss_impact_bar.visible,
+				" take 10 -> ", applied, " (失衡加深×防御应=", expected, ")")
+
+
+## ch5 断云：镜像换边（机鼻炮+背炮+机鼻预警点，无尾梁无旋翼）→ 啸雷齐射
+## （FlakShell 定距空爆弹）→ 俯冲突袭（确定性戳 _begin_skill_b：机体冲撞
+## 掉血断言）→ 失衡加深（账同 ch2/ch3/ch4：加深×1.5 前置、防御 5 后置）。
+func _probe_boss_interceptor(boss: BossInterceptor) -> void:
+	var player := get_tree().get_first_node_in_group("player") as Player
+	# 给巨量血：断云轮换深（俯冲排第二技能），站桩探针期全程吃直射/啸雷
+	# 蹭血——回满 100 也扛不住 ~20s 磨血，玩家一死全局暂停冻结世界，后续
+	# 探针全部落空（同鮟鱇探针的教训）。探针收尾还原满血。
+	player.hp = 99999
+	# 朝向镜像探针：Visuals 整层换边——机鼻炮口与臂根（炮座）都换到玩家一侧；
+	# 背炮塔与机鼻预警点都在机体中轴附近（局部 x=0/-136→镜像后 -0/+136…
+	# 机鼻点在轴上 x=-136≠0：镜像后应变正）。各归其位即证明挂件随整层镜像。
+	var player_x_before_flip := player.global_position.x
+	player.global_position = Vector2(boss.global_position.x + 420.0,
+			player.global_position.y)
+	player.velocity = Vector2.ZERO
+	await _wait(0.25)
+	var rig: Node2D = boss.get_node("Visuals")
+	var muzzle_x: float = (boss.get_node("Visuals/ArmPivot/Muzzle") as Node2D) \
+			.global_position.x
+	var pivot_x: float = (boss.get_node("Visuals/ArmPivot") as Node2D) \
+			.global_position.x
+	var nose_x: float = (boss.get_node("Visuals/Nose") as Node2D) \
+			.global_position.x
+	var flipped := rig.scale.x < 0.0 \
+			and muzzle_x > boss.global_position.x \
+			and pivot_x > boss.global_position.x \
+			and nose_x > boss.global_position.x
+	await _screenshot("08c_boss_flip.png")
+	print("[autotest] interceptor flip: ", "OK" if flipped else "FAIL",
+			" rig_scale_x=", rig.scale.x,
+			" muzzle-boss=", int(muzzle_x - boss.global_position.x),
+			" pivot-boss=", int(pivot_x - boss.global_position.x),
+			" nose-boss=", int(nose_x - boss.global_position.x),
+			" (玩家在右侧时应换边：镜像−1、机鼻炮/炮座/机鼻预警点>0)")
+	player.global_position = Vector2(player_x_before_flip, player.global_position.y)
+	player.velocity = Vector2.ZERO
+	await _wait(0.1)
+	# 啸雷齐射：入场第一手（skill_a），贴脸压招解除后重走预警 → 逐发定距
+	# 空爆弹；hover 恒 370 不压高（同 ch2/ch3/ch4 的构图区别），验啸雷弹在场。
+	await _wait(2.5)
+	var flak := 0
+	var waited := 0.0
+	while waited < 12.0 and flak == 0:
+		await _wait(0.05) # 弹速 2400 寿命短：0.05s 轮询稳逮到
+		waited += 0.05
+		flak = _count_projectiles(func(c: Node) -> bool:
+			return c is FlakShell)
+	await _screenshot("08a_interceptor_flak.png")
+	print("[autotest] interceptor flak: y=", int(boss.global_position.y),
+			" flak_shells=", flak > 0, " count=", flak,
+			" (啸雷期应 ≥1，定距空爆弹在飞)")
+	# 俯冲突袭：确定性戳 _begin_skill_b 走完整链路（机鼻预警→锁定→直线通场
+	# 冲撞）。玩家放在锁定通道里站桩（距 BOSS 1400>贴脸窗 700，出招不被压），
+	# 验冲撞掉血必须恰好=INTERCEPTOR_DIVE_DAMAGE。**单威胁源前置**（同 ch1
+	# 重击探针规矩）：清掉场上杂兵（它们朝站桩玩家开火，1 伤/发污染断言）+
+	# 等 BOSS 威胁弹（啸雷/直射曳光）排空再戳——上一手余弹落在基准血读取
+	# 之后会抢跑（2026-10-22 踩：掉血 10/8 分别被误当冲撞，实为啸雷/曳光余弹）。
+	if is_instance_valid(boss) and boss.hp_ratio() > 0.0:
+		var terrain := get_tree().get_first_node_in_group("terrain") as Terrain
+		if terrain != null:
+			var lane_x := boss.global_position.x - 1400.0
+			player.global_position = Vector2(lane_x,
+					terrain.surface_y_at(lane_x) - 30.0)
+			player.velocity = Vector2.ZERO
+			for node in get_tree().get_nodes_in_group("enemies"):
+				if node.is_in_group("boss"):
+					continue # BOSS 也在 enemies 组（Enemy.on_spawned）：清场别误伤本体
+				(node as Enemy).take_damage(999) # 单威胁源：杂兵清场
+			waited = 0.0
+			while waited < 8.0:
+				var leftover := _count_projectiles(func(c: Node) -> bool:
+					return c is FlakShell or (c is Bullet \
+							and c.damage == Balance.BOSS_SWEEP_DAMAGE))
+				# 双闸：容器干净 + BOSS 不在开火态（ST_FLAK_FIRE=4/ST_DIRECT=7，
+				# 直射 0.085s/发，单查容器会采到两发之间的空隙误判排空）
+				var quiet := leftover == 0 \
+						and boss._bstate != 4 and boss._bstate != 7
+				if quiet:
+					break
+				await _wait(0.2)
+				waited += 0.2
+			var hp_pre_dive := player.hp
+			boss._begin_skill_b()
+			waited = 0.0
+			while waited < 5.0 and player.hp >= hp_pre_dive:
+				await _wait(0.1)
+				waited += 0.1
+			var dive_damage := hp_pre_dive - player.hp
+			var dive_ok := dive_damage == Balance.INTERCEPTOR_DIVE_DAMAGE
+			await _screenshot("08c_interceptor_dive.png")
+			print("[autotest] interceptor dive: hp ", hp_pre_dive, " -> ",
+					player.hp, " damage=", dive_damage, " [",
+					"OK" if dive_ok else "FAIL", " 应=", Balance.INTERCEPTOR_DIVE_DAMAGE,
+					"；少报=余弹抢跑/未中=查锁定校平账]")
+	# 还原：结尾死亡探针要一刀必死
+	player.hp = Balance.PLAYER_MAX_HP
+	player.global_position = Vector2(player_x_before_flip, player.global_position.y)
+	player.velocity = Vector2.ZERO
+	await _wait(0.1)
+	# 失衡探针：加深×1.5 在前、减防御在后（10 → ceili(15)−5 = 10）
+	if is_instance_valid(boss) and boss.hp_ratio() > 0.0:
+		boss.add_impact(999)
+		await _wait(0.15)
+		var staggered := boss.is_staggered()
+		var ratio_pre := boss.hp_ratio()
+		boss.take_damage(10)
+		await _wait(0.05)
+		var applied := roundi((ratio_pre - boss.hp_ratio()) * Balance.INTERCEPTOR_MAX_HP)
+		var expected := ceili(10 * Balance.STAGGER_DMG_MULT) - Balance.BOSS_DEFENSE
+		await _screenshot("08e_boss_stagger.png")
+		print("[autotest] interceptor stagger: staggered=", staggered,
+				" impact_bar=", get_parent().get_node("HUD")._boss_impact_bar.visible,
+				" take 10 -> ", applied, " (失衡加深×防御应=", expected, ")")
+
+
+## ch6 赤轮：镜像换边（斗轮毂心+炮座随 Visuals 换边；腹闸轴向居中判据）
+## → 电网闸（自然首手，数 arc_fences 组）→ 溜矿车（确定性戳 _begin_skill_b：
+## 单威胁源前置=清杂兵+等威胁件排空，玩家站车路上，掉血恰=ORE_CART_DAMAGE）
+## → 失衡加深（账同 ch2~ch5：加深×1.5 前置、防御 5 后置）。
+func _probe_boss_redwheel(boss: BossRedwheel) -> void:
+	var player := get_tree().get_first_node_in_group("player") as Player
+	# 给巨量血：赤轮轮换深（矿车排第二技能），站桩探针期全程吃直射/电网/
+	# 矿车蹭血——回满 100 也扛不住 ~20s 磨血，玩家一死全局暂停冻结世界，
+	# 后续探针全部落空（同鮟鱇/断云探针的教训）。探针收尾还原满血。
+	player.hp = 99999
+	# 朝向镜像探针：Visuals 整层换边——斗轮毂心与臂根（毂座）都换到玩家一侧；
+	# 腹舱在机体中轴（局部 x=0），镜像后仍居中（≈0）。各归其位即证明挂件
+	# 随整层镜像（背甲炮架偏侧 x=60，镜像后换边不单独断言）。
+	var player_x_before_flip := player.global_position.x
+	player.global_position = Vector2(boss.global_position.x + 420.0,
+			player.global_position.y)
+	player.velocity = Vector2.ZERO
+	await _wait(0.25)
+	var rig: Node2D = boss.get_node("Visuals")
+	var muzzle_x: float = (boss.get_node("Visuals/ArmPivot/Muzzle") as Node2D) \
+			.global_position.x
+	var pivot_x: float = (boss.get_node("Visuals/ArmPivot") as Node2D) \
+			.global_position.x
+	var bay_x: float = (boss.get_node("Visuals/BayPort") as Node2D) \
+			.global_position.x
+	var flipped := rig.scale.x < 0.0 \
+			and muzzle_x > boss.global_position.x \
+			and pivot_x > boss.global_position.x \
+			and absf(bay_x - boss.global_position.x) < 4.0
+	await _screenshot("08c_boss_flip.png")
+	print("[autotest] redwheel flip: ", "OK" if flipped else "FAIL",
+			" rig_scale_x=", rig.scale.x,
+			" muzzle-boss=", int(muzzle_x - boss.global_position.x),
+			" pivot-boss=", int(pivot_x - boss.global_position.x),
+			" bay-boss=", int(bay_x - boss.global_position.x),
+			" (玩家在右侧时应换边：镜像−1、斗轮毂心/毂座>0、腹闸居中)")
+	player.global_position = Vector2(player_x_before_flip, player.global_position.y)
+	player.velocity = Vector2.ZERO
+	await _wait(0.1)
+	# 电网闸：入场第一手（skill_a），贴脸压招解除后重走预警 → 落桩围栏；
+	# hover 恒 370 不压高（同 ch2~ch5 的构图区别），数 arc_fences 组。
+	await _wait(2.5)
+	var fences := 0
+	var waited := 0.0
+	while waited < 12.0 and fences == 0:
+		await _wait(0.1)
+		waited += 0.1
+		fences = get_tree().get_nodes_in_group("arc_fences").size()
+	await _screenshot("08a_redwheel_fence.png")
+	print("[autotest] redwheel fence: y=", int(boss.global_position.y),
+			" arc_fences=", fences > 0, " count=", fences,
+			" (电网闸期应 ≥1，锚桩在飞/电幕已立)")
+	# 溜矿车：确定性戳 _begin_skill_b 走完整链路（腹舱预警→倾泻→贴地滚向
+	# 玩家）。玩家放在车路上站桩（距 BOSS 700，出招不被贴脸窗压）。
+	# 验掉血必须恰好=ORE_CART_DAMAGE。**单威胁源前置**（同 ch1/ch5 规矩）：
+	# 清掉场上杂兵 + 等威胁件（电网/矿车/弹石）排空且 BOSS 回到
+	# ENTER/RECOVER 稳态再戳——电网幕漏判会在基准血读取后抢跑（同为 10 伤
+	# 无法区分，双闸必须连预警态一起避开）。
+	if is_instance_valid(boss) and boss.hp_ratio() > 0.0:
+		var terrain := get_tree().get_first_node_in_group("terrain") as Terrain
+		if terrain != null:
+			var lane_x := boss.global_position.x - 700.0
+			player.global_position = Vector2(lane_x,
+					terrain.surface_y_at(lane_x) - 30.0)
+			player.velocity = Vector2.ZERO
+			for node in get_tree().get_nodes_in_group("enemies"):
+				if node.is_in_group("boss"):
+					continue # BOSS 也在 enemies 组（Enemy.on_spawned）：清场别误伤本体
+				(node as Enemy).take_damage(999) # 单威胁源：杂兵清场
+			waited = 0.0
+			while waited < 8.0:
+				var leftover := _count_projectiles(func(c: Node) -> bool:
+					return c is ArcFence or c is OreCart or (c is Bullet \
+							and c.damage == Balance.BOSS_SWEEP_DAMAGE))
+				# 三闸：容器干净 + BOSS 回稳态（0=ENTER/1=RECOVER，预警态
+				# 3/5 虽无弹但马上要出，一并避开）
+				var quiet := leftover == 0 \
+						and (boss._bstate == 0 or boss._bstate == 1)
+				if quiet:
+					break
+				await _wait(0.2)
+				waited += 0.2
+			var hp_pre_cart := player.hp
+			boss._begin_skill_b()
+			waited = 0.0
+			while waited < 3.0 and get_tree().get_nodes_in_group("ore_carts").is_empty():
+				await _wait(0.1)
+				waited += 0.1
+			waited = 0.0
+			while waited < 6.0 and player.hp >= hp_pre_cart:
+				await _wait(0.1)
+				waited += 0.1
+			var cart_damage := hp_pre_cart - player.hp
+			var cart_ok := cart_damage == Balance.ORE_CART_DAMAGE
+			await _screenshot("08c_redwheel_cart.png")
+			print("[autotest] redwheel cart: hp ", hp_pre_cart, " -> ",
+					player.hp, " damage=", cart_damage, " [",
+					"OK" if cart_ok else "FAIL", " 应=", Balance.ORE_CART_DAMAGE,
+					"；少报=余威胁抢跑/未中=查车路与贴地账]")
+	# 还原：结尾死亡探针要一刀必死
+	player.hp = Balance.PLAYER_MAX_HP
+	player.global_position = Vector2(player_x_before_flip, player.global_position.y)
+	player.velocity = Vector2.ZERO
+	await _wait(0.1)
+	# 失衡探针：加深×1.5 在前、减防御在后（10 → ceili(15)−5 = 10）
+	if is_instance_valid(boss) and boss.hp_ratio() > 0.0:
+		boss.add_impact(999)
+		await _wait(0.15)
+		var staggered := boss.is_staggered()
+		var ratio_pre := boss.hp_ratio()
+		boss.take_damage(10)
+		await _wait(0.05)
+		var applied := roundi((ratio_pre - boss.hp_ratio()) * Balance.REDWHEEL_MAX_HP)
+		var expected := ceili(10 * Balance.STAGGER_DMG_MULT) - Balance.BOSS_DEFENSE
+		await _screenshot("08e_boss_stagger.png")
+		print("[autotest] redwheel stagger: staggered=", staggered,
 				" impact_bar=", get_parent().get_node("HUD")._boss_impact_bar.visible,
 				" take 10 -> ", applied, " (失衡加深×防御应=", expected, ")")
 

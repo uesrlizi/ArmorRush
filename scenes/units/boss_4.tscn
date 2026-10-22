@@ -1,6 +1,6 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=10 format=3]
 
-[ext_resource type="Script" path="res://scripts/units/boss.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/units/boss_angler.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/world_4/boss_coral_body.svg" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/fx/muzzle_flash.tscn" id="3"]
 [ext_resource type="Texture2D" path="res://assets/world_4/boss_coral_gun.svg" id="4"]
@@ -9,10 +9,18 @@
 [ext_resource type="Texture2D" path="res://assets/world_4/boss_coral_rotor.svg" id="7"]
 [ext_resource type="Texture2D" path="res://assets/world_4/boss_coral_tailrotor.svg" id="8"]
 
+; 第四章 BOSS·深海猎杀舰「鮟鱇」（BossAngler，v2 珊瑚能量武器化）：美术按
+; 能力重烘焙（背驮大口径珊瑚重炮+艏部钓灯臂+腹下放电舱，同名覆写）。
+; 锚点 v2：独眼条带/Rotor/TailRotor 沿用；ArmPivot=钓灯臂根画布 (86,42)
+; →(-64,-48)，钓灯 sprite offset(-100,-12)（枢端画布 (100,12)，无 flip_v），
+; Muzzle=臂局部 (-94,14)=珊瑚球心；Cannon=背炮口画布 (150,28)→(0,-62)
+; （技能A 炮位：Flash+ThreatFlash）；BayPort=(0,84)（腹下放电舱，Flash 朝下
+; +ThreatFlash）。v1 的拟灯桅 Coil 与直升机族 MissilePorts 已删。
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
 size = Vector2(290, 170)
 
-[node name="Boss" type="CharacterBody2D"]
+[node name="BossAngler" type="CharacterBody2D"]
 collision_layer = 4
 collision_mask = 0
 script = ExtResource("1")
@@ -37,40 +45,37 @@ texture = ExtResource("7")
 position = Vector2(122, 22)
 texture = ExtResource("8")
 
+[node name="Cannon" type="Node2D" parent="Visuals"]
+position = Vector2(0, -62)
+
+[node name="Muzzle" type="Marker2D" parent="Visuals/Cannon"]
+position = Vector2(0, 0)
+
+[node name="Flash" parent="Visuals/Cannon/Muzzle" instance=ExtResource("3")]
+
+[node name="ThreatFlash" parent="Visuals/Cannon/Muzzle" instance=ExtResource("6")]
+
+[node name="BayPort" type="Marker2D" parent="Visuals"]
+position = Vector2(0, 84)
+
+[node name="Flash" parent="Visuals/BayPort" instance=ExtResource("3")]
+
+[node name="ThreatFlash" parent="Visuals/BayPort" instance=ExtResource("6")]
+
 [node name="ArmPivot" type="Node2D" parent="Visuals"]
-position = Vector2(-51, 15)
+position = Vector2(-64, -48)
 
 [node name="Arm" type="Sprite2D" parent="Visuals/ArmPivot"]
 texture = ExtResource("4")
 centered = false
-offset = Vector2(-95, -20)
-flip_v = true
+offset = Vector2(-100, -12)
 
 [node name="Muzzle" type="Marker2D" parent="Visuals/ArmPivot"]
-position = Vector2(-93, 8)
+position = Vector2(-94, 14)
 
 [node name="Flash" parent="Visuals/ArmPivot/Muzzle" instance=ExtResource("3")]
 
 [node name="ThreatFlash" parent="Visuals/ArmPivot/Muzzle" instance=ExtResource("6")]
-
-[node name="MissilePorts" type="Node2D" parent="Visuals"]
-
-[node name="Port1" type="Marker2D" parent="Visuals/MissilePorts"]
-position = Vector2(-67, -64)
-
-[node name="Port2" type="Marker2D" parent="Visuals/MissilePorts"]
-position = Vector2(-45, -64)
-
-[node name="Port3" type="Marker2D" parent="Visuals/MissilePorts"]
-position = Vector2(17, -64)
-
-[node name="Port4" type="Marker2D" parent="Visuals/MissilePorts"]
-position = Vector2(39, -64)
-
-[node name="MissileWarn" type="Marker2D" parent="Visuals"]
-position = Vector2(27, -64)
-
-[node name="ThreatFlash" parent="Visuals/MissileWarn" instance=ExtResource("6")]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_1")

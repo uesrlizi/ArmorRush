@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36" width="36" height="36">
+<!-- 珊瑚重弹贴图 36x36：软辉能量球（分层圆平涂假渐变+白热芯）。
+CoralOrb 本体；尾迹=coral_embers 粒子。能量语汇=柔光，无锯齿无电芯。 -->
+<defs>
+
+</defs>
+<circle cx="18" cy="18" r="16" fill="#ff5a33" opacity="0.14"/>
+<circle cx="18" cy="18" r="11.5" fill="#ff7a45" opacity="0.32"/>
+<circle cx="18" cy="18" r="8" fill="#ff5a33" opacity="0.85"/>
+<circle cx="18" cy="18" r="4.6" fill="#ffd9a0" opacity="0.95"/>
+<circle cx="18" cy="18" r="2" fill="#fff1dd" opacity="1.0"/>
+</svg>

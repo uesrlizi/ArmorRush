@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3200 900" width="3200" height="900">
+<!-- 第六章独层地标：斗轮挖掘机 3200x900（视差 0.9，tile 3200 同屏一份）。
+地标 tex_x=1620，总 extent [1245,1860]（∈[1575,1825] 防回绕弹切，
+worlds.md §5）。条带位 (8,270) 居中挂载：画布 y0=世界 −180；机座画布
+840=世界 660 沉远景地面线。原生朝左。种子 6062。 -->
+<defs>
+
+</defs>
+<rect x="1560" y="806" width="300" height="34" fill="#7a4a2e" opacity="0.92"/>
+<rect x="1560" y="806" width="300" height="4" fill="#d98c5e" opacity="0.7"/>
+<rect x="1576" y="838" width="68" height="22" fill="#7a4a2e" opacity="0.92"/>
+<rect x="1816" y="838" width="68" height="22" fill="#7a4a2e" opacity="0.92"/>
+<rect x="1600" y="640" width="240" height="170" fill="#8f5c3c" opacity="0.95"/>
+<rect x="1600" y="640" width="240" height="6" fill="#d98c5e" opacity="0.8"/>
+<rect x="1650" y="556" width="110" height="88" fill="#8f5c3c" opacity="0.95"/>
+<rect x="1650" y="556" width="110" height="5" fill="#d98c5e" opacity="0.8"/>
+<rect x="1688" y="512" width="34" height="48" fill="#8f5c3c" opacity="0.95"/>
+<rect x="1666" y="586" width="12" height="10" fill="#ffb347" opacity="0.85"/>
+<rect x="1694" y="586" width="12" height="10" fill="#ffb347" opacity="0.85"/>
+<rect x="1722" y="586" width="12" height="10" fill="#ffb347" opacity="0.85"/>
+<rect x="1666" y="616" width="12" height="10" fill="#ffb347" opacity="0.85"/>
+<rect x="1722" y="616" width="12" height="10" fill="#ffb347" opacity="0.85"/>
+<circle cx="1705" cy="506" r="8" fill="#ff4640" opacity="0.3"/>
+<circle cx="1705" cy="506" r="16" fill="#ff4640" opacity="0.13"/>
+<circle cx="1705" cy="506" r="2.4" fill="#ff4640"/>
+<polygon points="1660,610 1352,448 1362,424 1676,586" fill="#8f5c3c" opacity="0.95"/>
+<polygon points="1672,596 1370,448 1374,440 1678,586" fill="#7a4a2e" opacity="0.85"/>
+<circle cx="1322" cy="420" r="81" fill="#7a4a2e" opacity="0.95"/>
+<circle cx="1322" cy="420" r="60" fill="#c9a274" opacity="0.35"/>
+<line x1="1322" y1="420" x2="1385.8" y2="437" stroke="#7a4a2e" stroke-width="4" opacity="0.95"/>
+<rect x="1390.4" y="433.1" width="14" height="14" fill="#7a4a2e" opacity="0.95"/>
+<line x1="1322" y1="420" x2="1355.1" y2="477.1" stroke="#7a4a2e" stroke-width="4" opacity="0.95"/>
+<rect x="1354.1" y="480.5" width="14" height="14" fill="#7a4a2e" opacity="0.95"/>
+<line x1="1322" y1="420" x2="1305" y2="483.8" stroke="#7a4a2e" stroke-width="4" opacity="0.95"/>
+<rect x="1294.9" y="488.4" width="14" height="14" fill="#7a4a2e" opacity="0.95"/>
+<line x1="1322" y1="420" x2="1264.9" y2="453.1" stroke="#7a4a2e" stroke-width="4" opacity="0.95"/>
+<rect x="1247.5" y="452.1" width="14" height="14" fill="#7a4a2e" opacity="0.95"/>
+<line x1="1322" y1="420" x2="1258.2" y2="403" stroke="#7a4a2e" stroke-width="4" opacity="0.95"/>
+<rect x="1239.6" y="392.9" width="14" height="14" fill="#7a4a2e" opacity="0.95"/>
+<line x1="1322" y1="420" x2="1288.9" y2="362.9" stroke="#7a4a2e" stroke-width="4" opacity="0.95"/>
+<rect x="1275.9" y="345.5" width="14" height="14" fill="#7a4a2e" opacity="0.95"/>
+<line x1="1322" y1="420" x2="1339" y2="356.2" stroke="#7a4a2e" stroke-width="4" opacity="0.95"/>
+<rect x="1335.1" y="337.6" width="14" height="14" fill="#7a4a2e" opacity="0.95"/>
+<line x1="1322" y1="420" x2="1379.1" y2="386.9" stroke="#7a4a2e" stroke-width="4" opacity="0.95"/>
+<rect x="1382.5" y="373.9" width="14" height="14" fill="#7a4a2e" opacity="0.95"/>
+<circle cx="1322" cy="420" r="9" fill="#7a4a2e" opacity="0.95"/>
+<circle cx="1322" cy="332" r="8" fill="#ff4640" opacity="0.3"/>
+<circle cx="1322" cy="332" r="16" fill="#ff4640" opacity="0.13"/>
+<circle cx="1322" cy="332" r="2.2" fill="#ff4640"/>
+<polygon points="1836,620 1960,566 1966,580 1842,636" fill="#8f5c3c" opacity="0.9"/>
+<rect x="1952" y="556" width="16" height="12" fill="#8f5c3c" opacity="0.9"/>
+<circle cx="1960" cy="552" r="4" fill="#ffb347" opacity="0.35"/>
+<circle cx="1960" cy="552" r="8" fill="#ffb347" opacity="0.12"/>
+<circle cx="1960" cy="552" r="2" fill="#ffb347"/>
+<ellipse cx="1710" cy="852" rx="190" ry="22" fill="#d9b98c" opacity="0.5"/>
+<ellipse cx="1560" cy="860" rx="130" ry="16" fill="#d9b98c" opacity="0.4"/>
+<ellipse cx="1860" cy="858" rx="120" ry="15" fill="#d9b98c" opacity="0.35"/>
+<line x1="2452.5" y1="574.2" x2="2338.5" y2="579.9" stroke="#e6cba2" stroke-width="2" opacity="0.12338578367453756"/>
+<line x1="1009.3" y1="381.1" x2="881.3" y2="387.5" stroke="#e6cba2" stroke-width="2" opacity="0.22954692066132978"/>
+<line x1="1281.7" y1="734" x2="1151.3" y2="740.5" stroke="#e6cba2" stroke-width="2" opacity="0.13893573113700453"/>
+<line x1="2503.3" y1="326.4" x2="2403.4" y2="331.4" stroke="#e6cba2" stroke-width="2" opacity="0.1967534026330628"/>
+<line x1="1932.4" y1="455.5" x2="1860.3" y2="459.1" stroke="#e6cba2" stroke-width="2" opacity="0.21549526235357042"/>
+<line x1="1078.5" y1="401.2" x2="971.3" y2="406.5" stroke="#e6cba2" stroke-width="2" opacity="0.22700469045263344"/>
+<line x1="1835.8" y1="596.6" x2="1702.8" y2="603.2" stroke="#e6cba2" stroke-width="2" opacity="0.1653980375458493"/>
+<line x1="2149.4" y1="692.3" x2="2072.5" y2="696.1" stroke="#e6cba2" stroke-width="2" opacity="0.15369594183364327"/>
+</svg>

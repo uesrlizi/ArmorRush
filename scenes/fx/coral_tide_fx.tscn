@@ -1,0 +1,131 @@
+[gd_scene load_steps=17 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/world_4/fx_coral_wall.svg" id="1"]
+[ext_resource type="Texture2D" path="res://assets/common/fx_flash.svg" id="2"]
+; 珊瑚潮·浪墙（v3 平涂重设计：v2.5 平涂盘堆积被判"皂泡团不成墙"。本版=
+; **实体剪影墙**（fx_coral_wall 三层色阶波形，普通混合不进 ADD——"墙"的
+; 体量交给剪影，ADD 只给能量粒子；v2.2"死墙"被否的根因是粒子没命，不是
+; 剪影本身）+ 三层能量粒子：
+;   Wall  剪影浪墙（Sprite2D，随墙整体推进；溃散淡出走 coral_tide.gd 的
+;     modulate.a，全子节点一起淡）；
+;   Crest 顶缘白热翻滚（local_coords=true 随墙走，白盘快熄=浪冠沸腾）；
+;   Wake  基部尾迹（世界空间，涌过之后拖出的余烬带）；
+;   Spray 前缘飞沫（世界空间小平点，初速≈涌速朝前抛+快坠，抢在浪冠前拱弧）；
+; 发射量/速度/色带全在检查器调。
+; 布局规矩：sub_resource 按发射器分组（共享 curve 提前）——渐变链静默丢失坑。
+
+[sub_resource type="CanvasItemMaterial" id="addmat"]
+blend_mode = 1
+
+[sub_resource type="Curve" id="curve_shrink"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.35), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="ctex_shrink"]
+curve = SubResource("curve_shrink")
+
+[sub_resource type="Gradient" id="grad_crest"]
+offsets = PackedFloat32Array(0, 0.45, 1)
+colors = PackedColorArray(1, 0.95, 0.85, 0.95, 1, 0.55, 0.3, 0.7, 0.8, 0.28, 0.14, 0)
+
+[sub_resource type="GradientTexture1D" id="gtex_crest"]
+gradient = SubResource("grad_crest")
+
+[sub_resource type="ParticleProcessMaterial" id="pm_crest"]
+particle_flag_disable_z = true
+emission_shape = 3
+emission_box_extents = Vector3(24, 6, 2)
+direction = Vector3(-0.35, -1, 0)
+spread = 26.0
+initial_velocity_min = 30.0
+initial_velocity_max = 100.0
+gravity = Vector3(0, 150, 0)
+damping_min = 40.0
+damping_max = 90.0
+scale_min = 0.12
+scale_max = 0.22
+scale_curve = SubResource("ctex_shrink")
+color_ramp = SubResource("gtex_crest")
+
+[sub_resource type="Gradient" id="grad_wake"]
+offsets = PackedFloat32Array(0, 0.5, 1)
+colors = PackedColorArray(1, 0.52, 0.28, 0.7, 0.85, 0.28, 0.14, 0.45, 0.4, 0.11, 0.06, 0)
+
+[sub_resource type="GradientTexture1D" id="gtex_wake"]
+gradient = SubResource("grad_wake")
+
+[sub_resource type="ParticleProcessMaterial" id="pm_wake"]
+particle_flag_disable_z = true
+emission_shape = 3
+emission_box_extents = Vector3(38, 6, 2)
+direction = Vector3(1, -0.1, 0)
+spread = 16.0
+initial_velocity_min = 30.0
+initial_velocity_max = 80.0
+gravity = Vector3(0, 60, 0)
+scale_min = 0.14
+scale_max = 0.28
+scale_curve = SubResource("ctex_shrink")
+color_ramp = SubResource("gtex_wake")
+
+[sub_resource type="Gradient" id="grad_spray"]
+offsets = PackedFloat32Array(0, 0.5, 1)
+colors = PackedColorArray(1, 0.55, 0.3, 0.9, 1, 0.48, 0.27, 0.7, 0.85, 0.3, 0.16, 0)
+
+[sub_resource type="GradientTexture1D" id="gtex_spray"]
+gradient = SubResource("grad_spray")
+
+[sub_resource type="ParticleProcessMaterial" id="pm_spray"]
+particle_flag_disable_z = true
+emission_shape = 3
+emission_box_extents = Vector3(4, 28, 2)
+direction = Vector3(-1, -0.3, 0)
+spread = 14.0
+initial_velocity_min = 450.0
+initial_velocity_max = 650.0
+gravity = Vector3(0, 520, 0)
+angle_min = -180.0
+angle_max = 180.0
+scale_min = 0.09
+scale_max = 0.16
+color_ramp = SubResource("gtex_spray")
+
+[node name="CoralTideFX" type="Node2D"]
+
+[node name="Wall" type="Sprite2D" parent="."]
+position = Vector2(2, -6)
+rotation = -0.08
+texture = ExtResource("1")
+
+[node name="Crest" type="GPUParticles2D" parent="."]
+position = Vector2(-8, -48)
+material = SubResource("addmat")
+emitting = false
+amount = 44
+lifetime = 0.4
+local_coords = true
+fixed_fps = 0
+texture = ExtResource("2")
+process_material = SubResource("pm_crest")
+
+[node name="Wake" type="GPUParticles2D" parent="."]
+position = Vector2(40, 56)
+material = SubResource("addmat")
+emitting = false
+amount = 30
+lifetime = 0.55
+local_coords = false
+fixed_fps = 0
+texture = ExtResource("2")
+process_material = SubResource("pm_wake")
+
+[node name="Spray" type="GPUParticles2D" parent="."]
+position = Vector2(-36, 0)
+material = SubResource("addmat")
+emitting = false
+amount = 30
+lifetime = 0.32
+local_coords = false
+fixed_fps = 0
+texture = ExtResource("2")
+process_material = SubResource("pm_spray")

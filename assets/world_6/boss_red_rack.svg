@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 54" width="60" height="54">
+<!-- 第六章 BOSS 双桩炮架 60x54（独立件，固定射角）。
+枢端画布 (30,50)=背甲炮座环；双管朝天微外张，管口画布 (30,4)
+=Muzzle（架局部 (0,-46)）。出膛焰/预警闪光落管口（真实枪口律）。 -->
+<defs>
+
+</defs>
+<rect x="18" y="42" width="24" height="12" fill="#4e2418"/>
+<circle cx="30" cy="50" r="4" fill="#4e2418"/>
+<rect x="16" y="18" width="28" height="26" fill="#6e3424"/>
+<rect x="16" y="18" width="28" height="2.5" fill="#a85a3a"/>
+<polygon points="14,20 26,2 31,4 22,22" fill="#33180e"/>
+<polygon points="46,20 34,2 29,4 38,22" fill="#33180e"/>
+<rect x="20" y="0" width="8.4" height="4" fill="#6e3424"/>
+<rect x="31.6" y="0" width="8.4" height="4" fill="#6e3424"/>
+<rect x="22.4" y="0" width="3.6" height="2.2" fill="#f2f0ff" opacity="0.95"/>
+<rect x="33.6" y="0" width="3.6" height="2.2" fill="#f2f0ff" opacity="0.95"/>
+<circle cx="48" cy="30" r="1.4" fill="#d8a021" opacity="0.85"/>
+</svg>

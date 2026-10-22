@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3200 150" width="3200" height="150">
+<!-- 第五章云海·前景云沿 3200x150（SeaFront：场景里画在 Terrain 之后，
+遮住柱脚=柱子「没入海面」的前后层级；scroll_scale=1 静态）。顶缘错落
+云团+底缘 40px 渐隐融进云海底色。种子 5056。 -->
+<defs>
+<linearGradient id="seaf" x1="0" y1="0.0" x2="0" y2="1.0"><stop offset="0" stop-color="#d4b8ca" stop-opacity="1"/><stop offset="0.55" stop-color="#b892ac" stop-opacity="1"/><stop offset="0.78" stop-color="#a8849e" stop-opacity="1"/><stop offset="1.0" stop-color="#a8849e" stop-opacity="0.0"/></linearGradient>
+</defs>
+<ellipse cx="71.8" cy="55.3" rx="103.6" ry="22.2" fill="#d4b8ca" opacity="1.0"/>
+<ellipse cx="155" cy="45.7" rx="108.9" ry="25" fill="#d4b8ca" opacity="1.0"/>
+<ellipse cx="290.7" cy="63.5" rx="123.8" ry="24.2" fill="#d4b8ca" opacity="1.0"/>
+<ellipse cx="414" cy="66.7" rx="105.7" ry="41.2" fill="#d4b8ca" opacity="1.0"/>
+<ellipse cx="498.4" cy="66.5" rx="75.1" ry="38.2" fill="#d4b8ca" opacity="1.0"/>
+<ellipse cx="558.1" cy="45.2" rx="81.2" ry="26.3" fill="#d4b8ca" opacity="1.0"/>
+<ellipse cx="640.1" cy="45.4" rx="103.9" ry="29.5" fill="#d4b8ca" opacity="1.0"/>
+<ellipse cx="780.6" cy="44.9" rx="139.6" ry="29.3" fill="#d4b8ca" opacity="1.0"/>
+<ellipse cx="882.5" cy="60.7" rx="111.1" ry="28.3" fill="#d4b8ca" opacity="1.0"/>
+<ellipse cx="971.1" cy="39" rx="128.7" ry="32.6" fill="#d4b8ca" opacity="1.0"/>
+<ellipse cx="1052.8" cy="57.3" rx="107.3" ry="36.7" fill="#d4b8ca" opacity="1.0"/>
+<ellipse cx="1177.3" cy="41.6" rx="125.3" ry="30.4" fill="#d4b8ca" opacity="1.0"/>
+<ellipse cx="1283.9" cy="39.9" rx="133.9" ry="22.7" fill="#d4b8ca" opacity="1.0"/>
+<ellipse cx="1372.9" cy="66.5" rx="121.8" ry="20.1" fill="#d4b8ca" opacity="1.0"/>
+<ellipse cx="1465.9" cy="54.4" rx="71.6" ry="24.4" fill="#d4b8ca" opacity="1.0"/>
+<ellipse cx="1550" cy="50.4" rx="78.9" ry="35.6" fill="#d4b8ca" opacity="1.0"/>
+<ellipse cx="1606" cy="40.5" rx="76" ry="21.4" fill="#d4b8ca" opacity="1.0"/>
+<ellipse cx="1709.7" cy="60.1" rx="114.8" ry="20" fill="#d4b8ca" opacity="1.0"/>
+<ellipse cx="1843.1" cy="64.1" rx="139.1" ry="32.1" fill="#d4b8ca" opacity="1.0"/>
+<ellipse cx="1929.9" cy="61.9" rx="80.6" ry="26.7" fill="#d4b8ca" opacity="1.0"/>
+<ellipse cx="2004.2" cy="39.4" rx="60" ry="41.4" fill="#d4b8ca" opacity="1.0"/>
+<ellipse cx="2075.1" cy="64.4" rx="94.1" ry="36.2" fill="#d4b8ca" opacity="1.0"/>
+<ellipse cx="2167.2" cy="61.7" rx="100.4" ry="38.2" fill="#d4b8ca" opacity="1.0"/>
+<ellipse cx="2290.4" cy="55.4" rx="117.9" ry="40.9" fill="#d4b8ca" opacity="1.0"/>
+<ellipse cx="2367.6" cy="60" rx="77.4" ry="40.9" fill="#d4b8ca" opacity="1.0"/>
+<ellipse cx="2441.2" cy="52.2" rx="68.5" ry="39.4" fill="#d4b8ca" opacity="1.0"/>
+<ellipse cx="2547.7" cy="57.6" rx="121.6" ry="29.5" fill="#d4b8ca" opacity="1.0"/>
+<ellipse cx="2657" cy="44.7" rx="144.1" ry="28.2" fill="#d4b8ca" opacity="1.0"/>
+<ellipse cx="2728.5" cy="65" rx="76" ry="24.9" fill="#d4b8ca" opacity="1.0"/>
+<ellipse cx="2808.4" cy="68" rx="89.2" ry="27" fill="#d4b8ca" opacity="1.0"/>
+<ellipse cx="2894.5" cy="39.8" rx="65.5" ry="41.2" fill="#d4b8ca" opacity="1.0"/>
+<ellipse cx="2964.6" cy="42.4" rx="72.8" ry="31.2" fill="#d4b8ca" opacity="1.0"/>
+<ellipse cx="3028.5" cy="41.2" rx="61.2" ry="27.2" fill="#d4b8ca" opacity="1.0"/>
+<ellipse cx="3108.9" cy="64.9" rx="85.8" ry="39.5" fill="#d4b8ca" opacity="1.0"/>
+<ellipse cx="3208.2" cy="51.9" rx="142.6" ry="33.4" fill="#d4b8ca" opacity="1.0"/>
+<rect x="0" y="44" width="3200" height="106" fill="url(#seaf)"/>
+<ellipse cx="76.4" cy="43.8" rx="112.8" ry="12" fill="#f0d8de" opacity="0.5"/>
+<ellipse cx="239.9" cy="44.8" rx="115" ry="12" fill="#f0d8de" opacity="0.5"/>
+<ellipse cx="372" cy="44.5" rx="72.5" ry="12" fill="#f0d8de" opacity="0.5"/>
+<ellipse cx="465.8" cy="55.9" rx="59.3" ry="12" fill="#f0d8de" opacity="0.5"/>
+<ellipse cx="568.6" cy="45.4" rx="91.4" ry="12" fill="#f0d8de" opacity="0.5"/>
+<ellipse cx="670.1" cy="55.3" rx="100.9" ry="12" fill="#f0d8de" opacity="0.5"/>
+<ellipse cx="759.2" cy="57.6" rx="72.9" ry="12" fill="#f0d8de" opacity="0.5"/>
+<ellipse cx="838.9" cy="47.3" rx="62.2" ry="12" fill="#f0d8de" opacity="0.5"/>
+<ellipse cx="944.5" cy="39.8" rx="99" ry="12" fill="#f0d8de" opacity="0.5"/>
+<ellipse cx="1045.1" cy="39.5" rx="111.8" ry="12" fill="#f0d8de" opacity="0.5"/>
+<ellipse cx="1184.6" cy="36.9" rx="108.3" ry="12" fill="#f0d8de" opacity="0.5"/>
+<ellipse cx="1319.8" cy="41" rx="56.3" ry="12" fill="#f0d8de" opacity="0.5"/>
+<ellipse cx="1397.4" cy="51.9" rx="95.5" ry="12" fill="#f0d8de" opacity="0.5"/>
+<ellipse cx="1479.5" cy="53.9" rx="78" ry="12" fill="#f0d8de" opacity="0.5"/>
+<ellipse cx="1561.7" cy="39.5" rx="51.7" ry="12" fill="#f0d8de" opacity="0.5"/>
+<ellipse cx="1651.4" cy="36.1" rx="94" ry="12" fill="#f0d8de" opacity="0.5"/>
+<ellipse cx="1783" cy="47.4" rx="83.9" ry="12" fill="#f0d8de" opacity="0.5"/>
+<ellipse cx="1849.8" cy="49.8" rx="62.5" ry="12" fill="#f0d8de" opacity="0.5"/>
+<ellipse cx="1948.5" cy="38.3" rx="116.5" ry="12" fill="#f0d8de" opacity="0.5"/>
+<ellipse cx="2079.8" cy="47.5" rx="109.3" ry="12" fill="#f0d8de" opacity="0.5"/>
+<ellipse cx="2195.4" cy="36.3" rx="63.5" ry="12" fill="#f0d8de" opacity="0.5"/>
+<ellipse cx="2268.8" cy="51.3" rx="69.8" ry="12" fill="#f0d8de" opacity="0.5"/>
+<ellipse cx="2343.4" cy="52.5" rx="52.9" ry="12" fill="#f0d8de" opacity="0.5"/>
+<ellipse cx="2422.1" cy="55.1" rx="82.7" ry="12" fill="#f0d8de" opacity="0.5"/>
+<ellipse cx="2493.9" cy="41.2" rx="59.8" ry="12" fill="#f0d8de" opacity="0.5"/>
+<ellipse cx="2549.2" cy="45.5" rx="56.7" ry="12" fill="#f0d8de" opacity="0.5"/>
+<ellipse cx="2619.2" cy="55.6" rx="80.1" ry="12" fill="#f0d8de" opacity="0.5"/>
+<ellipse cx="2728.7" cy="36.3" rx="85" ry="12" fill="#f0d8de" opacity="0.5"/>
+<ellipse cx="2824.2" cy="43.8" rx="83" ry="12" fill="#f0d8de" opacity="0.5"/>
+<ellipse cx="2911.3" cy="56.3" rx="55.2" ry="12" fill="#f0d8de" opacity="0.5"/>
+<ellipse cx="2968.2" cy="46.9" rx="55" ry="12" fill="#f0d8de" opacity="0.5"/>
+<ellipse cx="3063.2" cy="52.1" rx="91.2" ry="12" fill="#f0d8de" opacity="0.5"/>
+<ellipse cx="3178.2" cy="37.2" rx="92.6" ry="12" fill="#f0d8de" opacity="0.5"/>
+</svg>
