@@ -10,13 +10,13 @@ extends Node2D
 ## 视觉=纯特效（v2.5 全平涂：coral_tide_fx 四层平涂盘发射器[墙体/浪冠/泡沫/
 ## 前缘飞沫]，平涂堆密度出能量感，柔光底已随渐变一起砍掉）：group
 ## "coral_tides" 供自测探针计数。预警在发射器上（ThreatFlash，见调用方）。
-## 数值全在 Balance.CORAL_TIDE_*。
+## 数值全在 BalanceWorld4.CORAL_TIDE_*。
 
 const TIDE_FX := preload("res://scenes/fx/coral_tide_fx.tscn")
 
-var damage := Balance.CORAL_TIDE_DAMAGE
-var speed := Balance.CORAL_TIDE_SPEED
-var travel_max := Balance.CORAL_TIDE_RANGE
+var damage := BalanceWorld4.CORAL_TIDE_DAMAGE
+var speed := BalanceWorld4.CORAL_TIDE_SPEED
+var travel_max := BalanceWorld4.CORAL_TIDE_RANGE
 
 var _dir := -1.0 # 涌动方向（−1=朝左，向玩家一侧）
 var _travel := 0.0
@@ -49,8 +49,8 @@ func _ready() -> void:
 func launch(_terrain: Terrain, from: Vector2, direction: float) -> void:
 	_dir = signf(direction) if direction != 0.0 else -1.0
 	_fx.scale.x = -1.0 if _dir > 0.0 else 1.0
-	var band_center := (Balance.CORAL_TIDE_BAND_TOP \
-			+ Balance.CORAL_TIDE_BAND_BOTTOM) * 0.5
+	var band_center := (BalanceWorld4.CORAL_TIDE_BAND_TOP \
+			+ BalanceWorld4.CORAL_TIDE_BAND_BOTTOM) * 0.5
 	global_position = Vector2(from.x, band_center)
 	reset_physics_interpolation() # 先入树后定位：不拖补间残影
 	for e in _emitters:
@@ -74,11 +74,11 @@ func _physics_process(delta: float) -> void:
 		return
 	var player := get_tree().get_first_node_in_group("player") as Player
 	if player != null and not player.is_dead():
-		var a := Vector2(global_position.x, Balance.CORAL_TIDE_BAND_TOP)
-		var b := Vector2(global_position.x, Balance.CORAL_TIDE_BAND_BOTTOM)
+		var a := Vector2(global_position.x, BalanceWorld4.CORAL_TIDE_BAND_TOP)
+		var b := Vector2(global_position.x, BalanceWorld4.CORAL_TIDE_BAND_BOTTOM)
 		var dist := Geometry2D.get_closest_point_to_segment(
 				player.global_position, a, b).distance_to(player.global_position)
-		if dist <= Balance.CORAL_TIDE_RADIUS + 26.0:
+		if dist <= BalanceWorld4.CORAL_TIDE_RADIUS + 26.0:
 			player.take_damage(damage)
 			_fade = 0.99 # 灼烧一次即溃散：威胁解除（同"雷爆即完"的账）
 			for e in _emitters:

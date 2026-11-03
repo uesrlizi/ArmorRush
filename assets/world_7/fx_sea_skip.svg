@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 16" width="44" height="16">
+<!-- 跳弹 44x16（+X=飞行方向）：暗壳卵形弹体+白热环带+浮标橙尾带。
+抛体落玩家脚下→连跳三次（每次触地喷白沫溅花）→末跳球爆。 -->
+<defs>
+
+</defs>
+<ellipse cx="22" cy="8" rx="20" ry="7.5" fill="#2d4149"/>
+<ellipse cx="22" cy="6" rx="18" ry="4.2" fill="#3f5a66" opacity="0.9"/>
+<rect x="14" y="3.4" width="4" height="9.2" fill="#f2f0ff" opacity="0.9"/>
+<rect x="30" y="4.4" width="7" height="7.2" fill="#3f5a66"/>
+<rect x="38" y="5" width="5" height="6" fill="#ff5a3c" opacity="0.9"/>
+<ellipse cx="6" cy="8" rx="4" ry="4.4" fill="#1c2a30"/>
+</svg>

@@ -1,0 +1,91 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/units/boss_anchor.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/world_7/boss_sea_body.svg" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/fx/muzzle_flash.tscn" id="3"]
+[ext_resource type="Texture2D" path="res://assets/world_7/boss_sea_gun.svg" id="4"]
+[ext_resource type="Script" path="res://scripts/units/eye_glow.gd" id="5"]
+[ext_resource type="PackedScene" path="res://scenes/fx/threat_flash.tscn" id="6"]
+[ext_resource type="Texture2D" path="res://assets/common/fx_flame.svg" id="7"]
+
+; 第七章 BOSS·打捞巡防舰「沉锚」（BossAnchor，海防与打捞能力套件）：
+; 独眼条带 y60..66 含 (55,63)（EyeGlow (-95,-27) 沿用）；
+; ArmPivot=艏炮座画布 (46,45)→局部 (-104,-45)（俯仰真瞄=敌基类瞄准层驱动，
+; 同响哨高炮账；炮臂画布 48x20
+; 枢端 (40,10)→offset(-40,-10)，管口画布 (4,10)=Muzzle 局部 (-36,0)，
+; Flash+ThreatFlash=直射枪口焰）；
+; BayPort=艉舱口画布 (226,146)→局部 (76,56)（ThreatFlash=深弹预警，
+; 深弹由此向艉侧抛出）；
+; TorpedoPort=艏部下管画布 (28,138)→局部 (-122,48)（ThreatFlash=跳弹预警，
+; 平抛出膛位=鱼雷语汇；v2 发射点改船体下部，技能A 同步压低机体到
+; ANCHOR_SKIP_FIRE_Y）；
+; Thruster1/2=局部 (-40,66)/(60,66)（通用 fx_flame+加色青白，举升喷口呼吸）。
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
+size = Vector2(280, 150)
+
+[sub_resource type="CanvasItemMaterial" id="addmat"]
+blend_mode = 1
+
+[node name="BossAnchor" type="CharacterBody2D"]
+collision_layer = 4
+collision_mask = 0
+script = ExtResource("1")
+feet_offset = 90.0
+body_size = Vector2(300, 180)
+
+[node name="Visuals" type="Node2D" parent="."]
+
+[node name="Sprite2D" type="Sprite2D" parent="Visuals"]
+texture = ExtResource("2")
+
+[node name="EyeGlow" type="Node2D" parent="Visuals/Sprite2D"]
+position = Vector2(-95, -27)
+scale = Vector2(1.2, 1.2)
+script = ExtResource("5")
+
+[node name="ArmPivot" type="Node2D" parent="Visuals"]
+position = Vector2(-104, -45)
+
+[node name="Sprite2D" type="Sprite2D" parent="Visuals/ArmPivot"]
+texture = ExtResource("4")
+centered = false
+offset = Vector2(-40, -10)
+
+[node name="Muzzle" type="Marker2D" parent="Visuals/ArmPivot"]
+position = Vector2(-36, 0)
+
+[node name="Flash" parent="Visuals/ArmPivot/Muzzle" instance=ExtResource("3")]
+
+[node name="ThreatFlash" parent="Visuals/ArmPivot/Muzzle" instance=ExtResource("6")]
+
+[node name="BayPort" type="Marker2D" parent="Visuals"]
+position = Vector2(76, 56)
+
+[node name="ThreatFlash" parent="Visuals/BayPort" instance=ExtResource("6")]
+
+[node name="Flash" parent="Visuals/BayPort" instance=ExtResource("3")]
+
+[node name="TorpedoPort" type="Marker2D" parent="Visuals"]
+position = Vector2(-122, 48)
+
+[node name="ThreatFlash" parent="Visuals/TorpedoPort" instance=ExtResource("6")]
+
+[node name="Flash" parent="Visuals/TorpedoPort" instance=ExtResource("3")]
+
+[node name="Thruster1" type="Sprite2D" parent="Visuals"]
+modulate = Color(0.62, 0.95, 0.92, 0.6)
+material = SubResource("addmat")
+position = Vector2(-40, 66)
+scale = Vector2(1.1, 1.1)
+texture = ExtResource("7")
+
+[node name="Thruster2" type="Sprite2D" parent="Visuals"]
+modulate = Color(0.62, 0.95, 0.92, 0.6)
+material = SubResource("addmat")
+position = Vector2(60, 66)
+scale = Vector2(1.1, 1.1)
+texture = ExtResource("7")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_1")

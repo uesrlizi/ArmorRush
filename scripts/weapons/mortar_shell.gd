@@ -40,14 +40,14 @@ func launch(terrain: Terrain, from: Vector2, target: Vector2, flight_time: float
 	_terrain = terrain
 	global_position = from
 	var d := target - from
-	var g := Balance.MORTAR_GRAVITY
+	var g := BalanceCombat.MORTAR_GRAVITY
 	_vel = Vector2(d.x / flight_time, d.y / flight_time - 0.5 * g * flight_time)
 	rotation = _vel.angle()
 	reset_physics_interpolation() # 先入树后定位：不拖补间残影
 
 
 func _physics_process(delta: float) -> void:
-	_vel.y += Balance.MORTAR_GRAVITY * delta
+	_vel.y += BalanceCombat.MORTAR_GRAVITY * delta
 	global_position += _vel * delta
 	rotation = _vel.angle()
 	if _terrain != null and global_position.y >= _terrain.surface_y_at(global_position.x):
@@ -59,7 +59,7 @@ func _physics_process(delta: float) -> void:
 static func compute_lead_target(from: Vector2, player: Player, terrain: Terrain,
 		lead_max: float, flight_time: float) -> Vector2:
 	var vx := clampf(player.velocity.x,
-			-Balance.PLAYER_MOVE_SPEED, Balance.PLAYER_MOVE_SPEED)
+			-BalancePlayer.PLAYER_MOVE_SPEED, BalancePlayer.PLAYER_MOVE_SPEED)
 	var x := clampf(player.global_position.x + vx * flight_time,
 			player.global_position.x - 150.0,
 			player.global_position.x + lead_max)
@@ -99,5 +99,5 @@ func _detonate() -> void:
 	Sfx.play(&"boom_enemy")
 	var player := get_tree().get_first_node_in_group("player") as Player
 	if player != null:
-		player.add_shake(Balance.KILL_SHAKE_STRENGTH * 1.5)
+		player.add_shake(BalanceCombat.KILL_SHAKE_STRENGTH * 1.5)
 	queue_free()

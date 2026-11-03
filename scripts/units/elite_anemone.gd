@@ -7,7 +7,7 @@ extends Enemy
 ## **逐发在出膛瞬间 lead 瞄准**（CoralOrb.lead_direction：玩家速度×飞行时长，
 ## clamp 承诺带——弹体自读：慢弹看得见、侧移即躲；匀速直线跑被压在路径上，
 ## 变向/急停=免）→ 慢速能量重球直线飞抵落点爆蕗（无残留区——教学纯净版）。
-## 数值全在 Balance.ELITE_ANEMONE_*/CORAL_ORB_*；重击公共规约见 Balance 重击段。
+## 数值全在 BalanceWorld4.ELITE_ANEMONE_*/CORAL_ORB_*；重击公共规约见 Balance 重击段。
 
 enum VolleyState { COOLDOWN, TELEGRAPH, LAUNCH }
 
@@ -19,11 +19,11 @@ var _launched := 0
 
 
 func _species_max_hp() -> int:
-	return Balance.ELITE_ANEMONE_MAX_HP
+	return BalanceWorld4.ELITE_ANEMONE_MAX_HP
 
 
 func _species_score() -> int:
-	return Balance.ELITE_ANEMONE_SCORE
+	return BalanceWorld4.ELITE_ANEMONE_SCORE
 
 
 ## 海葵发射器：射角固定（出膛方向由 lead 解算给），臂枢不随玩家俯仰。
@@ -37,11 +37,11 @@ func _knockback_scale() -> float:
 
 
 func _impact_resistance() -> float:
-	return Balance.IMPACT_RESIST_ELITE
+	return BalanceCombat.IMPACT_RESIST_ELITE
 
 
 func _stagger_time() -> float:
-	return Balance.STAGGER_TIME_ELITE
+	return BalanceCombat.STAGGER_TIME_ELITE
 
 
 func _stagger_key() -> StringName:
@@ -49,7 +49,7 @@ func _stagger_key() -> StringName:
 
 
 func _stagger_immunity() -> float:
-	return Balance.STAGGER_IMMUNITY_ELITE
+	return BalanceCombat.STAGGER_IMMUNITY_ELITE
 
 
 ## 攻击层整体替换：父类的机枪扫射层置空（移动层照旧，边踱步边按节奏开炮）。
@@ -76,10 +76,10 @@ func _tick_volley(delta: float) -> void:
 	match _volley_state:
 		VolleyState.COOLDOWN:
 			var in_range := absf(player.global_position.x - global_position.x) \
-					<= Balance.ELITE_ANEMONE_ATTACK_RANGE
-			if in_range and _roll_trigger(Balance.ELITE_ANEMONE_VOLLEY_HALF_LIFE, delta):
+					<= BalanceWorld4.ELITE_ANEMONE_ATTACK_RANGE
+			if in_range and _roll_trigger(BalanceWorld4.ELITE_ANEMONE_VOLLEY_HALF_LIFE, delta):
 				_volley_state = VolleyState.TELEGRAPH
-				_volley_t = Balance.HEAVY_GUN_WARN_TIME
+				_volley_t = BalanceCombat.HEAVY_GUN_WARN_TIME
 				_launched = 0
 				_warn.warn() # 预警统一入口：海葵口闪光 + 警告音
 		VolleyState.TELEGRAPH:
@@ -92,10 +92,10 @@ func _tick_volley(delta: float) -> void:
 			if _volley_t <= 0.0:
 				_launch_one()
 				_launched += 1
-				if _launched >= Balance.ELITE_ANEMONE_VOLLEY_COUNT:
+				if _launched >= BalanceWorld4.ELITE_ANEMONE_VOLLEY_COUNT:
 					_volley_state = VolleyState.COOLDOWN
 				else:
-					_volley_t = Balance.ELITE_ANEMONE_VOLLEY_STAGGER
+					_volley_t = BalanceWorld4.ELITE_ANEMONE_VOLLEY_STAGGER
 
 
 ## 珊瑚重弹：出膛瞬间 lead 解算方向（瞄准锁定在开火时机，真实枪口律），
@@ -107,11 +107,11 @@ func _launch_one() -> void:
 	if player == null or terrain == null or container == null:
 		return
 	var dir := CoralOrb.lead_direction(terrain, _muzzle.global_position, player,
-			Balance.CORAL_ORB_SPEED,
-			Balance.ELITE_ANEMONE_LEAD_BACK, Balance.ELITE_ANEMONE_LEAD_MAX)
+			BalanceWorld4.CORAL_ORB_SPEED,
+			BalanceWorld4.ELITE_ANEMONE_LEAD_BACK, BalanceWorld4.ELITE_ANEMONE_LEAD_MAX)
 	var orb := CoralOrb.new()
-	orb.damage = Balance.ELITE_ANEMONE_ORB_DAMAGE
-	orb.blast_radius = Balance.ELITE_ANEMONE_BLAST_RADIUS
+	orb.damage = BalanceWorld4.ELITE_ANEMONE_ORB_DAMAGE
+	orb.blast_radius = BalanceWorld4.ELITE_ANEMONE_BLAST_RADIUS
 	container.add_child(orb)
 	orb.launch(terrain, _muzzle.global_position, dir)
 	_muzzle_flash.fire(dir.angle()) # 出膛焰跟弹道方向，钉在海葵口

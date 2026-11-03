@@ -37,12 +37,8 @@ const DEADZONE_PX := 12.0
 		queue_redraw()
 
 var _touch_id := -1
+var _last_touch_pos := Vector2.ZERO # 按住指的最后视口坐标（跨关交接认领用）
 var _knob_dx := 0.0 # 圆钮相对轨道中心的横向偏移（表现用）
-
-## 手指按进摇杆（任何方向）。同步信号，TouchControls 用来关自动前进。
-signal move_started
-## 手指抬起：相对轨道中心的方向（+1 右 / -1 左 / 0 死区内）。双击右的判定源。
-signal tapped(direction: float)
 
 
 func _ready() -> void:
@@ -65,25 +61,44 @@ func _input(event: InputEvent) -> void:
 			if _touch_id == -1 and not viewport.is_input_handled() \
 					and _grab_area().has_point(pos):
 				_touch_id = touch.index
+				_last_touch_pos = touch.position
 				viewport.set_input_as_handled()
-				move_started.emit()
 				_apply_axis(pos.x - center().x) # 按下即按位置定方向，不等拖动
 				queue_redraw()
 		elif touch.index == _touch_id:
-			var side := 0.0
-			var dx := pos.x - center().x
-			if absf(dx) > DEADZONE_PX:
-				side = 1.0 if dx > 0.0 else -1.0
 			_release()
-			tapped.emit(side)
 		return
 	var drag := event as InputEventScreenDrag
 	if drag != null and drag.index == _touch_id:
+		_last_touch_pos = drag.position
 		_apply_axis(_to_local(drag.position).x - center().x)
 
 
 func _exit_tree() -> void:
+	# 章末黑场交接时指还按着：把（动作名/索引/最后坐标）暂存给 RunState，
+	# 新场景的摇杆原地认领——移动跨关不脱手（死亡路径先经 release() 清了
+	# 认领，这里自然是空的）。编辑器布局预览不参与。
+	if _touch_id != -1 and not Engine.is_editor_hint():
+		RunState.stash_touch_hold("move", _touch_id, _last_touch_pos)
 	_release()
+
+
+## 章末交接认领（TouchControls._ready 分发）：接住上一关离场时还按着的那根指
+## （共享触控场景=坐标一一对应），按原位重判方向并压回动作。认领产生的按下
+## 边沿落在场景装载帧，玩家首个物理帧读不到 just_pressed（帧号已过），
+## 不会误发边沿动作；移动是按住型，压回即续走。
+func adopt_hold(holds: Array[Dictionary]) -> void:
+	if Engine.is_editor_hint() or _touch_id != -1:
+		return
+	for hold in holds:
+		if hold.action != "move":
+			continue
+		var pos := _to_local(hold.position as Vector2)
+		if _grab_area().has_point(pos):
+			_touch_id = hold.index
+			_last_touch_pos = hold.position as Vector2
+			_apply_axis(pos.x - center().x)
+			break
 
 
 func _grab_area() -> Rect2:
@@ -114,12 +129,16 @@ func _apply_axis(dx: float) -> void:
 	queue_redraw()
 
 
-## 暂停/重开时由 TouchControls 调用：清掉残留的按住状态与动作。
+## 阵亡时由 TouchControls 调用：清掉残留的按住状态与动作（别带进下一局）。
 func release() -> void:
 	_release()
 
 
 func _release() -> void:
+	if _touch_id == -1:
+		return # 没认领过触摸就绝不动动作状态：桌面按住的键盘/手柄键是物理态，
+		       # 离场时无条件 release 会把"按住的 D"拦腰清掉，且物理键不会再产生
+		       # 按下边沿（echo 不算）——只能松开重按，跨关衔接断掉的元凶
 	_touch_id = -1
 	_knob_dx = 0.0
 	# 编辑器 --import 上下文没有项目 InputMap（布局恢复会实例化再销毁本节点），

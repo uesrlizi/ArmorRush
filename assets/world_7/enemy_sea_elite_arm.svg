@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 22" width="40" height="22">
+<!-- 第七章精英海防炮 40x22（俯仰真瞄）。
+枢端画布 (28,13)=炮座塔环；双管朝 -X，管口画布 (6,10)=Muzzle
+（臂局部 (-22,-3)）。出膛焰/预警闪光落管口（真实枪口律）。 -->
+<defs>
+
+</defs>
+<rect x="22" y="8" width="12" height="9" fill="#2d4149"/>
+<circle cx="28" cy="13" r="3" fill="#2d4149"/>
+<rect x="16" y="5" width="14" height="12" fill="#3f5a66"/>
+<rect x="16" y="5" width="14" height="2.5" fill="#6c8894"/>
+<polygon points="16,6 4,8 4,11 16,11" fill="#1c2a30"/>
+<polygon points="16,12 5,13.5 5,16 16,16" fill="#1c2a30"/>
+<rect x="3" y="7" width="3" height="5" fill="#3f5a66"/>
+<rect x="4" y="12.6" width="3" height="4.4" fill="#3f5a66"/>
+<rect x="2.6" y="8" width="1.6" height="2.4" fill="#f2f0ff" opacity="0.95"/>
+<rect x="3.6" y="13.6" width="1.6" height="2.4" fill="#f2f0ff" opacity="0.95"/>
+<circle cx="33" cy="8" r="1.2" fill="#ff5a3c" opacity="0.85"/>
+</svg>

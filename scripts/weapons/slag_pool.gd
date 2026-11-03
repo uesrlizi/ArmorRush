@@ -9,9 +9,9 @@ extends Node2D
 
 const POOL_TEXTURE := preload("res://assets/world_2/slag_pool.svg")
 
-var radius := Balance.SLAG_POOL_RADIUS
-var damage := Balance.SLAG_POOL_DAMAGE
-var tick_interval := Balance.SLAG_POOL_TICK
+var radius := BalanceWorld2.SLAG_POOL_RADIUS
+var damage := BalanceWorld2.SLAG_POOL_DAMAGE
+var tick_interval := BalanceWorld2.SLAG_POOL_TICK
 var lifetime := 2.8
 
 var _warmup := 0.0
@@ -36,7 +36,7 @@ func _physics_process(delta: float) -> void:
 		queue_free()
 		return
 	# 淡入（蓄热期渐亮=变危险的前摇）与末段淡出，一段式 alpha 账
-	var a_in := clampf(_life / Balance.SLAG_POOL_WARMUP, 0.0, 1.0)
+	var a_in := clampf(_life / BalanceWorld2.SLAG_POOL_WARMUP, 0.0, 1.0)
 	var a_out := clampf((lifetime - _life) / 0.4, 0.0, 1.0)
 	_visual.modulate.a = minf(a_in, a_out)
 	if _warmup > 0.0:

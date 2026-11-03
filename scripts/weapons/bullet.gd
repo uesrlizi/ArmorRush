@@ -1,10 +1,13 @@
 class_name Bullet
 extends Area2D
-## 通用子弹：玩家弹和敌人弹共用脚本，速度/伤害由发射方从 Balance 取值后赋给本节点，
+## 通用子弹：玩家弹和敌人弹共用脚本，速度/伤害由发射方从 Balance* 调参表取值后赋给本节点，
 ## 场景里不再保存副本（避免导出值遮蔽脚本改动）。
 ## 玩家弹蒙版 = 世界 + 敌人；敌人弹蒙版 = 世界 + 玩家。
 ## 方向是二维向量，整颗子弹（含碰撞形状）旋转到飞行方向；
 ## 飞行速度 = 自身速度 + 发射瞬间继承的载体速度。
+## lob_gravity>0 时为抛体弹种（red_lob 斗轮抛石）：初速=方向×速度+继承，之后逐帧
+## 吃重力，朝向/迸溅/击退全跟实时速度走——直线弹种（lob_gravity=0）语法零改动。
+##（成员名带 lob_ 前缀：Area2D 原生就有 gravity 属性，裸名会撞成重定义解析错。）
 
 const IMPACT_BURST := preload("res://scenes/fx/impact_burst.tscn")
 
@@ -14,9 +17,11 @@ var speed := 700.0
 var damage := 10
 var impact_tint := Color(1.0, 0.92, 0.6) # 命中迸溅染色：玩家弹暖金，敌弹出膛时覆写为红
 var impact := 0.0 # 冲击值（失衡积累，AC6 式）：发射方赋值——玩家弹 >0，敌弹默认 0 不积累
+var lob_gravity := 0.0 # px/s²，>0=抛体弹种（发射方赋值；场景不存副本，同 speed/damage 惯例）
 
 var _direction := Vector2.RIGHT
 var _inherit := Vector2.ZERO
+var _vel := Vector2.ZERO # 抛体弹的实时合速度（首个物理帧从 方向×速度+继承 起算）
 var _lifetime := 0.0
 var _spawn_pos := Vector2.ZERO # 出膛点（首个物理帧记录，用于迸溅最小飞行距离）
 var _started := false
@@ -52,7 +57,15 @@ func _physics_process(delta: float) -> void:
 	if not _started:
 		_started = true
 		_spawn_pos = global_position
-	position += (_direction * speed + _inherit) * delta
+		_vel = _direction * speed + _inherit
+	if lob_gravity > 0.0:
+		# 抛体：速度积分重力，弹头/迸溅反向/击退方向都改读实时速度（贴图所见即弹道所向）
+		_vel.y += lob_gravity * delta
+		_direction = _vel.normalized()
+		rotation = _vel.angle()
+		position += _vel * delta
+	else:
+		position += (_direction * speed + _inherit) * delta
 	_lifetime += delta
 	if _lifetime > max_lifetime or _is_offscreen():
 		queue_free()
@@ -86,6 +99,16 @@ static func solve_fire_direction(
 	return (d * k - inherit).normalized()
 
 
+## 抛体初速解算：给定重力与飞行时长，使弹道恰在 flight 秒后经过 target——落点
+## 锁定在**出手时刻**（无 lead：目标此后移开就落空）。发射方把返回值拆成
+## speed=length / setup(normalized) 并赋 lob_gravity。p(t)=from+v·t+½g·t²，解 v。
+static func solve_lob_velocity(
+		from: Vector2, target: Vector2, gravity_px: float, flight: float
+) -> Vector2:
+	var t := maxf(flight, 0.05)
+	return (target - from - Vector2(0.0, 0.5 * gravity_px * t * t)) / t
+
+
 func _is_offscreen() -> bool:
 	var cam := get_viewport().get_camera_2d()
 	if cam == null:
@@ -102,7 +125,7 @@ func _on_body_entered(body: Node2D) -> void:
 		if body.has_method("add_impact"): # 冲击只进敌人（失衡积累），玩家没有该入口
 			body.add_impact(impact)
 		if body.has_method("apply_knockback"): # 只有敌人响应击退（玩家没有该入口）
-			body.apply_knockback(_direction * Balance.ENEMY_KNOCKBACK_GUN)
+			body.apply_knockback(_direction * BalanceEnemy.ENEMY_KNOCKBACK_GUN)
 		_spawn_impact(global_position)
 	else:
 		_spawn_impact(global_position, true)
@@ -115,7 +138,7 @@ func _on_area_entered(area: Area2D) -> void:
 		if area.has_method("add_impact"):
 			area.add_impact(impact)
 		if area.has_method("apply_knockback"):
-			area.apply_knockback(_direction * Balance.ENEMY_KNOCKBACK_GUN)
+			area.apply_knockback(_direction * BalanceEnemy.ENEMY_KNOCKBACK_GUN)
 	_spawn_impact(_impact_point(area))
 	queue_free()
 
@@ -125,7 +148,7 @@ func _on_area_entered(area: Area2D) -> void:
 ## 枪口焰是挂在 Muzzle 下的子节点（跟着枪走），落世界空间的是迸溅。
 ## world=true 表示打在无生命地形上，补一记轻弹着声（节流在 Sfx 音库里管）。
 func _spawn_impact(at: Vector2, world := false) -> void:
-	if _started and global_position.distance_to(_spawn_pos) < Balance.BULLET_IMPACT_MIN_TRAVEL:
+	if _started and global_position.distance_to(_spawn_pos) < BalancePlayer.BULLET_IMPACT_MIN_TRAVEL:
 		return
 	if world:
 		Sfx.play(&"hit_world")

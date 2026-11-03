@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 46" width="24" height="46">
+<!-- 凿岩装药 24x46（+X=飞行方向）：钢钎钻头+药身螺旋箍+
+红色装药灯（引信期整弹亮度脉冲渐急=二段预警，代码驱动）。
+抛体解算落点即静止（零地形跟随），定延时起爆。 -->
+<defs>
+
+</defs>
+<rect x="2" y="16" width="4" height="14" fill="#4e2418"/>
+<rect x="5" y="17" width="16" height="12" fill="#6e3424"/>
+<rect x="8" y="17" width="2" height="12" fill="#a85a3a" opacity="0.9"/>
+<rect x="13" y="17" width="2" height="12" fill="#a85a3a" opacity="0.9"/>
+<rect x="18" y="17" width="2" height="12" fill="#a85a3a" opacity="0.9"/>
+<polygon points="20,16 24,23 20,30" fill="#33180e"/>
+<circle cx="11" cy="23" r="3.2" fill="#ff4640" opacity="0.95"/>
+<circle cx="11" cy="23" r="5.6" fill="#ff4640" opacity="0.3"/>
+</svg>

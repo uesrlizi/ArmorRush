@@ -24,7 +24,7 @@ func _ready() -> void:
 
 func on_spawned() -> void:
 	super()
-	despawn_margin = Balance.OBSTACLE_DESPAWN_MARGIN # 宽体平台：出画面后再留半屏余量
+	despawn_margin = BalanceGlobal.OBSTACLE_DESPAWN_MARGIN # 宽体平台：出画面后再留半屏余量
 	add_to_group("obstacles")
 	_rebuild_piers()
 

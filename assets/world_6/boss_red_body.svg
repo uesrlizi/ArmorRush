@@ -2,18 +2,18 @@
 <!-- 第六章 BOSS 斗轮采集舰「赤轮」300x180=碰撞体，原点(150,90)，原生朝左。
 能力布挂件：艏部斗轮座（斗轮独立件画布 (44,120)=局部 (-106,30)）+
 背甲双桩炮座（炮架独立件画布 (210,38)=局部 (60,-52)）+ 腹舱口（BayPort
-画布 (150,170)=局部 (0,80)，溜矿车出舱）+ 船底风扇位（画布 (120,154)/
+画布 (150,170)=局部 (0,80)，装药出舱）+ 船底风扇位（画布 (120,154)/
 (230,154)=通用 fx_flame）。沿用锚点：独眼条带 y60..66 含 (55,63)。
 提案=同目录 提案_v1_赤沙矿区.md §3。 -->
 <defs>
 
 </defs>
-<polygon points="10,88 42,62 140,56 238,58 286,68 294,90 288,122 244,146 186,162 118,164 64,154 22,126" fill="#6e3424"/>
-<polygon points="42,62 140,56 238,58 282,67 278,74 236,64 140,62 48,68" fill="#a85a3a" opacity="0.7"/>
+<polygon points="8,84 36,54 140,52 238,56 286,66 294,90 288,122 244,146 186,162 118,164 64,154 22,126" fill="#6e3424"/>
+<polygon points="36,54 140,52 238,56 282,65 278,71 236,62 140,58 42,60" fill="#a85a3a" opacity="0.7"/>
 <polygon points="22,126 64,154 118,164 186,162 240,146 230,138 120,152 66,140 30,118" fill="#4e2418"/>
 <rect x="130" y="60" width="2.5" height="96" fill="#33180e" opacity="0.3"/>
 <rect x="206" y="62" width="2.5" height="88" fill="#33180e" opacity="0.35"/>
-<rect x="60" y="96" width="180" height="2" fill="#33180e" opacity="0.3"/>
+<rect x="60" y="92" width="170" height="2" fill="#33180e" opacity="0.3"/>
 <rect x="158" y="74" width="7" height="6" fill="#ffb347" opacity="0.8"/>
 <rect x="174" y="74" width="7" height="6" fill="#ffb347" opacity="0.8"/>
 <rect x="190" y="74" width="7" height="6" fill="#ffb347" opacity="0.8"/>
@@ -23,8 +23,8 @@
 <circle cx="44" cy="120" r="7" fill="#33180e"/>
 <circle cx="44" cy="120" r="3.4" fill="#4e2418"/>
 <rect x="70" y="100" width="10" height="3" fill="#a85a3a" opacity="0.7"/>
-<rect x="188" y="46" width="44" height="14" fill="#4e2418"/>
-<rect x="190" y="44" width="40" height="3" fill="#a85a3a" opacity="0.7"/>
+<rect x="188" y="40" width="44" height="22" fill="#4e2418"/>
+<rect x="190" y="38" width="40" height="3" fill="#a85a3a" opacity="0.7"/>
 <circle cx="210" cy="52" r="2" fill="#f2f0ff" opacity="0.9"/>
 <rect x="126" y="148" width="48" height="16" fill="#33180e"/>
 <rect x="126" y="148" width="48" height="3" fill="#a85a3a" opacity="0.5"/>
@@ -32,14 +32,14 @@
 <circle cx="150" cy="144" r="1.8" fill="#d8a021" opacity="0.9"/>
 <rect x="108" y="148" width="24" height="10" fill="#4e2418"/>
 <rect x="218" y="142" width="24" height="10" fill="#4e2418"/>
-<polygon points="0,86 14,76 20,76 20,100 6,94" fill="#4e2418"/>
-<line x1="0" y1="86" x2="6" y2="94" stroke="#a85a3a" stroke-width="2" opacity="0.7"/>
+<polygon points="0,82 14,74 20,74 20,98 6,92" fill="#4e2418"/>
+<line x1="0" y1="82" x2="6" y2="92" stroke="#a85a3a" stroke-width="2" opacity="0.7"/>
 <rect x="38" y="57" width="34" height="12" fill="#ff4640" opacity="0.18"/>
 <rect x="42" y="60" width="26" height="6" fill="#ff4640" opacity="0.95"/>
-<polygon points="78,58 114,56 112,70 82,72" fill="#33180e" opacity="0.9"/>
-<polygon points="80,60 110,58 109,62 82,64" fill="#a85a3a" opacity="0.5"/>
-<polygon points="120,44 176,44 170,34 126,34" fill="#4e2418"/>
-<line x1="126" y1="34" x2="170" y2="34" stroke="#a85a3a" stroke-width="1.6" opacity="0.7"/>
+<polygon points="78,48 114,46 112,64 82,66" fill="#33180e" opacity="0.9"/>
+<polygon points="80,50 110,48 109,52 82,54" fill="#a85a3a" opacity="0.5"/>
+<polygon points="122,54 178,54 172,32 128,32" fill="#4e2418"/>
+<line x1="128" y1="32" x2="172" y2="32" stroke="#a85a3a" stroke-width="1.6" opacity="0.7"/>
 <rect x="130" y="80" width="26" height="3" fill="#ff4640" opacity="0.8"/>
 <rect x="88" y="128" width="3" height="4" fill="#d8a021" opacity="0.8"/>
 <rect x="95" y="128" width="3" height="4" fill="#33180e" opacity="0.8"/>

@@ -125,6 +125,33 @@ THEMES = {
         "seam": "#1d2823", "detail": "#7a5a3c", "foot": "#d6f2e8",
         "accent": "#ff5a3c", "pier": "#37453e",
     },
+    # 八 闭园夜场：沥青广场走道带（裂缝/褪色漆条/嵌灯）+ 混凝土断面（夜蓝族，暗场章）
+    "p8_park": {
+        "style": "park",
+        "top_line": "#5a6a8c", "band": "#2e3a4e", "band_edge": "#232c3a",
+        "band_dark": "#1e2632", "band_light": "#46556e", "ao": "#161d28",
+        "face_hi": "#26303f", "face_lo": "#141a24", "strata": "#1d2634",
+        "seam": "#10151d", "detail": "#4a5a74", "foot": "#202a38",
+        "accent": "#5fe0b0",
+    },
+    # 九 镜盐之原：盐壳台地走道带（龟裂/盐田粉渍/结晶点）+ 盐层断面（黄昏暖调）
+    "p9_salt": {
+        "style": "salt",
+        "top_line": "#e8d8bc", "band": "#b8a684", "band_edge": "#98876c",
+        "band_dark": "#988670", "band_light": "#dccfae", "ao": "#7a6a52",
+        "face_hi": "#a8967a", "face_lo": "#6e5f4a", "strata": "#8a7a62",
+        "seam": "#5c4f3c", "detail": "#e8dcc0", "foot": "#d8c8a8",
+        "accent": "#f2789f",
+    },
+    # 十 绿渊林场：湿泥苔走道带（苔斑/木屑/车辙）+ 土层根断面（阴天灰绿）
+    "p10_forest": {
+        "style": "forest",
+        "top_line": "#7a9a6a", "band": "#46543e", "band_edge": "#35422e",
+        "band_dark": "#2e3a28", "band_light": "#5e704e", "ao": "#242e1e",
+        "face_hi": "#38442e", "face_lo": "#1f281a", "strata": "#2b3622",
+        "seam": "#161e12", "detail": "#8a6a48", "foot": "#2e3826",
+        "accent": "#b8e04a",
+    },
 }
 
 
@@ -226,6 +253,54 @@ def band_detail(s, th, x0, top, bw, band, k, rng):
             for i in range(4):
                 s.rect(gx + i * 4 * k, top + band - 8 * k, 2.4 * k, 5 * k,
                        th["band_dark"], 0.9)
+    elif st == "park":
+        for _ in range(rng.randint(1, 2)):  # 裂缝（同 rust 语法）
+            cx, cy = rng.uniform(0.1, 0.7) * bw + x0, top + rng.uniform(6, 14) * k
+            seg = [(cx, cy)]
+            for _s2 in range(3):
+                cx += rng.uniform(4, 12) * k
+                cy += rng.uniform(3, 7) * k
+                seg.append((cx, min(cy, top + band - 3 * k)))
+            s.path("M " + " L ".join(f"{f(a)},{f(b)}" for a, b in seg),
+                   stroke=th["band_dark"], w=1.1 * k, opacity=0.85)
+        for i in range(2):  # 褪色漆条（薄荷=信号色 / 褪红，斑驳低透明）
+            pc = th["accent"] if i == 0 or rng.random() < 0.6 else "#d86a5a"
+            px = rng.uniform(0.12, 0.72) * bw + x0
+            s.rect(px, top + band * 0.52 + i * 7 * k, rng.uniform(12, 20) * k, 2.2 * k,
+                   pc, rng.uniform(0.3, 0.5))
+        if rng.random() < 0.4:  # 地面嵌灯
+            s.circle(x0 + rng.uniform(0.2, 0.8) * bw, top + 8 * k, 1.2 * k,
+                     th["accent"], 0.7)
+        for _ in range(4):  # 碎屑点
+            s.rect(x0 + rng.uniform(3, bw - 6) * k, top + rng.uniform(5, band - 6),
+                   2.0 * k, 1.5 * k, th["band_dark"], rng.uniform(0.35, 0.7))
+    elif st == "salt":
+        for _ in range(2):  # 盐壳龟裂（细亮纹折线）
+            cx, cy = rng.uniform(0.1, 0.6) * bw + x0, top + rng.uniform(5, 10) * k
+            for _s2 in range(3):
+                nx = cx + rng.uniform(6, 14) * k
+                ny = cy + rng.uniform(-2, 4) * k
+                s.line(cx, cy, nx, min(ny, top + band - 3 * k), th["band_light"], 1.0 * k, 0.6)
+                cx, cy = nx, min(ny, top + band - 3 * k)
+        px = rng.uniform(0.2, 0.6) * bw + x0  # 盐田粉渍
+        s.ellipse(px, top + rng.uniform(6, band - 5), rng.uniform(8, 15) * k,
+                  rng.uniform(1.6, 2.6) * k, th["accent"], rng.uniform(0.28, 0.5))
+        for _ in range(5):  # 结晶点
+            s.rect(x0 + rng.uniform(3, bw - 6) * k, top + rng.uniform(5, band - 6),
+                   1.8 * k, 1.4 * k, th["detail"], rng.uniform(0.4, 0.8))
+    elif st == "forest":
+        for _ in range(2):  # 苔斑
+            s.ellipse(x0 + rng.uniform(0.15, 0.85) * bw, top + rng.uniform(6, band - 5),
+                      rng.uniform(8, 15) * k, rng.uniform(1.6, 2.8) * k,
+                      th["band_light"], rng.uniform(0.4, 0.7))
+        dx = rng.uniform(0.1, 0.5) * bw + x0  # 木屑横屑（萤黄绿低透明）
+        for i in range(4):
+            s.line(dx + i * 6 * k, top + band * 0.72,
+                   dx + i * 6 * k + rng.uniform(3, 8) * k, top + band * 0.72,
+                   th["accent"], 1.2 * k, 0.3)
+        tx = rng.uniform(0.15, 0.6) * bw + x0  # 运材车辙
+        s.line(tx, top + 9 * k, tx + rng.uniform(18, 34) * k, top + 11 * k,
+               th["band_dark"], 1.5 * k, 0.45)
 
 
 # ============================================================
@@ -234,13 +309,16 @@ def band_detail(s, th, x0, top, bw, band, k, rng):
 def face_detail(s, th, x0, top, bw, band, k, rng):
     st = th["style"]
     fy = top + band
-    if st in ("rust", "ref", "sea"):
-        ry = fy + rng.uniform(9, 16) * k  # 露头钢筋/管线
+    if st in ("rust", "ref", "sea", "park", "forest"):
+        ry = fy + rng.uniform(9, 16) * k  # 露头钢筋/管线（park=拆散电缆 forest=断根，同语法）
         for rx in (rng.uniform(0.2, 0.42), rng.uniform(0.58, 0.8)):
             px = x0 + rx * bw
             s.line(px, ry, px + 9 * k, ry, th["detail"], 1.4 * k, 0.85)
             if st == "rust":
                 s.circle(px + 11 * k, ry, 1.1 * k, "#8a5a3a", 0.9)
+            elif st == "forest":
+                s.line(px + 4 * k, ry, px + 8 * k, ry + rng.uniform(4, 8) * k,
+                       th["detail"], 1.0 * k, 0.7)
     elif st == "snow":
         for _ in range(2):  # 冰脉
             px = x0 + rng.uniform(0.25, 0.75) * bw
@@ -262,6 +340,14 @@ def face_detail(s, th, x0, top, bw, band, k, rng):
         px = x0 + rng.uniform(0.2, 0.7) * bw  # 砂层夹石
         s.poly([(px, fy + rng.uniform(8, 14) * k), (px + 7 * k, fy + rng.uniform(5, 9) * k),
                 (px + 13 * k, fy + rng.uniform(10, 16) * k)], th["detail"], 0.7)
+    elif st == "salt":
+        for _ in range(2):  # 盐晶竖纹（断面短竖线，受光面亮）
+            px = x0 + rng.uniform(0.25, 0.75) * bw
+            s.line(px, fy + 6 * k, px + rng.uniform(-2, 2) * k, fy + 18 * k,
+                   th["detail"], 1.1 * k, 0.7)
+        if rng.random() < 0.5:  # 粉盐渍带（断面渗色）
+            s.rect(x0 + rng.uniform(0.2, 0.6) * bw, fy + rng.uniform(10, 22) * k,
+                   rng.uniform(14, 26) * k, 3 * k, th["accent"], 0.22)
 
 
 # ============================================================
@@ -274,7 +360,7 @@ def wall_foot(s, th, wx, low_top, k, rng, rise=False, hi_top=None):
         s.poly([(wx - 6 * k, hi_top), (wx + 3.5 * k, hi_top + 1.5 * k),
                 (wx + 1.5 * k, hi_top + 6.5 * k), (wx - 5 * k, hi_top + 3.5 * k)],
                "#f2f7f9", 0.95)
-    if st == "rust":
+    if st in ("rust", "park"):
         for _ in range(3):
             rx = wx + rng.uniform(2, 30) * k
             rw = rng.uniform(7, 15) * k
@@ -310,6 +396,17 @@ def wall_foot(s, th, wx, low_top, k, rng, rise=False, hi_top=None):
         rx = wx + rng.uniform(4, 18) * k
         s.poly([(rx, low_top + 1.4 * k), (rx + 5 * k, low_top - 3.5 * k),
                 (rx + 10 * k, low_top + 1.4 * k)], "#54665c", 0.95)
+    elif st == "salt":
+        s.ellipse(wx + 14 * k, low_top + 2 * k, 13 * k, 2.4 * k, th["foot"], 0.6)
+        rx = wx + rng.uniform(4, 18) * k
+        s.poly([(rx, low_top + 1.4 * k), (rx + 5 * k, low_top - 4 * k),
+                (rx + 11 * k, low_top + 1.4 * k)], th["band_light"], 0.9)
+    elif st == "forest":
+        s.ellipse(wx + 15 * k, low_top + 2.2 * k, 14 * k, 2.6 * k, th["foot"], 0.7)
+        for _ in range(2):
+            rx = wx + rng.uniform(3, 20) * k
+            s.line(rx, low_top + 1.4 * k, rx + rng.uniform(-2, 2) * k,
+                   low_top - rng.uniform(4, 8) * k, th["detail"], 1.6 * k, 0.9)  # 露头断根
 
 
 # ============================================================

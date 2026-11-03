@@ -47,7 +47,10 @@ func _ready() -> void:
 
 ## ---- 事件入口（main.gd 接线） ----
 
-func notify_combat_start() -> void:
+## 作战开始播报。announce=false 用于章末黑场交接进新关：系统启动音整局只在
+## 开局（首启/死亡重开的启动页）播一次，跨关不重复；但掐残留播报、复位低 AP
+## 档照做（上一关结尾的低 AP 提示属于上一场仗，不跟着进新关）。
+func notify_combat_start(announce := true) -> void:
 	_hp_tier = 0
 	# 重开进战斗：掐掉上局残留的播报（死亡瞬间触发的低 AP 等），
 	# 不然新一局开场顶着一句"AP剩余25%"，很出戏。系统音可丢了重触。
@@ -57,20 +60,21 @@ func notify_combat_start() -> void:
 		_playing = false
 		_box.visible = false
 		_voice.stop()
-	say("sys_combat")
+	if announce:
+		say("sys_combat")
 
 
 func notify_hp(current: int, max_hp: int) -> void:
 	if not _enabled or max_hp <= 0:
 		return
 	var ratio := float(current) / float(max_hp)
-	if ratio <= Balance.COMMS_HP_WARN_T2 and _hp_tier < 2:
+	if ratio <= BalanceGlobal.COMMS_HP_WARN_T2 and _hp_tier < 2:
 		_hp_tier = 2
 		say("sys_hp_crit")
-	elif ratio <= Balance.COMMS_HP_WARN_T1 and _hp_tier < 1:
+	elif ratio <= BalanceGlobal.COMMS_HP_WARN_T1 and _hp_tier < 1:
 		_hp_tier = 1
 		say("sys_hp_warn")
-	elif ratio >= Balance.COMMS_HP_WARN_T1 + Balance.COMMS_HP_REARM_MARGIN and _hp_tier > 0:
+	elif ratio >= BalanceGlobal.COMMS_HP_WARN_T1 + BalanceGlobal.COMMS_HP_REARM_MARGIN and _hp_tier > 0:
 		_hp_tier = 0
 
 
@@ -95,7 +99,7 @@ func _start_line(id: String) -> void:
 	_playing = true
 	var text: String = line.get("text", "")
 	_show_subtitle(str(line.get("speaker", "SYSTEM")), text)
-	if Balance.COMMS_RADIO_FX:
+	if BalanceGlobal.COMMS_RADIO_FX:
 		_play_sfx(_sq_open)
 		if _bed.stream != null and not _bed.playing:
 			_bed.play() # 频道开：静噪底床进
@@ -117,7 +121,7 @@ func _on_voice_finished() -> void:
 
 
 func _finish_line() -> void:
-	if Balance.COMMS_RADIO_FX:
+	if BalanceGlobal.COMMS_RADIO_FX:
 		_play_sfx(_sq_close)
 		_bed.stop() # 频道关：底床随闭合音掐掉
 	await _sleep(0.3)
@@ -167,31 +171,31 @@ func _setup_audio() -> void:
 		AudioServer.add_bus(idx)
 		AudioServer.set_bus_name(idx, BUS_NAME)
 		AudioServer.set_bus_send(idx, "Master")
-	# 电台后期链（Balance.COMMS_RADIO_FX 关闭时整段跳过=纯干声空听）。
+	# 电台后期链（BalanceGlobal.COMMS_RADIO_FX 关闭时整段跳过=纯干声空听）。
 	# 必须独立于总线创建：总线可能来自 .tres 烘焙，效果要挂得上已存在的总线。
-	if Balance.COMMS_RADIO_FX:
+	if BalanceGlobal.COMMS_RADIO_FX:
 		var fx_bus := AudioServer.get_bus_index(BUS_NAME)
 		var high := AudioEffectHighPassFilter.new()
 		high.cutoff_hz = 320.0
 		var low := AudioEffectLowPassFilter.new()
 		low.cutoff_hz = 3200.0
 		var eq := AudioEffectEQ10.new()
-		eq.set_band_gain_db(6, Balance.COMMS_RADIO_PRESENCE_DB) # ~2kHz 穿透感
-		eq.set_band_gain_db(7, Balance.COMMS_RADIO_PRESENCE_DB * 0.5)
+		eq.set_band_gain_db(6, BalanceGlobal.COMMS_RADIO_PRESENCE_DB) # ~2kHz 穿透感
+		eq.set_band_gain_db(7, BalanceGlobal.COMMS_RADIO_PRESENCE_DB * 0.5)
 		var dist := AudioEffectDistortion.new()
 		dist.mode = AudioEffectDistortion.MODE_CLIP
-		dist.pre_gain = Balance.COMMS_RADIO_DRIVE_DB # 推高进削波器=drive
+		dist.pre_gain = BalanceGlobal.COMMS_RADIO_DRIVE_DB # 推高进削波器=drive
 		var comp := AudioEffectCompressor.new()
-		comp.threshold = Balance.COMMS_RADIO_COMP_THRESHOLD_DB
-		comp.ratio = Balance.COMMS_RADIO_COMP_RATIO
+		comp.threshold = BalanceGlobal.COMMS_RADIO_COMP_THRESHOLD_DB
+		comp.ratio = BalanceGlobal.COMMS_RADIO_COMP_RATIO
 		comp.attack_us = 8000 # Godot 4 压缩器：攻击微秒/释放毫秒（两单位不同名）
 		comp.release_ms = 120
-		comp.gain = Balance.COMMS_RADIO_COMP_GAIN_DB
+		comp.gain = BalanceGlobal.COMMS_RADIO_COMP_GAIN_DB
 		var slap := AudioEffectDelay.new()
 		slap.dry = 1.0
 		slap.tap1_active = false # 拍背延迟已被用户否掉（听成复读），留参数备复活
-		slap.tap1_delay_ms = Balance.COMMS_RADIO_SLAP_MS
-		slap.tap1_level_db = Balance.COMMS_RADIO_SLAP_LEVEL_DB
+		slap.tap1_delay_ms = BalanceGlobal.COMMS_RADIO_SLAP_MS
+		slap.tap1_level_db = BalanceGlobal.COMMS_RADIO_SLAP_LEVEL_DB
 		var limiter := AudioEffectLimiter.new()
 		limiter.ceiling_db = -1.0
 		for effect: AudioEffect in [high, low, eq, dist, comp, slap, limiter]:
@@ -201,7 +205,7 @@ func _setup_audio() -> void:
 	var out_bus := "Master" if Platforms.is_web() else BUS_NAME
 	_voice = AudioStreamPlayer.new()
 	_voice.bus = out_bus
-	_voice.volume_db = Balance.COMMS_VOICE_VOLUME_DB
+	_voice.volume_db = BalanceGlobal.COMMS_VOICE_VOLUME_DB
 	_voice.finished.connect(_on_voice_finished)
 	add_child(_voice)
 	_squelch = AudioStreamPlayer.new()
@@ -210,7 +214,7 @@ func _setup_audio() -> void:
 	add_child(_squelch)
 	_bed = AudioStreamPlayer.new()
 	_bed.bus = out_bus
-	_bed.volume_db = Balance.COMMS_NOISE_BED_DB
+	_bed.volume_db = BalanceGlobal.COMMS_NOISE_BED_DB
 	_bed.finished.connect(_bed.play) # 循环：缝隙被压缩泵感和语音掩住
 	add_child(_bed)
 	_sq_open = _load_stream(VO_DIR + "/_squelch_open.wav")

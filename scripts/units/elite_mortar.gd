@@ -4,8 +4,8 @@ extends Enemy
 ## 继承 Enemy 的移动/受击/死亡/头顶血条全套；攻击层整体替换——不打机枪，
 ## 周期性导弹齐射：枪口预警闪光（ThreatFlash，不动精灵本体）→ 垂发固定角度
 ## 出膛（仓口朝天，臂枢只镜像不俯仰）→ 真追踪导弹（HeavyMissile）→ 落地
-## 球状爆伤。玩家必须离地+甩角规避。数值全在 Balance.ELITE_*；重击公共规约
-## 见 Balance 重击段。
+## 球状爆伤。玩家必须离地+甩角规避。数值全在 BalanceWorld1.ELITE_*；重击公共规约
+## 见 BalanceCombat 重击段。
 
 enum VolleyState { COOLDOWN, TELEGRAPH, LAUNCH }
 
@@ -22,11 +22,11 @@ var _launch_seq := 0 # 仓口轮转序号（随机起步，连轮不总从同一
 
 
 func _species_max_hp() -> int:
-	return Balance.ELITE_MAX_HP
+	return BalanceWorld1.ELITE_MAX_HP
 
 
 func _species_score() -> int:
-	return Balance.ELITE_SCORE
+	return BalanceWorld1.ELITE_SCORE
 
 
 ## 垂发架：发射角固定朝天，臂枢不随玩家俯仰（见 Enemy._arm_tracks_pitch）。
@@ -41,11 +41,11 @@ func _knockback_scale() -> float:
 
 ## 失衡（AC6 式）：枪弹 ≈12 发命中打满上限，踉跄硬直给玩家补刀窗。
 func _impact_resistance() -> float:
-	return Balance.IMPACT_RESIST_ELITE
+	return BalanceCombat.IMPACT_RESIST_ELITE
 
 
 func _stagger_time() -> float:
-	return Balance.STAGGER_TIME_ELITE
+	return BalanceCombat.STAGGER_TIME_ELITE
 
 
 func _stagger_key() -> StringName:
@@ -53,7 +53,7 @@ func _stagger_key() -> StringName:
 
 
 func _stagger_immunity() -> float:
-	return Balance.STAGGER_IMMUNITY_ELITE
+	return BalanceCombat.STAGGER_IMMUNITY_ELITE
 
 
 ## 攻击层整体替换：父类的机枪扫射层置空（移动层照旧，边踱步边按节奏齐射）。
@@ -81,10 +81,10 @@ func _tick_volley(delta: float) -> void:
 	match _volley_state:
 		VolleyState.COOLDOWN:
 			var in_range := absf(player.global_position.x - global_position.x) \
-					<= Balance.ELITE_ATTACK_RANGE
-			if in_range and _roll_trigger(Balance.ELITE_VOLLEY_HALF_LIFE, delta):
+					<= BalanceWorld1.ELITE_ATTACK_RANGE
+			if in_range and _roll_trigger(BalanceWorld1.ELITE_VOLLEY_HALF_LIFE, delta):
 				_volley_state = VolleyState.TELEGRAPH
-				_volley_t = Balance.HEAVY_GUN_WARN_TIME
+				_volley_t = BalanceCombat.HEAVY_GUN_WARN_TIME
 				_launched = 0
 				_muzzle.position.x = 0.0 # 预警钉在舱口正中（发射时再轮转到具体仓）
 				_warn.warn() # 预警统一入口：枪口闪光 + 警告音（出弹节拍另行倒数）
@@ -98,10 +98,10 @@ func _tick_volley(delta: float) -> void:
 			if _volley_t <= 0.0:
 				_launch_one()
 				_launched += 1
-				if _launched >= Balance.ELITE_VOLLEY_COUNT:
+				if _launched >= BalanceWorld1.ELITE_VOLLEY_COUNT:
 					_volley_state = VolleyState.COOLDOWN
 				else:
-					_volley_t = Balance.ELITE_VOLLEY_STAGGER
+					_volley_t = BalanceWorld1.ELITE_VOLLEY_STAGGER
 
 
 ## 垂发固定角度：出膛方向 = 枪口实际朝向——读 Muzzle 的全局 -Y（仓口朝天；
@@ -116,11 +116,11 @@ func _launch_one() -> void:
 	_launch_seq += 1
 	_muzzle.position.x = cell_x
 	var dir := (-_muzzle.global_transform.y).normalized()
-	dir = dir.rotated(deg_to_rad(randf_range(-Balance.HEAVY_MISSILE_SPREAD_DEG,
-			Balance.HEAVY_MISSILE_SPREAD_DEG)))
+	dir = dir.rotated(deg_to_rad(randf_range(-BalanceCombat.HEAVY_MISSILE_SPREAD_DEG,
+			BalanceCombat.HEAVY_MISSILE_SPREAD_DEG)))
 	var missile := HeavyMissile.new()
-	missile.damage = Balance.ELITE_MISSILE_DAMAGE
-	missile.blast_radius = Balance.ELITE_BLAST_RADIUS
+	missile.damage = BalanceWorld1.ELITE_MISSILE_DAMAGE
+	missile.blast_radius = BalanceWorld1.ELITE_BLAST_RADIUS
 	container.add_child(missile)
 	missile.launch(terrain, _muzzle.global_position, dir, true)
 	_muzzle_flash.fire(dir.angle()) # 出膛焰跟枪口实际方向（朝天），钉在发射仓口

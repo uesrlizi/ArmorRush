@@ -8,7 +8,7 @@ extends Enemy
 ## （lead=玩家x+vx×飞行时间，clamp 到 ELITE_SLAG_LEAD_MAX——相对速度就是机制：
 ## 匀速直线跑会一头扎进火区，躲=变速/绕行/跳越）→ 落地无溅射伤害（教学纯净版），
 ## 只留驻留熔渣火区（SlagPool，tick 伤害，蓄热后才咬人）。
-## 数值全在 Balance.ELITE_SLAG_*/SLAG_POOL_*/MORTAR_*；重击公共规约见 Balance 重击段。
+## 数值全在 BalanceWorld2.ELITE_SLAG_*/SLAG_POOL_*/MORTAR_*；重击公共规约见 Balance 重击段。
 
 enum VolleyState { COOLDOWN, TELEGRAPH, LAUNCH }
 
@@ -25,11 +25,11 @@ var _launch_seq := 0 # 仓口轮转序号（随机起步，连轮不总从同一
 
 
 func _species_max_hp() -> int:
-	return Balance.ELITE_SLAG_MAX_HP
+	return BalanceWorld2.ELITE_SLAG_MAX_HP
 
 
 func _species_score() -> int:
-	return Balance.ELITE_SLAG_SCORE
+	return BalanceWorld2.ELITE_SLAG_SCORE
 
 
 ## 垂发架：发射角固定朝天，臂枢不随玩家俯仰（见 Enemy._arm_tracks_pitch）。
@@ -43,11 +43,11 @@ func _knockback_scale() -> float:
 
 
 func _impact_resistance() -> float:
-	return Balance.IMPACT_RESIST_ELITE
+	return BalanceCombat.IMPACT_RESIST_ELITE
 
 
 func _stagger_time() -> float:
-	return Balance.STAGGER_TIME_ELITE
+	return BalanceCombat.STAGGER_TIME_ELITE
 
 
 func _stagger_key() -> StringName:
@@ -55,7 +55,7 @@ func _stagger_key() -> StringName:
 
 
 func _stagger_immunity() -> float:
-	return Balance.STAGGER_IMMUNITY_ELITE
+	return BalanceCombat.STAGGER_IMMUNITY_ELITE
 
 
 ## 攻击层整体替换：父类的机枪扫射层置空（移动层照旧，边踱步边按节奏齐射）。
@@ -83,10 +83,10 @@ func _tick_volley(delta: float) -> void:
 	match _volley_state:
 		VolleyState.COOLDOWN:
 			var in_range := absf(player.global_position.x - global_position.x) \
-					<= Balance.ELITE_SLAG_ATTACK_RANGE
-			if in_range and _roll_trigger(Balance.ELITE_SLAG_VOLLEY_HALF_LIFE, delta):
+					<= BalanceWorld2.ELITE_SLAG_ATTACK_RANGE
+			if in_range and _roll_trigger(BalanceWorld2.ELITE_SLAG_VOLLEY_HALF_LIFE, delta):
 				_volley_state = VolleyState.TELEGRAPH
-				_volley_t = Balance.HEAVY_GUN_WARN_TIME
+				_volley_t = BalanceCombat.HEAVY_GUN_WARN_TIME
 				_launched = 0
 				_muzzle.position.x = 0.0 # 预警钉在双管正中（发射时再轮转到具体仓）
 				_warn.warn() # 预警统一入口：枪口闪光 + 警告音（出弹节拍另行倒数）
@@ -100,10 +100,10 @@ func _tick_volley(delta: float) -> void:
 			if _volley_t <= 0.0:
 				_launch_one()
 				_launched += 1
-				if _launched >= Balance.ELITE_SLAG_VOLLEY_COUNT:
+				if _launched >= BalanceWorld2.ELITE_SLAG_VOLLEY_COUNT:
 					_volley_state = VolleyState.COOLDOWN
 				else:
-					_volley_t = Balance.ELITE_SLAG_VOLLEY_STAGGER
+					_volley_t = BalanceWorld2.ELITE_SLAG_VOLLEY_STAGGER
 
 
 ## 垂发发射：出膛初速由弹道解算给（MortarShell.launch，弧线仍朝天起手），
@@ -118,14 +118,14 @@ func _launch_one() -> void:
 	_launch_seq += 1
 	_muzzle.position.x = cell_x
 	var target := MortarShell.compute_lead_target(_muzzle.global_position,
-			player, terrain, Balance.ELITE_SLAG_LEAD_MAX, Balance.ELITE_SLAG_FLIGHT)
+			player, terrain, BalanceWorld2.ELITE_SLAG_LEAD_MAX, BalanceWorld2.ELITE_SLAG_FLIGHT)
 	var shell := MortarShell.new()
-	shell.damage = Balance.ELITE_SLAG_SHELL_DAMAGE # 0=落地无溅射判定
+	shell.damage = BalanceWorld2.ELITE_SLAG_SHELL_DAMAGE # 0=落地无溅射判定
 	shell.blast_radius = 0.0
 	shell.splash = false
-	shell.pool_radius = Balance.SLAG_POOL_RADIUS
-	shell.pool_lifetime = Balance.ELITE_SLAG_POOL_TIME
+	shell.pool_radius = BalanceWorld2.SLAG_POOL_RADIUS
+	shell.pool_lifetime = BalanceWorld2.ELITE_SLAG_POOL_TIME
 	container.add_child(shell)
-	shell.launch(terrain, _muzzle.global_position, target, Balance.ELITE_SLAG_FLIGHT)
+	shell.launch(terrain, _muzzle.global_position, target, BalanceWorld2.ELITE_SLAG_FLIGHT)
 	_muzzle_flash.fire(shell.rotation) # 出膛焰跟初速方向（解算出的朝天弧），钉在发射仓口
 	Sfx.play(&"fire_enemy") # 占位发射声（暂用敌枪声，熔渣炮音效后续单独配方）

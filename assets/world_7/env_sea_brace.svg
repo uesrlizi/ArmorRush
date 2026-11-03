@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 168 84" width="168" height="84">
+<!-- 第七章桥式·brace 件（terrain.gd 桥式模式：
+箱梁/剪刀撑/排架柱各自独立贴图，排架柱三档高度 110/170/230 按
+「bridge_sea_y 固定海面线−柱顶」自动选挡，柱底统一钉在海面上）。 -->
+<defs>
+
+</defs>
+<line x1="2" y1="2" x2="166" y2="82" stroke="#37453e" stroke-width="3.2" opacity="0.55"/>
+<line x1="166" y1="2" x2="2" y2="82" stroke="#37453e" stroke-width="3.2" opacity="0.55"/>
+</svg>

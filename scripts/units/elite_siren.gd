@@ -7,8 +7,8 @@ extends Enemy
 ## 啸雷弹：炮口预警闪光（ThreatFlash）→ **逐发出膛瞬间按玩家当时位置定距**
 ## （FlakShell.launch 的引信=炮口距/弹速——爆点=发射时玩家所在点，无 lead；
 ## 停=吃/动=免，与 ch4 重弹的 lead 惩罚互为镜像）→ 定距空爆（无驻留区
-## ——教学纯净版）。数值全在 Balance.ELITE_SIREN_*/FLAK_SHELL_*；
-## 重击公共规约见 Balance 重击段。
+## ——教学纯净版）。数值全在 BalanceWorld5.ELITE_SIREN_*/FLAK_SHELL_*；
+## 重击公共规约见 BalanceCombat 重击段。
 
 enum VolleyState { COOLDOWN, TELEGRAPH, LAUNCH }
 
@@ -20,11 +20,11 @@ var _launched := 0
 
 
 func _species_max_hp() -> int:
-	return Balance.ELITE_SIREN_MAX_HP
+	return BalanceWorld5.ELITE_SIREN_MAX_HP
 
 
 func _species_score() -> int:
-	return Balance.ELITE_SIREN_SCORE
+	return BalanceWorld5.ELITE_SIREN_SCORE
 
 
 ## 高炮臂随玩家俯仰（真瞄读法：炮塔指向即瞄准方向）。
@@ -38,11 +38,11 @@ func _knockback_scale() -> float:
 
 
 func _impact_resistance() -> float:
-	return Balance.IMPACT_RESIST_ELITE
+	return BalanceCombat.IMPACT_RESIST_ELITE
 
 
 func _stagger_time() -> float:
-	return Balance.STAGGER_TIME_ELITE
+	return BalanceCombat.STAGGER_TIME_ELITE
 
 
 func _stagger_key() -> StringName:
@@ -50,7 +50,7 @@ func _stagger_key() -> StringName:
 
 
 func _stagger_immunity() -> float:
-	return Balance.STAGGER_IMMUNITY_ELITE
+	return BalanceCombat.STAGGER_IMMUNITY_ELITE
 
 
 ## 攻击层整体替换：父类的机枪扫射层置空（移动层照旧，边踱步边按节奏开炮）。
@@ -77,10 +77,10 @@ func _tick_volley(delta: float) -> void:
 	match _volley_state:
 		VolleyState.COOLDOWN:
 			var in_range := absf(player.global_position.x - global_position.x) \
-					<= Balance.ELITE_SIREN_ATTACK_RANGE
-			if in_range and _roll_trigger(Balance.ELITE_SIREN_VOLLEY_HALF_LIFE, delta):
+					<= BalanceWorld5.ELITE_SIREN_ATTACK_RANGE
+			if in_range and _roll_trigger(BalanceWorld5.ELITE_SIREN_VOLLEY_HALF_LIFE, delta):
 				_volley_state = VolleyState.TELEGRAPH
-				_volley_t = Balance.HEAVY_GUN_WARN_TIME
+				_volley_t = BalanceCombat.HEAVY_GUN_WARN_TIME
 				_launched = 0
 				_warn.warn() # 预警统一入口：双管口闪光 + 警告音
 		VolleyState.TELEGRAPH:
@@ -93,10 +93,10 @@ func _tick_volley(delta: float) -> void:
 			if _volley_t <= 0.0:
 				_launch_one()
 				_launched += 1
-				if _launched >= Balance.ELITE_SIREN_VOLLEY_COUNT:
+				if _launched >= BalanceWorld5.ELITE_SIREN_VOLLEY_COUNT:
 					_volley_state = VolleyState.COOLDOWN
 				else:
-					_volley_t = Balance.ELITE_SIREN_VOLLEY_STAGGER
+					_volley_t = BalanceWorld5.ELITE_SIREN_VOLLEY_STAGGER
 
 
 ## 啸雷弹：出膛瞬间按玩家**当时位置**定距（引信=炮口距/弹速，真实枪口律，
@@ -111,9 +111,9 @@ func _launch_one() -> void:
 	var aim := player.global_position
 	var dir := from.direction_to(aim)
 	var shell := FlakShell.new()
-	shell.damage = Balance.ELITE_SIREN_FLAK_DAMAGE
-	shell.blast_radius = Balance.ELITE_SIREN_FLAK_BLAST_RADIUS
+	shell.damage = BalanceWorld5.ELITE_SIREN_FLAK_DAMAGE
+	shell.blast_radius = BalanceWorld5.ELITE_SIREN_FLAK_BLAST_RADIUS
 	container.add_child(shell)
-	shell.launch(terrain, from, dir, from.distance_to(aim) / Balance.FLAK_SHELL_SPEED)
+	shell.launch(terrain, from, dir, from.distance_to(aim) / BalanceWorld5.FLAK_SHELL_SPEED)
 	_muzzle_flash.fire(dir.angle()) # 出膛焰跟弹道方向，钉在双管口
 	Sfx.play(&"fire_enemy") # 占位：高炮出膛暂用敌枪声，啸雷配方后配

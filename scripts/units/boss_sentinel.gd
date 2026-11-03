@@ -16,7 +16,7 @@ extends PursuitBoss
 ##     （bullet.gd 纯换皮：冰蓝矢形贴图，速度/伤害复用 BOSS_SWEEP_*，直瞄无
 ##     预判语法不变），无重击警告（真瞄即预警）。
 ## 走位/贴脸窗/二阶段/失衡全在 PursuitBoss 框架；_tick_visual=背包双喷口推进焰
-## 琥珀脉动（机甲无旋翼，错相呼吸给"悬浮的活"感）。数值全在 Balance.SENTINEL_*
+## 琥珀脉动（机甲无旋翼，错相呼吸给"悬浮的活"感）。数值全在 BalanceWorld3.SENTINEL_*
 ## /PLASMA_MINE_*。
 
 const ST_RAIN_WARN := 3
@@ -42,12 +42,17 @@ var _direct_shoot_t := 0.0
 ]
 
 
+## 血条上方显示的机体名。
+func _display_name() -> String:
+	return "哨兵"
+
+
 func _species_max_hp() -> int:
-	return Balance.SENTINEL_MAX_HP
+	return BalanceWorld3.SENTINEL_MAX_HP
 
 
 func _hover_anchor_y() -> float:
-	return Balance.SENTINEL_HOVER_Y # 绝对锚：机体 280..460，对最高台阶 536 净空 76px
+	return BalanceWorld3.SENTINEL_HOVER_Y # 绝对锚：机体 280..460，对最高台阶 536 净空 76px
 
 
 func on_spawned() -> void:
@@ -68,7 +73,7 @@ func _tick_visual(delta: float) -> void:
 
 func _begin_skill_a() -> void:
 	_bstate = ST_RAIN_WARN
-	_bt = Balance.HEAVY_GUN_WARN_TIME
+	_bt = BalanceCombat.HEAVY_GUN_WARN_TIME
 	_rain_warn.warn() # 预警统一入口：肩部 Pod 闪光 + 警告音（炮口留给直射）
 
 
@@ -90,15 +95,15 @@ func _launch_ticker(delta: float) -> void:
 	var from := (ports[_rain_launched % ports.size()] as Node2D).global_position
 	var lean := signf(player.global_position.x - from.x)
 	var dir := (Vector2.UP + Vector2(0.28 * lean, 0.0)).normalized()
-	dir = dir.rotated(deg_to_rad(randf_range(-Balance.HEAVY_MISSILE_SPREAD_DEG,
-			Balance.HEAVY_MISSILE_SPREAD_DEG)))
+	dir = dir.rotated(deg_to_rad(randf_range(-BalanceCombat.HEAVY_MISSILE_SPREAD_DEG,
+			BalanceCombat.HEAVY_MISSILE_SPREAD_DEG)))
 	var missile := PlasmaMissile.new()
-	missile.damage = Balance.SENTINEL_RAIN_DAMAGE
-	missile.blast_radius = Balance.SENTINEL_RAIN_BLAST_RADIUS
+	missile.damage = BalanceWorld3.SENTINEL_RAIN_DAMAGE
+	missile.blast_radius = BalanceWorld3.SENTINEL_RAIN_BLAST_RADIUS
 	container.add_child(missile)
 	missile.launch(terrain, from, dir, true, _vel)
 	_rain_launched += 1
-	_launch_t = Balance.SENTINEL_RAIN_STAGGER
+	_launch_t = BalanceWorld3.SENTINEL_RAIN_STAGGER
 	Sfx.play(&"fire_enemy") # 占位发射声（暂用敌枪声，电浆音效后续单独配方）
 
 
@@ -106,7 +111,7 @@ func _launch_ticker(delta: float) -> void:
 
 func _begin_skill_b() -> void:
 	_bstate = ST_MINE_WARN
-	_bt = Balance.HEAVY_GUN_WARN_TIME
+	_bt = BalanceCombat.HEAVY_GUN_WARN_TIME
 	_bay_warn.warn() # 预警统一入口：布雷舱闪光 + 警告音
 
 
@@ -118,16 +123,16 @@ func _dispense_salvo() -> void:
 	var container := get_tree().get_first_node_in_group("projectile_container")
 	if player == null or terrain == null or container == null:
 		return
-	var base := PlasmaMine.fence_base_x(player, Balance.SENTINEL_MINE_FLIGHT,
-			Balance.SENTINEL_MINE_LEAD_MIN, Balance.SENTINEL_MINE_LEAD_MAX)
+	var base := PlasmaMine.fence_base_x(player, BalanceWorld3.SENTINEL_MINE_FLIGHT,
+			BalanceWorld3.SENTINEL_MINE_LEAD_MIN, BalanceWorld3.SENTINEL_MINE_LEAD_MAX)
 	for i in _mine_count():
-		var x := base + i * Balance.PLASMA_MINE_FENCE_SPACING
+		var x := base + i * BalanceWorld3.PLASMA_MINE_FENCE_SPACING
 		var target := Vector2(x, terrain.surface_y_at(x)
-				- Balance.PLASMA_MINE_HOVER_CLEAR)
+				- BalanceWorld3.PLASMA_MINE_HOVER_CLEAR)
 		var mine := PlasmaMine.new()
 		container.add_child(mine)
 		mine.launch(terrain, _bay_port.global_position, target,
-				Balance.SENTINEL_MINE_FLIGHT)
+				BalanceWorld3.SENTINEL_MINE_FLIGHT)
 		Sfx.play(&"fire_enemy") # 占位发射声（暂用敌枪声，布雷音效后续单独配方）
 	_bay_flash.fire(deg_to_rad(90.0)) # 出舱焰朝下（腰部开口往下撒）
 
@@ -136,7 +141,7 @@ func _dispense_salvo() -> void:
 
 func _begin_direct() -> void:
 	_bstate = ST_DIRECT
-	_bt = Balance.BOSS_DIRECT_DURATION
+	_bt = BalanceCombat.BOSS_DIRECT_DURATION
 	_direct_shoot_t = 0.0 # 首发即出
 
 
@@ -153,22 +158,22 @@ func _tick_attack(delta: float) -> void:
 				_bstate = ST_RAIN_FIRE
 				_rain_launched = 0
 				_launch_t = 0.0
-				_bt = Balance.HEAVY_MISSILE_TRACK_MAX + 0.8 # 全部出膛+追踪窗口
+				_bt = BalanceCombat.HEAVY_MISSILE_TRACK_MAX + 0.8 # 全部出膛+追踪窗口
 		ST_RAIN_FIRE:
 			_launch_ticker(delta)
 			_bt -= delta
 			if _bt <= 0.0:
-				_enter_recover(Balance.SENTINEL_RAIN_RECOVER)
+				_enter_recover(BalanceWorld3.SENTINEL_RAIN_RECOVER)
 		ST_MINE_WARN:
 			_bt -= delta
 			if _bt <= 0.0:
 				_bstate = ST_MINE_FIRE
 				_dispense_salvo()
-				_bt = Balance.SENTINEL_MINE_FLIGHT + 0.35 # 抛送+入位窗口
+				_bt = BalanceWorld3.SENTINEL_MINE_FLIGHT + 0.35 # 抛送+入位窗口
 		ST_MINE_FIRE:
 			_bt -= delta
 			if _bt <= 0.0:
-				_enter_recover(Balance.SENTINEL_MINE_RECOVER)
+				_enter_recover(BalanceWorld3.SENTINEL_MINE_RECOVER)
 		ST_DIRECT:
 			_bt -= delta
 			_direct_shoot_t -= delta
@@ -177,9 +182,9 @@ func _tick_attack(delta: float) -> void:
 				if player != null:
 					_fire_direct_shot(_muzzle.global_position.direction_to(
 							player.global_position))
-				_direct_shoot_t = Balance.BOSS_SWEEP_FIRE_INTERVAL
+				_direct_shoot_t = BalanceCombat.BOSS_SWEEP_FIRE_INTERVAL
 			if _bt <= 0.0:
-				_enter_recover(Balance.BOSS_DIRECT_RECOVER)
+				_enter_recover(BalanceCombat.BOSS_DIRECT_RECOVER)
 
 
 ## 直瞄单发：电浆矢弹真从炮口出膛、朝玩家当前位置（无预判）；弹是 bullet.gd
@@ -189,8 +194,8 @@ func _fire_direct_shot(dir: Vector2) -> void:
 	if container == null:
 		return
 	var b := PLASMA_BOLT.instantiate() as Bullet
-	b.speed = Balance.BOSS_SWEEP_SPEED
-	b.damage = Balance.BOSS_SWEEP_DAMAGE
+	b.speed = BalanceCombat.BOSS_SWEEP_SPEED
+	b.damage = BalanceCombat.BOSS_SWEEP_DAMAGE
 	b.impact_tint = Color(0.5, 0.8, 1.0)
 	b.setup(dir, Vector2.ZERO)
 	container.add_child(b)
@@ -204,10 +209,10 @@ func _fire_direct_shot(dir: Vector2) -> void:
 func _rewarn_after_hold() -> void:
 	match _bstate:
 		ST_RAIN_WARN:
-			_bt = Balance.HEAVY_GUN_WARN_TIME
+			_bt = BalanceCombat.HEAVY_GUN_WARN_TIME
 			_rain_warn.warn()
 		ST_MINE_WARN:
-			_bt = Balance.HEAVY_GUN_WARN_TIME
+			_bt = BalanceCombat.HEAVY_GUN_WARN_TIME
 			_bay_warn.warn()
 		_:
 			pass
@@ -222,8 +227,8 @@ func _reset_warnings() -> void:
 ## ---- 二阶段数值 ----
 
 func _rain_count() -> int:
-	return Balance.SENTINEL_RAIN_COUNT + (Balance.SENTINEL_PHASE2_RAIN_BONUS if _phase2 else 0)
+	return BalanceWorld3.SENTINEL_RAIN_COUNT + (BalanceWorld3.SENTINEL_PHASE2_RAIN_BONUS if _phase2 else 0)
 
 
 func _mine_count() -> int:
-	return Balance.SENTINEL_MINE_COUNT + (Balance.SENTINEL_PHASE2_MINE_BONUS if _phase2 else 0)
+	return BalanceWorld3.SENTINEL_MINE_COUNT + (BalanceWorld3.SENTINEL_PHASE2_MINE_BONUS if _phase2 else 0)

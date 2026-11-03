@@ -7,7 +7,7 @@ extends Node2D
 ## 速度×飞行时长，时距从决策点起算，clamp 承诺带）——相对速度即机制：
 ## 匀速直线跑被压在路径上，变向/急停=免。预警在发射器上（ThreatFlash，
 ## 见调用方）。视觉全贴图+粒子（fx 规约）：fx_coral_orb.svg+coral_embers
-## 余烬尾迹。数值：速度=Balance.CORAL_ORB_SPEED，伤害/爆径=调用方机体段。
+## 余烬尾迹。数值：速度=BalanceWorld4.CORAL_ORB_SPEED，伤害/爆径=调用方机体段。
 
 const ORB_TEXTURE := preload("res://assets/world_4/fx_coral_orb.svg")
 const EMBERS := preload("res://scenes/fx/coral_embers.tscn")
@@ -18,7 +18,7 @@ const MAX_LIFETIME := 6.0 # 兜底寿钟（正常按地形命中结算）
 var damage := 10
 var blast_radius := 90.0
 
-var _speed := Balance.CORAL_ORB_SPEED
+var _speed := BalanceWorld4.CORAL_ORB_SPEED
 var _dir := Vector2.LEFT
 var _terrain: Terrain
 var _t := 0.0
@@ -32,7 +32,7 @@ var _embers: GPUParticles2D
 static func lead_direction(terrain: Terrain, from: Vector2, player: Player,
 		speed: float, lead_back: float, lead_max: float) -> Vector2:
 	var vx := clampf(player.velocity.x,
-			-Balance.PLAYER_MOVE_SPEED, Balance.PLAYER_MOVE_SPEED)
+			-BalancePlayer.PLAYER_MOVE_SPEED, BalancePlayer.PLAYER_MOVE_SPEED)
 	var t := from.distance_to(player.global_position) / speed
 	var lead_x := player.global_position.x + vx * t
 	lead_x = clampf(lead_x, player.global_position.x - lead_back,
@@ -98,5 +98,5 @@ func _bloom() -> void:
 	Sfx.play(&"boom_enemy") # 占位：能量爆蕗暂用敌爆声，珊瑚系配方后配
 	var player := get_tree().get_first_node_in_group("player") as Player
 	if player != null:
-		player.add_shake(Balance.KILL_SHAKE_STRENGTH * 1.2)
+		player.add_shake(BalanceCombat.KILL_SHAKE_STRENGTH * 1.2)
 	queue_free()

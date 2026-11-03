@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 10" width="60" height="10">
+<!-- 舰炮曳光 60x10（+X=飞行方向）：暗壳弹体+浮标橙曳光带+白热弹头
+（亮青绿底靠暗壳剪影读，橙带当轨迹线）。sea_bolt.tscn=bullet.gd 纯换皮。 -->
+<defs>
+
+</defs>
+<polygon points="4,2 44,1 58,5 44,9 4,8" fill="#2d4149"/>
+<polygon points="44,1 58,5 44,9 36,5" fill="#3f5a66"/>
+<rect x="4" y="3.6" width="34" height="2.8" fill="#ff5a3c" opacity="0.85"/>
+<rect x="2" y="3.2" width="4" height="3.6" fill="#f2f0ff" opacity="0.9"/>
+</svg>

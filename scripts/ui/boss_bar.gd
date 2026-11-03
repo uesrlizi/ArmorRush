@@ -6,8 +6,8 @@ extends Control
 ## fill(白)=实值（真实冲击，瞬时），ghost(黄)=虚值（指数跟随值）仍压在上层：
 ## 升程黄没追上时白尖端从两端露头，衰减/排程黄瞬时跟住线性实值边（匀速读数）。
 
-var fill_color := Color(1.0, 0.32, 0.25) # 填充色：血条=阵营红，冲击条=白（构造时取 Balance）
-var ghost_color := Color(1.0, 1.0, 1.0)  # 虚影色：血条=满白，冲击条=黄（构造时取 Balance）
+var fill_color := Color(1.0, 0.32, 0.25) # 填充色：血条=阵营红，冲击条=白（构造时取 BalanceGlobal）
+var ghost_color := Color(1.0, 1.0, 1.0)  # 虚影色：血条=满白，冲击条=黄（构造时取 BalanceGlobal）
 var center_fill := false                 # true=从中心向两边填充+赋值翻转（失衡条），false=左锚定（血条）
 var ratio := 1.0
 
@@ -15,8 +15,8 @@ var _ghost := 1.0
 
 
 func _init() -> void:
-	fill_color = Balance.HP_BAR_ENEMY_COLOR # autoload 在 _init 里取值，解析期不依赖
-	ghost_color = Balance.HP_BAR_GHOST_COLOR
+	fill_color = BalanceGlobal.HP_BAR_ENEMY_COLOR # autoload 在 _init 里取值，解析期不依赖
+	ghost_color = BalanceGlobal.HP_BAR_GHOST_COLOR
 
 
 func set_ratio(r: float) -> void:
@@ -40,13 +40,13 @@ func _process(delta: float) -> void:
 		# 降程瞬时贴住（衰减/失衡排空的可视边=线性实值，匀速）
 		if ratio > _ghost:
 			_ghost = lerpf(_ghost, ratio,
-					1.0 - exp(-Balance.HP_BAR_GHOST_DAMP * delta))
+					1.0 - exp(-BalanceGlobal.HP_BAR_GHOST_DAMP * delta))
 		else:
 			_ghost = ratio
 		queue_redraw()
 	elif ratio < _ghost:
 		_ghost = lerpf(_ghost, ratio,
-				1.0 - exp(-Balance.HP_BAR_GHOST_DAMP * delta))
+				1.0 - exp(-BalanceGlobal.HP_BAR_GHOST_DAMP * delta))
 		queue_redraw()
 
 

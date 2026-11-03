@@ -23,7 +23,7 @@ var _judged := false
 
 
 func _init() -> void:
-	linger = Balance.HEAVY_BLAST_LINGER # autoload 在 _init 里取值，解析期不依赖
+	linger = BalanceCombat.HEAVY_BLAST_LINGER # autoload 在 _init 里取值，解析期不依赖
 
 
 func _ready() -> void:

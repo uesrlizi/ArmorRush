@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 20" width="48" height="20">
+<!-- 第七章 BOSS 艏炮臂 48x20（独立件，俯仰真瞄）。
+枢端画布 (40,10)=艏炮座环；单管重炮朝 -X（管长 36），管口画布 (4,10)
+=Muzzle（臂局部 (-36,0)）。俯角 90° 管口世界 ≈364 仍在船底 460 之上。 -->
+<defs>
+
+</defs>
+<rect x="30" y="4" width="12" height="12" fill="#2d4149"/>
+<circle cx="40" cy="10" r="4" fill="#2d4149"/>
+<rect x="24" y="2" width="14" height="16" fill="#3f5a66"/>
+<rect x="24" y="2" width="14" height="2.5" fill="#6c8894"/>
+<rect x="6" y="6" width="20" height="8" fill="#1c2a30"/>
+<rect x="10" y="5" width="3" height="10" fill="#3f5a66"/>
+<rect x="2" y="4.5" width="6" height="11" fill="#3f5a66"/>
+<rect x="2" y="7.5" width="2.4" height="5" fill="#1c2a30"/>
+<rect x="0.8" y="8" width="1.6" height="4" fill="#f2f0ff" opacity="0.95"/>
+<circle cx="35" cy="16" r="1.3" fill="#ff5a3c" opacity="0.85"/>
+</svg>

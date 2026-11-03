@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+<!-- 电白热光晕 32x32（径向软晕，ADD 叠亮）：
+蓝紫晕+白热芯——桩顶充能/幕驻留/触电的电系专属光形，代码脉冲。 -->
+<defs>
+<radialGradient id="rg1"><stop offset="0" stop-color="#a08cff" stop-opacity="0.5"/><stop offset="1" stop-color="#a08cff" stop-opacity="0.0"/></radialGradient>
+<radialGradient id="rg2"><stop offset="0" stop-color="#f2f0ff" stop-opacity="0.95"/><stop offset="1" stop-color="#f2f0ff" stop-opacity="0.0"/></radialGradient>
+</defs>
+<ellipse cx="16" cy="16" rx="15" ry="15" fill="url(#rg1)"/>
+<ellipse cx="16" cy="16" rx="6.5" ry="6.5" fill="url(#rg2)"/>
+</svg>

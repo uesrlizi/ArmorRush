@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 230" width="48" height="230">
+<!-- 第七章桥式·column_3 件（terrain.gd 桥式模式：
+箱梁/剪刀撑/排架柱各自独立贴图，排架柱三档高度 110/170/230 按
+「bridge_sea_y 固定海面线−柱顶」自动选挡，柱底统一钉在海面上）。 -->
+<defs>
+
+</defs>
+<rect x="14" y="0" width="20" height="230" fill="#37453e"/>
+<rect x="14" y="0" width="5" height="230" fill="#22312b" opacity="0.6"/>
+<rect x="30" y="0" width="4" height="230" fill="#4d6058" opacity="0.4"/>
+<rect x="14" y="204" width="20" height="26" fill="#7a5a3c" opacity="0.22"/>
+<rect x="14" y="224" width="20" height="6" fill="#2e4a44" opacity="0.5"/>
+</svg>

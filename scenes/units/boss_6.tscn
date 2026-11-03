@@ -15,7 +15,7 @@
 ; Wheel，Muzzle=毂心 (0,0)，弹石出膛点）；Rack=背甲炮架画布 (210,38)→局部
 ; (60,-52)（架画布 60x54 枢端 (30,50)→offset(-30,-50)，固定射角，
 ; Muzzle=架局部 (0,-46)=管口 (30,4)，Flash+ThreatFlash=电网闸预警）；
-; BayPort=腹舱口画布 (150,170)→局部 (0,80)（ThreatFlash=溜矿车预警）；
+; BayPort=腹舱口画布 (150,170)→局部 (0,80)（ThreatFlash=凿岩装药预警，装药由此抛出）；
 ; Thruster1/2=局部 (-30,64)/(80,64)（通用 fx_flame+加色，金琥珀呼吸）。
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
@@ -73,6 +73,8 @@ position = Vector2(0, -46)
 position = Vector2(0, 80)
 
 [node name="ThreatFlash" parent="Visuals/BayPort" instance=ExtResource("6")]
+
+[node name="Flash" parent="Visuals/BayPort" instance=ExtResource("3")]
 
 [node name="Thruster1" type="Sprite2D" parent="Visuals"]
 modulate = Color(1, 0.75, 0.45, 0.6)

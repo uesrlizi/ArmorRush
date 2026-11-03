@@ -5,7 +5,7 @@
 
 ## 0. 场景池现状（洗牌袋轮换制，2026-10-21 起）
 
-六关已为平行场景，无顺序链、无末章：`scenes/world/world_1.tscn`（一「锈雨废都」）、`world_2`（二「精炼所工业带」）、`world_3`（三「雪原警戒点」）、`world_4`（四「珊瑚辐合夜」）、`world_5`（五「破晓云廊」）、`world_6`（六「赤沙矿区」；**2026-10-22 暂时出池**——BOSS「赤轮」待返工，`RunState.SCENES` 内注释停用，正常入口抽不到，编辑器直跑仍可单关测试，返工验收后取消注释即恢复）。开机入口 = `entry.tscn`（run/main_scene，**纯跳板**：开局即抽关立即跳转，启动页由第一关自己的 TitleScreen 负责）。
+七关已为平行场景，无顺序链、无末章：`scenes/world/world_1.tscn`（一「锈雨废都」）、`world_2`（二「精炼所工业带」）、`world_3`（三「雪原警戒点」）、`world_4`（四「珊瑚辐合夜」）、`world_5`（五「破晓云廊」）、`world_6`（六「赤沙矿区」；2026-10-23 用户验收后**已装回池子**——曾因 BOSS 待返工短暂出池一轮，凿岩齐射替换溜矿车+船体悬空返工完成后恢复）、`world_7`（七「溺海都会」，2026-11-02 实装入池，引擎流水线全绿，**待用户游戏内验收**）。开机入口 = `entry.tscn`（run/main_scene，**纯跳板**：开局即抽关立即跳转，启动页由第一关自己的 TitleScreen 负责）。
 
 - **轮换袋在 `RunState`**：`SCENES` 全场景池 + `FIRST_POOL` 开局白名单（"只包含"语义：不在白名单里的场景永远不会当首关）。入口"开始"调 `start_run()` 清分 + 整袋洗牌 + 只从白名单抽首关；此后每次通关 `draw_next()` 从袋抽下一关，袋空整袋重洗——每 N 关全场景恰好各一次、周期内不重复（袋边界首尾允许相接，Tetris 式）。**新章进池 = 往 `SCENES` 加一行**；不许当首关就不进 `FIRST_POOL`。
 - 转场：BOSS 击败 → `Spawner.stop()` → 真实时间 1.7s（`Balance.CHAPTER_CLEAR_DELAY`，让爆散播完）→ `RunState.begin_handoff()` + 全局黑场 → `change_scene_to_file(RunState.draw_next())`。
@@ -17,11 +17,11 @@
 
 ```
 scenes/   entry.tscn（入口跳板=main_scene）
-          world/    world_1..6.tscn（关卡）
+          world/    world_1..7.tscn（关卡）
           units/    enemy_N / enemy_drone_N / enemy_shield_N / elite_N / boss_N
           player/   player.tscn / thruster_flame.tscn
-          weapons/  player_bullet / enemy_bullet / mortar_trail / slag_pool / plasma_bolt / dawn_bolt / coral_bolt / red_chip
-          props/    obstacle / platform_crate / scaffold_1..6
+          weapons/  player_bullet / enemy_bullet / mortar_trail / slag_pool / plasma_bolt / dawn_bolt / coral_bolt / red_chip / red_lob / sea_bolt
+          props/    obstacle / platform_crate / scaffold_1..7
           fx/       爆/闪/花/烟/尾迹/预警闪光
           ui/       touch_controls
           previews/ 开发预览场（rust/readability/fog_check/slash）
@@ -29,10 +29,10 @@ scenes/   entry.tscn（入口跳板=main_scene）
 scripts/  core/     autoload 五件（balance/run_state/comms/sfx/scene_fade）+ ui_font/platforms/entry
           world/    main（关卡控制器）/spawner/terrain/scroll_object/world_strip/obstacle/aerial_fog
           units/    敌/精英/BOSS 能力脚本全家 + eye_glow/overhead_bar
-          weapons/  bullet/heavy_missile/mortar_shell/plasma_missile/plasma_mine/ground_blast/slag_pool/coral_orb/coral_tide/flak_shell/arc_fence/ore_cart
+          weapons/  bullet/heavy_missile/mortar_shell/plasma_missile/plasma_mine/ground_blast/slag_pool/coral_orb/coral_tide/flak_shell/arc_fence/drill_charge/skip_shell/depth_charge/sea_surge
           player/   player/thruster_flame
           fx/ ui/ dev/（autotest + 预览脚本）
-assets/   world_1..6/（各章主题件）+ common/（跨章件）+ fonts/ branding/ sfx/ vo/
+assets/   world_1..7/（各章主题件）+ common/（跨章件）+ fonts/ branding/ sfx/ vo/
 ```
 
 - **场景文件名 = `<单位>_N.tscn`**（N=world 序号，从 1 起）；单位叫什么（哨兵/钢嵴/白鲸…）写在 BOSS 血条与文档里，不进文件名。
@@ -43,7 +43,7 @@ assets/   world_1..6/（各章主题件）+ common/（跨章件）+ fonts/ brand
 ## 1. 定章
 
 - 从 `art_proposals/proposal_N_*.svg` 拿定稿提案；从 `generate_proposals.py` 的 `PROPOSALS` 表取精确色板与分层账（远 0.9 / 中 0.55 / 地 0）。
-- 六套提案已实装（五=generate_proposals2.py 方案五，正本=`dawn_ch5/提案_v1_破晓云廊.md`；六=方案六，正本=`red_desert_ch6/提案_v1_赤沙矿区.md`）；七（溺海都会）已出提案待实装。再做新章 = 先出提案评审再进本流程。
+- 七套提案已实装（五=generate_proposals2.py 方案五，正本=`dawn_ch5/提案_v1_破晓云廊.md`；六=方案六，正本=`red_desert_ch6/提案_v1_赤沙矿区.md`；七=方案七，正本=`drowned_ch7/提案_v1_溺海都会.md`）。再做新章 = 先出提案评审再进本流程。
 
 ## 2. 环境美术（半程序化）
 
@@ -108,43 +108,51 @@ assets/   world_1..6/（各章主题件）+ common/（跨章件）+ fonts/ brand
 **设计自由度**：
 
 - **BOSS 能力生态位不要求无重叠**——玩家操作就那么几个，**新组合/新视觉也算新设计**；别为"补生态位"硬造新弹种（ch5 的"罚停留"定位成立，但那是这一章的选题，不是通用门槛）。
-- **不必每个 BOSS 都装可动机枪做普攻直射**——真瞄臂短点放是现役惯例，不是门检要求；普攻段可以换形式（固定射角弹幕、机体动作、环境联动都行）。
+- **不必每个 BOSS 都装可动机枪做普攻直射**——真瞄臂短点放是现役惯例，不是门检要求；普攻段可以换形式（固定射角弹幕、机体动作、环境联动都行）。**2026-11-02 已换三家**：ch2 排炮重弹（单发慢弹可跳越）/ch4 钓灯爆闪（径向慢矢齐放）/ch6 斗轮抛石（抛体落点锁定）；ch1 机枪本位、ch3/ch5 枪械普攻保留（截击机/机甲的机体读法）。换形的根=把「连发+逐发微跟踪」换成「**出手锁定的一次性形态**」，普攻枪口永不挂 ThreatFlash、后摇/贴脸窗/节奏骨架全部不动，四家解法各不同（跳越慢弹/拉距找缝/看弧挪位/横移出扇）。
 - **章节专属弹种可按本章背景调色**（它是这个世界专属的，只保本章可读性，非强制）：ch5 啸雷弹=白热金主带+暗紫壳双色（上暗紫天区靠白热带读、金霞地平带靠暗壳剪影读）。**高速弹的读法=拉长度**：弹速 2400 下短弹几乎不可见，拉到 112 全长曳光矢=每秒掠过自长 21 次、高速拖成一条轨迹线——快弹别在配色上死磕，先拉长度。
 
 **公共弹药/危险件库（新行为=新弹种，禁改既有弹种的制导语法）**：
 
 | 件 | 语法 | 已用 |
 | --- | --- | --- |
-| `Bullet` | 直线（方向恒定，可带载体速度 inherit） | 全章机枪/弹幕/直瞄 |
+| `Bullet` | 直线（方向恒定，可带载体速度 inherit）；**`lob_gravity>0`=抛体语法**（初速由 `solve_lob_velocity` 解到出手时刻的落点，逐帧吃重力，弹头/迸溅/击退跟实时速度；现役直线弹全为 0，语法零改动） | 全章机枪/弹幕/直瞄 + ch6 斗轮抛石 |
 | `HeavyMissile` | 玩家追踪（抛体滑行→比例导引） | ch1 导弹车/弹雨 |
 | `PlasmaMissile` | =HeavyMissile 纯视觉换皮（`extends HeavyMissile`，语法零改动：SVG 矢弹+电光尾迹+冰蓝爆） | ch3 哨兵电浆弹雨 |
 | `MortarShell` | 真弹道（落点+时长解算初速，MORTAR_GRAVITY≈4×玩家；弹体/尾迹独立资产） | ch2 熔渣封路 |
 | `PlasmaMine` | 空中封锁件：真弹道高抛入位→悬停蓄能（渐亮二段预警）→近炸引信；寿命到点哑熄（无伤）——「站=吃/冲过=免/跳=吃」；投放=**一次性齐撒**（同帧全出，与臼炮逐孔梯次分家） | ch3 精英布雷车/哨兵浮雷封锁 |
 | `CoralOrb` | 珊瑚重弹：**慢速可见能量重球**（弹速 CORAL_ORB_SPEED 慢于机枪流=弹体自读，侧移即躲），出膛瞬间 lead 瞄准（玩家速度×飞行时长，时距从决策点起算，clamp 承诺带），撞地即爆蕗（GroundBlast+coral_burst 粒群，无残留；爆区 180/160=慢+大压制面）——急停/变向=免，匀速跑被压在路径上 | ch4 精英海葵/鮟鱇 |
 | `CoralTide` | 固定高度涌浪墙：**不管地面**，浪墙钉绝对高度带 [520,640] 纵跨盖满三档站立带，只沿 x 涌动；灼烧一次即溃散，射程到点哑熄——**飞越=反制**（纯跳仅最高档擦得过，低档须推进升空；浮空脚手架高台=掩体） | ch4 鮟鱇 |
-| `CoralBolt`（coral_bolt.tscn） | 直射弹=bullet.gd 纯换皮（语法零改动） | ch4 鮟鱇钓灯直射 |
+| `CoralBolt`（coral_bolt.tscn） | 直射弹=bullet.gd 纯换皮（语法零改动）；鮟鱇普攻用它**径向 N 矢同帧齐放**（一矢对准玩家、余矢等分圆周）——弹种语法不变，齐放图案是发射方的事 | ch4 鮟鱇钓灯爆闪 |
 | `FlakShell` | **定距空爆**的防空弹：直线无重力+出膛瞬间按「炮口→玩家当时位置」距离解算引信（爆点=发射时玩家所在点，**无 lead**），到点 GroundBlast 空中爆（flash_color 白热金）；撞地形=早爆（掩体合法不校平）——**停=吃/动=免**，与 CoralOrb 的 lead 惩罚互为镜像（罚停留不罚跑）；读法=炮口预警+弹上引信芯越闪越急（fx_dawn_flak.svg 曳光矢） | ch5 精英响哨/断云 |
 | `DawnBolt`（dawn_bolt.tscn） | 直射弹=bullet.gd 纯换皮（语法零改动，紫白曳光矢） | ch5 断云机鼻直射 |
 | `ArcFence` | **落点围栏**：双锚桩解算弹道（MORTAR_GRAVITY）落到玩家**当时位置**两侧（无 lead）→桩上火花蓄能（渐亮二段预警）→竖直电幕立起（各自桩位各自贴当地地表的竖直线段）；触幕一次整套溃散，寿命到点哑熄（无伤）——**停=被围（出笼交税/飞越/等）/跑=提前出带免**；与 ch5 啸雷「停=吃」互补（那边罚不跑，这边罚跑晚了）；纯跳过不了幕（幕高 150/200 > 跳 apex 底 103），推进 ≥204 飞越=免 | ch6 精英锚桩/赤轮 |
-| `OreCart` | **贴地滚行**危险件：腹舱出舱坠落→恒速滚向玩家（台阶=y 快速归位）；命中一次结算、车继续滚；寿命到点/滚出射程脱轨哑熄（无伤）——**纯跳可过**（车 84 高 < 跳 apex 底 103）、站桩=吃 | ch6 赤轮 |
-| `RedChip`（red_chip.tscn） | 直射弹=bullet.gd 纯换皮（语法零改动，红砂弹石；亮沙底靠暗壳剪影读） | ch6 赤轮斗轮弹石 |
+| `DrillCharge` | **凿岩装药**（定延时起爆件，全游戏首个）：抛体解算（MORTAR_GRAVITY）落玩家前进路径等距铺开，**落地即钉住竖立（落点静止，零地形跟随）**，红灯渐急=二段预警，定延时 1.0s 球爆（GroundBlast 无驻留区）；间距 > 爆球直径不连锁；lead 走廊封匀速跑（尾弹贴着跑者爆），反应窗（飞行+引信 ≈1.7s）内跑离=免，变速/变向=落在身后 | ch6 赤轮 |
+| `RedChip`（red_chip.tscn） | 直射弹=bullet.gd 纯换皮（语法零改动，红砂弹石；亮沙底靠暗壳剪影读）。**沉淀中**：赤轮普攻已改抛石（2026-11-02），当前无发射方，tscn 留作弹石语汇正本 | （无现役发射方） |
+| `SlagSlug`（slag_slug.tscn） | 直射重弹=bullet.gd 纯换皮（语法零改动）：慢速大号熔渣弹（BARGE_SLUG_SPEED=机枪流七成，2026-11-03 用户「太慢读不出炮弹」500→700；弹体自带 mortar_trail 双层拖尾），弹体自读、可跳越——「重弹点放」与弹幕墙的「排管齐射」同族不同量；开火戏=枪口焰+FlashBurst 熔橙爆闪双叠，出膛音=fire_heavy 专配（首个非占位敌弹音） | ch2 钢嵴排炮重弹 |
+| `RedLob`（red_lob.tscn） | **抛体弹石**=bullet.gd 抛体语法首用（lob_gravity=2000）：发射点=**斗轮外缘切点**（出手方向反退到轮缘，世界逆时针轮的上缘切向=出手向——轮斗真把石头甩出去，2026-11-03 从毂心射出改此；出膛=切点一撮凿尘，无枪火）；**扇面开在初速上**：基准弹道（中心石恰落玩家出手瞬间位置）只解算一次，按序号旋开初速、切点跟各自出手向重取——若每石各自解算回同一落点，扇面会被弹道解算吃成一条线（同日二轮踩）；无 lead 无跟踪，落点簇围玩家当时位置散布；抛体不贴地（贴地跟随类全禁红线不受累） | ch6 赤轮斗轮抛石 |
+| `SkipShell` | **跳弹 v2=平抛鱼雷**（全游戏首个弹跳弹道；v1 落玩家脚下被判死——落点全在行进方向身后=「跳的没意义」，2026-11-03）：**平抛**出膛=水平初速 1300 向玩家一侧（**不瞄人**，炮位定平射向；BOSS 从艏部下管 TorpedoPort 发射且技能A 压低到 ANCHOR_SKIP_FIRE_Y=480[clamp ≤当地地表−150，同 ch1 扫射压高语言]）→重力拉浅垂弧触甲板→反弹（apex 固定 90、水平速度按跳序衰减 1/0.85/0.72=跳距 509/432/367 可预判）×3→第 4 次触地球爆；触地喷白沫溅花=落点读出件；撞台阶立面（埋深超限）=当场起爆——**对冲几何：停=被平射段命中（头部高度）/跳过弹体=免**（纯跳脚底+67；跳弧中段站立擦顶不中）；真弹道抛体非贴地滑行件（禁令红线不受累） | ch7 精英岸炮/沉锚 |
+| `DepthCharge` | **深弹**：艉舱向艉侧抛出（抛离玩家一侧）→坠海白沫水花→定延时 0.6s 水下闷爆（青白晕）；弹体走**地形后方容器**（"sea_props_container"=坠入桥后海面不穿桥面），水花/闷爆走前景容器 | ch7 沉锚涌浪链 |
+| `SeaSurge` | **涌浪漫桥**（固定绝对高度带，珊瑚潮同类合法件）：深弹闷爆后水面从屏底涨到 FLOOD_Y（620/p2 584）→驻留→退去；不管地面零地形跟随，脚底（中心+24）过水面即吃（一次涌浪至多一次）——**低处=吃/高处=免/升空=免**；p2 纯跳不够（脚底 597>584）须推进或登高 | ch7 沉锚 |
+| `SeaBolt`（sea_bolt.tscn） | 直射弹=bullet.gd 纯换皮；v2=**共享机炮弹画法**（同 enemy_bullet 贴图/材质/碰撞——v1 暗壳曳光矢 60×10 配白色小迸溅读成「黑色块瞬间消失」判死，2026-11-03；亮底章弹体可读性归压暗天光承担，弹体回归全场统一）；fx_sea_bolt.svg 沉淀留档 | ch7 沉锚舰炮曳光 |
 | `coral_embers`/`coral_burst` | 珊瑚粒群粒子件（余烬尾迹/爆蕗绽放，fx_flame 交红 ramp）——**科若尔 FX 语汇=柔光+粒群+平滑波浪，禁锯齿/高频白芯（闪电感）** | ch4 全系 |
 | `GroundBlast` | 单次球状爆区（`flash_color` 可染，默认橙红；`show_flash` 可关） | 爆类落地/空中 |
 | `SlagPool` | 驻留 tick 区（蓄热二段预警） | ch2 火区 |
 
 - 代码惯例：`.new()` 出生的类**必须纯代码自建视觉**——不带场景子节点，`$节点` 必炸（GroundBlast/SlagPool/MortarShell 惯例）。
-- 音效占位：新武器先用 `fire_enemy`/`boom_enemy`，专属配方后配。
+- 音效占位：新武器先用 `fire_enemy`/`boom_enemy`，专属配方后配（`fire_heavy` 2026-11-03 起为首个专配例：gen_sfx.py 配方 + sfx.gd 注册 + 事件接线三步）。
 - 反例存档："导弹加定点"（给追踪导弹伪装弹道武器）已被否——弹种语法混用一眼假。
 
-**章例（ch2，照抄结构、不抄数值）**：精英=熔渣臼炮车（预教封路：lead 落点+驻留火区，落地无溅射=教学纯净版）；BOSS=悬浮冶炼驳船「钢嵴」（熔渣封路 4 垂发孔+火区 ⇄ 排炮弹幕墙 3 真实炮门±摆动扇+地形校平/哑火 + 直瞄普攻；hover 370、船底=t2 站立头顶上方 10px）。教训：尾迹类特效量级先对标同类现役再动手（烟=fx_smoke 档；首版"纯小火星"太小看不见被打回）。数值全在 Balance `BARGE_*/ELITE_SLAG_*/SLAG_POOL_*/MORTAR_*`。
+**章例（ch2，照抄结构、不抄数值）**：精英=熔渣臼炮车（预教封路：lead 落点+驻留火区，落地无溅射=教学纯净版）；BOSS=悬浮冶炼驳船「钢嵴」（熔渣封路 4 垂发孔+火区 ⇄ 排炮弹幕墙 3 真实炮门±摆动扇+地形校平/哑火 + 排炮重弹普攻[2026-11-02 机枪短梭→单发慢速熔渣重弹，p2 双发各自重瞄；解法=跳越/挪位]；hover 370、船底=t2 站立头顶上方 10px）。教训：尾迹类特效量级先对标同类现役再动手（烟=fx_smoke 档；首版"纯小火星"太小看不见被打回）。数值全在 Balance `BARGE_*/ELITE_SLAG_*/SLAG_POOL_*/MORTAR_*`。
 
 **章例（ch3）**：精英=电浆布雷车（预教浮雷：承诺带落点+悬停近炸，双仓同帧齐布）；BOSS=强袭悬空机甲「哨兵」（BossSentinel，260×180 机体：高度同 ch1 直升机档、宽度放开、碰撞 246×168——**从零设计非补美术**，场景 `scenes/units/boss_3.tscn`，资产沿用 `boss_snow_body/gun.svg` 名）：电浆弹雨（**右肩双仓口 (151/167,26)**，4 发回绕复用，PlasmaMissile 换皮弹）⇄ 浮雷封锁（腰布雷闸 BayPort (122,138)→(-8,48)，**一次性齐撒** 4 枚同帧出舱）+ 电浆枪直瞄普攻（plasma_bolt.tscn=bullet.gd 纯换皮冰蓝矢弹，速度/伤害复用 BOSS_SWEEP_*）；hover 370 同驳船账。几何账/惩罚账正本=`art_proposals/snowfield_ch3/提案_v2_能力化.md`+`提案_v3_哨兵重设计.md`；数值全在 Balance `SENTINEL_*/ELITE_MINE_*/PLASMA_MINE_*`。**教训：新危险件的"第一眼读法"是验收项**——浮雷首版 44px+逐孔梯次被误读"导弹卡天上"，放大到 64 电极柱水雷剪影+同帧齐撒才立住。
 
-**章例（ch4；科若尔=红色化的电浆/能量武器[AC6 珊瑚=红色智能能量粒群，武库=步枪波浪束/振荡器/导弹]；正本=coral_ch4/提案_v2_珊瑚重设计.md，v1 闪电版留档 `提案_能力化.md`）**：精英=炮台车「海葵」（EliteAnemone，预教重弹：背驮海葵发射器[发射器=美术本体，Muzzle=海葵口]，三发梯次 CoralOrb）；BOSS=深海猎杀舰「鮟鱇」（BossAngler，**美术按能力重烘焙**=背驮大口径珊瑚重炮+艏部钓灯臂+腹下吊挂放电舱，独眼条带/Rotor 位沿用）：珊瑚重炮（炮位预警→逐发梯次 CoralOrb 慢弹 4 发/p2+1，出膛瞬间 lead 解算——弹体自读，惩罚"看到预警仍匀速跑"；爆区 180）⇄ 珊瑚潮（腹闸出舱爆蕗小瓣→CoralTide 固定高度涌浪墙；默认双波/p2 三波）+ 钓灯能量束直射（coral_bolt.tscn=bullet.gd 纯换皮波浪红束）。hover 370 同驳船账；锚点账=bake_coral_units.py 头注（精英 ArmPivot 画布 (44,8)/Muzzle (44,6)；BOSS Cannon/Muzzle (150,28)、ArmPivot (86,42)、BayPort (150,174)）；数值全在 Balance `ELITE_ANEMONE_*/ANGLER_*/CORAL_ORB_SPEED/CORAL_TIDE_*`。**教训四条**：①主题词先研究原作语汇再动手（闪电≠科若尔）；②FX 走规约正途（贴图+粒子，检查器可调），_draw 特效件全数删除；③量与压制的"手感弱"是验收项（爆区翻倍/潮墙化治瞬移/弹数下限上调都来自实机调参）；④爆区视觉要跟爆径耦合（GroundBlast 预置 scale 曾被 FlashBurst 补间 .from 覆盖=闪光从不随爆径变——修=FlashBurst.size_scale 并进补间两端+coral_burst.power 爆径耦合；潮墙=coral_tide_fx 粒子浪墙，静态贴图版"像死墙"被否）。
+**章例（ch4；科若尔=红色化的电浆/能量武器[AC6 珊瑚=红色智能能量粒群，武库=步枪波浪束/振荡器/导弹]；正本=coral_ch4/提案_v2_珊瑚重设计.md，v1 闪电版留档 `提案_能力化.md`）**：精英=炮台车「海葵」（EliteAnemone，预教重弹：背驮海葵发射器[发射器=美术本体，Muzzle=海葵口]，三发梯次 CoralOrb）；BOSS=深海猎杀舰「鮟鱇」（BossAngler，**美术按能力重烘焙**=背驮大口径珊瑚重炮+艏部钓灯臂+腹下吊挂放电舱，独眼条带/Rotor 位沿用）：珊瑚重炮（炮位预警→逐发梯次 CoralOrb 慢弹 4 发/p2+1，出膛瞬间 lead 解算——弹体自读，惩罚"看到预警仍匀速跑"；爆区 180）⇄ 珊瑚潮（腹闸出舱爆蕗小瓣→CoralTide 固定高度涌浪墙；默认双波/p2 三波）+ 钓灯爆闪（普攻；2026-11-02 机枪短梭→钓灯一次爆闪径向 N 矢同帧齐放：一矢对准玩家、余矢等分圆周，弹=coral_bolt.tscn 纯换皮慢矢 ANGLER_FLASH_SPEED，拉开距离即躲；灯亮即读法、普攻不挂 ThreatFlash；三招三种几何：重炮=点/潮=线/爆闪=面）。**钓灯臂 v3 重画（2026-11-03 用户「炮管一点都不像钓灯」）**：bake_coral_units.py `boss_gun()` 重写=鮟鱇拟饵（贝塞尔细竿抬起垂下+灯球分层+垂须），球心画布 (6,26)=Muzzle 锚点一像素不动；**v3.1 钓灯不俯仰**（同日用户「还跟炮管一样旋转」）：`_arm_tracks_pitch()` false——径向爆闪无瞄准语义，竿臂钉艏部原姿态只随船体镜像，瞄准基向由爆闪出手瞬间灯口→玩家现算；**同脚本 fx_bolt() 曾是被否的 noodle 残版，一次重烘焙就把磁盘定稿的六边形能量镖盖回旧版——生成器脚本与磁盘定稿漂移时重烘焙会静默覆写定稿，跑前先查 git diff 产物**（现已对齐）。hover 370 同驳船账；锚点账=bake_coral_units.py 头注（精英 ArmPivot 画布 (44,8)/Muzzle (44,6)；BOSS Cannon/Muzzle (150,28)、ArmPivot (86,42)、BayPort (150,174)）；数值全在 Balance `ELITE_ANEMONE_*/ANGLER_*/CORAL_ORB_SPEED/CORAL_TIDE_*`。**教训四条**：①主题词先研究原作语汇再动手（闪电≠科若尔）；②FX 走规约正途（贴图+粒子，检查器可调），_draw 特效件全数删除；③量与压制的"手感弱"是验收项（爆区翻倍/潮墙化治瞬移/弹数下限上调都来自实机调参）；④爆区视觉要跟爆径耦合（GroundBlast 预置 scale 曾被 FlashBurst 补间 .from 覆盖=闪光从不随爆径变——修=FlashBurst.size_scale 并进补间两端+coral_burst.power 爆径耦合；潮墙=coral_tide_fx 粒子浪墙，静态贴图版"像死墙"被否）。
 
 **章例（ch5；几何账正本=dawn_ch5/提案_v1_破晓云廊.md §2）**：精英=防空炮车「响哨」（EliteSiren，预教啸雷：双管高炮臂**俯仰真瞄**，双连定距空爆弹）；BOSS=高空截击机「断云」（BossInterceptor，300×180 镖形机体、无旋翼=双尾焰脉动[通用 fx_flame+加色]，独眼条带沿用）：啸雷齐射（背炮塔 Cannon (150,34) 俯仰跟随真瞄→逐发梯次 FlakShell 定距空爆 3 发/p2+1——**停=吃/动=免**，与 ch4 重弹 lead 惩罚互为镜像）⇄ **俯冲突袭**（首次机体冲撞：机鼻 Nose (14,84) 预警+尾焰增亮 0.6s→锁定出手点[玩家当时 x、当地地表−120]→2100px/s 直线通场→过冲 500px 拉起；通场带盖站立带：站立=被撞、**纯跳 apex 也被撞**、推进 ≥204px 或横移出锁定线=免；每帧 clamp 中心 y ≤ 当地地表−120 滑过台阶上缘）+ 机鼻曳光直射（dawn_bolt.tscn=bullet.gd 纯换皮）。分工账：啸雷 hunts 空中与驻停、俯冲 hunts 地面通道——玩家被迫两头换层。hover 370 同驳船档；碰撞 280×150（body_size 300×180，冲撞判定用 body_size+玩家半宽限）；锚点账=bake_dawn_units.py 头注（精英 ArmPivot 画布 (44,12)→局部 (14,-28)、臂枢端 (28,13)/Muzzle 臂局部 (-22,-3)；BOSS ArmPivot (60,74)/Cannon (150,34)、Nose (14,84)、尾焰画布 (286,86)/(286,106)）；数值全在 Balance `ELITE_SIREN_*/INTERCEPTOR_*/FLAK_SHELL_SPEED`。**探针教训三条**：①BOSS 段同样要单威胁源——戳技能前清杂兵+等威胁弹排空，否则上一手的余弹抢跑断言（掉血值≠招式伤害时先怀疑污染）；②**BOSS 也在 "enemies" 组**（Enemy.on_spawned 加的），清场循环必须跳过 "boss" 组成员，否则误杀本体；③状态机兜底看门狗进入状态时必须重置 _bt——预警把 _bt 减到 ≤0 再切状态，不重置=首帧判超时、招式自灭（探针逐拍打 bstate 时间线一跑定案）。**美术教训两笔**：①BOSS 双垂尾根部要埋进机体轮廓（悬在外=断件读法；先画后压的层序只有埋进去才成立）；②快弹读法=拉长度非调色（见「设计自由度」）。
 
-**章例（ch6；几何账正本=red_desert_ch6/提案_v1_赤沙矿区.md §2）**：精英=打桩车「锚桩」（ElitePiler，预教电网闸：双桩炮架**固定射角**[垂发账，臂不俯仰]，单笼投放）；BOSS=斗轮采集舰「赤轮」（BossRedwheel，300×180 低矮宽驳、**斗轮=独立旋转件**[恒转+直射加速=signature 动画]、背甲双桩炮架+腹舱+船底双举升风扇[通用 fx_flame+加色]，独眼条带沿用）：电网闸（背甲炮架 Rack (210,38) 预警→双锚桩落到玩家**当时位置**两侧（无 lead，半 lead=按玩家速度 clamp LEAD_MAX 400 前后移）→蓄能火花渐亮→竖直电幕 [half 200/top 200/p2 蓄能 0.7→0.55]）⇄ 溜矿车（腹闸 BayPort (150,170) 预警→倾泻 OreCart 1/p2 2 辆间隔 0.55——纯跳可过、双车节拍减半）+ 斗轮弹石直射（red_chip.tscn=bullet.gd 纯换皮，轮毂心真瞄）。分工账：电网闸 hunts 滞留者（笼+税）、矿车 hunts 地面驻留节奏（跳的拍子）——玩家在跑/跳/飞三态间换挡（全走地面轴，与 ch5 换层账同构）。hover 370 同驳船档、斗轮缘 454=最低点（对 t536 台阶净空 76 同账）；碰撞 280×150；锚点账=bake_red_units.py 头注（精英 ArmPivot 画布 (44,12)→局部 (14,-28)、臂枢端 (17,40)/Muzzle 臂局部 (0,-34)；BOSS ArmPivot (-106,30)/Wheel 轮毂、Rack (60,-52)、BayPort (0,80)、风扇 (-30,64)/(80,64)）；数值全在 Balance `ELITE_PILER_*/REDWHEEL_*/ORE_CART_*`。**探针教训一笔**：电网闸伤害=矿车伤害（同 10）时，掉血值无法区分威胁源——单威胁源的"排空闸"必须把**驻留危险件（ArcFence/OreCart）连同预警态一起算进 quiet 判据**（BOSS 回 ST_ENTER/RECOVER 稳态才准戳），光等弹容器干净不够。**独层地标排布教训**：太阳+巨机两个地标挤不进 tile 3200 的防回绕安全带 [1200+半宽, 3200−1200−半宽]——一章一个独层大件，白热天光交给天顶渐变+尘带承担。
+**章例（ch6；几何账正本=red_desert_ch6/提案_v1_赤沙矿区.md §2+v2 变更段）**：精英=打桩车「锚桩」（ElitePiler，预教电网闸：双桩炮架**固定射角**[垂发账，臂不俯仰]，单笼投放）；BOSS=斗轮采集舰「赤轮」（BossRedwheel，300×180 低矮宽驳、**斗轮=独立旋转件**[恒转+直射/装药期加速=signature 动画]、背甲双桩炮架+腹舱+船底双举升风扇[通用 fx_flame+加色]，独眼条带沿用）：电网闸（背甲炮架 Rack (210,38) 预警→双锚桩落到玩家**当时位置**两侧（无 lead，半 lead=按玩家速度 clamp LEAD_MAX 400 前后移）→蓄能火花渐亮→竖直电幕 [half 200/top 200/p2 蓄能 0.7→0.55]）⇄ 凿岩齐射（腹闸 BayPort (150,170) 预警→DrillCharge 装药 3/p2+1 枚 lead 走廊等距铺开，落地钉住定延时 1.0s 起爆——落点静止零地形跟随）+ 斗轮抛石（普攻；2026-11-02 机枪短梭→**斗轮=武器**：提速吐料一拍→red_lob 抛体弹石 5/p2+1 枚逐石从毂心抛出，初速解到玩家出手瞬间位置+固定扇 ±12° 错开——石群落点围玩家当时位置散布，站桩/直线冲脸=吃、看弧线挪位=免，弧线盖跳高滞空不免费；抛体不贴地）。分工账：站桩被电网罚+抛石落点罚、匀速跑被装药走廊罚、直线冲脸被石扇罚——反制=变速变向（相对速度语言，ch2/ch4 同族）。hover 370 同驳船档、斗轮缘 454=最低点（对 t536 台阶净空 76 同账）；碰撞 280×150；锚点账=bake_red_units.py 头注（精英 ArmPivot 画布 (44,12)→局部 (14,-28)、臂枢端 (17,40)/Muzzle 臂局部 (0,-34)；BOSS ArmPivot (-106,30)/Wheel 轮毂、Rack (60,-52)、BayPort (0,80)、风扇 (-30,64)/(80,64)）；数值全在 Balance `ELITE_PILER_*/REDWHEEL_*/REDWHEEL_CHARGE_*`。**教训三笔**：①**贴地跟随类移动危险件全禁**（2026-10-23 用户定案）——首版溜矿车贴地滚行跨台阶瞬移穿帮，与珊瑚潮 v1 同死因；危险件要么静止落点（桩/装药）要么固定绝对高度带（潮墙），矿车件已整体删除（ore_cart.gd/fx_red_cart.svg 不留档，从未出池无存量）；②**「滚过/越过」类方向性判定必须 ×行进方向归一取正**——矿车 past_player 判定符号写反，出舱时在玩家身后=负半轴是合法起点，首滚行帧即自毁（玩家永远见不到矿车，BOSS 观感"不对劲"的真凶）；③电网闸伤害=装药伤害（同 10）时，掉血值无法区分威胁源——单威胁源的"排空闸"必须把**驻留危险件（ArcFence/DrillCharge）连同预警态一起算进 quiet 判据**（BOSS 回 ST_ENTER/RECOVER 稳态才准戳），光等弹容器干净不够。④**BOSS 顶挂件连接账（2026-10-23 用户抓「顶上有条东西悬空」）**：上层构件必须与甲板几何咬合——腿/裙底边 y 要落到当地甲板线以下（埋 ≥1.5px）；与独立件（炮架等单独 Sprite）对接的裙座顶要与其枢座底**重叠 ≥2px**（独立件画在上层，重叠段被盖住=接缝归零）；条带类沿用锚点（眼条带 y57..69）而甲板够不着时，**甲板顶缘抬高包住条带**（ch5 抬到 y52 / ch6 抬到 y52..54，两例同手法）；改完必须光栅放大自检（boss6_zoom_check）。**独层地标排布教训**：太阳+巨机两个地标挤不进 tile 3200 的防回绕安全带 [1200+半宽, 3200−1200−半宽]——一章一个独层大件，白热天光交给天顶渐变+尘带承担。**入池状态**：2026-10-23 用户验收后装回 `RunState.SCENES`（此前因 BOSS 返工短暂出池）。
+
+**章例（ch7；几何账正本=drowned_ch7/提案_v1_溺海都会.md §2+v2 变更段）**：精英=海防炮车「岸炮」（EliteShore，预教跳弹：海防炮臂**俯仰真瞄**[响哨家族位]，双连平抛）；BOSS=打捞巡防舰「沉锚」（BossAnchor，300×180 低矮宽舰、艏炮俯仰真瞄[=敌基类 ArmPivot 瞄准层驱动]+艉舱+艏部下管+艉部打捞吊臂+船底双举升喷口[通用 fx_flame+加色青白]，独眼条带沿用；艏段甲板顶缘 y52..54 包条带，ch5/ch6 同手法）：跳弹齐射（**v2 平抛鱼雷**：技能A 先**压低到 ANCHOR_SKIP_FIRE_Y=480**[水线发射，本体压下来=预警的一半]→艏部下管 TorpedoPort 预警→逐发梯次 SkipShell 2/p2+1 **平抛**出膛[水平初速向玩家一侧，不瞄人；v1 落玩家脚下被判死=落点全在行进方向身后]→触甲板连跳三次末跳球爆——对冲几何：停=被平射段命中/跳过弹体=免）⇄ 深弹涌浪（艉舱 BayPort (226,146) 预警→深弹 2 枚向艉侧抛出落海[地形后方容器]→闷爆→SeaSurge 固定高度带漫桥 620/p2 584——低处=吃/高处=免/升空=免）+ 舰炮曳光直射（sea_bolt.tscn v2=共享机炮弹画法）。分工账：跳弹 hunts 地面站位与顺向跑、涌浪 hunts 低处停留——两手都把玩家往"上"赶。**亮背景章（青绿海光；v2 天光压暗返工——提案高调色板照搬=天空近白吃掉特效可读性，雪原初版同罪；v2=#5e8a8f→#8fb8b2→#b7d5cd 战斗带落中调，§6 补执行细则：提案色板只定色相不定明度）**：敌营=**舰灰蓝 #3f5a66 族**（与走道带青绿 #5a7268 分色相），浮标橙 #ff5a3c=本章信号色，HUD 深字。地块=桥式（p7_sea 走道带+箱梁+排架柱钉 bridge_sea_y=860 海面固定线；GroundStrip=青绿海+日光碎光路[浪纹 v2 压扁成光纹条，v1 椭圆浪带读成睡莲撞五章]，SeaFront=白沫浪沿遮柱脚）+ 独层地标=倾覆巨舰 env_sea_wreck（tex_x=1600）；**深弹落海要专门的地形后方容器**（场景里 `SeaProps` 组 "sea_props_container"，夹在 GroundStrip 与 Terrain 之间——弹坠桥后海面不穿桥面，水花/闷爆走前景）。hover 370 同驳船档（技能A 发射段压到 480 档）；碰撞 280×150；锚点账=bake_sea_units.py 头注（精英 ArmPivot 画布 (44,12)→局部 (14,-28)、臂枢端 (28,13)/Muzzle 臂局部 (-22,-3)；BOSS ArmPivot (46,45)→局部 (-104,-45)、BayPort (226,146)→局部 (76,56)、**TorpedoPort (28,138)→局部 (-122,48)**、喷口 (-40,66)/(60,66)）；数值全在 Balance `ELITE_SHORE_*/ANCHOR_*/SKIP_SHELL_*/DEPTH_CHARGE_*/SEA_SURGE_*`。**教训五笔**：①**敌基类要求每个单位场景都有 `Visuals/ArmPivot`**——BOSS 场景用别的名字（Cannon 等）挂炮臂时，基类俯仰层 `_arm_pivot` 拿到 null 直接炸 `_physics_process`（转场探针里 world_7 首跑暴露）；正解=炮臂节点就叫 ArmPivot 交给基类瞄准层（同响哨账），自写 `_tick_visual` 重复瞄准=白干；②**Area2D 原生就有 `gravity` 属性**——bullet.gd 抛体语法首版成员裸名 `gravity` 撞成 "Member redefined" 解析错，全工程子弹挂脚本=全部场景加载失败；成员名带语义前缀（`lob_gravity`）；③BOSS 顶挂件连接账三处重犯（吊臂柱脚悬空/炮座裙压条带/艉舱口在艉部收窄段外凸 14px）——光栅放大自检照 ch6 手法全抓回；④**.tscn 属性行内 `#` 注释不合法**（v2 改色时在 sky_color 行尾加 `# 说明`→解析器把注释吞进值→后续节点 type 级联失效：实测报 "Script inherits from native type 'Sprite2D', can't be assigned to Node2D"+Main 脚本失挂→score/spawner 假死；tscn 注释只能独立成行用 `;`，「注释不跨行」的姊妹坑，v2 定位耗了半场——**先查自己上一轮 diff 加了什么，再怀疑引擎**）；⑤**跳弹类「落点在行进方向身后」=无效设计**（v1 判死）——新弹种几何账必须对上玩家行进方向：跑酷游戏玩家恒 +X，向 −X 跳的东西落点会落到身后；v2 平抛对冲（迎面相遇）才立住。**入池状态**：2026-11-02 实装入池；2026-11-03 v2 返工（天光压暗/曳光换共享弹/跳弹平抛鱼雷化）后引擎流水线全绿，**待用户游戏内验收**。
 
 ## 5. WorldStrip 接线账（踩过的坑全在这）
 
@@ -158,6 +166,7 @@ assets/   world_1..6/（各章主题件）+ common/（跨章件）+ fonts/ brand
 - **亮背景章**（雪原）：黄弹/焰芯会隐形 → 可读性全部由压暗天光承担，共享弹/焰资产**原样不动**；焰内芯压暖琥珀。发射物的"自发光描边/光晕"思路已被否。
 - **暗背景章**（珊瑚夜）："近黑=敌"反转 → 敌营用**比天亮一档**的亮钢蓝（章四：#9fb0d8/#5d6d94/#3f4c6e/#262f4a + 珊瑚灯 #ff7a45），独眼红 #ff4640 不变；HUD 分数/结算字色转浅 #dfe6ff（亮背景章是深字 0.13/0.17/0.21），GameOver 标题用亮红。
 - 天清屏色 = 本章天顶色；AerialFog color = 本章雾色（雾只洗 far+mid，前景自然剪出）。
+- **提案色板只定色相不定明度（ch7 v2 增补，2026-11-03）**：高调提案（溺海 #eef8f0 级）照搬=天空近白吃掉特效可读性，雪原初版同罪二犯——实装时把天空渐变主动压到**战斗带落中调**（白特效与暗壳弹都读得出；ch7 v2=#5e8a8f→#8fb8b2→#b7d5cd，压暗 ~35%），天清屏/雾/远条楼群/预览台 sky 五处同步。
 
 ## 7. 校验流水线 + 过程守则
 
@@ -187,8 +196,9 @@ assets/   world_1..6/（各章主题件）+ common/（跨章件）+ fonts/ brand
 | 一 锈雨废都 | world/world_1 | art_proposals/bake_rust_assets.py | — | 暖褐近黑 | 重型武直「dreadnought」 | 深 |
 | 二 精炼所工业带 | world/world_2 | refinery_ch2/bake_ref_assets.py | — | 冷绿 #4d5348 族 | 熔渣驳船「钢嵴」（BossBarge：封路+弹幕墙；船艏炮门画布 (27,70)/(19.5,100)/(35,123)） | 深 |
 | 三 雪原警戒点 | world/world_3 | snowfield_ch3/bake_snow_assets.py | 3031/3032/3033 | 冷蓝灰 #5d6c76 族 | 强袭悬空机甲「哨兵」v3（`boss_ch3.tscn`+BossSentinel：电浆弹雨+浮雷齐撒+电浆枪直射；布雷闸画布 (122,138)；**弹雨仓口=右肩双孔 (151/167,26)，4 发回绕复用**（v3b 砍前肩）；无旋翼=推进焰脉动；v3 提案=同目录 提案_v3_哨兵重设计.md） | 深 |
-| 四 珊瑚辐合夜 | world/world_4 | coral_ch4/bake_coral_assets.py + bake_coral_units.py（v2 单位/特效覆写） | 4041-4044 | 亮钢蓝 #5d6d94 族（反转） | 深海猎杀舰「鮟鱇」（BossAngler：珊瑚重炮+珊瑚潮+钓灯直射；Cannon/Muzzle (150,28)、ArmPivot (86,42)、BayPort (150,174)；精英=炮台车「海葵」预教重弹[ArmPivot (44,8)]；正本=coral_ch4/提案_v2_珊瑚重设计.md） | 浅 #dfe6ff |
+| 四 珊瑚辐合夜 | world/world_4 | coral_ch4/bake_coral_assets.py + bake_coral_units.py（v2 单位/特效覆写） | 4041-4044 | 亮钢蓝 #5d6d94 族（反转） | 深海猎杀舰「鮟鱇」（BossAngler：珊瑚重炮+珊瑚潮+钓灯爆闪；Cannon/Muzzle (150,28)、ArmPivot (86,42)、BayPort (150,174)；精英=炮台车「海葵」预教重弹[ArmPivot (44,8)]；正本=coral_ch4/提案_v2_珊瑚重设计.md） | 浅 #dfe6ff |
 | 五 破晓云廊 | world/world_5 | dawn_ch5/bake_dawn_assets.py + bake_dawn_units.py | 5051-5054（地块花=band 内 3111/3222） | 暗紫罗兰 #4e3c64 族（金霞补色域，不反转） | 高空截击机「断云」（BossInterceptor：啸雷齐射+俯冲突袭+机鼻曳光；Cannon (150,34)、ArmPivot (60,74)、Nose (14,84)、尾焰 (286,86)/(286,106)；精英=防空炮车「响哨」预教啸雷[ArmPivot (44,12)]；独层地标=天梯缆 env_dawn_ladder；正本=dawn_ch5/提案_v1_破晓云廊.md） | 浅 #dfe6ff |
-| 六 赤沙矿区 | world/world_6 | red_desert_ch6/bake_red_assets.py + bake_red_units.py | 6061-6064/6071-6080（地块花=band 内 3111/3222） | 赤红暗棕 #6e3424 族（亮背景章，不反转） | 斗轮采集舰「赤轮」（BossRedwheel：电网闸+溜矿车+斗轮弹石；Wheel 轮毂画布 (44,120)=独立旋转件、Rack (210,38)、BayPort (150,170)、风扇 (120,154)/(230,154)；精英=打桩车「锚桩」预教电网闸[ArmPivot (44,12)，臂不俯仰]；独层地标=斗轮巨机 env_red_wheel；正本=red_desert_ch6/提案_v1_赤沙矿区.md） | 深 |
+| 六 赤沙矿区 | world/world_6 | red_desert_ch6/bake_red_assets.py + bake_red_units.py | 6061-6064/6071-6080（地块花=band 内 3111/3222） | 赤红暗棕 #6e3424 族（亮背景章，不反转） | 斗轮采集舰「赤轮」（BossRedwheel：电网闸+凿岩齐射+斗轮抛石；Wheel 轮毂画布 (44,120)=独立旋转件、Rack (210,38)、BayPort (150,170)、风扇 (120,154)/(230,154)；精英=打桩车「锚桩」预教电网闸[ArmPivot (44,12)，臂不俯仰]；独层地标=斗轮巨机 env_red_wheel；正本=red_desert_ch6/提案_v1_赤沙矿区.md §2+v2）） | 深 |
+| 七 溺海都会 | world/world_7 | drowned_ch7/bake_sea_assets.py + bake_sea_units.py | 7071-7076/7081-7090（地块花=band 内 3111/3222；天光 v2 压暗 #5e8a8f→#8fb8b2→#b7d5cd） | 舰灰蓝 #3f5a66 族（亮背景章，不反转；浮标橙 #ff5a3c=章信号色） | 打捞巡防舰「沉锚」（BossAnchor：跳弹齐射[v2 平抛鱼雷：压高 480→艏部下管 TorpedoPort 局部 (-122,48) 平抛，提案 v2 变更段]+深弹涌浪+舰炮曳光[sea_bolt v2=共享机炮弹画法]；ArmPivot (46,45)→局部 (-104,-45)、BayPort (226,146)→局部 (76,56)、喷口 (-40,66)/(60,66)；精英=海防炮车「岸炮」预教平射跳弹[ArmPivot (44,12)，俯仰真瞄]；独层地标=倾覆巨舰 env_sea_wreck；深弹落海容器=SeaProps 组 "sea_props_container"；正本=drowned_ch7/提案_v1_溺海都会.md §2+v2） | 深 |
 
 通用命名：`env_<主题>_far/mid/ground/ground_top/ground_fill/deck` + `enemy_<主题>_*` + `boss_<主题>_*`；独层地标另起名（如 `env_coral_ring`）。

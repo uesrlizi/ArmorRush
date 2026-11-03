@@ -441,6 +441,26 @@ def fire_enemy(tone=1.0):
     return normalize(out)
 
 
+def fire_heavy(tone=1.0):
+    """钢嵴排炮重弹（ch2 BOSS 普攻，2026-11-03）：重炮点放——同族配方再压
+    一档体量：实录重击大幅降调（0.68=臼炮级闷响）+ 更深更长的噪声体 + 更足
+    的硝烟尾。与 fire_enemy（钝塔炮）拉开「重弹 vs 弹流」的份量差。"""
+    body_dur = 0.55
+    n = int(body_dur * SR)
+    out = [0.0] * n
+    mix_at(out, load_ref("impactMetal_heavy_002.ogg", 0.68 * tone), 0.0, 1.0)
+    body = sweep_lowpass(brown_noise(n), 800.0 * tone, 90.0)
+    e = env(n, 0.005, 0.15)
+    for i in range(n):
+        out[i] += body[i] * e[i]
+    tail = lowpass(brown_noise(n), 420.0)
+    e2 = env(n, 0.008, 0.28)
+    for i in range(n):
+        out[i] += tail[i] * e2[i] * 0.5
+    out = add_space(out, 0.07, 0.22)
+    return normalize(out)
+
+
 def melee_hit(tone=1.0):
     """近战命中：实录金属重击双层（脆击+厚板余振）+ 低频质量垫，与顿帧同拍。"""
     out = [0.0] * int(0.42 * SR)
@@ -558,6 +578,8 @@ def main():
     convert("fire_player_c", fire_player, bright=0.9)
     convert("fire_enemy_a", fire_enemy)
     convert("fire_enemy_b", fire_enemy, tone=0.92)
+    convert("fire_heavy_a", fire_heavy)
+    convert("fire_heavy_b", fire_heavy, tone=0.9)
     convert("melee_slash1_a", melee_slash, down=True)
     convert("melee_slash1_b", melee_slash, down=True, sweep=0.9)
     convert("melee_slash2_a", melee_slash, down=False)

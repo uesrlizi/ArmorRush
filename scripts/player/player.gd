@@ -1,10 +1,10 @@
 class_name Player
 extends CharacterBody2D
-## 机甲玩家：左右移动、跳跃、AC6 式飞行（空中按住跳持续推进上升）、开火、近战二段斩。
+## 机甲玩家：左右移动、跳跃、AC6 式飞行（空中按住跳持续推进上升）、自动开火、近战二段斩。
 ## 索敌：以左右移动方向为优先方向，找该侧最近的敌人；该侧没有才锁另一侧。
 ## 视觉朝向：优先面朝锁定的敌人，没有目标时面朝移动方向。
 ## 镜头：横向跟随、高度锁死（飞行范围由天花板约束在画面内）。
-## 数值一律取自 Balance（全局调参表），本文件不存副本。
+## 数值一律取自 BalancePlayer（玩家域调参表），本文件不存副本。
 
 signal hp_changed(current: int, max_hp: int)
 signal boost_changed(current: float, max_value: float)
@@ -45,11 +45,12 @@ var max_hp := 0
 var boost := 0.0 # 剩余推进量（秒）
 var search_direction := 1.0 # 索敌优先方向，由左右移动决定
 var input_enabled := false # 启动页待机锁操作：Main 进战斗才开（小恐龙式站桩开局）
+var auto_fire := true # 自动开火副开关（自测探针临时关掉保确定性；总开关在 BalancePlayer.PLAYER_AUTO_FIRE）
 
 var _fire_timer := 0.0
 var _dead := false
 var _face_dir := 1.0
-var _camera_y := 0.0 # 本局镜头锁死高度（桌面=Balance.CAMERA_Y，移动端再下移两档）
+var _camera_y := 0.0 # 本局镜头锁死高度（桌面=BalanceGlobal.CAMERA_Y，移动端再下移两档）
 var _gun_pitch := 0.0 # 枪臂俯仰角（度，正=朝上）
 var _idle_puff_t := 0.0  # 待机小喷焰剩余时间
 var _idle_puff_cd := 0.6 # 下一次待机小喷焰的倒计时
@@ -97,14 +98,14 @@ var _phys_curr := Vector2.ZERO
 
 func _ready() -> void:
 	add_to_group("player")
-	max_hp = Balance.PLAYER_MAX_HP
+	max_hp = BalancePlayer.PLAYER_MAX_HP
 	hp = max_hp
-	boost = Balance.BOOST_CAPACITY
+	boost = BalancePlayer.BOOST_CAPACITY
 	# 移动端镜头额外下移两档（战斗区抬到屏幕上半躲手指），桌面为 0。
-	_camera_y = Balance.CAMERA_Y \
-			+ (Balance.MOBILE_CAMERA_Y_OFFSET if Platforms.is_mobile() else 0.0)
+	_camera_y = BalanceGlobal.CAMERA_Y \
+			+ (BalanceGlobal.MOBILE_CAMERA_Y_OFFSET if Platforms.is_mobile() else 0.0)
 	_camera.global_position = Vector2(
-		global_position.x + Balance.CAMERA_X_OFFSET, _camera_y)
+		global_position.x + BalanceGlobal.CAMERA_X_OFFSET, _camera_y)
 	# 开机即位：清掉平滑器残差，镜头第一帧就钉在目标点——
 	# 启动页要的是静止画面（机甲站平地），不能看见镜头从旁边滑过来。
 	_camera.reset_smoothing()
@@ -112,22 +113,22 @@ func _ready() -> void:
 	# 每渲染帧驱动（亚步补间位，见 _process），被引擎按物理步补间反而会滞后。
 	_phys_prev = global_position
 	_phys_curr = global_position
-	# 近战判定盒尺寸/位置从 Balance 取，避免场景存副本（调参没效果的老坑）。
+	# 近战判定盒尺寸/位置从 BalancePlayer 取，避免场景存副本（调参没效果的老坑）。
 	var hitbox_rect := RectangleShape2D.new()
-	hitbox_rect.size = Vector2(Balance.MELEE_REACH, Balance.MELEE_HEIGHT)
+	hitbox_rect.size = Vector2(BalancePlayer.MELEE_REACH, BalancePlayer.MELEE_HEIGHT)
 	_melee_hitbox_shape.shape = hitbox_rect
-	_melee_hitbox.position = Vector2(Balance.MELEE_HITBOX_OFFSET, 0)
+	_melee_hitbox.position = Vector2(BalancePlayer.MELEE_HITBOX_OFFSET, 0)
 	# 刃光平面：x 镜像交给 Visuals（朝向层），这里只按 MELEE_SQUASH 压扁 y
 	# （挥砍平面投影成椭圆，即 2D 侧视的"贴地横扫"）。
-	_slash_root.scale = Vector2(1.0, Balance.MELEE_SQUASH)
+	_slash_root.scale = Vector2(1.0, BalancePlayer.MELEE_SQUASH)
 	# 滑行火花原生朝 +X 喷（滑行后方）：本地固定镜像一次，朝向换边由
 	# Visuals 整体翻转承担（不再随 _face_dir 逐帧重写）。
 	_slide_sparks.scale.x = -1.0
 	# 刃光前后分层：同一道弧画两遍，近段裁掉上半（观众半侧）、远段裁掉下半。
 	_slash_near.clip = SlashArc.Clip.LOWER
 	_slash_far.clip = SlashArc.Clip.UPPER
-	_slash_near.depth_dim = Balance.MELEE_FAR_DIM
-	_slash_far.depth_dim = Balance.MELEE_FAR_DIM
+	_slash_near.depth_dim = BalancePlayer.MELEE_FAR_DIM
+	_slash_far.depth_dim = BalancePlayer.MELEE_FAR_DIM
 	# 启动页待机空场不挂牌（overhead_bar 侧也不画）；进战斗由 reveal_overhead_bar 淡入。
 	_overhead_bar.modulate.a = 0.0
 
@@ -141,12 +142,12 @@ func _process(delta: float) -> void:
 	# 震屏走 Camera2D.offset：offset 在平滑之后叠加，不会被 position_smoothing 滤掉。
 	if _shake_strength > 0.1:
 		_camera.offset = Vector2(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)) * _shake_strength
-		_shake_strength = move_toward(_shake_strength, 0.0, Balance.MELEE_SHAKE_DECAY * delta)
+		_shake_strength = move_toward(_shake_strength, 0.0, BalancePlayer.MELEE_SHAKE_DECAY * delta)
 	else:
 		_camera.offset = Vector2.ZERO
 	var blended := _phys_prev.lerp(_phys_curr, Engine.get_physics_interpolation_fraction())
 	_camera.global_position = Vector2(
-		blended.x + Balance.CAMERA_X_OFFSET, _camera_y)
+		blended.x + BalanceGlobal.CAMERA_X_OFFSET, _camera_y)
 
 
 func _physics_process(delta: float) -> void:
@@ -163,11 +164,11 @@ func _physics_process(delta: float) -> void:
 			axis = signf(axis) # 方向归一化（同触控语义）：手柄左摇杆只读方向，轻推=满速
 		jump_just = Input.is_action_just_pressed("jump")
 		jump_held = Input.is_action_pressed("jump")
-	# 物理加速度：朝目标速度渐进，加/减速都走 Balance.PLAYER_ACCELERATION；
+	# 物理加速度：朝目标速度渐进，加/减速都走 BalancePlayer.PLAYER_ACCELERATION；
 	# 近战后摇期间操控系数降低（硬直但可微调走位）。
 	velocity.x = move_toward(
-		velocity.x, axis * Balance.PLAYER_MOVE_SPEED,
-		Balance.PLAYER_ACCELERATION * _control_scale * delta)
+		velocity.x, axis * BalancePlayer.PLAYER_MOVE_SPEED,
+		BalancePlayer.PLAYER_ACCELERATION * _control_scale * delta)
 
 	# AC6 式飞行：地面按跳起跳；空中按住跳持续推进上升，耗 BOOST 槽，松开或耗尽即落。
 	# 近战全程滞空（AC6 同款"不下坠"）：竖直速度由近战阶段自己管，重力跳过。
@@ -177,34 +178,34 @@ func _physics_process(delta: float) -> void:
 			MeleePhase.WINDUP:
 				# 前摇：悬停钉住（推进器撑住，速度快速归零）。
 				velocity.y = lerpf(velocity.y, 0.0,
-						1.0 - exp(-Balance.MELEE_HANG_DAMP * delta))
+						1.0 - exp(-BalancePlayer.MELEE_HANG_DAMP * delta))
 			MeleePhase.RECOVER:
 				# 后摇：推进器撑着缓慢沉降。
-				velocity.y = lerpf(velocity.y, Balance.MELEE_HANG_SINK,
-						1.0 - exp(-Balance.MELEE_HANG_DAMP * delta))
+				velocity.y = lerpf(velocity.y, BalancePlayer.MELEE_HANG_SINK,
+						1.0 - exp(-BalancePlayer.MELEE_HANG_DAMP * delta))
 			MeleePhase.DASH, MeleePhase.STRIKE:
 				pass # 突进/斩击向量自带竖直分量
 	elif is_on_floor():
 		if jump_just:
-			velocity.y = Balance.PLAYER_JUMP_VELOCITY
+			velocity.y = BalancePlayer.PLAYER_JUMP_VELOCITY
 	elif jump_held and boost > 0.0:
 		velocity.y = move_toward(
-			velocity.y, -Balance.BOOST_MAX_ASCENT_SPEED, Balance.BOOST_THRUST_ACCEL * delta)
-		boost = maxf(boost - Balance.BOOST_DRAIN_PER_SEC * delta, 0.0)
-		_boost_regen_delay = Balance.BOOST_REGEN_DELAY_AIR # 推进即重置回充倒计时
+			velocity.y, -BalancePlayer.BOOST_MAX_ASCENT_SPEED, BalancePlayer.BOOST_THRUST_ACCEL * delta)
+		boost = maxf(boost - BalancePlayer.BOOST_DRAIN_PER_SEC * delta, 0.0)
+		_boost_regen_delay = BalancePlayer.BOOST_REGEN_DELAY_AIR # 推进即重置回充倒计时
 		thrusting = true
 	else:
 		# 上升/下降段重力分开：下降略小，体感为机体在下落时主动反推缓降。
-		var g := Balance.PLAYER_GRAVITY_ASCENT if velocity.y < 0.0 else Balance.PLAYER_GRAVITY_DESCENT
+		var g := BalancePlayer.PLAYER_GRAVITY_ASCENT if velocity.y < 0.0 else BalancePlayer.PLAYER_GRAVITY_DESCENT
 		velocity.y += g * delta
 	if not thrusting:
 		# AC6 式回充：空中松开推进后只隔很短一拍就开始（没有"晾一段时间"的门槛），
 		# 落地则立即回充且不受倒计时影响；速率本身调快。
 		if is_on_floor() or _boost_regen_delay <= 0.0:
-			boost = minf(boost + Balance.BOOST_REGEN_PER_SEC * delta, Balance.BOOST_CAPACITY)
+			boost = minf(boost + BalancePlayer.BOOST_REGEN_PER_SEC * delta, BalancePlayer.BOOST_CAPACITY)
 		else:
 			_boost_regen_delay -= delta
-	boost_changed.emit(boost, Balance.BOOST_CAPACITY)
+	boost_changed.emit(boost, BalancePlayer.BOOST_CAPACITY)
 
 	if axis != 0.0:
 		search_direction = signf(axis)
@@ -217,19 +218,19 @@ func _physics_process(delta: float) -> void:
 	_phys_curr = global_position
 
 	# 地面滑行火花：贴地高速刮地（跑动/近战突进/前摇预压都算），重落地再踢一脚。
-	if is_on_floor() and not was_on_floor and pre_vy > Balance.SLIDE_SPARK_LAND_VY:
+	if is_on_floor() and not was_on_floor and pre_vy > BalancePlayer.SLIDE_SPARK_LAND_VY:
 		_slide_kick = GroundSparks.LAND_KICK_TIME
 	_slide_kick = maxf(_slide_kick - delta, 0.0)
 	_slide_sparks.set_slide(
-			is_on_floor() and (absf(velocity.x) > Balance.SLIDE_SPARK_MIN_SPEED
+			is_on_floor() and (absf(velocity.x) > BalancePlayer.SLIDE_SPARK_MIN_SPEED
 					or _slide_kick > 0.0),
-			absf(velocity.x) / Balance.PLAYER_MOVE_SPEED)
+			absf(velocity.x) / BalancePlayer.PLAYER_MOVE_SPEED)
 	# 地面滑行摩擦声：与滑行火花同条件同源（音画同步）；脚步声已按音画同步砍掉
 	# ——移动是滑动，没有步态动画。
 	var slide_vx := absf(velocity.x)
 	Sfx.set_slide(
-			clampf(slide_vx / Balance.PLAYER_MOVE_SPEED, 0.0, 1.0)
-			if is_on_floor() and slide_vx > Balance.SLIDE_SPARK_MIN_SPEED else 0.0)
+			clampf(slide_vx / BalancePlayer.PLAYER_MOVE_SPEED, 0.0, 1.0)
+			if is_on_floor() and slide_vx > BalancePlayer.SLIDE_SPARK_MIN_SPEED else 0.0)
 
 	# 喷口状态判定（画布空间；朝向镜像由 Visuals 承担）：
 	# 竖直支撑=推进上升/近战悬停/缓沉/下落反推；水平分量分前进/倒退两向。
@@ -252,28 +253,28 @@ func _physics_process(delta: float) -> void:
 		flame_level = 0.5
 	elif _melee_phase == MeleePhase.DASH \
 			or _melee_phase == MeleePhase.STRIKE:
-		flame_level = Balance.NOZZLE_DASH_FLAME # 近战推进：突进/斩击冲锋过烧
+		flame_level = BalancePlayer.NOZZLE_DASH_FLAME # 近战推进：突进/斩击冲锋过烧
 	elif not is_on_floor() and velocity.y > 20.0:
 		flame_level = 0.45
 	elif nozzle_forward:
-		flame_level = Balance.NOZZLE_CRUISE_FLAME
+		flame_level = BalancePlayer.NOZZLE_CRUISE_FLAME
 		cruise_flame = true
 	# 待机小喷焰：启动页站桩时机体每隔几秒排一口汽（随包络起落）。
 	if not input_enabled:
 		_idle_puff_cd = maxf(_idle_puff_cd - delta, 0.0)
 		if _idle_puff_cd == 0.0:
-			_idle_puff_t = Balance.IDLE_PUFF_TIME
-			_idle_puff_cd = randf_range(Balance.IDLE_PUFF_INTERVAL_MIN, Balance.IDLE_PUFF_INTERVAL_MAX)
+			_idle_puff_t = BalanceGlobal.IDLE_PUFF_TIME
+			_idle_puff_cd = randf_range(BalanceGlobal.IDLE_PUFF_INTERVAL_MIN, BalanceGlobal.IDLE_PUFF_INTERVAL_MAX)
 	if _idle_puff_t > 0.0:
 		_idle_puff_t = maxf(_idle_puff_t - delta, 0.0)
 		flame_level = maxf(flame_level,
-				Balance.IDLE_PUFF_LEVEL * sin(PI * (1.0 - _idle_puff_t / Balance.IDLE_PUFF_TIME)))
+				BalanceGlobal.IDLE_PUFF_LEVEL * sin(PI * (1.0 - _idle_puff_t / BalanceGlobal.IDLE_PUFF_TIME)))
 	_thruster.set_target(flame_level)
 	# 巡航焰只出视觉不出声（移动系音效宁缺毋滥，跑动已有滑行摩擦声）：
 	# 推进声仍只跟真实推进/悬停/反推走。
 	Sfx.set_thrust(0.0 if cruise_flame else flame_level)
 
-	# 喷口可动摆动（Balance.NOZZLE_SWING_DEG）：默认朝左下（画布正形）；
+	# 喷口可动摆动（BalancePlayer.NOZZLE_SWING_DEG）：默认朝左下（画布正形）；
 	# 纯前进抬向正后(+)；倒退与竖直支撑（推进上升/近战悬停/下落反推缓降）压向正下(−)；
 	# 前进+竖直同时回正中（对角=两者的合成排气向）。摆角写画布空间本地角，
 	# 朝向镜像由 Visuals 承担——面朝哪边，同一个本地角都落到屏幕同一侧。
@@ -282,29 +283,28 @@ func _physics_process(delta: float) -> void:
 			or _melee_phase == MeleePhase.STRIKE
 	var nozzle_target := 0.0
 	if melee_dashing:
-		nozzle_target = Balance.NOZZLE_SWING_DEG
+		nozzle_target = BalancePlayer.NOZZLE_SWING_DEG
 	elif nozzle_backward:
-		nozzle_target = -Balance.NOZZLE_SWING_DEG
+		nozzle_target = -BalancePlayer.NOZZLE_SWING_DEG
 	elif nozzle_forward:
-		nozzle_target = 0.0 if nozzle_vertical else Balance.NOZZLE_SWING_DEG
+		nozzle_target = 0.0 if nozzle_vertical else BalancePlayer.NOZZLE_SWING_DEG
 	elif nozzle_vertical:
-		nozzle_target = -Balance.NOZZLE_SWING_DEG
+		nozzle_target = -BalancePlayer.NOZZLE_SWING_DEG
 	_nozzle_pivot.rotation = move_toward(
 			_nozzle_pivot.rotation, deg_to_rad(nozzle_target),
-			Balance.NOZZLE_TURN_SPEED * delta)
+			BalancePlayer.NOZZLE_TURN_SPEED * delta)
 
 	# 腰/腿姿控焰（固定喷口，不带可动）：腿焰向后喷=前进推力，腰焰向前喷=倒退推力。
 	# 巡航全焰；近战突进/斩击冲锋没有后退，腰焰不跟冲刺只认倒退巡航，主焰+腿焰同拉过烧档。
-	_leg_thruster.set_target(Balance.VERNIER_DASH_FLAME if melee_dashing
-			else (Balance.VERNIER_CRUISE_FLAME if nozzle_forward else 0.0))
+	_leg_thruster.set_target(BalancePlayer.VERNIER_DASH_FLAME if melee_dashing
+			else (BalancePlayer.VERNIER_CRUISE_FLAME if nozzle_forward else 0.0))
 	_waist_thruster.set_target(
-			Balance.VERNIER_CRUISE_FLAME if nozzle_backward else 0.0)
+			BalancePlayer.VERNIER_CRUISE_FLAME if nozzle_backward else 0.0)
 
 	_fire_timer = maxf(_fire_timer - delta, 0.0)
 
-	if input_enabled and Input.is_action_pressed("fire") and _fire_timer == 0.0:
-		_fire()
-		_fire_timer = Balance.PLAYER_FIRE_COOLDOWN
+	if input_enabled and _fire_timer == 0.0:
+		_tick_auto_fire() # 开火全自动：手动开火键已移除（操控只剩移动/跳跃/斩击）
 
 	if input_enabled:
 		_tick_melee_input()
@@ -376,9 +376,9 @@ func _update_arm(delta: float) -> void:
 	if target != null:
 		var to := target.global_position - _arm_pivot.global_position
 		_gun_pitch = clampf(-rad_to_deg(atan2(to.y, maxf(absf(to.x), 40.0))),
-				-Balance.GUN_PITCH_MAX_DEG, Balance.GUN_PITCH_MAX_DEG)
+				-BalanceCombat.GUN_PITCH_MAX_DEG, BalanceCombat.GUN_PITCH_MAX_DEG)
 	else:
-		_gun_pitch = move_toward(_gun_pitch, 0.0, Balance.GUN_PITCH_RETURN_SPEED * delta)
+		_gun_pitch = move_toward(_gun_pitch, 0.0, BalanceCombat.GUN_PITCH_RETURN_SPEED * delta)
 	_arm_pivot.rotation = -deg_to_rad(_gun_pitch)
 
 
@@ -389,7 +389,7 @@ func _apply_melee_attitude() -> void:
 	_slash_root.rotation = -deg_to_rad(_melee_pitch)
 	var rot := -deg_to_rad(_melee_pitch) * _face_dir
 	_melee_hitbox.rotation = rot
-	_melee_hitbox.position = Vector2(Balance.MELEE_HITBOX_OFFSET * _face_dir, 0).rotated(rot)
+	_melee_hitbox.position = Vector2(BalancePlayer.MELEE_HITBOX_OFFSET * _face_dir, 0).rotated(rot)
 
 
 ## 锁定本次挥砍的俯仰角与突进方向：朝锁定目标做有限俯仰（AC6 近战追踪），
@@ -409,28 +409,32 @@ func _aim_at_target() -> bool:
 		return false
 	var to := target.global_position - global_position
 	_melee_pitch = clampf(-rad_to_deg(atan2(to.y, maxf(absf(to.x), 40.0))),
-			-Balance.MELEE_PITCH_MAX_DEG, Balance.MELEE_PITCH_MAX_DEG)
+			-BalancePlayer.MELEE_PITCH_MAX_DEG, BalancePlayer.MELEE_PITCH_MAX_DEG)
 	var pitch_rad := deg_to_rad(_melee_pitch)
 	_lunge_dir = Vector2(cos(pitch_rad) * _face_dir, -sin(pitch_rad))
 	_apply_melee_attitude()
 	return true
 
 
-func _fire() -> void:
+## 开火：返回是否真的出弹。近战全程禁射（前摇→追击→斩击→后摇）是这里的底层硬闸
+## ——不管谁调用都拦，挥刀滞空硬直里夹子弹会毁掉出招读法；调用方据此不空耗冷却。
+func _fire() -> bool:
+	if _melee_phase != MeleePhase.IDLE:
+		return false
 	var container := get_tree().get_first_node_in_group("projectile_container")
 	if container == null:
-		return
+		return false
 	var bullet := PLAYER_BULLET.instantiate()
-	bullet.speed = Balance.PLAYER_BULLET_SPEED
-	bullet.damage = Balance.PLAYER_BULLET_DAMAGE
-	bullet.impact = Balance.PLAYER_BULLET_IMPACT # 冲击值：失衡积累用（衰减>扫射注入，近战主积累）
+	bullet.speed = BalancePlayer.PLAYER_BULLET_SPEED
+	bullet.damage = BalancePlayer.PLAYER_BULLET_DAMAGE
+	bullet.impact = BalanceCombat.PLAYER_BULLET_IMPACT # 冲击值：失衡积累用（衰减>扫射注入，近战主积累）
 	var fire_dir := Vector2(search_direction, 0.0)
 	var target := _acquire_target()
 	if target != null:
 		# 预判瞄准（打提前量）+ 按继承速度反解方向，弹道精确穿过预判点。
-		var aim_at := Bullet.aim_point(_muzzle.global_position, target, Balance.PLAYER_BULLET_SPEED)
+		var aim_at := Bullet.aim_point(_muzzle.global_position, target, BalancePlayer.PLAYER_BULLET_SPEED)
 		fire_dir = Bullet.solve_fire_direction(
-			_muzzle.global_position, aim_at, Balance.PLAYER_BULLET_SPEED, velocity)
+			_muzzle.global_position, aim_at, BalancePlayer.PLAYER_BULLET_SPEED, velocity)
 	bullet.setup(fire_dir, velocity)
 	container.add_child(bullet)
 	bullet.global_position = _muzzle.global_position
@@ -438,6 +442,33 @@ func _fire() -> void:
 	# 枪口焰是 Muzzle 的子节点，天然跟随枪臂的俯仰/镜像/移动，不落世界空间。
 	_muzzle_flash.fire(fire_dir.angle())
 	Sfx.play(&"fire_player")
+	return true
+
+
+## 自动开火（唯一的开火方式，手动开火已移除）：索敌目标在射程内、枪口→目标连线
+## 不被地形挡住才出弹；冷却与近战禁射闸都在 _fire 这一层。
+## LOS 只查世界地形层（层 1）：障碍层对子弹透明（obstacle.gd 头注——掩体不挡弹），
+## 也就不该挡开火判定。
+func _tick_auto_fire() -> void:
+	if not BalancePlayer.PLAYER_AUTO_FIRE or not auto_fire:
+		return
+	var target := _acquire_target()
+	if target == null:
+		return
+	var from := _muzzle.global_position
+	var to := target.global_position
+	if from.distance_to(to) > BalancePlayer.PLAYER_AUTO_FIRE_RANGE:
+		return
+	if _terrain_blocks(from, to):
+		return
+	if _fire():
+		_fire_timer = BalancePlayer.PLAYER_FIRE_COOLDOWN
+
+
+## 枪口→目标连线是否被地形（碰撞层 1，见 terrain.gd）截断。
+func _terrain_blocks(from: Vector2, to: Vector2) -> bool:
+	var ray := PhysicsRayQueryParameters2D.create(from, to, 1)
+	return not get_world_2d().direct_space_state.intersect_ray(ray).is_empty()
 
 
 ## ---- 近战（AC6 式二段斩） ----
@@ -461,8 +492,8 @@ func _tick_melee(delta: float) -> void:
 		MeleePhase.WINDUP:
 			# 反向预压一小步，蓄势感；竖直方向已在滞空分支里钉住。
 			velocity.x = move_toward(velocity.x,
-					-_face_dir * Balance.MELEE_ANTIC_SPEED,
-					Balance.PLAYER_ACCELERATION * 2.0 * delta)
+					-_face_dir * BalancePlayer.MELEE_ANTIC_SPEED,
+					BalancePlayer.PLAYER_ACCELERATION * 2.0 * delta)
 			_melee_t -= delta
 			if _melee_t <= 0.0:
 				_enter_dash()
@@ -477,12 +508,12 @@ func _tick_melee(delta: float) -> void:
 			var cfg: Dictionary = MELEE_SWINGS[_melee_swing - 1]
 			var lunge_scale: float = cfg.lunge_scale
 			# 斩击：继承突进动量沿带俯仰方向冲（后段衰减交还操控）。
-			var strike_t := clampf(_melee_t / Balance.MELEE_STRIKE_TIME, 0.0, 1.0)
-			velocity = _lunge_dir * Balance.MELEE_DASH_SPEED * lunge_scale \
+			var strike_t := clampf(_melee_t / BalancePlayer.MELEE_STRIKE_TIME, 0.0, 1.0)
+			velocity = _lunge_dir * BalancePlayer.MELEE_DASH_SPEED * lunge_scale \
 					* lerpf(0.25, 1.0, strike_t)
 			# 伤害判定时机：斩击进度（归一化 0..1）到达 MELEE_HIT_MOMENT 的瞬间结算一次。
 			if not _strike_judged \
-					and 1.0 - _melee_t / Balance.MELEE_STRIKE_TIME >= Balance.MELEE_HIT_MOMENT:
+					and 1.0 - _melee_t / BalancePlayer.MELEE_STRIKE_TIME >= BalancePlayer.MELEE_HIT_MOMENT:
 				_strike_judged = true
 				_scan_melee_hits()
 			if _melee_t <= 0.0:
@@ -507,7 +538,7 @@ func _start_swing(linked: bool) -> void:
 	_melee_swing = 2 if linked else 1
 	_melee_phase = MeleePhase.WINDUP
 	# 闲置起手有明显停顿前摇（架势），连段衔接的停顿短一点（AC6 同款）。
-	_melee_t = Balance.MELEE_WINDUP_COMBO_TIME if linked else Balance.MELEE_WINDUP_TIME
+	_melee_t = BalancePlayer.MELEE_WINDUP_COMBO_TIME if linked else BalancePlayer.MELEE_WINDUP_TIME
 	_melee_buffered = false
 	_combo_window_t = 0.0
 	_melee_hits.clear()
@@ -520,16 +551,16 @@ func _start_swing(linked: bool) -> void:
 
 func _enter_dash() -> void:
 	_melee_phase = MeleePhase.DASH
-	_melee_t = Balance.MELEE_DASH_TIME_MAX
+	_melee_t = BalancePlayer.MELEE_DASH_TIME_MAX
 
 
 ## 追击跟踪：突进中每帧朝锁定目标修正俯仰与突进方向（AC6 近战追踪）；
 ## 目标丢失就沿最后方向直冲，到时长上限强制出刀。
 func _dash_home() -> void:
 	if not _aim_at_target():
-		velocity = _lunge_dir * Balance.MELEE_DASH_SPEED
+		velocity = _lunge_dir * BalancePlayer.MELEE_DASH_SPEED
 		return
-	velocity = _lunge_dir * Balance.MELEE_DASH_SPEED
+	velocity = _lunge_dir * BalancePlayer.MELEE_DASH_SPEED
 
 
 ## 目标是否已进入斩击距离（水平为主，竖向按比例放宽）。
@@ -538,13 +569,13 @@ func _target_in_strike_range() -> bool:
 	if target == null:
 		return false
 	var to := target.global_position - global_position
-	return absf(to.x) <= Balance.MELEE_STRIKE_RANGE \
-			and absf(to.y) <= Balance.MELEE_STRIKE_RANGE * 0.7
+	return absf(to.x) <= BalancePlayer.MELEE_STRIKE_RANGE \
+			and absf(to.y) <= BalancePlayer.MELEE_STRIKE_RANGE * 0.7
 
 
 func _enter_strike() -> void:
 	_melee_phase = MeleePhase.STRIKE
-	_melee_t = Balance.MELEE_STRIKE_TIME
+	_melee_t = BalancePlayer.MELEE_STRIKE_TIME
 	_strike_judged = false
 	_slash_clock = 0.0
 	_slash_playing = true
@@ -574,9 +605,9 @@ func _enter_strike() -> void:
 
 func _enter_recover() -> void:
 	_melee_phase = MeleePhase.RECOVER
-	_melee_t = Balance.MELEE_RECOVER_1 if _melee_swing == 1 else Balance.MELEE_RECOVER_2
-	_combo_window_t = Balance.MELEE_COMBO_WINDOW # 连段窗口从斩击完成这刻起算
-	_control_scale = Balance.MELEE_RECOVER_CONTROL
+	_melee_t = BalancePlayer.MELEE_RECOVER_1 if _melee_swing == 1 else BalancePlayer.MELEE_RECOVER_2
+	_combo_window_t = BalancePlayer.MELEE_COMBO_WINDOW # 连段窗口从斩击完成这刻起算
+	_control_scale = BalancePlayer.MELEE_RECOVER_CONTROL
 
 
 func _end_swing() -> void:
@@ -585,7 +616,7 @@ func _end_swing() -> void:
 
 
 func _scan_melee_hits() -> void:
-	var damage := Balance.MELEE_DAMAGE_1 if _melee_swing == 1 else Balance.MELEE_DAMAGE_2
+	var damage := BalancePlayer.MELEE_DAMAGE_1 if _melee_swing == 1 else BalancePlayer.MELEE_DAMAGE_2
 	# 敌人本体是 CharacterBody2D（body），跨屏弹等旧 Area 命中路径已不存在；
 	# 两边都扫一遍 + as Enemy 过滤，兼容一切挂敌层 4 的碰撞体。
 	var hits: Array[Node2D] = []
@@ -597,15 +628,15 @@ func _scan_melee_hits() -> void:
 			continue
 		_melee_hits[enemy] = true
 		enemy.take_damage(damage, true) # 近战绕盾：刀刃不吃防御力减免
-		enemy.add_impact(Balance.MELEE_IMPACT_1 if _melee_swing == 1
-				else Balance.MELEE_IMPACT_2) # 近战主冲击：打失衡的正式手段
-		enemy.apply_knockback(Vector2(Balance.ENEMY_KNOCKBACK_MELEE * _face_dir, 0.0))
+		enemy.add_impact(BalanceCombat.MELEE_IMPACT_1 if _melee_swing == 1
+				else BalanceCombat.MELEE_IMPACT_2) # 近战主冲击：打失衡的正式手段
+		enemy.apply_knockback(Vector2(BalanceEnemy.ENEMY_KNOCKBACK_MELEE * _face_dir, 0.0))
 		_spawn_sparks(enemy.global_position)
 		_slash_flash = 1.0 # 刃光命中闪增
 		if _melee_hits.size() == 1:
 			Sfx.play(&"melee_hit") # 命中确认=全库最高档之一，与顿帧同拍
-			apply_hitstop(Balance.MELEE_HITSTOP_TIME, Balance.MELEE_HITSTOP_SCALE)
-			add_shake(Balance.MELEE_SHAKE_STRENGTH)
+			apply_hitstop(BalancePlayer.MELEE_HITSTOP_TIME, BalancePlayer.MELEE_HITSTOP_SCALE)
+			add_shake(BalancePlayer.MELEE_SHAKE_STRENGTH)
 			# 斩击=脆：弱电机（高频）主导的短脉冲，与 0.05s 顿帧同量级；
 			# 强电机低频"钝"留给受击/爆炸。
 			_rumble(0.55, 0.25, 0.07)
@@ -628,8 +659,8 @@ func _update_slash_visual(delta: float) -> void:
 	var alpha := 1.0
 	var brightness := 1.0
 	var radius_grow := 0.0
-	if _slash_clock <= Balance.MELEE_STRIKE_TIME:
-		var p := _slash_clock / Balance.MELEE_STRIKE_TIME
+	if _slash_clock <= BalancePlayer.MELEE_STRIKE_TIME:
+		var p := _slash_clock / BalancePlayer.MELEE_STRIKE_TIME
 		var eased := 1.0 - pow(1.0 - p, 3.0)
 		_slash_head = lerpf(from_deg, to_deg, eased)
 		brightness = clampf(_slash_clock / 0.05, 0.0, 1.0) # 亮度快攻
@@ -643,10 +674,10 @@ func _update_slash_visual(delta: float) -> void:
 			_tip_sparks.emitting = false # 扫掠结束停喷，余量粒子由脚本自灭
 		_slash_head = to_deg
 		var fade_p := clampf(
-			(_slash_clock - Balance.MELEE_STRIKE_TIME) / Balance.MELEE_FADE_TIME, 0.0, 1.0)
+			(_slash_clock - BalancePlayer.MELEE_STRIKE_TIME) / BalancePlayer.MELEE_FADE_TIME, 0.0, 1.0)
 		alpha = 1.0 - fade_p # 不透明度只在末尾渐减
 		radius_grow = 14.0 * fade_p
-	if _slash_clock >= Balance.MELEE_STRIKE_TIME + Balance.MELEE_FADE_TIME:
+	if _slash_clock >= BalancePlayer.MELEE_STRIKE_TIME + BalancePlayer.MELEE_FADE_TIME:
 		_slash_playing = false
 		_slash_far.clear()
 		_slash_near.clear()
@@ -687,14 +718,20 @@ func add_shake(strength: float) -> void:
 
 ## 进战斗切换（Main 调）：掐掉待机汽（不能跨过切换点继续喷，读起来像
 ## "一开始就喷火"）、头顶血条/气槽渐亮、操作延迟解锁。
+## handoff=true（章末黑场交接进新关）：操作立即解锁，落地即战——按住的
+## 移动键跨关不松手就该接着走；延迟闸只服务启动页那一下（开始按键不许
+## 直接变成跳跃/攻击），交接路径没有那一按。
 ## （开场推进器点火已删——全焰+推进音与"上升推进"同款，读起来像误触发。）
-func enter_combat() -> void:
+func enter_combat(handoff := false) -> void:
 	_idle_puff_t = 0.0
 	_thruster.set_target(0.0)
 	var tw := create_tween()
 	tw.tween_property(_overhead_bar, "modulate:a", 1.0, 0.5) \
 			.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	enable_input_delayed(Balance.COMBAT_INPUT_DELAY)
+	if handoff:
+		input_enabled = true
+	else:
+		enable_input_delayed(BalanceGlobal.COMBAT_INPUT_DELAY)
 
 
 ## 延迟解锁操作：开始那一下的按键（空格/J…）不许直接变成跳跃/攻击——
@@ -714,7 +751,7 @@ func take_damage(amount: int) -> void:
 	hp = maxi(hp - amount, 0)
 	hp_changed.emit(hp, max_hp)
 	# 受击=钝：多感官同步（哈迪斯/死亡细胞同款），震屏+强电机低频一起上。
-	add_shake(Balance.PLAYER_DAMAGE_SHAKE_STRENGTH)
+	add_shake(BalancePlayer.PLAYER_DAMAGE_SHAKE_STRENGTH)
 	Sfx.play(&"hit_player")
 	_rumble(0.25, 0.6, 0.15)
 	if hp == 0:
@@ -737,6 +774,9 @@ func is_dead() -> bool:
 func _die() -> void:
 	_dead = true
 	velocity = Vector2.ZERO
+	# 阵亡撤碰撞层（2）：结算后世界不冻结，在飞的敌弹不再把隐形的碰撞盒当靶子
+	# ——穿过空位飞走，不在尸体原来的空气里开花。层一撤全体敌弹自动失的。
+	collision_layer = 0
 	# 机体在爆炸里炸没：Visuals 整层隐藏（本体/枪臂/喷口/刃光/火花），不留残骸立全场。
 	_visuals.visible = false
 	_thruster.set_target(0.0) # 推进器熄火
@@ -753,7 +793,7 @@ func _die() -> void:
 		_tip_sparks = null
 	_spawn_death_explosion()
 	Sfx.play(&"boom_player")
-	add_shake(Balance.PLAYER_DEATH_SHAKE_STRENGTH)
+	add_shake(BalancePlayer.PLAYER_DEATH_SHAKE_STRENGTH)
 	_rumble(1.0, 1.0, 0.4) # 机体被毁：全强长震
 	# 不顿帧：死亡结算由 Main 延迟到爆炸播完（GAME_OVER_DELAY），时停会冻住特效。
 	set_physics_process(false)

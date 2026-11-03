@@ -195,6 +195,11 @@ func _fill_lib() -> void:
 			"db": -10.0, "pitch": [0.96, 1.06], "throttle": 30}
 	_lib[&"fire_enemy"] = {"paths": ["fire_enemy_a", "fire_enemy_b"],
 			"db": -12.0, "pitch": [0.94, 1.04], "throttle": 0}
+	# 排炮重弹（ch2 BOSS 普攻专配，2026-11-03）：重炮点放的份量档——压过
+	# 钝塔炮（-12）但不及爆炸（-5）；pitch 压低位（重）；throttle 150=单发
+	# 点放天然稀疏，只防 p2 双发贴太近时叠爆音。
+	_lib[&"fire_heavy"] = {"paths": ["fire_heavy_a", "fire_heavy_b"],
+			"db": -8.0, "pitch": [0.92, 1.0], "throttle": 150}
 	_lib[&"melee_slash1"] = {"paths": ["melee_slash1_a", "melee_slash1_b"],
 			"db": -7.0, "pitch": [0.97, 1.05], "throttle": 0}
 	_lib[&"melee_slash2"] = {"paths": ["melee_slash2_a", "melee_slash2_b"],
@@ -213,7 +218,7 @@ func _fill_lib() -> void:
 			"db": -14.0, "pitch": [0.90, 1.15], "throttle": 80}
 	# 失衡确立（D 钟振款，2026-10-16 换装）：近战爆发窗开启的确认音。
 	# B 坍塌双层款 -5dB 实测被枪炮声掩蔽，换持续钟鸣；延迟 0.15s 播（主击声先
-	# 落地，Balance.STAGGER_SFX_DELAY）。+4dB 全库唯一正增益键（用户定稿）——
+	# 落地，BalanceCombat.STAGGER_SFX_DELAY）。+4dB 全库唯一正增益键（用户定稿）——
 	# 对应 wav 母带预留了 4dB 峰顶余量，回放恰好满幅不削波。三键=同一配方按
 	# 机体体量变调（杂兵/精英/BOSS），确定性分档不走随机变体；免疫期攒不了
 	# 冲击=天然节流，80ms 只防多机体同拍齐倒叠声。

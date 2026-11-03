@@ -7,7 +7,7 @@ extends ScrollObject
 ## 本体是 CharacterBody2D：踱步/击退都走 move_and_slide，台阶/障碍自然挡住，
 ## 走出平台边缘会掉落；被玩家攻击命中按冲量击退（apply_knockback，指数弹衰减）。
 ## 弹道继承/预判读 get_real_velocity()（move_and_slide 的实际速度，撞墙滑停时不虚标）。
-## 数值一律取自 Balance（全局调参表）。
+## 数值一律取自 BalanceEnemy（杂兵域调参表）。
 
 enum MoveState { IDLE, MANEUVER }
 enum FireState { IDLE, BURST }
@@ -101,7 +101,7 @@ func take_damage(amount: int, ignore_defense: bool = false) -> void:
 	if _hp <= 0:
 		return
 	if _staggered:
-		amount = ceili(amount * Balance.STAGGER_DMG_MULT)
+		amount = ceili(amount * BalanceCombat.STAGGER_DMG_MULT)
 	_hp -= amount if ignore_defense else maxi(amount - _defense(), 1)
 	if _hp <= 0:
 		_explode()
@@ -140,7 +140,7 @@ func _physics_process(delta: float) -> void:
 	if _staggered:
 		_stagger_t -= delta
 		_knockback = move_toward(_knockback, 0.0,
-				Balance.ENEMY_KNOCKBACK_DECEL * delta)
+				BalanceEnemy.ENEMY_KNOCKBACK_DECEL * delta)
 		velocity.x = _knockback
 		if _hover > 0.0:
 			velocity.y = 0.0 # 悬浮失衡：僵在原高度（瘫而不坠）
@@ -159,14 +159,16 @@ func _physics_process(delta: float) -> void:
 	if _hover > 0.0:
 		_bob_t += delta
 		bob_y = _hover_base_y \
-				+ sin(_bob_t * Balance.DRONE_BOB_SPEED) * Balance.DRONE_BOB_AMPLITUDE
+				+ sin(_bob_t * BalanceEnemy.DRONE_BOB_SPEED) * BalanceEnemy.DRONE_BOB_AMPLITUDE
 	if not is_instance_valid(_player):
 		_player = get_tree().get_first_node_in_group("player") as Node2D
 		if _player == null:
 			return
 	var player := _player as Player
-	if player != null and player.is_dead():
-		return # 玩家已毁：停火（死亡演出期间世界照跑，但不朝残骸开火）
+	# 玩家已毁：只停攻击层（不朝残骸开火）；朝向/踱步/重力/浮动照常——结算后世界
+	# 不冻结，杂兵就地自然待机（旧版整段 return 连移动出口一起跳过=冻成雕像、半空的
+	# 悬着不落；当年结算会冻结整棵树所以没露馅）。
+	var player_down := player != null and player.is_dead()
 
 	var dx := _player.global_position.x - global_position.x
 	# 朝向只翻 Visuals 一层（敌方美术原生朝左）：贴图、枪臂、仓口等全部挂件
@@ -178,14 +180,15 @@ func _physics_process(delta: float) -> void:
 	if _arm_tracks_pitch():
 		var to := _player.global_position - _arm_pivot.global_position
 		var pitch := clampf(-rad_to_deg(atan2(to.y, maxf(absf(to.x), 40.0))),
-				-Balance.GUN_PITCH_MAX_DEG, Balance.GUN_PITCH_MAX_DEG)
+				-BalanceCombat.GUN_PITCH_MAX_DEG, BalanceCombat.GUN_PITCH_MAX_DEG)
 		_arm_pivot.rotation = deg_to_rad(pitch)
 	else:
 		_arm_pivot.rotation = 0.0
 
 	# 两个分层各自独立推进：机动时不影响扫射节奏，扫射时也不打断踱步。
 	_tick_move(delta)
-	_tick_fire(delta)
+	if not player_down:
+		_tick_fire(delta)
 
 	# 移动出口：踱步控制速度 + 击退合流进 move_and_slide（地形/台阶自然挡住）。
 	velocity.x = _control_vx + _knockback
@@ -197,15 +200,21 @@ func _physics_process(delta: float) -> void:
 		velocity.y += _gravity() * delta
 		move_and_slide()
 	_knockback = move_toward(_knockback, 0.0,
-			Balance.ENEMY_KNOCKBACK_DECEL * delta)
+			BalanceEnemy.ENEMY_KNOCKBACK_DECEL * delta)
 	# 冲击衰减：受击会重置宽限倒计时——持续输出冲击只涨不掉；停手宽限走完才掉
 	if _impact_decay_t > 0.0:
 		_impact_decay_t -= delta
 	else:
-		_impact = move_toward(_impact, 0.0, Balance.IMPACT_DECAY * delta)
+		_impact = move_toward(_impact, 0.0, BalanceCombat.IMPACT_DECAY * delta)
 	# 失衡免疫倒计时：恢复后这段时间攒不了冲击（防连续失衡无限锁死）
 	if _impact_lock_t > 0.0:
 		_impact_lock_t -= delta
+
+
+## 玩家已毁（结算后世界不冻结：攻击层与 BOSS 出手都认这道闸，移动层照常=自然待机）。
+func _player_down() -> bool:
+	var player := get_tree().get_first_node_in_group("player") as Player
+	return player != null and player.is_dead()
 
 
 ## ---- 失衡（AC6 式冲击/STAGGER） ----
@@ -216,7 +225,7 @@ func add_impact(amount: float) -> void:
 	if _hp <= 0 or _staggered or _impact_lock_t > 0.0:
 		return
 	_impact += amount
-	_impact_decay_t = Balance.IMPACT_DECAY_DELAY # 受击即重置宽限：连打不掉
+	_impact_decay_t = BalanceCombat.IMPACT_DECAY_DELAY # 受击即重置宽限：连打不掉
 	if _impact >= _impact_resistance():
 		_enter_stagger()
 
@@ -233,7 +242,7 @@ func _enter_stagger() -> void:
 	_tilt_t = 0.0
 	# 失衡音延迟播：命中的受击声先落地，钟鸣随后补位（读"垮下来"，不和主击挤一拍）。
 	# 定时器连到本节点方法——节点先被砍掉时连接自动断开，无需判空。
-	get_tree().create_timer(Balance.STAGGER_SFX_DELAY).timeout.connect(_play_stagger_sfx)
+	get_tree().create_timer(BalanceCombat.STAGGER_SFX_DELAY).timeout.connect(_play_stagger_sfx)
 
 
 ## 延迟失衡音（STAGGER_SFX_DELAY 后到点）：等主击声落地；期间被砍死/被重置就不播。
@@ -285,10 +294,10 @@ func _tick_move(delta: float) -> void:
 	match _move_state:
 		MoveState.IDLE:
 			_control_vx = 0.0
-			if _roll_trigger(Balance.ENEMY_MANEUVER_HALF_LIFE, delta):
+			if _roll_trigger(BalanceEnemy.ENEMY_MANEUVER_HALF_LIFE, delta):
 				var dir := 1.0 if randf() < 0.5 else -1.0 # 前后各半
 				_maneuver_target_x = global_position.x + dir * randf_range(
-						Balance.ENEMY_MANEUVER_DIST_MIN, Balance.ENEMY_MANEUVER_DIST_MAX)
+						BalanceEnemy.ENEMY_MANEUVER_DIST_MIN, BalanceEnemy.ENEMY_MANEUVER_DIST_MAX)
 				_move_state = MoveState.MANEUVER
 		MoveState.MANEUVER:
 			var remain := _maneuver_target_x - global_position.x
@@ -296,25 +305,25 @@ func _tick_move(delta: float) -> void:
 			var blocked := absf(_control_vx) > 0.0 \
 					and signf(get_real_velocity().x) != signf(_control_vx)
 			# 到点 / 被挡 / 步行族脚下悬空（不主动走下台阶，被击退除外）：
-			if absf(remain) <= Balance.ENEMY_MANEUVER_SPEED * delta \
+			if absf(remain) <= BalanceEnemy.ENEMY_MANEUVER_SPEED * delta \
 					or blocked or (_hover <= 0.0 and not is_on_floor()):
 				_control_vx = 0.0
 				_move_state = MoveState.IDLE
 			else:
-				_control_vx = signf(remain) * Balance.ENEMY_MANEUVER_SPEED
+				_control_vx = signf(remain) * BalanceEnemy.ENEMY_MANEUVER_SPEED
 
 
 ## ---- 攻击层：待机 ⇄ 扫射（随机发数短点放；玩家出射程即中断） ----
 
 func _tick_fire(delta: float) -> void:
 	var in_range := absf(_player.global_position.x - global_position.x) \
-			<= Balance.ENEMY_ATTACK_RANGE
+			<= BalanceEnemy.ENEMY_ATTACK_RANGE
 	match _fire_state:
 		FireState.IDLE:
-			if in_range and _roll_trigger(Balance.ENEMY_FIRE_HALF_LIFE, delta):
+			if in_range and _roll_trigger(BalanceEnemy.ENEMY_FIRE_HALF_LIFE, delta):
 				_fire_state = FireState.BURST
 				_burst_shots_left = randi_range(
-						Balance.ENEMY_BURST_MIN, Balance.ENEMY_BURST_MAX)
+						BalanceEnemy.ENEMY_BURST_MIN, BalanceEnemy.ENEMY_BURST_MAX)
 				_burst_timer = 0.0 # 进扫射第一发立即出膛
 		FireState.BURST:
 			if not in_range:
@@ -328,7 +337,7 @@ func _tick_fire(delta: float) -> void:
 			if _burst_shots_left <= 0:
 				_fire_state = FireState.IDLE
 			else: # 机枪射速固定，但节拍叠 ±20% 抖动：听着不机械
-				_burst_timer = Balance.ENEMY_BURST_INTERVAL * randf_range(0.8, 1.2)
+				_burst_timer = BalanceEnemy.ENEMY_BURST_INTERVAL * randf_range(0.8, 1.2)
 
 
 ## 半衰期掷骰（恒定危险率的泊松采样）：p = 1 - 2^(-Δt/t½)，期望等待 = t½ / ln2。
@@ -348,8 +357,8 @@ func _explode() -> void:
 	Sfx.play(&"boom_enemy")
 	var player := get_tree().get_first_node_in_group("player") as Player
 	if player != null:
-		player.add_shake(Balance.KILL_SHAKE_STRENGTH)
-		player.apply_hitstop(Balance.KILL_HITSTOP_TIME, Balance.KILL_HITSTOP_SCALE)
+		player.add_shake(BalanceCombat.KILL_SHAKE_STRENGTH)
+		player.apply_hitstop(BalanceCombat.KILL_HITSTOP_TIME, BalanceCombat.KILL_HITSTOP_SCALE)
 
 
 func _shoot() -> void:
@@ -357,8 +366,8 @@ func _shoot() -> void:
 	if container == null:
 		return
 	var bullet := ENEMY_BULLET.instantiate()
-	bullet.speed = Balance.ENEMY_BULLET_SPEED
-	bullet.damage = Balance.ENEMY_BULLET_DAMAGE
+	bullet.speed = BalanceEnemy.ENEMY_BULLET_SPEED
+	bullet.damage = BalanceEnemy.ENEMY_BULLET_DAMAGE
 	bullet.impact_tint = IMPACT_TINT
 	# 直瞄：朝玩家当前位置打，不预判不修偏——跑起来弹自然落后，跑=有效规避。
 	var fire_dir := _muzzle.global_position.direction_to(_player.global_position)
@@ -377,10 +386,10 @@ func apply_knockback(impulse: Vector2) -> void:
 	if _hp <= 0:
 		return
 	_knockback = clampf(_knockback + impulse.x * _knockback_scale(),
-			-Balance.ENEMY_KNOCKBACK_MAX, Balance.ENEMY_KNOCKBACK_MAX)
+			-BalanceEnemy.ENEMY_KNOCKBACK_MAX, BalanceEnemy.ENEMY_KNOCKBACK_MAX)
 
 
-## ---- 机型档案钩子：子类覆写以换数值/姿态（数值出处仍是 Balance） ----
+## ---- 机型档案钩子：子类覆写以换数值/姿态（数值出处仍是 BalanceEnemy） ----
 
 ## 枪臂是否随玩家俯仰瞄准。垂发架发射角固定（仓口朝天），子类覆写关闭——
 ## 关闭后臂只随朝向镜像（镜像不动竖直轴，朝天仓口仍朝天），rotation 恒回正。
@@ -389,11 +398,11 @@ func _arm_tracks_pitch() -> bool:
 
 
 func _species_max_hp() -> int:
-	return Balance.ENEMY_MAX_HP
+	return BalanceEnemy.ENEMY_MAX_HP
 
 
 func _species_score() -> int:
-	return Balance.ENEMY_SCORE
+	return BalanceEnemy.ENEMY_SCORE
 
 
 ## 防御力：常规伤害（子弹）先减这一档、下限 1；近战绕盾（ignore_defense）。
@@ -413,17 +422,17 @@ func _knockback_scale() -> float:
 
 ## 步行族下落重力（悬浮族不走物理竖直轴，不调用）；BOSS 覆写 0（高度自管）。
 func _gravity() -> float:
-	return Balance.ENEMY_GRAVITY
+	return BalanceEnemy.ENEMY_GRAVITY
 
 
-## 失衡上限（冲击抗性）：杂兵一刀近战踉跄；精英/BOSS 见 Balance。
+## 失衡上限（冲击抗性）：杂兵一刀近战踉跄；精英/BOSS 见 BalanceCombat 失衡段。
 func _impact_resistance() -> float:
-	return Balance.IMPACT_RESIST_GRUNT
+	return BalanceCombat.IMPACT_RESIST_GRUNT
 
 
 ## 失衡硬直时长。
 func _stagger_time() -> float:
-	return Balance.STAGGER_TIME_GRUNT
+	return BalanceCombat.STAGGER_TIME_GRUNT
 
 
 ## 失衡确立音键：按体量分档（杂兵/精英/BOSS 各配变调文件，注册见 sfx.gd）。
@@ -433,4 +442,4 @@ func _stagger_key() -> StringName:
 
 ## 失衡恢复后的冲击免疫时长（这段时间攒不了冲击，防连续失衡锁死）。
 func _stagger_immunity() -> float:
-	return Balance.STAGGER_IMMUNITY_GRUNT
+	return BalanceCombat.STAGGER_IMMUNITY_GRUNT

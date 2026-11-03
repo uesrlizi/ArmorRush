@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://whe2rsu6n52d"
-path="res://.godot/imported/fx_red_cart.svg-3e807bb66687e09ec2e31aaca3d01523.ctex"
+uid="uid://cppfwbv4mpfcp"
+path="res://.godot/imported/fx_sea_bloom.svg-61be520391a4b9b704ec1263d91932e4.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/world_6/fx_red_cart.svg"
-dest_files=["res://.godot/imported/fx_red_cart.svg-3e807bb66687e09ec2e31aaca3d01523.ctex"]
+source_file="res://assets/world_7/fx_sea_bloom.svg"
+dest_files=["res://.godot/imported/fx_sea_bloom.svg-61be520391a4b9b704ec1263d91932e4.ctex"]
 
 [params]
 

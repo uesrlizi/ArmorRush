@@ -28,22 +28,22 @@ var _skill_flip := false  # 技能轮换旗标：a→b→a…
 
 
 func _species_score() -> int:
-	return Balance.BOSS_SCORE
+	return BalanceCombat.BOSS_SCORE
 
 
 func _defense() -> int:
-	return Balance.BOSS_DEFENSE
+	return BalanceCombat.BOSS_DEFENSE
 
 
 func _hover_anchor_y() -> float:
-	return Balance.BOSS_HOVER_Y # 默认 ch1 悬浮锚；子类覆写（驳船=BARGE_HOVER_Y）
+	return BalanceCombat.BOSS_HOVER_Y # 默认 ch1 悬浮锚；子类覆写（驳船=BARGE_HOVER_Y）
 
 
 func on_spawned() -> void:
 	super()
 	add_to_group("boss")
 	_bstate = ST_ENTER
-	_bt = Balance.BOSS_ENTER_TIME
+	_bt = BalanceCombat.BOSS_ENTER_TIME
 	_vel = Vector2.ZERO
 	_next_direct = false
 	_skill_flip = false
@@ -55,7 +55,7 @@ func on_spawned() -> void:
 	var hud := get_tree().get_first_node_in_group("hud") as HUD
 	if hud != null:
 		hud.flash_warning()
-		hud.show_boss()
+		hud.show_boss(_display_name())
 
 
 ## 父类 AI 两层整体替换：不走踱步层、不打机枪层（瞄准/朝向/浮动照旧）。
@@ -83,12 +83,18 @@ func _physics_process(delta: float) -> void:
 		_control_vx = 0.0
 		velocity = Vector2.ZERO
 		global_position.y = move_toward(global_position.y,
-				_hover_anchor_y() + Balance.BOSS_STAGGER_SINK, 60.0 * delta)
+				_hover_anchor_y() + BalanceCombat.BOSS_STAGGER_SINK, 60.0 * delta)
 		return
 	_bob_t += delta
 	_tick_visual(delta) # 子类挂件动画（旋翼等），默认空
 	_tick_vertical(delta)
 	_tick_screen_lock(delta)
+	# 玩家已毁（结算后世界不冻结）：压招判定作废（不再为贴脸冻结出招、也不重走
+	# 预警），正在放的招照常推进到收势；后摇到点 _dispatch_next 不再派新招=悬停待机。
+	if _player_down():
+		_hold_fire = false
+		_tick_attack(delta)
+		return
 	# 贴脸压招：离玩家过近整段冻结出招（含硬直刚结束的贪刀窗）——弹簧把
 	# BOSS 弹回安全距离，回到位才重新出手；断在预警里的招重走完整预警
 	var close := _player_too_close()
@@ -104,11 +110,11 @@ func _physics_process(delta: float) -> void:
 ## 直升机的扫射压高——它未迁移，仍用自己的覆写版）。只定 velocity.y，积分在
 ## 父类移动出口（重力已覆写 0）。
 func _tick_vertical(delta: float) -> void:
-	var bob := sin(_bob_t * Balance.BOSS_BOB_SPEED) * Balance.BOSS_BOB_AMPLITUDE
+	var bob := sin(_bob_t * BalanceCombat.BOSS_BOB_SPEED) * BalanceCombat.BOSS_BOB_AMPLITUDE
 	var desired := clampf(
-			(_hover_anchor_y() + bob - global_position.y) * Balance.BOSS_ANCHOR_STIFFNESS,
-			-Balance.BOSS_VERT_MAX_SPEED, Balance.BOSS_VERT_MAX_SPEED)
-	_vel.y = move_toward(_vel.y, desired, Balance.BOSS_VERT_ACCEL * delta)
+			(_hover_anchor_y() + bob - global_position.y) * BalanceCombat.BOSS_ANCHOR_STIFFNESS,
+			-BalanceCombat.BOSS_VERT_MAX_SPEED, BalanceCombat.BOSS_VERT_MAX_SPEED)
+	_vel.y = move_toward(_vel.y, desired, BalanceCombat.BOSS_VERT_ACCEL * delta)
 	velocity.y = _vel.y
 
 
@@ -118,13 +124,13 @@ func _tick_screen_lock(delta: float) -> void:
 	if _bstate == ST_ENTER:
 		# 入场：从画面外加速滑向锚点，到位（或兜底到时）进战斗循环
 		#（入场吃纵向那档硬增益，滑入要利落，不跟水平弹簧一起放松）
-		_accel_x(anchor_x, Balance.BOSS_ENTER_SPEED, delta, Balance.BOSS_ANCHOR_STIFFNESS)
+		_accel_x(anchor_x, BalanceCombat.BOSS_ENTER_SPEED, delta, BalanceCombat.BOSS_ANCHOR_STIFFNESS)
 		_bt -= delta
 		if _bt <= 0.0 or absf(global_position.x - anchor_x) < 8.0:
-			_vel.x = minf(_vel.x, Balance.BOSS_MOVE_MAX_SPEED) # 收敛到巡航档
+			_vel.x = minf(_vel.x, BalanceCombat.BOSS_MOVE_MAX_SPEED) # 收敛到巡航档
 			_dispatch_next() # 入场即出招
 		return
-	_accel_x(anchor_x, Balance.BOSS_MOVE_MAX_SPEED, delta, Balance.BOSS_MOVE_STIFFNESS)
+	_accel_x(anchor_x, BalanceCombat.BOSS_MOVE_MAX_SPEED, delta, BalanceCombat.BOSS_MOVE_STIFFNESS)
 
 
 ## 锚点世界 x：玩家 + 镜头偏移 + 屏幕锚（绕开 Camera2D.offset——震屏走
@@ -132,11 +138,11 @@ func _tick_screen_lock(delta: float) -> void:
 func _anchor_x() -> float:
 	var player := get_tree().get_first_node_in_group("player") as Player
 	if player != null:
-		return player.global_position.x + Balance.CAMERA_X_OFFSET \
-				+ Balance.BOSS_SCREEN_ANCHOR
+		return player.global_position.x + BalanceGlobal.CAMERA_X_OFFSET \
+				+ BalanceCombat.BOSS_SCREEN_ANCHOR
 	var cam := get_viewport().get_camera_2d()
 	if cam != null:
-		return cam.get_screen_center_position().x + Balance.BOSS_SCREEN_ANCHOR
+		return cam.get_screen_center_position().x + BalanceCombat.BOSS_SCREEN_ANCHOR
 	return global_position.x
 
 
@@ -146,7 +152,7 @@ func _accel_x(target_x: float, max_speed: float, delta: float, stiffness: float)
 	var desired := clampf(
 			(target_x - global_position.x) * stiffness,
 			-max_speed, max_speed)
-	_vel.x = move_toward(_vel.x, desired, Balance.BOSS_MOVE_ACCEL * delta)
+	_vel.x = move_toward(_vel.x, desired, BalanceCombat.BOSS_MOVE_ACCEL * delta)
 	_control_vx = _vel.x
 
 
@@ -156,12 +162,19 @@ func _player_too_close() -> bool:
 	if player == null:
 		return false
 	return absf(player.global_position.x - global_position.x) \
-			< Balance.BOSS_ATTACK_MIN_DISTANCE
+			< BalanceCombat.BOSS_ATTACK_MIN_DISTANCE
 
 
 ## 出下一手：技能与普攻直射交替——技能之后必插一段直射，直射把下一段还给
 ## 技能轮换（skill_a→直射→skill_b→直射…）。各动作后摇到点就调这里。
+## 玩家已毁（结算后世界不冻结）：不再派下一手，停在后摇里随构图位悬停待机——
+## 正在放的招照常放完、各自收势进后摇（不硬切状态，挂件/预警自然收尾）；
+## 入场途中阵亡的同理，到位即转待机。
 func _dispatch_next() -> void:
+	if _player_down():
+		_bstate = ST_RECOVER
+		_bt = 0.0
+		return
 	if _next_direct:
 		_next_direct = false
 		_begin_direct()
@@ -184,12 +197,12 @@ func _tick_attack(delta: float) -> void:
 ## 动作收势：各招自己的后摇（二阶段按比例缩短），到点直接出下一手。
 func _enter_recover(base: float) -> void:
 	_bstate = ST_RECOVER
-	_bt = base * (Balance.BOSS_PHASE2_RECOVER_SCALE if _phase2 else 1.0)
+	_bt = base * (BalanceCombat.BOSS_PHASE2_RECOVER_SCALE if _phase2 else 1.0)
 
 
 func take_damage(amount: int, ignore_defense: bool = false) -> void:
 	super(amount, ignore_defense)
-	if _hp > 0 and not _phase2 and hp_ratio() <= Balance.BOSS_PHASE2_RATIO:
+	if _hp > 0 and not _phase2 and hp_ratio() <= BalanceCombat.BOSS_PHASE2_RATIO:
 		_phase2 = true
 
 
@@ -210,11 +223,11 @@ func is_past_left_edge() -> bool:
 
 
 func _impact_resistance() -> float:
-	return Balance.IMPACT_RESIST_BOSS
+	return BalanceCombat.IMPACT_RESIST_BOSS
 
 
 func _stagger_time() -> float:
-	return Balance.STAGGER_TIME_BOSS
+	return BalanceCombat.STAGGER_TIME_BOSS
 
 
 func _stagger_key() -> StringName:
@@ -222,10 +235,15 @@ func _stagger_key() -> StringName:
 
 
 func _stagger_immunity() -> float:
-	return Balance.STAGGER_IMMUNITY_BOSS
+	return BalanceCombat.STAGGER_IMMUNITY_BOSS
 
 
 ## ---- 能力层钩子：子类覆写 ----
+
+## 血条上方显示的机体名（哨兵/钢嵴/鮟鱇/断云/赤轮…；§0b「单位名写在血条」）。
+func _display_name() -> String:
+	return "未登记大型机"
+
 
 func _begin_skill_a() -> void:
 	pass

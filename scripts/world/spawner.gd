@@ -98,7 +98,7 @@ func _tick_boss(boss_here: bool) -> void:
 		_boss_engaged = false
 		_boss_score_accum = 0
 		return
-	if _boss_score_accum >= Balance.BOSS_SCORE_TRIGGER:
+	if _boss_score_accum >= BalanceGlobal.BOSS_SCORE_TRIGGER:
 		debug_spawn_boss()
 
 
@@ -108,7 +108,7 @@ func _tick_boss(boss_here: bool) -> void:
 func debug_spawn_boss() -> Node2D:
 	var boss := boss_scene.instantiate() as Node2D
 	var x := _right_edge() + 1000.0
-	boss.global_position = Vector2(x, Balance.BOSS_HOVER_Y)
+	boss.global_position = Vector2(x, BalanceCombat.BOSS_HOVER_Y)
 	_container.add_child(boss) # 入树即 _ready→on_spawned：亮血条 + WARNING
 	boss.killed.connect(_on_killed)
 	boss.killed.connect(func(_points: int) -> void: boss_defeated.emit())
@@ -122,7 +122,7 @@ func debug_spawn_boss() -> Node2D:
 func _pick_enemy_scene() -> PackedScene:
 	var r := randf()
 	var elite_ok := elite_enabled and elite_scene != null \
-			and _player.global_position.x >= Balance.ELITE_MIN_DISTANCE
+			and _player.global_position.x >= BalanceGlobal.ELITE_MIN_DISTANCE
 	if elite_ok and r < 0.15:
 		return elite_scene
 	if r < 0.55 or drone_scene == null:
@@ -134,8 +134,8 @@ func _pick_enemy_scene() -> PackedScene:
 
 func _roll(is_enemy: bool) -> float:
 	if is_enemy:
-		return randf_range(Balance.SPAWN_ENEMY_GAP_MIN, Balance.SPAWN_ENEMY_GAP_MAX)
-	return randf_range(Balance.SPAWN_OBSTACLE_GAP_MIN, Balance.SPAWN_OBSTACLE_GAP_MAX)
+		return randf_range(BalanceGlobal.SPAWN_ENEMY_GAP_MIN, BalanceGlobal.SPAWN_ENEMY_GAP_MAX)
+	return randf_range(BalanceGlobal.SPAWN_OBSTACLE_GAP_MIN, BalanceGlobal.SPAWN_OBSTACLE_GAP_MAX)
 
 
 ## 障碍选择：两种箱子禁用期间只刷脚手架平台。
@@ -165,7 +165,7 @@ func _spawn(scene: PackedScene, is_enemy: bool, at_x: float = INF) -> ScrollObje
 	if obstacle != null and obstacle.floating:
 		# 空中平台（断桥）：顶面悬在所在地表上方 PLATFORM_HOVER_* 区间，随地形起伏。
 		var surface := _terrain.surface_y_at(x)
-		var top := maxf(surface - randf_range(Balance.PLATFORM_HOVER_MIN, Balance.PLATFORM_HOVER_MAX), 20.0)
+		var top := maxf(surface - randf_range(BalanceGlobal.PLATFORM_HOVER_MIN, BalanceGlobal.PLATFORM_HOVER_MAX), 20.0)
 		y = top + obj.feet_offset
 	obj.global_position = Vector2(x, y)
 	if is_enemy:

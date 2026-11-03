@@ -5,7 +5,7 @@
 产物：
   enemy_coral_elite_body.svg  60x80    精英重设计「海葵」炮台车（背驮海葵发射器）
   boss_coral_body.svg         300x180  BOSS 重设计「鮟鱇」v2（背炮+钓灯+腹闸）
-  boss_coral_gun.svg          120x40   BOSS 钓灯臂（直射炮位，端头珊瑚球）
+  boss_coral_gun.svg          120x40   BOSS 钓灯臂 v3（鮟鱇拟饵：贝塞尔细竿+灯球+垂须）
   fx_coral_orb.svg            36x36    珊瑚重弹：软辉能量球（CoralOrb）
   fx_coral_bolt.svg           30x12    钓灯能量束：平滑波浪红带（直射弹，noodle 语汇）
   fx_coral_tide.svg           84x52    珊瑚潮涌浪剪影（CoralTide）
@@ -208,23 +208,45 @@ def boss_body():
 def boss_gun():
     """BOSS 钓灯臂 120x40（tscn：ArmPivot 画布 (86,42)→Visuals (-64,-48)，
     sprite offset(-100,-12)=枢端画布 (100,12)；Muzzle=臂局部 (-94,14)=球心）。
-    造型：细臂从枢端前伸下垂（S 微曲），端头=珊瑚球发射器（拟饵=炮位，
-    造型与玩法互证）。ADD 辉光由引擎侧材质叠，此处纯平涂。"""
+    v3 重画（2026-11-03 用户「炮管一点都不像钓灯，重画」）：鮟鱇拟饵——细竿
+    从弓部后上方抬起、过前缘后垂下（二次贝塞尔采样，根粗梢细），端头吊珊瑚
+    灯球，球后两根垂须。普攻已改径向爆闪，发射位=灯球本体（锚点一像素不动）。
+    纯平涂分层圆=假渐变，ADD 辉光由引擎侧材质叠。"""
     s = Svg(120, 40)
-    # 臂（上缘 LIGHT/下缘 BELLY 的锥形双条，S 微曲）
-    s.poly([(100, 9), (78, 11), (52, 18), (24, 22), (10, 24), (10, 29),
-            (26, 27), (54, 23), (80, 16), (100, 15)], BODY)
-    s.poly([(100, 9), (78, 11), (52, 18), (30, 21.5), (30, 24), (54, 20.5),
-            (80, 13.5), (100, 12)], LIGHT, 0.8)
-    # 臂节环
-    for jx, jy in ((76, 12.6), (50, 19.4)):
-        s.line(jx - 2, jy - 2.5, jx + 2, jy + 0.5, GAP, 2.0, 0.9)
-    # 端头：珊瑚球发射器（球心画布 (6,26)=Muzzle）
-    s.line(10, 26, 12, 26, BELLY, 6)              # 颈
-    s.circle(6, 26, 7, BELLY)
-    s.circle(6, 26, 4.6, CORAL, 0.9)
-    s.circle(6, 26, 1.8, WHITE_HOT, 0.95)
-    s.circle(24, 16.5, 1.1, CORAL_LAMP, 0.9)      # 臂中信号灯
+    # 主竿：P0(100,10) 枢端 → P1(52,-6) 抬头控制点 → P2(7,21) 挂球点；
+    # 采样贝塞尔+法向偏移做锥形（根半宽 2.4 → 梢 1.1），上下面合成填充条。
+    p0, p1, p2 = (100.0, 10.0), (52.0, -6.0), (7.0, 21.0)
+    n_seg = 16
+    upper, lower, mid = [], [], []
+    for i in range(n_seg + 1):
+        t = i / n_seg
+        u = 1.0 - t
+        x = u * u * p0[0] + 2 * u * t * p1[0] + t * t * p2[0]
+        y = u * u * p0[1] + 2 * u * t * p1[1] + t * t * p2[1]
+        dx = 2 * u * (p1[0] - p0[0]) + 2 * t * (p2[0] - p1[0])
+        dy = 2 * u * (p1[1] - p0[1]) + 2 * t * (p2[1] - p1[1])
+        ln = math.hypot(dx, dy) or 1.0
+        nx, ny = -dy / ln, dx / ln
+        hw = 2.4 - 1.3 * t
+        upper.append((x + nx * hw, y + ny * hw))
+        lower.append((x - nx * hw, y - ny * hw))
+        mid.append((x, y))
+    s.poly(upper + lower[::-1], BODY)
+    # 竿背高光：沿上缘一条细亮线（受光面读法，弹体三层语汇的减档）
+    s.path("M " + " L ".join(f"{f(x)},{f(y)}" for x, y in upper),
+           stroke=LIGHT, w=1.0, opacity=0.85)
+    # 竿顶信号灯（章节灯点语汇，钉在弧顶段）
+    s.circle(mid[7][0], mid[7][1] - 1.2, 1.1, CORAL_LAMP, 0.9)
+    # 灯球（球心画布 (6,26)=Muzzle 锚点不动）：软晕+灯罩壳+珊瑚内层+白热芯
+    s.circle(6, 26, 7.5, CORAL, 0.14)   # 软晕（贴画布左缘，裁 1px 无碍）
+    s.circle(6, 26, 6.4, BELLY)         # 灯罩壳
+    s.circle(6, 26, 4.8, CORAL_HI, 0.95)
+    s.circle(6, 26, 2.2, WHITE_HOT)
+    s.circle(5.2, 25.2, 0.9, "#fff1dd") # 白热点
+    s.line(7.5, 20.0, 6.8, 22.0, BELLY, 1.4)  # 挂环（竿梢→球顶）
+    # 垂须两根（球后下方拖出，拟饵的须）
+    s.path("M 9,31 Q 16,34 24,33", stroke=BELLY, w=1.0, opacity=0.9)
+    s.path("M 8,33 Q 13,38 20,37.5", stroke=BELLY, w=0.8, opacity=0.75)
     return s
 
 
@@ -241,24 +263,18 @@ def fx_orb():
 
 
 def fx_bolt():
-    """钓灯能量束矢弹 30x12（+X=飞行方向）：平滑正弦波带（珊瑚步枪 noodle
-    语汇——波浪流动，非锯齿）。三层：外晕/中层/白热芯，各为同波形变宽带。"""
-    s = Svg(30, 12)
-    amp, lam, x0, x1, yc = 1.9, 13.0, 2.0, 28.0, 6.0
-    n = 26
-    xs = [x0 + (x1 - x0) * i / (n - 1) for i in range(n)]
-    ys = [yc + amp * math.sin((x - x0) / lam * 2.0 * math.pi) for x in xs]
-
-    def ribbon(width: float, color: str, opacity: float) -> None:
-        pts = [(x, y - width * 0.5) for x, y in zip(xs, ys)]
-        pts += [(x, y + width * 0.5) for x, y in zip(reversed(xs), reversed(ys))]
-        s.poly(pts, color, opacity)
-
-    ribbon(6.5, CORAL, 0.30)
-    ribbon(3.2, CORAL_HI, 0.9)
-    ribbon(1.4, "#ffe3c8", 1.0)
-    # 端头（+X 前缘）白热珠
-    s.circle(x1, ys[-1], 1.6, "#fff1dd", 1.0)
+    """钓灯能量束矢弹 28x10（+X=飞行方向）：plasma_bolt.svg 六边形能量镖几何
+    原样只换珊瑚家配色（波浪 noodle 版被否，用户钦定「像电浆弹一样只换色」
+    ——本函数曾是 noodle 版，2026-11-03 对齐磁盘定稿，烘焙不再覆写它）。
+    深珊瑚壳+珊瑚鞘+白热芯+尾部弧须；ADD 材质在场景。"""
+    s = Svg(28, 10)
+    s.poly([(2, 5), (9, 2), (22, 2.5), (26, 5), (22, 7.5), (9, 8)], "#b53722")
+    s.poly([(5, 5), (10, 3.2), (21, 3.6), (24, 5), (21, 6.4), (10, 6.8)],
+           CORAL_HI, 0.9)
+    s.poly([(7, 4.6), (14, 3.9), (22, 4.6), (22, 5.4), (14, 6.1), (7, 5.4)],
+           "#fff1dd")
+    s.line(1, 3.5, 5, 4.6, CORAL_HI, 1.1, 0.8)
+    s.line(1, 6.5, 5, 5.4, CORAL_HI, 1.1, 0.8)
     return s
 
 
@@ -276,12 +292,12 @@ if __name__ == "__main__":
 =BayPort）+ 尾部涵道/浮筒（桨独件画布 (272,64)/(272,112) 沿用）。
 沿用锚点：独眼条带 y60..66 含 (55,63)。v1 背脊垂发 4 仓口作废。
 提案=同目录 提案_v2_珊瑚重设计.md §4。""")
-    save(boss_gun(), "boss_coral_gun.svg", """第四章 BOSS 钓灯臂 120x40（tscn offset(-100,-12)，枢端画布 (100,12)）。
-Muzzle=臂局部 (-94,14)=端头珊瑚球心（尖端画布≈(-8,56)，出画惯例同 ch1）。
-拟饵=直射炮位：细臂前伸下垂 + 珊瑚球发射器。""")
+    save(boss_gun(), "boss_coral_gun.svg", """第四章 BOSS 钓灯臂 v3（鮟鱇拟饵）120x40（tscn offset(-100,-12)，枢端画布 (100,12)；球心 (6,26)=Muzzle 锚点）。
+Muzzle=臂局部 (-94,14)=灯球心（尖端画布≈(-8,56)，出画惯例同 ch1）。
+拟饵=爆闪发射位：贝塞尔细竿抬起垂下 + 灯球 + 垂须；普攻径向爆闪从球心齐放。""")
     save(fx_orb(), "fx_coral_orb.svg", """珊瑚重弹贴图 36x36：软辉能量球（分层圆平涂假渐变+白热芯）。
 CoralOrb 本体；尾迹=coral_embers 粒子。能量语汇=柔光，无锯齿无电芯。""")
-    save(fx_bolt(), "fx_coral_bolt.svg", """钓灯能量束矢弹 30x12（+X=飞行方向）：平滑正弦波带三层
-（外晕/中层/白热芯）+前缘白热珠——珊瑚步枪 noodle 语汇（波浪流动非锯齿）。
+    save(fx_bolt(), "fx_coral_bolt.svg", """钓灯能量束矢弹 28x10（+X=飞行方向）：plasma_bolt 六边形能量镖几何
+原样只换珊瑚家配色（深珊瑚壳+珊瑚鞘+白热芯+尾部弧须；ADD 材质在场景）。
 coral_bolt.tscn=bullet.gd 纯换皮。""")
     print("coral chapter v2 units baked.")

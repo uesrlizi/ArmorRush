@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3200 900" width="3200" height="900">
+<!-- 第七章独层地标：倾覆巨舰 3200x900（视差 0.9，tile 3200 同屏一份）。
+地标 tex_x=1600（舰身半宽 340：∈[1540,1860]，防回绕弹切，worlds.md §5）。
+条带位 (8,270) 居中挂载：画布 y0=世界 -180；海平线画布 740=世界 560，龙骨顶
+画布 568=世界 388。种子 7072。 -->
+<defs>
+<linearGradient id="sub" x1="0" y1="0.0" x2="0" y2="1.0"><stop offset="0" stop-color="#4a726e" stop-opacity="0.45"/><stop offset="1" stop-color="#4a726e" stop-opacity="0.0"/></linearGradient>
+</defs>
+<path d="M 1260,740 L 1300,700 L 1360,650 L 1440,610 L 1540,580 L 1640,568 L 1740,576 L 1820,600 L 1890,640 L 1930,690 L 1940,740" fill="#5f8a84" opacity="0.95"/>
+<path d="M 1300,706 L 1360,656 L 1440,616 L 1540,586 L 1640,574 L 1740,582 L 1820,606 L 1890,646 L 1930,696" fill="none" stroke="#4a726e" stroke-width="3" opacity="0.6"/>
+<line x1="1320" y1="680" x2="1900" y2="674" stroke="#4a726e" stroke-width="2" opacity="0.55"/>
+<line x1="1400" y1="716" x2="1840" y2="712" stroke="#4a726e" stroke-width="1.6" opacity="0.5"/>
+<line x1="1300" y1="710" x2="1303" y2="740" stroke="#4a726e" stroke-width="2.2" opacity="0.55"/>
+<line x1="1360" y1="660" x2="1363" y2="690" stroke="#4a726e" stroke-width="2.2" opacity="0.55"/>
+<line x1="1440" y1="620" x2="1443" y2="650" stroke="#4a726e" stroke-width="2.2" opacity="0.55"/>
+<line x1="1540" y1="590" x2="1543" y2="620" stroke="#4a726e" stroke-width="2.2" opacity="0.55"/>
+<line x1="1640" y1="578" x2="1643" y2="608" stroke="#4a726e" stroke-width="2.2" opacity="0.55"/>
+<line x1="1740" y1="586" x2="1743" y2="616" stroke="#4a726e" stroke-width="2.2" opacity="0.55"/>
+<line x1="1820" y1="610" x2="1823" y2="640" stroke="#4a726e" stroke-width="2.2" opacity="0.55"/>
+<line x1="1890" y1="650" x2="1893" y2="680" stroke="#4a726e" stroke-width="2.2" opacity="0.55"/>
+<line x1="1930" y1="700" x2="1933" y2="730" stroke="#4a726e" stroke-width="2.2" opacity="0.55"/>
+<polygon points="1800,600 1862,622 1850,670 1790,644" fill="#2d4a46" opacity="0.95"/>
+<line x1="1800" y1="600" x2="1862" y2="622" stroke="#496f6a" stroke-width="2" opacity="0.8"/>
+<line x1="1480" y1="590" x2="1488" y2="732" stroke="#7a5a3c" stroke-width="3" opacity="0.35"/>
+<line x1="1660" y1="590" x2="1668" y2="732" stroke="#7a5a3c" stroke-width="3" opacity="0.35"/>
+<line x1="1780" y1="590" x2="1788" y2="732" stroke="#7a5a3c" stroke-width="3" opacity="0.35"/>
+<rect x="1248" y="686" width="30" height="10" fill="#4a726e" opacity="0.95"/>
+<circle cx="1234" cy="690" r="16" fill="#4a726e" opacity="0.95"/>
+<line x1="1234" y1="690" x2="1256.1" y2="699.3" stroke="#5f8a84" stroke-width="5" opacity="0.9"/>
+<line x1="1234" y1="690" x2="1214.9" y2="704.5" stroke="#5f8a84" stroke-width="5" opacity="0.9"/>
+<line x1="1234" y1="690" x2="1231" y2="666.2" stroke="#5f8a84" stroke-width="5" opacity="0.9"/>
+<rect x="1930" y="704" width="60" height="26" fill="#5f8a84" opacity="0.95"/>
+<rect x="1930" y="704" width="60" height="4" fill="#86b0aa" opacity="0.8"/>
+<line x1="1960" y1="704" x2="1960" y2="660" stroke="#5f8a84" stroke-width="3" opacity="0.95"/>
+<circle cx="1960" cy="656" r="6" fill="#ff4640" opacity="0.35"/>
+<circle cx="1960" cy="656" r="11" fill="#ff4640" opacity="0.13"/>
+<circle cx="1960" cy="656" r="2.6" fill="#ff4640"/>
+<ellipse cx="1600" cy="743" rx="360" ry="9" fill="#1f6a66" opacity="0.45"/>
+<ellipse cx="1560" cy="741" rx="300" ry="5" fill="#eafaf2" opacity="0.55"/>
+<ellipse cx="1960" cy="742" rx="50" ry="4" fill="#eafaf2" opacity="0.5"/>
+<rect x="1300" y="744" width="620" height="60" fill="url(#sub)"/>
+</svg>

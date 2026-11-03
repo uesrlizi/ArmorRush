@@ -18,7 +18,7 @@ func _ready() -> void:
 		var to_deg: float = cfg.to_deg
 		for j in STATES.size():
 			var root := Node2D.new() # 模拟 SlashRoot：y 压扁投影
-			root.scale = Vector2(1.0, Balance.MELEE_SQUASH)
+			root.scale = Vector2(1.0, BalancePlayer.MELEE_SQUASH)
 			root.position = Vector2(400.0 + 700.0 * j, 300.0 + 500.0 * i)
 			add_child(root)
 			var far := SlashArc.new()
@@ -29,7 +29,7 @@ func _ready() -> void:
 				arc.thickness = cfg.thickness
 				arc.color_core = cfg.color_core
 				arc.color_outer = cfg.color_outer
-				arc.depth_dim = Balance.MELEE_FAR_DIM
+				arc.depth_dim = BalancePlayer.MELEE_FAR_DIM
 			far.clip = SlashArc.Clip.UPPER
 			near.clip = SlashArc.Clip.LOWER
 			var body := ColorRect.new() # 机体占位块（40×60），画在远/近层之间

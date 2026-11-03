@@ -8,7 +8,7 @@ extends HeavyMissile
 ##   开机时机（_coast 找不到 _smoke/_flame，开机分支安全跳过）；
 ##   爆=电浆爆闪（plasma_burst.tscn）+ GroundBlast（爆区闪染冰蓝，伤害判定同源）。
 ## 规约出处：提案_v2 §1「基本还是导弹，相当于换皮」（本项目无能量伤害模型）；
-## fx 规约：全贴图+粒子，无程序化 _draw。数值全在 Balance.SENTINEL_RAIN_*。
+## fx 规约：全贴图+粒子，无程序化 _draw。数值全在 BalanceWorld3.SENTINEL_RAIN_*。
 
 const BODY_TEXTURE := preload("res://assets/world_3/missile_plasma.svg")
 const TRAIL := preload("res://scenes/fx/missile_plasma_trail.tscn")
@@ -58,5 +58,5 @@ func _detonate() -> void:
 	Sfx.play(&"boom_enemy")
 	var player := get_tree().get_first_node_in_group("player") as Player
 	if player != null:
-		player.add_shake(Balance.KILL_SHAKE_STRENGTH * 1.5)
+		player.add_shake(BalanceCombat.KILL_SHAKE_STRENGTH * 1.5)
 	queue_free()

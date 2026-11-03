@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 28" width="320" height="28">
+<!-- 第七章桥式·girder 件（terrain.gd 桥式模式：
+箱梁/剪刀撑/排架柱各自独立贴图，排架柱三档高度 110/170/230 按
+「bridge_sea_y 固定海面线−柱顶」自动选挡，柱底统一钉在海面上）。 -->
+<defs>
+
+</defs>
+<rect x="0" y="0" width="320" height="28" fill="#46584f"/>
+<rect x="0" y="25" width="320" height="3" fill="#22312b"/>
+<rect x="0" y="0" width="320" height="2" fill="#8fa39a" opacity="0.35"/>
+<line x1="0.6" y1="0" x2="0.6" y2="28" stroke="#1d2823" stroke-width="2.4" opacity="0.6"/>
+<line x1="319.4" y1="0" x2="319.4" y2="28" stroke="#1d2823" stroke-width="2.4" opacity="0.6"/>
+</svg>

@@ -1,0 +1,52 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/common/fx_spark.svg" id="1"]
+
+; 电幕驻留电花（ArcFence 立幕后沿幕全高持续上飘的电花——「电在流动」
+; 的能量读法；v1 只有光带 alpha 脉冲=一条静线，判丑）。根=常驻发射器
+; （plasma_mine_arcs 同构），emission 矩形默认 200 高，由 ArcFence 按
+; 幕高注入 extents.y；作幕 Sprite 的子节点入树，随幕 modulate 淡出。
+; 色带纪律：白→蓝紫→深晕（家色板 #a08cff/#5a4a9c），上飘微加速。
+
+[sub_resource type="CanvasItemMaterial" id="addmat"]
+blend_mode = 1
+
+[sub_resource type="Gradient" id="grad_curtain"]
+offsets = PackedFloat32Array(0, 0.5, 1)
+colors = PackedColorArray(1, 1, 1, 0.9, 0.627, 0.549, 1, 0.65, 0.353, 0.29, 0.612, 0)
+
+[sub_resource type="GradientTexture1D" id="gtex_curtain"]
+gradient = SubResource("grad_curtain")
+
+[sub_resource type="Curve" id="curve_curtain"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.35), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="ctex_curtain"]
+curve = SubResource("curve_curtain")
+
+[sub_resource type="ParticleProcessMaterial" id="pm_curtain"]
+particle_flag_disable_z = true
+emission_shape = 3
+emission_box_extents = Vector2(5, 100)
+direction = Vector3(0, -1, 0)
+spread = 22.0
+initial_velocity_min = 30.0
+initial_velocity_max = 90.0
+gravity = Vector3(0, -50, 0)
+damping_min = 10.0
+damping_max = 30.0
+scale_min = 0.45
+scale_max = 0.85
+scale_curve = SubResource("ctex_curtain")
+color_ramp = SubResource("gtex_curtain")
+
+[node name="ArcCurtainFx" type="GPUParticles2D"]
+material = SubResource("addmat")
+emitting = true
+amount = 26
+lifetime = 0.5
+local_coords = false
+fixed_fps = 0
+texture = ExtResource("1")
+process_material = SubResource("pm_curtain")

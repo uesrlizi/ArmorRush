@@ -3,36 +3,13 @@
 [ext_resource type="Script" uid="uid://btc26jindue0" path="res://scripts/ui/touch_controls.gd" id="1"]
 [ext_resource type="Script" uid="uid://mqtslog42f4q" path="res://scripts/ui/virtual_joystick.gd" id="2"]
 [ext_resource type="Script" uid="uid://i7i30yw3kiow" path="res://scripts/ui/touch_button.gd" id="3"]
-[ext_resource type="Texture2D" path="res://assets/common/ui_btn_fire.svg" id="4"]
-[ext_resource type="Texture2D" path="res://assets/common/ui_btn_thrust.svg" id="5"]
-[ext_resource type="Texture2D" path="res://assets/common/ui_btn_melee.svg" id="6"]
+[ext_resource type="Texture2D" uid="uid://dam4dmrd18n5e" path="res://assets/common/ui_btn_thrust.svg" id="5"]
+[ext_resource type="Texture2D" uid="uid://dv0va4l8kv3cg" path="res://assets/common/ui_btn_melee.svg" id="6"]
 
 [node name="TouchControls" type="CanvasLayer" unique_id=2082947377]
 process_mode = 3
 layer = 10
 script = ExtResource("1")
-
-[node name="FireZone" type="Control" parent="." unique_id=1463796528]
-process_mode = 1
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-script = ExtResource("3")
-use_full_rect = true
-
-[node name="AutoLabel" type="Label" parent="." unique_id=914257290]
-offset_left = 37.0
-offset_top = 92.0
-offset_right = 357.0
-offset_bottom = 132.0
-theme_override_colors/font_color = Color(0.13, 0.17, 0.21, 1)
-theme_override_font_sizes/font_size = 26
-text = "▶ 自动前进"
-horizontal_alignment = 0
 
 [node name="Joystick" type="Control" parent="." unique_id=546822883]
 process_mode = 1
@@ -50,25 +27,6 @@ script = ExtResource("2")
 track_size = Vector2(500, 160)
 knob_radius = 70.0
 
-[node name="FireButton" type="Control" parent="." unique_id=1344060242]
-process_mode = 1
-layout_mode = 3
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -220.0
-offset_top = -560.0
-offset_right = -20.0
-offset_bottom = -360.0
-grow_horizontal = 0
-grow_vertical = 0
-mouse_filter = 2
-script = ExtResource("3")
-icon = ExtResource("4")
-radius = 100.0
-
 [node name="JumpButton" type="Control" parent="." unique_id=713902862]
 process_mode = 1
 layout_mode = 3
@@ -77,15 +35,14 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -620.0
-offset_top = -220.0
-offset_right = -420.0
-offset_bottom = -20.0
+offset_left = -520.0
+offset_top = -256.0
+offset_right = -320.0
+offset_bottom = -56.0
 grow_horizontal = 0
 grow_vertical = 0
 mouse_filter = 2
 script = ExtResource("3")
-action = "jump"
 icon = ExtResource("5")
 radius = 100.0
 
@@ -97,10 +54,10 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -460.0
-offset_top = -440.0
-offset_right = -260.0
-offset_bottom = -240.0
+offset_left = -408.0
+offset_top = -464.0
+offset_right = -208.0
+offset_bottom = -264.0
 grow_horizontal = 0
 grow_vertical = 0
 mouse_filter = 2

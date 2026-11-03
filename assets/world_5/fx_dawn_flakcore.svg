@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+<!-- 引信芯光斑 32x32（径向软晕，ADD 叠亮）：白热金晕+亮芯
+——啸雷弹引信「何时爆」信息层，alpha+scale 渐急脉冲由代码驱动。 -->
+<defs>
+<radialGradient id="rg1"><stop offset="0" stop-color="#ffd9a0" stop-opacity="0.45"/><stop offset="1" stop-color="#ffd9a0" stop-opacity="0.0"/></radialGradient>
+<radialGradient id="rg2"><stop offset="0" stop-color="#fff8e8" stop-opacity="0.95"/><stop offset="1" stop-color="#fff8e8" stop-opacity="0.0"/></radialGradient>
+</defs>
+<ellipse cx="16" cy="16" rx="15" ry="15" fill="url(#rg1)"/>
+<ellipse cx="16" cy="16" rx="7" ry="7" fill="url(#rg2)"/>
+</svg>

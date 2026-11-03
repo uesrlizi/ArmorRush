@@ -37,7 +37,7 @@ var _phase := Phase.HOME  # 默认直瞄（旧行为）；lofted 出膛时进 CO
 var _vel := Vector2.ZERO  # COAST 段弹道速度（含重力积分），开机时归化为巡航速度
 var _prev_los := 0.0      # PN 用的上一帧视线角
 var _t := 0.0             # 当前段计时：HOME 段超时锁死防缠斗
-var _turn_rate := 3.0     # 转向角速度（rad/s）=速度/转向半径，_init 里从 Balance 导出
+var _turn_rate := 3.0     # 转向角速度（rad/s）=速度/转向半径，_init 里从 BalanceCombat.HEAVY_MISSILE_TURN_RADIUS 导出
 var _terrain: Terrain
 var _smoke: GPUParticles2D # 拉烟（missile_smoke.tscn，浓度/寿命/色带在场景里调）
 var _flame: GPUParticles2D # 尾焰（missile_flame.tscn）：开机才点火，与拉烟同拍
@@ -58,8 +58,8 @@ func _ready() -> void:
 
 
 func _init() -> void:
-	speed = Balance.HEAVY_MISSILE_SPEED
-	_turn_rate = speed / Balance.HEAVY_MISSILE_TURN_RADIUS
+	speed = BalanceCombat.HEAVY_MISSILE_SPEED
+	_turn_rate = speed / BalanceCombat.HEAVY_MISSILE_TURN_RADIUS
 
 
 ## 先入树再调本方法。initial_dir 为出膛方向（=发射器炮口的实际朝向，弹体
@@ -75,7 +75,7 @@ func launch(terrain: Terrain, from: Vector2, initial_dir: Vector2,
 	if not lofted:
 		return
 	# 出膛动量 = 炮口朝向×上抛初速×随机 + 载机速度（姿态仍钉炮口）
-	_vel = _dir * Balance.HEAVY_MISSILE_THROW_SPEED * randf_range(0.85, 1.1) + carrier_vel
+	_vel = _dir * BalanceCombat.HEAVY_MISSILE_THROW_SPEED * randf_range(0.85, 1.1) + carrier_vel
 	_phase = Phase.COAST
 
 
@@ -103,8 +103,8 @@ func _physics_process(delta: float) -> void:
 ## 滑行 COAST_TIME 秒到点开机（不等过顶——上升段就点火压弯，拦截更果断）
 ## ——点火喷烟，PN 从炮口朝向起转。
 func _coast(delta: float) -> void:
-	_vel.y += Balance.HEAVY_MISSILE_COAST_GRAVITY * delta
-	if _t >= Balance.HEAVY_MISSILE_COAST_TIME:
+	_vel.y += BalanceCombat.HEAVY_MISSILE_COAST_GRAVITY * delta
+	if _t >= BalanceCombat.HEAVY_MISSILE_COAST_TIME:
 		_phase = Phase.HOME
 		_t = 0.0
 		_prev_los = _los_angle()
@@ -125,10 +125,10 @@ func _home(delta: float) -> void:
 	var los := _los_angle()
 	var los_rate := wrapf(los - _prev_los, -PI, PI) / delta
 	_prev_los = los
-	var step := clampf(Balance.HEAVY_MISSILE_PN_N * los_rate * delta,
+	var step := clampf(BalanceCombat.HEAVY_MISSILE_PN_N * los_rate * delta,
 			-_turn_rate * delta, _turn_rate * delta)
 	_dir = _dir.rotated(step)
-	if _t >= Balance.HEAVY_MISSILE_TRACK_MAX:
+	if _t >= BalanceCombat.HEAVY_MISSILE_TRACK_MAX:
 		_phase = Phase.LOCK
 
 
@@ -137,7 +137,7 @@ func _los_angle() -> float:
 	if player == null:
 		return _dir.angle()
 	return (player.global_position \
-			+ Vector2(0.0, Balance.HEAVY_MISSILE_FOOT_OFFSET) - global_position).angle()
+			+ Vector2(0.0, BalanceCombat.HEAVY_MISSILE_FOOT_OFFSET) - global_position).angle()
 
 
 func _detonate() -> void:
@@ -165,7 +165,7 @@ func _detonate() -> void:
 	Sfx.play(&"boom_enemy")
 	var player := get_tree().get_first_node_in_group("player") as Player
 	if player != null:
-		player.add_shake(Balance.KILL_SHAKE_STRENGTH * 1.5)
+		player.add_shake(BalanceCombat.KILL_SHAKE_STRENGTH * 1.5)
 	queue_free()
 
 

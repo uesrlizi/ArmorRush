@@ -21,8 +21,8 @@ const BURST := preload("res://scenes/fx/plasma_burst.tscn")
 
 const FLASH_COLOR := Color(0.5, 0.8, 1.0, 0.55) # 电浆爆区冰蓝（同 PlasmaMissile）
 
-var damage := Balance.PLASMA_MINE_DAMAGE
-var blast_radius := Balance.PLASMA_MINE_BLAST_RADIUS
+var damage := BalanceWorld3.PLASMA_MINE_DAMAGE
+var blast_radius := BalanceWorld3.PLASMA_MINE_BLAST_RADIUS
 
 var _terrain: Terrain
 var _vel := Vector2.ZERO
@@ -51,7 +51,7 @@ func _ready() -> void:
 ## 抛物线初速解算：v0 = Δ/T − ½gT（竖直项），全程只受 MORTAR_GRAVITY。
 static func ballistic_velocity(from: Vector2, target: Vector2, flight_time: float) -> Vector2:
 	var d := target - from
-	var g := Balance.MORTAR_GRAVITY
+	var g := BalanceCombat.MORTAR_GRAVITY
 	return Vector2(d.x / flight_time, d.y / flight_time - 0.5 * g * flight_time)
 
 
@@ -60,7 +60,7 @@ static func ballistic_velocity(from: Vector2, target: Vector2, flight_time: floa
 static func fence_base_x(player: Player, flight_time: float, lead_min: float,
 		lead_max: float) -> float:
 	var vx := clampf(player.velocity.x,
-			-Balance.PLAYER_MOVE_SPEED, Balance.PLAYER_MOVE_SPEED)
+			-BalancePlayer.PLAYER_MOVE_SPEED, BalancePlayer.PLAYER_MOVE_SPEED)
 	return clampf(player.global_position.x + vx * flight_time,
 			player.global_position.x + lead_min,
 			player.global_position.x + lead_max)
@@ -80,7 +80,7 @@ func _physics_process(delta: float) -> void:
 	match _state:
 		State.FLY:
 			_t += delta
-			_vel.y += Balance.MORTAR_GRAVITY * delta
+			_vel.y += BalanceCombat.MORTAR_GRAVITY * delta
 			global_position += _vel * delta
 			if _t >= _flight:
 				_state = State.HOVER # 到点断发：速度清零悬停（落点即解算值）
@@ -93,7 +93,7 @@ func _physics_process(delta: float) -> void:
 			_bob_t += delta
 			_hover += delta
 			_tick_visual(delta)
-			if _hover >= Balance.PLASMA_MINE_LIFETIME:
+			if _hover >= BalanceWorld3.PLASMA_MINE_LIFETIME:
 				queue_free() # 引信期内没人靠近：照常哑熄（无伤）
 				return
 			_fuse_t -= delta
@@ -106,18 +106,18 @@ func _tick_hover(delta: float) -> void:
 	_bob_t += delta
 	_hover += delta
 	global_position = _hover_base + Vector2(
-			sin(_bob_t * Balance.DRONE_BOB_SPEED * 0.6) * 3.0,
-			sin(_bob_t * Balance.DRONE_BOB_SPEED) * 4.0)
-	if _hover >= Balance.PLASMA_MINE_LIFETIME:
+			sin(_bob_t * BalanceEnemy.DRONE_BOB_SPEED * 0.6) * 3.0,
+			sin(_bob_t * BalanceEnemy.DRONE_BOB_SPEED) * 4.0)
+	if _hover >= BalanceWorld3.PLASMA_MINE_LIFETIME:
 		queue_free() # 哑熄：无伤淡出（等出来的是安全，不是圈套）
 		return
 	var player := get_tree().get_first_node_in_group("player") as Player
 	if player != null and not player.is_dead() \
-			and _hover >= Balance.PLASMA_MINE_WARMUP \
+			and _hover >= BalanceWorld3.PLASMA_MINE_WARMUP \
 			and global_position.distance_to(player.global_position) \
-					<= Balance.PLASMA_MINE_PROXIMITY:
+					<= BalanceWorld3.PLASMA_MINE_PROXIMITY:
 		_state = State.FUSED
-		_fuse_t = Balance.PLASMA_MINE_FUSE
+		_fuse_t = BalanceWorld3.PLASMA_MINE_FUSE
 	_tick_visual(delta)
 
 
@@ -127,14 +127,14 @@ func _tick_visual(_delta: float) -> void:
 	var alpha := 0.9
 	if _state == State.FLY:
 		alpha = 0.9
-	elif _hover < Balance.PLASMA_MINE_WARMUP:
-		var p := _hover / Balance.PLASMA_MINE_WARMUP
+	elif _hover < BalanceWorld3.PLASMA_MINE_WARMUP:
+		var p := _hover / BalanceWorld3.PLASMA_MINE_WARMUP
 		alpha = p * (0.6 + 0.3 * sin(_bob_t * 10.0))
 	elif _state == State.FUSED:
 		alpha = 0.95 if fmod(_bob_t * 14.0, 1.0) < 0.5 else 0.35 # 高频快闪（14Hz 方波）
 	else:
 		alpha = 0.85 + 0.1 * sin(_bob_t * 6.0)
-	var fade_out := clampf((Balance.PLASMA_MINE_LIFETIME - _hover) / 0.4, 0.0, 1.0)
+	var fade_out := clampf((BalanceWorld3.PLASMA_MINE_LIFETIME - _hover) / 0.4, 0.0, 1.0)
 	_visual.modulate.a = minf(alpha, fade_out)
 
 
@@ -160,5 +160,5 @@ func _detonate() -> void:
 	Sfx.play(&"boom_enemy")
 	var player := get_tree().get_first_node_in_group("player") as Player
 	if player != null:
-		player.add_shake(Balance.KILL_SHAKE_STRENGTH * 1.2)
+		player.add_shake(BalanceCombat.KILL_SHAKE_STRENGTH * 1.2)
 	queue_free()

@@ -56,7 +56,7 @@ func _update() -> void:
 	var cam := get_viewport().get_camera_2d()
 	if cam == null:
 		return
-	var w := Balance.TERRAIN_CHUNK_WIDTH
+	var w := BalanceGlobal.TERRAIN_CHUNK_WIDTH
 	var half_w := get_viewport_rect().size.x * 0.5
 	var center := cam.get_screen_center_position().x
 	var lo := floori((center - half_w - w) / w)
@@ -75,7 +75,7 @@ func _update() -> void:
 
 
 func _spawn_chunk(i: int) -> void:
-	var w := Balance.TERRAIN_CHUNK_WIDTH
+	var w := BalanceGlobal.TERRAIN_CHUNK_WIDTH
 	var top := _tier_y(_seg_tier(_seg_of_chunk(i)))
 	var chunk := StaticBody2D.new()
 	chunk.collision_layer = 1
@@ -147,17 +147,17 @@ func _add_bridge_parts(chunk: StaticBody2D, i: int, top: float) -> void:
 ## 之后照常随机。
 func _seg_len(s: int) -> int:
 	if s == 0:
-		return Balance.TERRAIN_INTRO_SEG_LEN
+		return BalanceGlobal.TERRAIN_INTRO_SEG_LEN
 	if s == -1:
-		return Balance.TERRAIN_INTRO_WEST_SEG_LEN
-	var span := Balance.TERRAIN_RUN_MAX - Balance.TERRAIN_RUN_MIN + 1
-	return Balance.TERRAIN_RUN_MIN + _hash(s, 1) % span
+		return BalanceGlobal.TERRAIN_INTRO_WEST_SEG_LEN
+	var span := BalanceGlobal.TERRAIN_RUN_MAX - BalanceGlobal.TERRAIN_RUN_MIN + 1
+	return BalanceGlobal.TERRAIN_RUN_MIN + _hash(s, 1) % span
 
 
 func _seg_tier(s: int) -> int:
 	if s == 0 or s == -1:
-		return Balance.TERRAIN_INTRO_SEG_TIER
-	return _hash(s, 2) % Balance.TERRAIN_TIER_COUNT
+		return BalanceGlobal.TERRAIN_INTRO_SEG_TIER
+	return _hash(s, 2) % BalanceGlobal.TERRAIN_TIER_COUNT
 
 
 func _hash(s: int, salt: int) -> int:
@@ -216,7 +216,7 @@ func _seg_of_chunk(i: int) -> int:
 
 
 func _tier_y(tier: int) -> float:
-	return Balance.TERRAIN_TIER_BASE_Y - tier * Balance.TERRAIN_TIER_STEP
+	return BalanceGlobal.TERRAIN_TIER_BASE_Y - tier * BalanceGlobal.TERRAIN_TIER_STEP
 
 
 ## 表面带：640 宽纹理的 A/B 两半，按块序号奇偶取用（接缝烘在纹里，无平铺相位）
@@ -225,7 +225,7 @@ func _make_band_sprite(i: int) -> Sprite2D:
 	s.texture = band_texture
 	s.centered = false
 	s.region_enabled = true
-	var w := Balance.TERRAIN_CHUNK_WIDTH
+	var w := BalanceGlobal.TERRAIN_CHUNK_WIDTH
 	s.region_rect = Rect2(w * float(i & 1), 0.0, w, BAND_HEIGHT)
 	return s
 
@@ -239,7 +239,7 @@ func _make_fill_sprite() -> Sprite2D:
 	s.centered = false
 	s.position = Vector2(0, BAND_HEIGHT)
 	var tex_size := fill_texture.get_size()
-	s.scale = Vector2(Balance.TERRAIN_CHUNK_WIDTH / tex_size.x,
+	s.scale = Vector2(BalanceGlobal.TERRAIN_CHUNK_WIDTH / tex_size.x,
 			(FILL_DEPTH - BAND_HEIGHT) / tex_size.y)
 	return s
 
@@ -289,14 +289,14 @@ func _make_face_details(i: int) -> Node2D:
 
 func _add_chunk_decor(chunk: StaticBody2D, i: int) -> void:
 	chunk.add_child(_make_seam(0.6))
-	chunk.add_child(_make_seam(Balance.TERRAIN_CHUNK_WIDTH - 1.8))
+	chunk.add_child(_make_seam(BalanceGlobal.TERRAIN_CHUNK_WIDTH - 1.8))
 	chunk.add_child(_make_face_details(i))
 
 
 ## 指定 x 处的地表高度。段数据是纯函数，未生成的远处也能精确算出，
 ## 刷敌人/脚手架永远贴合将来的地表。
 func surface_y_at(x: float) -> float:
-	var i := floori(x / Balance.TERRAIN_CHUNK_WIDTH)
+	var i := floori(x / BalanceGlobal.TERRAIN_CHUNK_WIDTH)
 	if _chunks.has(i):
 		return _chunks[i].get_meta("top")
 	return _tier_y(_seg_tier(_seg_of_chunk(i)))

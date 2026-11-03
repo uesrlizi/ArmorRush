@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+<!-- 装药灯红晕 32x32（径向软晕）：信号红晕+亮红芯
+——装药引信「何时爆」信息层，alpha+scale 渐急脉冲由代码驱动。 -->
+<defs>
+<radialGradient id="rg1"><stop offset="0" stop-color="#ff4640" stop-opacity="0.42"/><stop offset="1" stop-color="#ff4640" stop-opacity="0.0"/></radialGradient>
+<radialGradient id="rg2"><stop offset="0" stop-color="#ff4640" stop-opacity="0.95"/><stop offset="1" stop-color="#ff4640" stop-opacity="0.0"/></radialGradient>
+</defs>
+<ellipse cx="16" cy="16" rx="15" ry="15" fill="url(#rg1)"/>
+<ellipse cx="16" cy="16" rx="7" ry="7" fill="url(#rg2)"/>
+</svg>

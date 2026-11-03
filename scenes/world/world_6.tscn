@@ -30,7 +30,7 @@
 ; 一份，夹在远条与中景之间）。亮背景章规矩（同雪原）：黄弹/焰芯可读性由
 ; 压暗天光承担，共享弹/焰资产原样不动；HUD 深字。敌营=赤红暗棕（近黑=敌，
 ; 敌营=赤红暗棕（近黑=敌，#b8d0dc 亮天上暗色剪影读），独眼红不变。能力=矿区电网与输送：精英「锚桩」
-; 预教电网闸，BOSS「赤轮」电网闸⇄溜矿车+斗轮弹石
+; 预教电网闸，BOSS「赤轮」电网闸⇄凿岩齐射+斗轮弹石
 ; （提案=art_proposals/red_desert_ch6/提案_v1_赤沙矿区.md）。
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_1"]
@@ -165,7 +165,7 @@ offset_right = 1400.0
 offset_bottom = 1058.0
 theme_override_colors/font_color = Color(0.85, 0.82, 0.72, 0.8)
 theme_override_font_sizes/font_size = 17
-text = "A/D 移动 · 空格 跳跃/按住推进 · J 斩击 · K/右键 射击"
+text = "A/D 移动 · W 跳跃/按住推进 · S 斩击"
 
 [node name="GameOver" type="VBoxContainer" parent="HUD/Root"]
 visible = false

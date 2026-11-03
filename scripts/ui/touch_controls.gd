@@ -1,46 +1,49 @@
 class_name TouchControls
 extends CanvasLayer
 ## 触控层总控：
-## 1) 游戏结束（树暂停）后点按屏幕任意处重开（400ms 防抖，防止死亡瞬间误触）；
-## 2) 暂停瞬间释放摇杆/按钮残留输入并关掉自动前进（按着摇杆死掉不能卡动作）；
-## 3) 双击"右"开启自动前进——键盘双击 D/→，触控双击摇杆轨道右半；
-##    之后任何移动操作（A/D/←/→ 键、摇杆按下）立即关闭。
-## 本节点 process_mode=ALWAYS，暂停时仍能收输入；子控件保持 PAUSABLE。
+## 1) 结算面板出现后（Main 调 arm_restart 开闸）点按屏幕任意处或按任意键/手柄键
+##    重开（400ms 防抖，防止死亡瞬间误触；只受理一次）。结算后世界不冻结，
+##    不再靠树暂停判定游戏结束；
+## 2) 阵亡瞬间释放摇杆/按钮残留输入（按住型动作带进下一局会自己推进），触控件渐隐停用。
+## 本节点 process_mode=ALWAYS；子控件保持 PAUSABLE。
 
 signal restart_requested
 
-## 游戏结束后多少毫秒内的点按无效
+## 结算面板出现后多少毫秒内的点按无效
 const RESTART_DEBOUNCE_MS := 400
-## 判定双击的两次"右"间隔上限（毫秒）
-const DOUBLE_TAP_MS := 280
-
-var _paused_at_ms := 0
 ## 桌面临时调触控布局时改成 true（正常发布不用动，仅影响本层子控件的显隐）
 const FORCE_TOUCH_VISIBLE := false
 
-var _was_paused := false
-var _auto_forward := false
 var _combat_on := false # 启动页待机时触控件藏着，进战斗才点亮
-var _last_right_tap_ms := -999999999 # 上一次"右"手势（键盘或摇杆）的时刻
-
-@onready var _joystick: TouchJoystick = $Joystick
-@onready var _auto_label: Label = $AutoLabel
+var _restart_armed := false # 结算面板已出：受理重开输入
+var _armed_at_ms := 0
 
 
 func _ready() -> void:
-	_joystick.move_started.connect(_on_move_started)
-	_joystick.tapped.connect(_on_joystick_tapped)
-	# 中文标签用打包的思源黑体子集（见 ui_font.gd）。
-	_auto_label.add_theme_font_override("font", UIFont.cjk())
-	_auto_label.visible = false
 	_apply_touch_visibility(false) # 启动页待机先藏，进战斗 fade_in_controls 依次点亮
+	_adopt_touch_holds()
 
 
-## 触控输入件只在移动端显示；桌面保留键盘双击自动前进、点屏重开与自动前进标签。
+## 章末黑场交接：上一关离场时还按着的触控指（RunState 暂存）由本层分发、
+## 同款控件原地认领——按住跨关不脱手，移动/推进连续（见 virtual_joystick.gd /
+## touch_button.gd 的 adopt_hold）。死亡重开路径离场前已 release() 清认领，
+## 暂存自然为空；桌面无触摸也不产生暂存，此处空转。
+func _adopt_touch_holds() -> void:
+	if Engine.is_editor_hint():
+		return
+	var holds := RunState.take_touch_holds()
+	if holds.is_empty():
+		return
+	for child in get_children():
+		if child.has_method("adopt_hold"):
+			child.call("adopt_hold", holds)
+
+
+## 触控输入件只在移动端显示；桌面只保留结算后的任意键/点屏重开。
 func _apply_touch_visibility(interactive: bool) -> void:
 	var show_touch := FORCE_TOUCH_VISIBLE or Platforms.is_mobile()
 	for child in get_children():
-		if child.has_method("release"): # 摇杆 + 按钮（AutoLabel 没有此方法，不参与）
+		if child.has_method("release"): # 摇杆 + 按钮
 			child.visible = show_touch and interactive
 			# 不参与输入时彻底停掉回调（隐藏的 Control 仍会收 _input）。
 			child.process_mode = Node.PROCESS_MODE_INHERIT \
@@ -67,13 +70,16 @@ func fade_in_controls() -> void:
 		delay += 0.07
 
 
-## 死亡演出：触控 UI 整体渐隐并停用——机体失控，操控件跟着熄掉；
-## 全屏开火区若还活着会先认领触摸，把"点屏重开"吃掉（实测踩过），
-## 渐隐落定必须 visible=false + DISABLED 双保险。
+## 死亡演出：先放掉残留按住，再把触控 UI 整体渐隐并停用——机体失控，操控件跟着熄掉；
+## 渐隐落定必须 visible=false + DISABLED 双保险：隐藏的控件仍收 _input，活着的
+## 触控件会先认领触摸、把"点屏重开"吃掉（当年全屏开火区实测踩过，该区已移除）。
 func fade_out_controls() -> void:
 	if not _combat_on:
 		return
 	_combat_on = false
+	for child in get_children():
+		if child.has_method("release"):
+			child.call("release")
 	if not (FORCE_TOUCH_VISIBLE or Platforms.is_mobile()):
 		return
 	var tw := create_tween().set_parallel(true)
@@ -93,56 +99,21 @@ func _retire_touch_controls() -> void:
 			child.process_mode = Node.PROCESS_MODE_DISABLED
 
 
-func _process(_delta: float) -> void:
-	var paused := get_tree().paused
-	if paused and not _was_paused:
-		_paused_at_ms = Time.get_ticks_msec()
-		for child in get_children():
-			if child.has_method("release"):
-				child.call("release")
-		_set_auto(false)
-	_was_paused = paused
-	# 自动前进：每帧重申动作（真实按键的释放会把整个动作状态清掉）。
-	if _auto_forward and not paused:
-		Input.action_press("move_right", 1.0)
+## 结算面板出现（Main 调）：开始受理重开输入，防抖从此刻起算。
+func arm_restart() -> void:
+	_restart_armed = true
+	_armed_at_ms = Time.get_ticks_msec()
 
 
+## 结算后点屏/任意键/鼠标/手柄键重开，同权同防抖；只受理一次（转场黑屏期间
+## 再按不重复触发）。未开闸时一律不管（战斗输入走各自的动作映射）。
 func _input(event: InputEvent) -> void:
+	if not _restart_armed or Time.get_ticks_msec() - _armed_at_ms < RESTART_DEBOUNCE_MS:
+		return
 	var touch := event as InputEventScreenTouch
-	if touch != null:
-		if touch.pressed and get_tree().paused \
-				and Time.get_ticks_msec() - _paused_at_ms >= RESTART_DEBOUNCE_MS:
-			restart_requested.emit()
-		return
-	# 游戏结束（树暂停）后任意键/鼠标/手柄键重开，与点屏同权（防抖同源）；
-	# 暂停期间不走双击右等战斗输入。
-	if get_tree().paused:
-		if Time.get_ticks_msec() - _paused_at_ms >= RESTART_DEBOUNCE_MS \
-				and _is_any_press(event):
-			restart_requested.emit()
-		return
-	# 键盘侧的双击右与关自动（触控侧走摇杆信号）。
-	var key := event as InputEventKey
-	if key != null and key.pressed and not key.is_echo():
-		var pk := key.physical_keycode
-		var is_right := pk == KEY_D or pk == KEY_RIGHT
-		var is_move := is_right or pk == KEY_A or pk == KEY_LEFT
-		if is_move:
-			if _auto_forward:
-				_set_auto(false) # 任何移动操作先关自动
-				_last_right_tap_ms = -999999999 # 关自动的这次按下不参与双击
-			elif is_right:
-				var now := Time.get_ticks_msec()
-				if now - _last_right_tap_ms <= DOUBLE_TAP_MS:
-					_last_right_tap_ms = -999999999
-					_set_auto(true)
-				else:
-					_last_right_tap_ms = now
-
-
-func _exit_tree() -> void:
-	if _auto_forward:
-		Input.action_release("move_right")
+	if (touch != null and touch.pressed) or _is_any_press(event):
+		_restart_armed = false
+		restart_requested.emit()
 
 
 ## 结算画面的"任意键重开"判定：键盘/鼠标/手柄键任一按下（与启动页同语义）。
@@ -157,31 +128,3 @@ func _is_any_press(event: InputEvent) -> bool:
 	if pad != null:
 		return pad.pressed
 	return false
-
-
-func _on_move_started() -> void:
-	# 同步信号，先于摇杆压轴执行：关掉自动前进（释放 move_right）再让摇杆接管。
-	if _auto_forward:
-		_set_auto(false)
-		_last_right_tap_ms = -999999999
-
-
-func _on_joystick_tapped(direction: float) -> void:
-	if direction <= 0.0:
-		_last_right_tap_ms = -999999999 # 只有连续两次"右"才算
-		return
-	if _auto_forward:
-		return
-	var now := Time.get_ticks_msec()
-	if now - _last_right_tap_ms <= DOUBLE_TAP_MS:
-		_last_right_tap_ms = -999999999
-		_set_auto(true)
-	else:
-		_last_right_tap_ms = now
-
-
-func _set_auto(on: bool) -> void:
-	_auto_forward = on
-	_auto_label.visible = on
-	if not on:
-		Input.action_release("move_right")
