@@ -53,7 +53,7 @@ func _display_name() -> String:
 
 
 func _species_max_hp() -> int:
-	return BalanceWorld7.ANCHOR_MAX_HP
+	return BalanceCombat.BOSS_MAX_HP
 
 
 func _hover_anchor_y() -> float:

@@ -13,7 +13,6 @@ const BARGE_SLAG_FLIGHT := 0.75       # 驳船臼炮弹飞行时长
 # ---- 第二章精英·熔渣臼炮车（垂发高抛，落点=按玩家速度推算的前方路面） ----
 # 教学位：把 BOSS 的"熔渣封路"提前教给玩家——读弧线、离开落点、跳越火区。
 # 相对速度即机制：落点带 lead，匀速直线跑会一头扎进火区，躲=变速/绕行/跳越。
-const ELITE_SLAG_MAX_HP := 15
 const ELITE_SLAG_SCORE := 60
 const ELITE_SLAG_ATTACK_RANGE := 2200.0
 const ELITE_SLAG_VOLLEY_HALF_LIFE := 2.4 # 齐射触发半衰期（同 ch1 精英的泊松节奏）
@@ -28,7 +27,6 @@ const ELITE_SLAG_POOL_TIME := 2.2     # 精英火区驻留时长（BOSS 版更�
 # 后摇仍走 BOSS_DIRECT_RECOVER）。弹幕墙：船艏 3 真实炮位（wy 350/380/410，
 # =画布 y70/100/130 舱门），基准俯角+每轮整体摆动（缝轮轮换）；每发出膛前沿射线
 # 采样地形，埋弹抬角校平（至多 2 次），仍埋该炮本轮哑火（被地形挡住不打）。
-const BARGE_MAX_HP := 700
 const BARGE_HOVER_Y := 370.0
 const BARGE_WALL_BASE_DEG := [1.0, 6.0, 11.0] # 三炮位基准俯角（左向开火，正=向下）
 const BARGE_WALL_SWEEP_DEG := 3.0     # 每轮扇面整体摆动幅 ±（phase2 换 5）
@@ -50,7 +48,7 @@ const BARGE_SLAG_LEAD_MAX := 900.0
 const BARGE_PHASE2_SLAG_BONUS := 2
 const BARGE_PHASE2_BURST_BONUS := 2
 const BARGE_PHASE2_SWEEP_DEG := 5.0
-const BARGE_SLUG_SPEED := 700.0       # 排炮重弹（普攻）：机枪流 1000 的七成（2026-11-03 用户「太慢读不出炮弹」500→700），慢大弹仍可跳越
+const BARGE_SLUG_SPEED := 1000.0       # 排炮重弹（普攻）：机枪流 1000 的七成（2026-11-03 用户「太慢读不出炮弹」500→700），慢大弹仍可跳越
 const BARGE_SLUG_DAMAGE := 12         # 单发（旧短梭 6×8 满吃 48 → 单发 12，普攻仍低于技能弹）
 const BARGE_SLUG_DELAY := 0.12        # 枪臂真瞄到位的一拍再点放（方向锁定在出手瞬间）
 const BARGE_SLUG_TWIN_GAP := 0.15     # 二阶段双发间隔（第二发各自重瞄，仍是离散点放）

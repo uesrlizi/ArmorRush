@@ -6,6 +6,9 @@ const ENEMY_MAX_HP := 20
 const ENEMY_SCORE := 10
 const ENEMY_ATTACK_RANGE := 1400.0
 
+# ---- 精英（全章统一：血量只有这一份，不按章分；2026-11-04 定案，原每章一份×7） ----
+const ELITE_MAX_HP := 25
+
 # ---- 敌人状态机（移动/攻击两层独立，半衰期掷骰驱动：p = 1 - 2^(-Δt/t½)） ----
 # 期望等待 = t½ / ln2 ≈ 1.44 × t½；帧率无关、无记忆（同波敌人天然错开开火）。
 const ENEMY_MANEUVER_HALF_LIFE := 1.5  # 待机→机动的触发半衰期

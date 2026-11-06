@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+<!-- 光斑晕 48x48（径向软晕，ADD）：白粉双层——干燥光束线落点光斑+mark
+蓄能点缀共用。脉冲由代码驱动。 -->
+<defs>
+<radialGradient id="rg1"><stop offset="0" stop-color="#f2789f" stop-opacity="0.4"/><stop offset="1" stop-color="#f2789f" stop-opacity="0.0"/></radialGradient>
+<radialGradient id="rg2"><stop offset="0" stop-color="#f2f0ff" stop-opacity="0.95"/><stop offset="1" stop-color="#f2f0ff" stop-opacity="0.0"/></radialGradient>
+</defs>
+<ellipse cx="24" cy="24" rx="22" ry="22" fill="url(#rg1)"/>
+<ellipse cx="24" cy="24" rx="9" ry="9" fill="url(#rg2)"/>
+</svg>

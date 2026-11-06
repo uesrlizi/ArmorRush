@@ -39,6 +39,12 @@ func _hover_anchor_y() -> float:
 	return BalanceCombat.BOSS_HOVER_Y # 默认 ch1 悬浮锚；子类覆写（驳船=BARGE_HOVER_Y）
 
 
+## RUSH 终局血量打折（未经精英预教，run_loop.md §1；开关在 BalanceGlobal）。
+## 二至七章 BOSS 全线继承本类，一处覆写全含。
+func _rush_discount() -> bool:
+	return true
+
+
 func on_spawned() -> void:
 	super()
 	add_to_group("boss")
@@ -130,7 +136,12 @@ func _tick_screen_lock(delta: float) -> void:
 			_vel.x = minf(_vel.x, BalanceCombat.BOSS_MOVE_MAX_SPEED) # 收敛到巡航档
 			_dispatch_next() # 入场即出招
 		return
-	_accel_x(anchor_x, BalanceCombat.BOSS_MOVE_MAX_SPEED, delta, BalanceCombat.BOSS_MOVE_STIFFNESS)
+	# 贴脸压招期：回正移速乘 retreat 倍率——出招被冻结的另一半惩罚是弹簧超速
+	# 弹回安全距离（ch5 俯冲覆写只在俯冲态绕过本函数，非俯冲态照吃提速）
+	var cruise := BalanceCombat.BOSS_MOVE_MAX_SPEED
+	if _player_too_close():
+		cruise *= BalanceCombat.BOSS_RETREAT_SPEED_MULT
+	_accel_x(anchor_x, cruise, delta, BalanceCombat.BOSS_MOVE_STIFFNESS)
 
 
 ## 锚点世界 x：玩家 + 镜头偏移 + 屏幕锚（绕开 Camera2D.offset——震屏走

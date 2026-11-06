@@ -5,7 +5,7 @@ class_name BalancePlayer
 const PLAYER_MAX_HP := 100
 const PLAYER_MOVE_SPEED := 600.0 # 保留手调值（原 420）
 const PLAYER_ACCELERATION := 1800.0 # 水平加/减速度（px/s²），速度不再瞬间突变
-const PLAYER_JUMP_VELOCITY := -400.0
+const PLAYER_JUMP_VELOCITY := -450.0
 const PLAYER_GRAVITY_ASCENT := 1200.0  # 上升段重力
 const PLAYER_GRAVITY_DESCENT := 800.0 # 下降段重力略减，模拟主动反推缓降
 const PLAYER_FIRE_COOLDOWN := 0.22
@@ -64,10 +64,11 @@ const MELEE_HEIGHT := 90.0          # 判定盒高度
 const PLAYER_DAMAGE_SHAKE_STRENGTH := 8.0 # 玩家受击的镜头震动（击毁 6 / 死亡 10 之间）
 const PLAYER_DEATH_SHAKE_STRENGTH := 10.0 # 玩家被毁的镜头震动（比击毁敌人更重）
 # ---- 飞行（AC6 式推进：地面按跳=跳跃；空中按住跳=持续上升） ----
-const BOOST_THRUST_ACCEL := 930.0     # 推进加速度（px/s²），等比压缩
+const BOOST_THRUST_ACCEL := 1000.0     # 推进加速度（px/s²），等比压缩
 const BOOST_MAX_ASCENT_SPEED := 320.0 # 推进上升速度上限，等比压缩
-const BOOST_CAPACITY := 1.8           # 推进槽容量（满槽可连续推进的秒数）
+const BOOST_CAPACITY := 2.5           # 推进槽容量（满槽可连续推进的秒数）
 const BOOST_DRAIN_PER_SEC := 1.0      # 推进时每秒消耗
-const BOOST_REGEN_PER_SEC := 1.5      # 非推进时每秒回充（原 0.9：满槽 ~1.2s 回满，AC6 式快回）
-const BOOST_REGEN_DELAY_AIR := 0.30   # 空中松开推进到开始回充的间隔（很短的一拍，不是"晾一段时间"）
+const BOOST_REGEN_PER_SEC := 2.0      # 非推进时每秒回充（原 0.9：满槽 ~1.2s 回满，AC6 式快回）
+const BOOST_REGEN_DELAY_AIR := 0.50   # 空中松开推进到开始回充的间隔（很短的一拍，不是"晾一段时间"）
 const BOOST_REGEN_DELAY_GROUND := 0.0 # 落地立即开始回充（AC6 落地回气）
+const MELEE_BOOST_COST := 0.15        # 近战固定耗气：每刀起手一口价，不管时长（满槽 1.8 约扣 8%）

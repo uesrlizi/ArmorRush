@@ -51,8 +51,18 @@ var _death_played := false
 @onready var _tail_rotor: Sprite2D = $Visuals/TailRotor
 
 
+## 血条上方显示的机体名（§8 索引名 dreadnought 只作文档键，不上屏）。
+func _display_name() -> String:
+	return "无畏"
+
+
 func _species_max_hp() -> int:
-	return BalanceWorld1.BOSS_MAX_HP
+	return BalanceCombat.BOSS_MAX_HP
+
+
+## RUSH 终局血量打折（未经精英预教，run_loop.md §1；开关在 BalanceGlobal）。
+func _rush_discount() -> bool:
+	return true
 
 
 func _species_score() -> int:
@@ -84,7 +94,7 @@ func on_spawned() -> void:
 	var hud := get_tree().get_first_node_in_group("hud") as HUD
 	if hud != null:
 		hud.flash_warning()
-		hud.show_boss("dreadnought") # 重型武直（§8 索引名）
+		hud.show_boss(_display_name())
 
 
 ## 父类 AI 两层整体替换：不走踱步层、不打机枪层（瞄准/朝向/浮动照旧）。
@@ -171,7 +181,12 @@ func _tick_screen_lock(delta: float) -> void:
 			_vel.x = minf(_vel.x, BalanceCombat.BOSS_MOVE_MAX_SPEED) # 收敛到巡航档
 			_dispatch_next() # 入场即出招（扫射自带压高+蓄力预警，无需另给间歇）
 		return
-	_accel_x(anchor_x, BalanceCombat.BOSS_MOVE_MAX_SPEED, delta, BalanceCombat.BOSS_MOVE_STIFFNESS)
+	# 贴脸压招期：回正移速乘 retreat 倍率——出招被冻结的另一半惩罚是弹簧超速
+	# 弹回安全距离（扫射三态只压高度，水平照吃提速）
+	var cruise := BalanceCombat.BOSS_MOVE_MAX_SPEED
+	if _player_too_close():
+		cruise *= BalanceCombat.BOSS_RETREAT_SPEED_MULT
+	_accel_x(anchor_x, cruise, delta, BalanceCombat.BOSS_MOVE_STIFFNESS)
 
 
 ## 锚点世界 x：玩家 + 镜头偏移 + 屏幕锚（绕开 Camera2D.offset——震屏走

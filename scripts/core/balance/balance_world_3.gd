@@ -19,7 +19,6 @@ const PLASMA_MINE_FENCE_SPACING := 280.0 # 布雷带间距（>爆球直径 160�
 
 # ---- 第三章精英·电浆布雷车（垂发高抛浮雷，落点=按玩家速度推算的前方承诺带） ----
 # 教学位：把白鲸的「浮雷封锁」提前教给玩家——读落点、承诺通过/绕行/等哑熄。
-const ELITE_MINE_MAX_HP := 15
 const ELITE_MINE_SCORE := 60
 const ELITE_MINE_ATTACK_RANGE := 2200.0
 const ELITE_MINE_VOLLEY_HALF_LIFE := 2.4 # 齐射触发半衰期（同 ch1/ch2 精英的泊松节奏）
@@ -36,7 +35,6 @@ const ELITE_MINE_FLIGHT := 0.85        # 高抛飞行时长（弹道解算用，
 # 逐孔轮发 PlasmaMissile——HeavyMissile 纯视觉换皮（追踪/爆炸语法同 ch1 弹雨，
 # 见 plasma_missile.gd）。布雷：腰部布雷舱（BayPort 画布 (122,138)）撒布承诺带
 # （间距 FENCE_SPACING 有缝）。
-const SENTINEL_MAX_HP := 750
 const SENTINEL_HOVER_Y := 370.0
 const SENTINEL_RAIN_COUNT := 4         # 一轮电浆导弹=4 仓口 1:1（phase2 +2 回绕）
 const SENTINEL_RAIN_STAGGER := 0.26

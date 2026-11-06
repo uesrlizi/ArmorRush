@@ -1,0 +1,81 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/units/boss_saltmill.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/world_8/boss_salt_body.svg" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/fx/muzzle_flash.tscn" id="3"]
+[ext_resource type="Texture2D" path="res://assets/world_8/boss_salt_wing.svg" id="4"]
+[ext_resource type="Script" path="res://scripts/units/eye_glow.gd" id="5"]
+[ext_resource type="PackedScene" path="res://scenes/fx/threat_flash.tscn" id="6"]
+[ext_resource type="Texture2D" path="res://assets/common/fx_flame.svg" id="7"]
+
+; 第八章 BOSS·悬浮采盐联合机「盐磨」（BossSaltmill，采盐与地热能力套件）：
+; 独眼条带 y60..66 含 (55,63)（EyeGlow (-95,-27) 沿用；艏段甲板顶缘 y52..54
+; 包住条带）；
+; ArmPivot=镜阵翼枢画布 (150,26)→局部 (0,-64)（俯仰真瞄=敌基类瞄准层驱动，
+; 同沉锚艏炮账；翼画布 96x44 枢端 (78,22)→offset(-78,-22)，翼尖聚焦口画布
+; (10,22)=Muzzle 局部 (-68,0)，Flash=融盐重弹枪口焰+灼烤光束源点）；
+; BayPort=腹裂地锚口画布 (150,168)→局部 (0,78)（ThreatFlash=泉幕预警，
+; 裂地镖由此出膛落地成 mark）；
+; Thruster1/2=局部 (-40,66)/(60,66)（通用 fx_flame+加色杏金，举升喷口呼吸）。
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
+size = Vector2(280, 150)
+
+[sub_resource type="CanvasItemMaterial" id="addmat"]
+blend_mode = 1
+
+[node name="BossSaltmill" type="CharacterBody2D"]
+collision_layer = 4
+collision_mask = 0
+script = ExtResource("1")
+feet_offset = 90.0
+body_size = Vector2(300, 180)
+
+[node name="Visuals" type="Node2D" parent="."]
+
+[node name="Sprite2D" type="Sprite2D" parent="Visuals"]
+texture = ExtResource("2")
+
+[node name="EyeGlow" type="Node2D" parent="Visuals/Sprite2D"]
+position = Vector2(-95, -27)
+scale = Vector2(1.2, 1.2)
+script = ExtResource("5")
+
+[node name="ArmPivot" type="Node2D" parent="Visuals"]
+position = Vector2(0, -64)
+
+[node name="Sprite2D" type="Sprite2D" parent="Visuals/ArmPivot"]
+texture = ExtResource("4")
+centered = false
+offset = Vector2(-78, -22)
+
+[node name="Muzzle" type="Marker2D" parent="Visuals/ArmPivot"]
+position = Vector2(-68, 0)
+
+[node name="Flash" parent="Visuals/ArmPivot/Muzzle" instance=ExtResource("3")]
+
+[node name="ThreatFlash" parent="Visuals/ArmPivot/Muzzle" instance=ExtResource("6")]
+
+[node name="BayPort" type="Marker2D" parent="Visuals"]
+position = Vector2(0, 78)
+
+[node name="ThreatFlash" parent="Visuals/BayPort" instance=ExtResource("6")]
+
+[node name="Flash" parent="Visuals/BayPort" instance=ExtResource("3")]
+
+[node name="Thruster1" type="Sprite2D" parent="Visuals"]
+modulate = Color(0.98, 0.78, 0.52, 0.6)
+material = SubResource("addmat")
+position = Vector2(-40, 66)
+scale = Vector2(1.1, 1.1)
+texture = ExtResource("7")
+
+[node name="Thruster2" type="Sprite2D" parent="Visuals"]
+modulate = Color(0.98, 0.78, 0.52, 0.6)
+material = SubResource("addmat")
+position = Vector2(60, 66)
+scale = Vector2(1.1, 1.1)
+texture = ExtResource("7")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_1")

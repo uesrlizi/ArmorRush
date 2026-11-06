@@ -3,7 +3,6 @@ class_name BalanceWorld1
 ## 只在这里改数值，场景和脚本不保存副本，避免“改了没效果”的遮蔽问题。（原 scripts/core/balance.gd 拆分）
 ## 走位框架与机枪流基准档在 balance_combat.gd（boss.gd/pursuit_boss.gd 与后续各章共用）。
 # ---- 敌人（精英·导弹车：周期导弹齐射，枪口预警） ----
-const ELITE_MAX_HP := 15
 const ELITE_SCORE := 60
 const ELITE_ATTACK_RANGE := 2200.0
 const ELITE_VOLLEY_HALF_LIFE := 2.2 # 齐射触发半衰期（平均 ~3.2s 一轮，泊松采样同杂兵）
@@ -12,7 +11,6 @@ const ELITE_VOLLEY_STAGGER := 0.28  # 轮内发射间隔
 const ELITE_MISSILE_DAMAGE := 8
 const ELITE_BLAST_RADIUS := 95.0    # 爆炸球半径（玩家判定另加半宽宽限）
 # ---- 第一章 BOSS·追击直升机（本章专属段） ----
-const BOSS_MAX_HP := 300
 # 高位扫射：BOSS 真的机动到射高再开火（本体压下来就是预警），不虚空射击。
 # 射高=枪口 410：最高地形站立头顶（536-66=470）之下余量 60px，
 # 跳跃顶点擦不到，滞空挨打。持续机枪流（不是齐射）：小散布角扫成扇面。

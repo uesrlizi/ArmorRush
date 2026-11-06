@@ -1,11 +1,13 @@
 extends Node
 ## 关卡轮换端到端探针（无头）：洗牌袋纯 API 直测 ×200（首抽必在开局白名单、
-## 同周期不重复、整袋轮全、相邻永不相同——含跨袋边界连抽 10N 长跑）→ 入口
-## 跳板自动抽关 → 首关死一次验"死亡重开=重掷新一局"（白名单首关+清分+
-## 启动页，非原地复活）→ 连续通关 N+2 关，逐关验证不变式：落地都在场景池、
-## 白名单只锁首关、同周期不重复、相邻不重复、通关永远滚动进下一关（无末章）、
-## 分数跨关累计、首关照常带启动页（入口纯跳板不交接）、后续关交接跳启动页、
-## 落地满血。
+## 局内不重复（一局=普通段+RUSH 段）、相邻永不相同——含跨局连抽 10N 长跑）
+## → 入口跳板自动抽关 → 首关死一次验"死亡重开=重掷新一局"（白名单首关+清分+
+## 启动页，非原地复活）→ 真实打完一整局（RUN_NORMAL_LEVELS 普通关 + RUSH
+## RUN_RUSH_COUNT 台逐台跳场景），逐关验证不变式：落地都在场景池、白名单只锁
+## 首关、局内不重复、相邻不重复、RUSH 段 rush_active、通关原地结算（无末章
+## 滚动——局内循环 v2，run_loop.md §1）、分数跨关累计、首关照常带启动页
+## （入口纯跳板不交接）、后续关交接跳启动页、落地满血（RUSH 击破间探针全程
+## 无伤=满血账不受 RUSH_NO_HEAL 影响）。
 ## 场景先后是随机的，所以只断言不变式，不断言固定链；RunState.SCENES 加新
 ## 场景后本探针自动覆盖，无需改这里。
 ## 用法：godot --headless res://tests/transition_probe.tscn
@@ -48,31 +50,67 @@ func _run() -> void:
 	watchdog.timeout.connect(func() -> void: _fail("watchdog timeout"))
 	watchdog.start()
 
-	# ---- 袋逻辑直测（纯 API，不进场景）----
+	# ---- 袋逻辑直测（纯 API，不进场景；局内循环 v2 语义=design/run_loop.md §1）----
+	# 一局 = 首关 +（RUN_NORMAL_LEVELS−1）普通抽 + RUSH 阵容（RUN_RUSH_COUNT 台）
+	# + ""（通关结算原地）。一局恰好看 SCENES.size()−1 台（少的那张=没抽到）；
+	# 局内（=旧「周期」概念）不重复、相邻永不相同——普通段/RUSH 段/两段边界都算。
 	for trial in 200:
 		var seen := {}
 		var prev := RunState.start_run()
 		if not RunState.FIRST_POOL.has(prev):
 			return _fail("start_run 首抽不在白名单: %s" % prev)
 		seen[prev] = true
-		for _k in RunState.SCENES.size() - 1:
+		for _k in BalanceGlobal.RUN_NORMAL_LEVELS - 1:
 			var s := RunState.draw_next()
+			if s.is_empty():
+				return _fail("普通段提前返回空串（trial %d）" % trial)
 			if s == prev:
 				return _fail("相邻两关相同: %s（trial %d）" % [s, trial])
 			if seen.has(s):
-				return _fail("纯 API 周期内重复抽到 %s（trial %d）" % [s, trial])
+				return _fail("纯 API 一局内重复抽到 %s（trial %d）" % [s, trial])
 			seen[s] = true
 			prev = s
-		if seen.size() != RunState.SCENES.size():
-			return _fail("纯 API 一周期未轮全: %s" % [seen.keys()])
-	# 跨袋边界连抽 10×N 关：重洗后首张撞上一关是老翻车点，长跑压测防回归
+		# 第 RUN_NORMAL_LEVELS 次抽关即进 RUSH（stage 越过普通关数）：该抽
+		# 返回阵容首台——普通段与 RUSH 段的边界抽。
+		var first_rush := RunState.draw_next()
+		if first_rush.is_empty():
+			return _fail("进 RUSH 的边界抽返回空串（trial %d）" % trial)
+		if not RunState.rush_active:
+			return _fail("普通段抽满未进 RUSH（trial %d）" % trial)
+		if first_rush == prev:
+			return _fail("相邻两关相同: %s（trial %d）" % [first_rush, trial])
+		if seen.has(first_rush):
+			return _fail("纯 API 一局内重复抽到 %s（trial %d）" % [first_rush, trial])
+		seen[first_rush] = true
+		prev = first_rush
+		for _k in BalanceGlobal.RUN_RUSH_COUNT - 1:
+			var s := RunState.draw_next()
+			if s.is_empty():
+				return _fail("RUSH 阵容提前打空（trial %d）" % trial)
+			if s == prev:
+				return _fail("相邻两关相同: %s（trial %d）" % [s, trial])
+			if seen.has(s):
+				return _fail("纯 API 一局内重复抽到 %s（trial %d）" % [s, trial])
+			seen[s] = true
+			prev = s
+		if not RunState.draw_next().is_empty():
+			return _fail("阵容打空后未返回空串（通关结算信号，trial %d）" % trial)
+		if seen.size() != RunState.SCENES.size() - 1:
+			return _fail("纯 API 一局落地 %d 张，应=场景池-1（%d；trial %d）"
+					% [seen.size(), RunState.SCENES.size() - 1, trial])
+	# 长跑连抽压测（跨局边界）：通关空串即开新一局续抽——相邻相同在任何边界
+	# （普通袋尾/RUSH 阵容/新一局首抽）都不允许。start_run 的返回值=新一局
+	# 首关，必须接进比较链（漏了会把「隔一关」误当「相邻」假 FAIL）。
 	var prev2 := ""
 	for _i in RunState.SCENES.size() * 10:
 		var s2 := RunState.draw_next()
+		if s2.is_empty():
+			prev2 = RunState.start_run() # 通关=新一局：首抽直接当 prev
+			continue
 		if s2 == prev2:
-			return _fail("跨袋边界相邻相同: %s" % s2)
+			return _fail("长跑连抽相邻相同: %s" % s2)
 		prev2 = s2
-	printerr("[probe] bag sim x200 + 10N 连抽防相邻 OK (t=%.1fs)" % _elapsed())
+	printerr("[probe] bag sim x200 一局账 + 10N 跨局连抽防相邻 OK (t=%.1fs)" % _elapsed())
 
 	# ---- 真实流程：入口跳板自动抽关 → 连续通关 N+2 关 ----
 	# 入口是纯跳板：装载完当帧末就 change_scene 到抽中的第一关，全程只有
@@ -109,8 +147,9 @@ func _run() -> void:
 	if not _check_landing(0, rerolled, cycle_seen):
 		return
 
-	# ---- 连续通关 N+2 关：整轮一遍 + 新周期两关证"通关永远滚动" ----
-	var hops := RunState.SCENES.size() + 2
+	# ---- 真实流程·一整局：4 普通关 + RUSH 3 台逐台跳场景 → 通关结算原地 ----
+	# （局内循环 v2：通关即结束，不再有旧制「永远滚动」；run_loop.md §1）
+	var hops := BalanceGlobal.RUN_NORMAL_LEVELS + BalanceGlobal.RUN_RUSH_COUNT
 	# 上一关路径先存字符串：change_scene 会立刻释放旧场景节点，
 	# 落地等待后再解引用 _current 必踩 previously freed（踩过）。
 	var prev_path := rerolled.scene_file_path
@@ -130,12 +169,20 @@ func _run() -> void:
 				% [i + 1, scene.scene_file_path, _elapsed()])
 		if not _check_landing(i, scene, cycle_seen):
 			return
-		if i == hops - 1:
-			break # 末次落地本身即证明"又一关滚动进来了"
 		if not await _kill_boss(scene):
 			return
-	printerr("[probe] PASS: 死亡重掷 + %d 落地全过——白名单/整轮不重复/相邻不同/永远滚动/跨关分数/交接满血 (t=%.1fs)"
-			% [hops + 1, _elapsed()])
+		if i == hops - 1:
+			break # 末台 RUSH BOSS 已击杀：随后应通关原地结算（不再有新关）
+	# 通关断言：阵容打空 → draw_next 返回 "" → 不切场景原地出结算
+	#（CHAPTER_CLEAR_DELAY 1.7s + 黑场余量；旧制这里已切进新关=本断言 FAIL）
+	var last_scene := _current
+	await _wait(2.6)
+	if get_tree().current_scene != last_scene or not is_instance_valid(last_scene):
+		return _fail("通关后应原地结算（无新关落地）")
+	if not RunState.run_complete:
+		return _fail("通关记号未置真（run_complete）")
+	printerr("[probe] PASS: 死亡重掷 + 一整局 %d 落地全过（4 普通关+RUSH 3 台）——白名单/局内不重复/相邻不同/通关原地结算/跨关分数/交接满血 (t=%.1fs)"
+			% [hops, _elapsed()])
 	get_tree().quit(0)
 
 
@@ -175,8 +222,9 @@ func _await_next_scene() -> Node:
 	return get_tree().current_scene
 
 
-## 逐关不变式检查。cycle_seen 跨调用持有：逢周期边界（i % N == 0）清空，
-## 周期内不允许重复。
+## 逐关不变式检查。cycle_seen 跨调用持有：逢局边界（i==0）清空，局内不重复
+##（局内循环 v2：一局=普通段+RUSH 段，跨局经死亡重开重掷，探针内只走一局）。
+## RUSH 段（i ≥ RUN_NORMAL_LEVELS）必须 rush_active=true（关号钉死+无杂兵账）。
 func _check_landing(i: int, scene: Node, cycle_seen: Dictionary) -> bool:
 	var path := scene.scene_file_path
 	if not RunState.SCENES.has(path):
@@ -184,6 +232,9 @@ func _check_landing(i: int, scene: Node, cycle_seen: Dictionary) -> bool:
 		return false
 	if i % RunState.SCENES.size() == 0:
 		cycle_seen.clear()
+	if i >= BalanceGlobal.RUN_NORMAL_LEVELS and not RunState.rush_active:
+		_fail("第 %d 落地应已进 RUSH（rush_active=false）" % (i + 1))
+		return false
 	if cycle_seen.has(path):
 		_fail("同一周期内重复落地 %s（第 %d 关）" % [path, i + 1])
 		return false
@@ -203,23 +254,27 @@ func _check_landing(i: int, scene: Node, cycle_seen: Dictionary) -> bool:
 		_fail("交接进新关但启动页仍在")
 		return false
 	var player: Player = scene.get_node_or_null("Player")
-	if player == null or player.hp != Balance.PLAYER_MAX_HP:
+	if player == null or player.hp != BalancePlayer.PLAYER_MAX_HP:
 		var hp := -1 if player == null else player.hp
 		_fail("第 %d 关玩家未满血: %d" % [i + 1, hp])
 		return false
 	# 探针每关只杀 BOSS：分数必须精确等于 BOSS_SCORE × 关序（0 起）
 	var score_label: Label = scene.get_node("HUD/Root/ScoreLabel")
-	var expect := "得分 %d" % (Balance.BOSS_SCORE * i)
+	var expect := "得分 %d" % (BalanceCombat.BOSS_SCORE * i)
 	if score_label.text != expect:
 		_fail("分数跨关累计错误: 期望「%s」实得「%s」" % [expect, score_label.text])
 		return false
 	return true
 
 
-## 刷 BOSS 并击杀（真实路径：killed → Spawner → enemy_killed/boss_defeated）。
+## 杀 BOSS（真实路径：killed → Spawner → enemy_killed/boss_defeated）。
+## RUSH 落地即战（Spawner.start() 已自动刷 BOSS）：组里已有就直杀现役，
+## 别 debug_spawn 出第二只（双 boss_defeated 会把转场账搅乱）。
 func _kill_boss(scene: Node) -> bool:
 	var spawner: Spawner = scene.get_node("Spawner")
-	var boss := spawner.debug_spawn_boss()
+	var boss := scene.get_tree().get_first_node_in_group("boss") as Enemy
+	if boss == null:
+		boss = spawner.debug_spawn_boss() as Enemy
 	if boss == null:
 		_fail("BOSS 未刷出: " + scene.scene_file_path)
 		return false

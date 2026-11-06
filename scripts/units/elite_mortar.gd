@@ -22,7 +22,7 @@ var _launch_seq := 0 # 仓口轮转序号（随机起步，连轮不总从同一
 
 
 func _species_max_hp() -> int:
-	return BalanceWorld1.ELITE_MAX_HP
+	return BalanceEnemy.ELITE_MAX_HP
 
 
 func _species_score() -> int:

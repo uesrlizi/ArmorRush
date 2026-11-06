@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 16" width="36" height="16">
+<!-- 融盐重弹 36x16（+X=飞行方向）：暗盐壳+熔芯裂缝透光（杏金熔）
++白热熔芯头+盐田粉热晕尾带。盐磨普攻点放弹，salt_bolt.tscn=bullet.gd 纯换皮
+（照 slag_slug 账：普通混合不 ADD，暗壳压底=暖调天上靠剪影读）。 -->
+<defs>
+
+</defs>
+<polygon points="3,3.5 24,2.5 33,6 33,10 24,13.5 3,12.5" fill="#3a2c22"/>
+<polygon points="24,2.5 33,6 33,10 24,13.5 28,8" fill="#574434" opacity="0.9"/>
+<line x1="8" y1="4.5" x2="12" y2="11.5" stroke="#ffb050" stroke-width="2.2" opacity="0.9"/>
+<line x1="15" y1="3.5" x2="18" y2="12.5" stroke="#ffc870" stroke-width="1.8" opacity="0.85"/>
+<line x1="21" y1="4" x2="23.5" y2="12" stroke="#ffb050" stroke-width="1.6" opacity="0.8"/>
+<ellipse cx="29.5" cy="8" rx="4.5" ry="5" fill="#fff2d8" opacity="0.95"/>
+<circle cx="31.5" cy="8" r="2" fill="#f2f0ff" opacity="0.95"/>
+<rect x="2" y="5.5" width="5" height="5" fill="#f2789f" opacity="0.75"/>
+<rect x="0.5" y="6.5" width="2.5" height="3" fill="#f2789f" opacity="0.5"/>
+</svg>

@@ -5,9 +5,11 @@ extends Node2D
 ## 开始那一下的按键不许直接变成跳跃/攻击）。
 ## 死亡重开：全局黑屏转场（Fade autoload）进重掷的新一关启动页（哪里死不再哪里复活），再点一次才开始。
 ## 黑屏放全局的原因：场景内的转场层会随旧场景卸载，reload 空档帧闪清屏色。
-## 章节推进：击败 BOSS → 延迟 → 全局黑场 → RunState.draw_next()（轮换袋
-## 抽下一关场景）；分数跨关累计走 RunState，新关跳过启动页落地即战
-## （满血来自全新玩家实例）。输入跨关连续：系统启动音只开局播一次、
+## 章节推进：击败 BOSS → 延迟 → 抽下一关 → 全局黑场切入；分数跨关累计走
+## RunState，新关跳过启动页落地即战（满血来自全新玩家实例；RUSH 击破间
+## 不回血例外，见 run_loop.md §1）。局内循环 v2：固定普通关 + 第 5 关 RUSH
+## 终局（没抽到的场景连战）+ 通关结算，总开关 RUN_LOOP_ENABLED（balance_global）
+## 拨 false 即整套退回旧的无限滚动关。输入跨关连续：系统启动音只开局播一次、
 ## 交接路径操作立即解锁，按住的键/触控指经 RunState 交接认领不脱手。
 
 ## 内容开关（编辑器里直接打勾；_ready 时转发给 Spawner / 预警组件）。
@@ -45,17 +47,19 @@ func _ready() -> void:
 	_touch_controls.restart_requested.connect(_on_restart_requested)
 	score = RunState.score # 分数跨章累计：黑场交接进来的新章从上一章接着算
 	_hud.set_score(score)
-	_hud.set_stage(RunState.stage) # 关卡数/用时同理跨关接续（新一局由 start_run 归零）
+	_hud.set_progress(" ".join(RunState.progress_parts())) # 关卡进度/用时同理跨关接续（新一局由 start_run 归零）
 	_hud.set_play_time(RunState.play_time)
 	_player.hp_changed.connect(Comms.notify_hp)
 	_hud.hide_for_title()
 	_title_screen.accepted.connect(_on_title_accepted)
 	if RunState.take_handoff():
 		# 黑场交接进新章：跳过启动页，落地即战斗（全新玩家实例=满血，
-		# 原"击败回血"由这个满状态开场替代）；不播系统启动播报（整局只在
-		# 开局那次），操作立即解锁——按住的移动键跨关不松手，落地就在走
+		# 原"击败回血"由这个满状态开场替代；RUSH 击破间不回血时改为接上一台
+		# 的血量，run_loop.md §1）；不播系统启动播报（整局只在开局那次），
+		# 操作立即解锁——按住的移动键跨关不松手，落地就在走
 		# （触控件经 RunState 交接认领，按住的手指同理）。
 		_title_screen.queue_free()
+		_player.carry_over_hp(RunState.take_handover_hp())
 		_enter_combat(true)
 	# 开机亮屏：首启与重开回来同路，从全黑渐亮露出启动页。
 	Fade.reveal()
@@ -94,17 +98,43 @@ func _on_enemy_killed(points: int) -> void:
 
 func _on_player_died() -> void:
 	_clock_running = false # 停表：结算报的就是阵亡这一刻的用时
+	_cut_held_input()
 	_hud.play_outro() # 顶栏随失控退场（信息移入结算面板，不再重复）
 	_spawner.stop() # 结算期彻底停刷：残弹打出的击杀分不再把 BOSS 拉进场盖住结算
 	# 触控 UI 随失控渐隐停用（活着的触控件会先认领触摸，吃掉"点屏重开"）。
 	_touch_controls.fade_out_controls()
 	# 玩家爆炸先播完再出结算（按真实时间计时，命中顿帧不影响演出窗口）。世界不冻结：
-	# 敌人/BOSS 认 is_dead 停火、移动层照常=自然待机；重开受理在结算出现时才开闸。
+	# 敌人/BOSS 认 is_dead 停火、移动层照常=自然待机；重开受理在结算动画播完才开闸。
 	get_tree().create_timer(BalanceGlobal.GAME_OVER_DELAY, true, false, true).timeout.connect(
 		func() -> void:
-			_hud.show_result(score, RunState.stage, RunState.play_time)
-			_touch_controls.arm_restart()
+			var intro := _hud.show_result(score, RunState.progress_parts(), RunState.play_time)
+			_arm_restart_after(intro, BalanceGlobal.RESULT_RESTART_LOCK)
 	)
+
+
+## 结算重开闸（防误触）：入场动画播完 + 额外锁定后才受理重开，重开提示同拍
+## 亮起（看见提示=能按）。RESULT_RESTART_AFTER_INTRO=false 回旧制：面板一出即开闸。
+func _arm_restart_after(intro: float, extra_lock: float) -> void:
+	var wait := intro + extra_lock if BalanceGlobal.RESULT_RESTART_AFTER_INTRO else 0.0
+	if wait <= 0.0:
+		_hud.show_restart_hint()
+		_touch_controls.arm_restart()
+		return
+	get_tree().create_timer(wait, true, false, true).timeout.connect(func() -> void:
+		_hud.show_restart_hint()
+		_touch_controls.arm_restart())
+
+
+## 战斗结束（阵亡/通关）断开按住的操作：键盘/手柄按住态一律松开，须真的
+## 松手重按才再算数——按着的方向/跳跃不带进结算与下一局（触控指由
+## fade_out_controls 的 release 放掉）。重开受理只认新按下（非 echo），
+## 结算期间一直按着的键不会触发重开。开关 RESULT_CUT_HELD_INPUT。
+func _cut_held_input() -> void:
+	if not BalanceGlobal.RESULT_CUT_HELD_INPUT:
+		return
+	for action in InputMap.get_actions():
+		if Input.is_action_pressed(action):
+			Input.action_release(action)
 
 
 ## 重开：死亡即新一局——RunState.start_run() 清分+整袋重洗+白名单重掷首关
@@ -115,9 +145,11 @@ func _on_restart_requested() -> void:
 		get_tree().change_scene_to_file(RunState.start_run()))
 
 
-## 本章通关（BOSS 被击败）：延迟让爆散演出播完 → 全局黑场 → 轮换袋抽下一关
-## 切入。分数随击杀实时累进 RunState，新关 _ready 接走；黑场交接旗标让新关
-## 跳过启动页落地即战。没有末章：通关永远滚动进下一关（hold_chapter 锁章除外）。
+## 本章通关（BOSS 被击败）：延迟让爆散演出播完 → 抽下一关 → 全局黑场切入
+## （旧制=轮换袋无限滚动）。局内循环 v2（run_loop.md §1）：第 RUN_NORMAL_LEVELS
+## 关后进 RUSH 终局逐台连战，击破间不回血（血量跨场景携带）；阵容打空=
+## 通关——不切场景，原地出通关结算，本局到此结束（重开=新一局）。
+## hold_chapter 锁章（自测）照旧不转场。
 func _on_boss_defeated() -> void:
 	if RunState.hold_chapter:
 		return
@@ -126,8 +158,28 @@ func _on_boss_defeated() -> void:
 		func() -> void:
 			if _player.is_dead():
 				return # 延迟窗口内玩家暴毙：走死亡结算，不切场景
-			_clock_running = false # 黑场转场不计时：新关进战斗再接着走
+			_clock_running = false # 转场/结算不计时：新关进战斗再接着走
+			var was_rush := RunState.rush_active # draw_next 会推进局状态，先留影
+			var next := RunState.draw_next()
+			if next.is_empty():
+				_show_clear_result() # RUSH 阵容打空=通关：本局结束
+				return
+			if was_rush and BalanceGlobal.RUSH_NO_HEAL:
+				RunState.handover_hp = _player.hp # 击破间不回血：血量带进下一台
 			RunState.begin_handoff()
 			Fade.transition(func() -> void:
-				get_tree().change_scene_to_file(RunState.draw_next()))
+				get_tree().change_scene_to_file(next))
 	)
+
+
+## 通关结算（run_loop.md §1）：不切场景不黑场——BOSS 已亡、刷怪已停，世界
+## 照跑（结算不冻结惯例），结算面板从天空带进场；本局结束，操作收线（机体
+## 停在原地、按住的操作断开），重开闸比阵亡多锁 CLEAR_RESTART_LOCK（打赢那下
+## 手正忙，最易误触），任意键/点屏=新一局。
+func _show_clear_result() -> void:
+	_player.input_enabled = false
+	_cut_held_input()
+	_touch_controls.fade_out_controls()
+	_hud.play_outro() # 顶栏退场（信息移入结算面板，不再重复）
+	var intro := _hud.show_result(score, RunState.progress_parts(), RunState.play_time, true)
+	_arm_restart_after(intro, BalanceGlobal.CLEAR_RESTART_LOCK)

@@ -24,7 +24,6 @@ const SKIP_SHELL_WALL_PENETRATION := 40.0  # 触地埋深超过此值=撞台阶�
 # ---- 第七章精英·海防炮车「岸炮」（俯仰真瞄海防炮，双连跳弹） ----
 # 教学位：把「沉锚」的跳弹齐射提前教给玩家——读落点溅花+弹跳节奏，
 # 落点=你现在站着的地方：看到溅花就跳，停=吃，顺着跑被下一跳追咬。
-const ELITE_SHORE_MAX_HP := 15
 const ELITE_SHORE_SCORE := 60
 const ELITE_SHORE_ATTACK_RANGE := 2200.0
 const ELITE_SHORE_VOLLEY_HALF_LIFE := 2.4 # 齐射触发半衰期（同前六章精英的泊松节奏）
@@ -40,7 +39,6 @@ const ELITE_SHORE_SKIP_BLAST_RADIUS := 90.0 # 末跳球爆（+玩家半宽宽限
 # 漫桥，见 SEA_SURGE 段），间插舰炮曳光直射（sea_bolt.tscn=bullet.gd 纯换皮，
 # 速度/伤害复用 BOSS_SWEEP_*）。分工账：跳弹 hunts 地面站位与顺向跑（跳=反制），
 # 涌浪 hunts 低处停留（上=反制）——两手都把玩家往"上"赶。
-const ANCHOR_MAX_HP := 750
 const ANCHOR_HOVER_Y := 370.0
 const ANCHOR_SKIP_FIRE_Y := 480.0      # 跳弹发射高度（绝对锚，技能A 压低用）：
 									   # 船底 570→管口 ~540，对档 664 甲板落差 ~120；

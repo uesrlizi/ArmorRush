@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 8" width="16" height="8">
+<!-- 裂地镖 16x8（+X=飞行方向）：小件快弹，快速一闪即落——读法归地面
+标记本身（fx_salt_mark）。落地生成 mark（间歇泉预警）。 -->
+<defs>
+
+</defs>
+<polygon points="1,2.5 11,2 15,4 11,6 1,5.5" fill="#1e332e"/>
+<polygon points="11,2 15,4 11,6" fill="#142320"/>
+<rect x="1" y="3.2" width="3" height="1.6" fill="#f2789f" opacity="0.9"/>
+<circle cx="14.4" cy="4" r="1.1" fill="#f2f0ff" opacity="0.95"/>
+</svg>

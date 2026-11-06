@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 44" width="34" height="44">
+<!-- 第八章精英钻塔 34x44（固定射角，臂不俯仰）。
+枢端画布 (17,40)=钻塔座塔环；A 字塔架+钻杆中轴，钻尖画布 (17,6)=Muzzle
+（臂局部 (0,-34)）。裂地镖从钻尖口出膛（出膛焰/预警闪光落钻尖）。 -->
+<defs>
+
+</defs>
+<rect x="11" y="34" width="12" height="9" fill="#1e332e"/>
+<circle cx="17" cy="40" r="3.4" fill="#1e332e"/>
+<polygon points="6,40 17,8 28,40" fill="#2e4a42"/>
+<line x1="8.5" y1="38" x2="17" y2="10" stroke="#4e6a5e" stroke-width="2" opacity="0.9"/>
+<line x1="25.5" y1="38" x2="17" y2="10" stroke="#4e6a5e" stroke-width="2" opacity="0.9"/>
+<line x1="10.3" y1="16" x2="23.7" y2="16" stroke="#2e4a42" stroke-width="2" opacity="0.9"/>
+<line x1="12" y1="22" x2="22" y2="22" stroke="#2e4a42" stroke-width="2" opacity="0.9"/>
+<line x1="13.6" y1="28" x2="20.4" y2="28" stroke="#2e4a42" stroke-width="2" opacity="0.9"/>
+<rect x="15" y="8" width="4" height="30" fill="#142320"/>
+<rect x="16.2" y="10" width="1.6" height="26" fill="#4e6a5e" opacity="0.7"/>
+<polygon points="17,0 20.4,6 13.6,6" fill="#f2f0ff" opacity="0.95"/>
+<circle cx="24" cy="30" r="1.2" fill="#f2789f" opacity="0.85"/>
+</svg>

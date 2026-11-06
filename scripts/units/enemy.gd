@@ -18,6 +18,7 @@ const EXPLOSION := preload("res://scenes/fx/explosion_burst.tscn")
 const IMPACT_TINT := Color(1.0, 0.5, 0.3) # 敌弹命中迸溅的染色（与弹体同族的暗红）
 
 var _hp := 0
+var _hp_scale := 1.0 # 有效最大血量缩放（RUSH 终局 BOSS 血量打折，唯一入口 _max_hp）
 var _move_state := MoveState.IDLE
 var _fire_state := FireState.IDLE
 var _maneuver_target_x := 0.0 # 本次机动的目标世界 x
@@ -55,7 +56,13 @@ const STAGGER_TILT_DOWN := 0.7  # 回正时长（秒，带一点过冲晃动）
 func on_spawned() -> void:
 	super()
 	add_to_group("enemies")
-	_hp = _species_max_hp()
+	# 有效最大血量：物种基准 × 缩放。RUSH 终局（run_loop.md §1）只给 BOSS 打折
+	# ——未经精英预教=一阶段整段缺席；头顶条/血条比例全走 _max_hp，打折不把
+	# 二阶段阈值提前。缩放每次出场重算（池化复用兜底）。
+	_hp_scale = BalanceGlobal.RUSH_HP_DISCOUNT \
+			if (BalanceGlobal.RUSH_HP_DISCOUNT_ON and RunState.rush_active and _rush_discount()) \
+			else 1.0
+	_hp = _max_hp()
 	_move_state = MoveState.IDLE
 	_fire_state = FireState.IDLE
 	velocity = Vector2.ZERO # CharacterBody2D 内置速度
@@ -87,11 +94,21 @@ func on_spawned() -> void:
 
 ## 头顶血条数据源（OverheadBar 轮询）：受损且存活才显示。
 func is_damaged() -> bool:
-	return _hp > 0 and _hp < _species_max_hp()
+	return _hp > 0 and _hp < _max_hp()
 
 
 func hp_ratio() -> float:
-	return clampf(float(_hp) / float(_species_max_hp()), 0.0, 1.0)
+	return clampf(float(_hp) / float(_max_hp()), 0.0, 1.0)
+
+
+## 有效最大血量：物种基准 × 缩放（默认 1=原血）。血条比例/二阶段阈值唯一出处。
+func _max_hp() -> int:
+	return maxi(1, roundi(_species_max_hp() * _hp_scale))
+
+
+## RUSH 血量打折资格：只章 BOSS 开（Boss / PursuitBoss 覆写为真），杂兵/精英恒关。
+func _rush_discount() -> bool:
+	return false
 
 
 ## 伤害结算：常规伤害先扣防御力（下限 1——盾"打不动"但不完全免疫）；

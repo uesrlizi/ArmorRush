@@ -20,7 +20,7 @@ var _launched := 0
 
 
 func _species_max_hp() -> int:
-	return BalanceWorld7.ELITE_SHORE_MAX_HP
+	return BalanceEnemy.ELITE_MAX_HP
 
 
 func _species_score() -> int:

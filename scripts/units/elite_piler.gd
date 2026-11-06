@@ -19,7 +19,7 @@ var _volley_t := 0.0
 
 
 func _species_max_hp() -> int:
-	return BalanceWorld6.ELITE_PILER_MAX_HP
+	return BalanceEnemy.ELITE_MAX_HP
 
 
 func _species_score() -> int:

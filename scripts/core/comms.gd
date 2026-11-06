@@ -20,6 +20,7 @@ const SUBTITLE_TOP_MARGIN := 26.0    # 顶部模式：字幕块离屏幕上缘
 const SUBTITLE_BOTTOM_MARGIN := 90.0 # 底部模式：字幕块离屏幕下缘（AC6 位）
 
 var _enabled := true
+var muted := false # 录制静音闸（F1 档，HUD 接线 set_muted）：人声+字幕+静噪全停
 var _speakers := {}
 var _lines := {}
 var _pending: Array = [] # 播报中又触发一条：只压一条最新的，其余丢弃（系统音可丢了重触）
@@ -78,10 +79,27 @@ func notify_hp(current: int, max_hp: int) -> void:
 		_hp_tier = 0
 
 
+## 录制静音闸（F1 档开、回落档 0 关，HUD 接线）：掐掉在播的人声/字幕/静噪
+## 底床，后续播报一律不出（say 入口挡）。打断逻辑与 notify_combat_start 同款：
+## 代际号推进，旧收尾协程醒来对不上号自行退出。
+func set_muted(on: bool) -> void:
+	muted = on
+	if not on:
+		return
+	_hp_tier = 0
+	_pending.clear()
+	if _playing:
+		_line_seq += 1
+		_playing = false
+	_box.visible = false
+	_voice.stop()
+	_bed.stop()
+
+
 ## ---- 播报内核 ----
 
 func say(id: String) -> void:
-	if not _enabled:
+	if not _enabled or muted:
 		return
 	if _playing:
 		if _pending.size() < 1 and not _pending.has(id):

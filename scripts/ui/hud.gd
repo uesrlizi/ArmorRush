@@ -22,6 +22,7 @@ const RESULT_RULE_W := 620.0    # 标题下横线宽
 const RESULT_HINT_Y := 228.0    # 呼吸提示顶
 const RESULT_TEXT_SIZE := 28    # 统计行统一字号：单档消灭组间大小不齐（数字满墨/汉字 0.75 只靠明度分层）
 const BREATHE_PERIOD := 1.5     # 提示呼吸周期（与启动页同款）
+const RESULT_INTRO_TIME := 0.86 # 结算入场动画总长（末组统计浮齐）：重开闸从这之后才开，见 _play_result_intro
 const BREATHE_MIN := 0.45       # 呼吸下限（modulate.a）
 
 ## 操作提示只列最简 WASD（单手方案；方向键/空格同样可用但不占提示位）。
@@ -55,6 +56,7 @@ var _result_tween: Tween
 var _boss_bar: BossBar
 var _boss_impact_bar: BossBar
 var _boss_name: Label
+var _boss_shown := false # BOSS 在场记账：录制隐藏档回落时按它还原名条/血条显隐
 var _warning_label: Label
 var _warning_tween: Tween
 
@@ -78,6 +80,54 @@ func _ready() -> void:
 		# 手柄热插拔即切提示文案。
 		Input.joy_connection_changed.connect(
 				func(_device: int, _connected: bool) -> void: _apply_help_text())
+	_apply_ui_tier() # 录制隐藏档跨章/跨局延续：新场景落地即沿用（RunState.ui_tier）
+
+
+## 录制隐藏档（F1/F2 两档；状态正本与档位语义见 RunState.ui_tier）：
+## F1=隐顶栏信息 HUD+结算面板，语音播报（含字幕文字）一并停；
+## F2=在 1 的基础上连头顶血条/BOSS 血条/WARNING 全隐=画面完全无 UI。
+## 再按同键回落：F1 在 0↔1 间切换，F2 在 0↔2 间切换（档 2 按 F1 退到档 1）。
+## 注意：结算画面的"任意键重开"监听在 TouchControls——按 F1/F2 也会触发重开，
+## 档位经 RunState 延续到新场景，录制不受影响。
+func _unhandled_input(event: InputEvent) -> void:
+	if not (event is InputEventKey) or not event.pressed or event.echo:
+		return
+	var tier := RunState.ui_tier
+	if event.keycode == KEY_F1:
+		tier = 1 if tier != 1 else 0
+	elif event.keycode == KEY_F2:
+		tier = 2 if tier != 2 else 0
+	else:
+		return
+	RunState.ui_tier = tier
+	get_viewport().set_input_as_handled()
+	_apply_ui_tier()
+
+
+## 把当前档位落到本场景全部 UI（HUD._ready 与每次按键都调）。
+func _apply_ui_tier() -> void:
+	var tier := RunState.ui_tier
+	# 档 1：顶栏信息整组+结算面板全藏；档 0 按战斗态还原（启动页待机本就该藏）。
+	if tier >= 1:
+		for node in _combat_nodes():
+			node.visible = false
+		hide_result()
+	elif _intro_played:
+		show_combat_instant()
+	# 档 2：BOSS 名条/血条/冲击条一并藏；档 0/1 按 BOSS 在场还原。
+	_set_boss_ui_visible(_boss_shown and tier < 2)
+	if tier >= 2 and _warning_tween != null:
+		_warning_tween.kill()
+		_warning_label.visible = false
+	Comms.set_muted(tier >= 1)
+
+
+## BOSS 名条/血条/冲击条三件套统一显隐（含不透明度复位：阵亡退场淡过后
+## 再拉出新 BOSS 的兜底，原 show_boss 手写三行收拢于此）。
+func _set_boss_ui_visible(v: bool) -> void:
+	for node: CanvasItem in [_boss_name, _boss_bar, _boss_impact_bar]:
+		node.visible = v
+		node.modulate.a = 1.0
 
 
 ## 操作提示按输入设备分文案：接着手柄显示手柄版，否则键鼠版。
@@ -253,12 +303,27 @@ func _build_result_ui(font: Font) -> void:
 
 
 ## 结算建立（Main 在 GAME_OVER_DELAY 到点时调）：摆数据 → 播入场
-## （标题下落淡入 → 横线自中心展开 → 统计四段左到右依次上浮 → 提示呼吸接管）。
-func show_result(score: int, stage: int, play_time: float) -> void:
+## （标题下落淡入 → 横线自中心展开 → 统计三组左到右依次上浮），返回入场
+## 动画时长——重开提示不随入场出，由 Main 开闸时调 show_restart_hint 同拍点亮
+## （看见提示=能按，防误触）。progress=RunState.progress_parts()（[标签, 读数]，
+## 「关卡 4/5」/「最终战 2/3」）。
+## cleared=true 为通关结算（RUSH 阵容打空，run_loop.md §1）：换标题，不拍
+## gameover 音（暂无通关音，宁缺毋滥）。受击数/反制数/倍率/拾取清单待局内
+## 循环后续部分进组。录制隐藏档 1 起整面板不建（信息 UI，F1 档即隐），返回 0。
+func show_result(score: int, progress: PackedStringArray, play_time: float,
+		cleared := false) -> float:
+	if RunState.ui_tier >= 1:
+		return 0.0
+	_result_title.text = "作战完成" if cleared else "游戏结束"
+	# 通关标题不吃 GameOver 的死亡红：换本章墨色（横线/统计同款，第一眼读法=
+	# 完成，不是又一场失败；死亡路径照旧走各章结算标题色）。
+	var ink := _score_label.get_theme_color("font_color")
+	var title_rgb := (_game_over.get_node("GameOverTitle") as Label).get_theme_color("font_color")
+	_result_title.add_theme_color_override("font_color", ink if cleared else title_rgb)
 	_result_groups[0][0].text = "得分"
 	_result_groups[0][1].text = str(score)
-	_result_groups[1][0].text = "关卡"
-	_result_groups[1][1].text = str(stage)
+	_result_groups[1][0].text = progress[0]
+	_result_groups[1][1].text = progress[1]
 	_result_groups[2][0].text = "用时"
 	_result_groups[2][1].text = format_time(play_time)
 	_layout_result_units()
@@ -268,7 +333,9 @@ func show_result(score: int, stage: int, play_time: float) -> void:
 		for node: CanvasItem in segs:
 			node.visible = true
 	_play_result_intro()
-	Sfx.play(&"ui_gameover")
+	if not cleared:
+		Sfx.play(&"ui_gameover")
+	return RESULT_INTRO_TIME
 
 
 ## 统计三组（得分 1230 · 关卡 3 · 用时 05:32）同一基线水平居中：得分/用时数字 40 号
@@ -308,7 +375,9 @@ func _layout_result_units() -> void:
 			x += label.size.x
 
 
-## 结算入场：标题自上落位淡入 → 横线自中心展开 → 统计四段左到右依次上浮 → 提示淡入。
+## 结算入场：标题自上落位淡入 → 横线自中心展开 → 统计三组左到右依次上浮。
+## 时序须与 RESULT_INTRO_TIME 对账（末组 delay 0.3+0.08×2 + 0.4 = 0.86s）。
+## 重开提示不在这里出：留到开闸（show_restart_hint）。
 func _play_result_intro() -> void:
 	if _result_tween != null:
 		_result_tween.kill()
@@ -336,9 +405,20 @@ func _play_result_intro() -> void:
 					.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 			tw.tween_property(node, "position:y", node.position.y - 12.0, 0.4) \
 					.set_delay(delay).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	tw.chain().tween_property(_result_hint, "modulate:a", 0.8, 0.5) \
+	_result_tween = tw
+
+
+## 重开开闸同拍（Main 调）：提示淡入后转呼吸——提示亮起=此刻起按键才算数。
+## 面板没建（录制隐藏档）时空转。
+func show_restart_hint() -> void:
+	if not _result_hint.visible:
+		return
+	if _result_tween != null:
+		_result_tween.kill()
+	var tw := create_tween()
+	tw.tween_property(_result_hint, "modulate:a", 0.8, 0.5) \
 			.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	tw.chain().tween_callback(_breathe_hint)
+	tw.tween_callback(_breathe_hint)
 	_result_tween = tw
 
 
@@ -381,9 +461,11 @@ func hide_for_title() -> void:
 	hide_result()
 
 
-## 重开直进战斗：不播启动动画，整组立即就位。
+## 重开直进战斗：不播启动动画，整组立即就位（档 1 起整组不亮，回落档 0 走这里还原）。
 func show_combat_instant() -> void:
 	_intro_played = true
+	if RunState.ui_tier >= 1:
+		return
 	for node in _combat_nodes():
 		node.visible = true
 		node.modulate.a = 1.0
@@ -402,6 +484,8 @@ func play_intro() -> void:
 	if _intro_played:
 		return
 	_intro_played = true
+	if RunState.ui_tier >= 1: # 录制隐藏档：启动动画不播，回落档 0 走 show_combat_instant 还原
+		return
 	for node in _combat_nodes():
 		node.visible = true
 	_help_label.visible = _help_allowed
@@ -476,9 +560,8 @@ func play_outro() -> void:
 	tw.chain().tween_callback(func() -> void:
 		for node in _combat_nodes():
 			node.visible = false
-		_boss_name.visible = false
-		_boss_bar.visible = false
-		_boss_impact_bar.visible = false
+		_boss_shown = false
+		_set_boss_ui_visible(false)
 		_warning_label.visible = false)
 
 
@@ -486,8 +569,9 @@ func set_score(score: int) -> void:
 	_score_label.text = "得分 %d" % score
 
 
-func set_stage(stage: int) -> void:
-	_stage_label.text = "关卡 %d" % stage
+## 进度读数（RunState.progress_parts 拼好的「关卡 4/5」/「最终战 1/3」）。
+func set_progress(text: String) -> void:
+	_stage_label.text = text
 
 
 ## 跑局用时（Main 逐帧喂累计秒数）：跳秒才刷新文本。
@@ -512,17 +596,14 @@ static func format_time(seconds: float) -> String:
 ## ---- BOSS 战 UI（Boss 按组调用） ----
 
 ## boss_name：机体名写进血条上方标签（§0b「单位名写在 BOSS 血条」的接线；
-## 缺省=未登记，兜底旧调用不炸）。
+## 缺省=未登记，兜底旧调用不炸）。录制隐藏档 2 起三件套不亮（记账照走，
+## 回落档 0/1 按 _boss_shown 还原）。
 func show_boss(boss_name: String = "未登记大型机") -> void:
 	_boss_name.text = boss_name
 	_boss_bar.reset() # 血条出生满格
-	_boss_bar.visible = true
 	_boss_impact_bar.reset(0.0) # 冲击条出生空格：满格虚影衰减会演出一段"逐渐变短"
-	_boss_impact_bar.visible = true
-	_boss_name.visible = true
-	_boss_name.modulate.a = 1.0 # 阵亡退场后残留敌弹打死杂兵拉出新 BOSS 的兜底：
-	_boss_bar.modulate.a = 1.0  # play_outro 淡过这仨，show_boss 得把不透明度抬回来。
-	_boss_impact_bar.modulate.a = 1.0
+	_boss_shown = true
+	_set_boss_ui_visible(RunState.ui_tier < 2)
 
 
 func set_boss_hp(ratio: float) -> void:
@@ -534,13 +615,15 @@ func set_boss_impact(ratio: float) -> void:
 
 
 func hide_boss() -> void:
-	_boss_bar.visible = false
-	_boss_impact_bar.visible = false
-	_boss_name.visible = false
+	_boss_shown = false
+	_set_boss_ui_visible(false)
 
 
 ## WARNING 大字闪两轮（AC6 式遭遇警报），结束自隐；重复调用重启闪烁。
+## 录制隐藏档 2 起不闪（F2=完全无 UI）。
 func flash_warning() -> void:
+	if RunState.ui_tier >= 2:
+		return
 	if _warning_tween != null:
 		_warning_tween.kill()
 	_warning_label.visible = true

@@ -145,7 +145,7 @@ func _run() -> void:
 	var time_parts := hud._time_label.text.trim_prefix("用时 ").split(":")
 	var shown_secs := int(time_parts[0]) * 60 + int(time_parts[1]) \
 			if time_parts.size() == 2 else -1
-	var info_ok: bool = hud._stage_label.text == "关卡 %d" % RunState.stage \
+	var info_ok: bool = hud._stage_label.text == " ".join(RunState.progress_parts()) \
 			and RunState.play_time > 1.0 and absf(shown_secs - RunState.play_time) < 1.0
 	print("[autotest] run info: stage=\"", hud._stage_label.text, "\" time=\"",
 			hud._time_label.text, "\" play_time=", snappedf(RunState.play_time, 0.01),
@@ -402,7 +402,8 @@ func _run() -> void:
 		# （ch1=导弹车追踪导弹 HeavyMissile；ch2=熔渣臼炮车迫击炮弹 MortarShell；
 		# ch3=布雷车电浆浮雷 PlasmaMine——PlasmaMissile 是 HeavyMissile 子类，自然命中；
 		# ch4=海葵炮台车珊瑚重弹 CoralOrb；ch5=响哨防空炮车啸雷弹 FlakShell；
-		# ch6=锚桩打桩车电网闸 ArcFence；ch7=岸炮海防炮车跳弹 SkipShell）
+		# ch6=锚桩打桩车电网闸 ArcFence；ch7=岸炮海防炮车跳弹 SkipShell；
+		# ch8=钻机车「喷井」裂地镖 SaltDart——mark 落地即计入威胁，镖=出手件）
 	# 齐射触发是半衰期掷骰（平均 ~3.5s 一轮）+ 蓄力 0.5s，16s 窗口覆盖 ~99%。
 	var elite: Enemy = spawner.debug_spawn_elite(player.global_position.x + 500.0)
 	if elite != null:
@@ -415,7 +416,7 @@ func _run() -> void:
 				return c is HeavyMissile or c is MortarShell \
 						or c is PlasmaMine or c is CoralOrb \
 						or c is FlakShell or c is ArcFence \
-						or c is SkipShell) > 0
+						or c is SkipShell or c is SaltDart) > 0
 		await _screenshot("07_elite_volley.png")
 		print("[autotest] elite heavy shot: ", saw_missile,
 				" (当前章精英在场应出重击弹)")
@@ -447,6 +448,8 @@ func _run() -> void:
 			await _probe_boss_redwheel(boss as BossRedwheel)
 		elif boss is BossAnchor:
 			await _probe_boss_anchor(boss as BossAnchor)
+		elif boss is BossSaltmill:
+			await _probe_boss_saltmill(boss as BossSaltmill)
 		elif boss is Boss:
 			await _probe_boss_heli(boss as Boss)
 		elif boss is PursuitBoss:
@@ -492,7 +495,7 @@ func _run() -> void:
 	print("[autotest] game over: paused=", get_tree().paused, " [",
 			"OK" if not get_tree().paused else "FAIL", "] (结算后世界不冻结，应=false)")
 	# 结算三组=阵亡瞬间的得分/关卡/用时；GAME_OVER_DELAY 演出窗口里表已停（不再走）。
-	var expect_num: Array[String] = [str(get_parent().score), str(RunState.stage),
+	var expect_num: Array[String] = [str(get_parent().score), RunState.progress_parts()[1],
 			HUD.format_time(play_time_at_death)]
 	var got_num: Array[String] = []
 	for gi in 3:
@@ -505,6 +508,12 @@ func _run() -> void:
 	var result_up: bool = hud._result_title.visible and hud._result_hint.visible \
 			and (hud._result_groups[0][0] as CanvasItem).visible
 	print("[autotest] result panel up: ", result_up, " [", "OK" if result_up else "FAIL", "]")
+	# 重开闸（防误触）：面板刚出、入场动画没播完时不受理重开，提示也还没亮。
+	var touch_ctl: TouchControls = get_parent().get_node("TouchControls")
+	var gate_shut: bool = not touch_ctl._restart_armed and hud._result_hint.modulate.a < 0.05
+	print("[autotest] restart gate during intro: armed=", touch_ctl._restart_armed,
+			" hint_a=", snappedf(hud._result_hint.modulate.a, 0.01),
+			" [", "OK" if gate_shut else "FAIL", "] (入场动画内应未开闸、提示未亮)")
 	# 结算建立帧截图放呼吸稳定后（先截会截到统计还没浮齐的中间态）。
 	await _wait(0.8)
 	await _screenshot("07_game_over.png")
@@ -532,6 +541,10 @@ func _run() -> void:
 			" boss_bob=", snappedf(boss_bob, 0.1), " [",
 			"OK" if new_hostile == 0 and boss_bob > 1.0 else "FAIL",
 			"] (阵亡后敌方应停火=0 新弹，BOSS 应仍在悬停浮动>1px)")
+	# 入场动画早已播完：重开闸应已开、提示已亮（下面的任意键重开才有效）。
+	var gate_open: bool = touch_ctl._restart_armed and hud._result_hint.modulate.a > 0.3
+	print("[autotest] restart gate after intro: armed=", touch_ctl._restart_armed,
+			" [", "OK" if gate_open else "FAIL", "] (动画播完应开闸、提示亮起)")
 	await _screenshot("07c_idle_after_death.png")
 	# 重开=任意键（结算画面）：用 N 键（不映射任何动作）验证任意键都能重开。
 	var ev := InputEventKey.new()
@@ -609,7 +622,7 @@ func _probe_boss_heli(boss: Boss) -> void:
 		var ratio_pre := boss.hp_ratio()
 		boss.take_damage(10)
 		await _wait(0.05)
-		var applied := roundi((ratio_pre - boss.hp_ratio()) * BalanceWorld1.BOSS_MAX_HP)
+		var applied := roundi((ratio_pre - boss.hp_ratio()) * BalanceCombat.BOSS_MAX_HP)
 		var expected := ceili(10 * BalanceCombat.STAGGER_DMG_MULT) - BalanceCombat.BOSS_DEFENSE
 		await _screenshot("08e_boss_stagger.png")
 		print("[autotest] boss stagger: staggered=", staggered,
@@ -699,7 +712,7 @@ func _probe_boss_barge(boss: BossBarge) -> void:
 		var ratio_pre := boss.hp_ratio()
 		boss.take_damage(10)
 		await _wait(0.05)
-		var applied := roundi((ratio_pre - boss.hp_ratio()) * BalanceWorld2.BARGE_MAX_HP)
+		var applied := roundi((ratio_pre - boss.hp_ratio()) * BalanceCombat.BOSS_MAX_HP)
 		var expected := ceili(10 * BalanceCombat.STAGGER_DMG_MULT) - BalanceCombat.BOSS_DEFENSE
 		await _screenshot("08e_boss_stagger.png")
 		print("[autotest] barge stagger: staggered=", staggered,
@@ -763,7 +776,7 @@ func _probe_boss_sentinel(boss: BossSentinel) -> void:
 		var ratio_pre := boss.hp_ratio()
 		boss.take_damage(10)
 		await _wait(0.05)
-		var applied := roundi((ratio_pre - boss.hp_ratio()) * BalanceWorld3.SENTINEL_MAX_HP)
+		var applied := roundi((ratio_pre - boss.hp_ratio()) * BalanceCombat.BOSS_MAX_HP)
 		var expected := ceili(10 * BalanceCombat.STAGGER_DMG_MULT) - BalanceCombat.BOSS_DEFENSE
 		await _screenshot("08e_boss_stagger.png")
 		print("[autotest] sentinel stagger: staggered=", staggered,
@@ -865,7 +878,7 @@ func _probe_boss_angler(boss: BossAngler) -> void:
 		var ratio_pre := boss.hp_ratio()
 		boss.take_damage(10)
 		await _wait(0.05)
-		var applied := roundi((ratio_pre - boss.hp_ratio()) * BalanceWorld4.ANGLER_MAX_HP)
+		var applied := roundi((ratio_pre - boss.hp_ratio()) * BalanceCombat.BOSS_MAX_HP)
 		var expected := ceili(10 * BalanceCombat.STAGGER_DMG_MULT) - BalanceCombat.BOSS_DEFENSE
 		await _screenshot("08e_boss_stagger.png")
 		print("[autotest] angler stagger: staggered=", staggered,
@@ -981,7 +994,7 @@ func _probe_boss_interceptor(boss: BossInterceptor) -> void:
 		var ratio_pre := boss.hp_ratio()
 		boss.take_damage(10)
 		await _wait(0.05)
-		var applied := roundi((ratio_pre - boss.hp_ratio()) * BalanceWorld5.INTERCEPTOR_MAX_HP)
+		var applied := roundi((ratio_pre - boss.hp_ratio()) * BalanceCombat.BOSS_MAX_HP)
 		var expected := ceili(10 * BalanceCombat.STAGGER_DMG_MULT) - BalanceCombat.BOSS_DEFENSE
 		await _screenshot("08e_boss_stagger.png")
 		print("[autotest] interceptor stagger: staggered=", staggered,
@@ -1115,7 +1128,7 @@ func _probe_boss_redwheel(boss: BossRedwheel) -> void:
 		var ratio_pre := boss.hp_ratio()
 		boss.take_damage(10)
 		await _wait(0.05)
-		var applied := roundi((ratio_pre - boss.hp_ratio()) * BalanceWorld6.REDWHEEL_MAX_HP)
+		var applied := roundi((ratio_pre - boss.hp_ratio()) * BalanceCombat.BOSS_MAX_HP)
 		var expected := ceili(10 * BalanceCombat.STAGGER_DMG_MULT) - BalanceCombat.BOSS_DEFENSE
 		await _screenshot("08e_boss_stagger.png")
 		print("[autotest] redwheel stagger: staggered=", staggered,
@@ -1266,10 +1279,179 @@ func _probe_boss_anchor(boss: BossAnchor) -> void:
 		var ratio_pre := boss.hp_ratio()
 		boss.take_damage(10)
 		await _wait(0.05)
-		var applied := roundi((ratio_pre - boss.hp_ratio()) * BalanceWorld7.ANCHOR_MAX_HP)
+		var applied := roundi((ratio_pre - boss.hp_ratio()) * BalanceCombat.BOSS_MAX_HP)
 		var expected := ceili(10 * BalanceCombat.STAGGER_DMG_MULT) - BalanceCombat.BOSS_DEFENSE
 		await _screenshot("08e_boss_stagger.png")
 		print("[autotest] anchor stagger: staggered=", staggered,
+				" impact_bar=", get_parent().get_node("HUD")._boss_impact_bar.visible,
+				" take 10 -> ", applied, " (失衡加深×防御应=", expected, ")")
+
+
+## ch8 盐磨：无镜像换边探针（镜阵翼枢/腹口都钉机体中轴 x=0，翻转不产生
+## 轴向位移，断言不成立）→ 间歇泉幕（入场首手自然出招：玩家原地站桩=恰吃
+## 一枚 mark 的汽柱 10；再戳一手、镖出膛后瞬移跑离=0——「离=唯一反制」）
+## → 定镜灼烤（戳 _begin_skill_b：站桩吃首个 tick 恰 6 → 急停瞬移挪位后
+## 不再掉血=「变速变向免」）→ **单威胁源排空把 mark/灼点连预警态算进
+## quiet 判据**（ch6 教训④：驻留危险件+预警态一起排空）→ 失衡加深（账同
+## ch2~ch7，hp=99999 贯穿收尾还原）。
+func _probe_boss_saltmill(boss: BossSaltmill) -> void:
+	var player := get_tree().get_first_node_in_group("player") as Player
+	# 给巨量血：站桩探针期全程吃泉幕/灼点/直射蹭血——玩家一死全局暂停冻结
+	# 世界，后续探针全部落空（ch5/ch6/ch7 同教训）。探针收尾还原满血。
+	player.hp = 99999
+	var player_x_before_run := player.global_position.x # 收尾还原位（跑离/挪位都从这里推）
+	# 单威胁源：清掉场上杂兵（BOSS 也在 enemies 组，别误伤本体）。
+	for node in get_tree().get_nodes_in_group("enemies"):
+		if node.is_in_group("boss"):
+			continue
+		(node as Enemy).take_damage(999)
+	# ---- 技能A·间歇泉幕：确定性戳招（入场首手不定时——入场收尾快时镖在
+	#      探针动作前就出膛，观测窗口不稳；ch7 同款=先排空再戳）。站桩玩家
+	#      恰在「身后 28」mark 的柱半宽内（|−28| < 45+26）→ 恰吃一枚 10 ----
+	# 排空自然首手：威胁件出清 + BOSS 回稳态（0=ENTER/1=RECOVER）才动戳。
+	var waited := 0.0
+	while waited < 12.0:
+		var leftover := _count_projectiles(func(c: Node) -> bool:
+			return c is SaltDart or c is SaltGeyser or c is MirrorBurn \
+					or (c is Bullet \
+					and c.damage != BalancePlayer.PLAYER_BULLET_DAMAGE))
+		var quiet := leftover == 0 \
+				and (boss._bstate == 0 or boss._bstate == 1)
+		if quiet:
+			break
+		await _wait(0.2)
+		waited += 0.2
+	for c in get_tree().get_nodes_in_group("salt_darts"):
+		c.queue_free()
+	for c in get_tree().get_nodes_in_group("salt_geysers"):
+		c.queue_free()
+	await _wait(0.2)
+	player.velocity = Vector2.ZERO
+	var hp_pre_geyser := player.hp
+	boss._begin_skill_a()
+	var geysers := 0
+	waited = 0.0
+	while waited < 3.0 and geysers == 0:
+		await _wait(0.1)
+		waited += 0.1
+		geysers = get_tree().get_nodes_in_group("salt_geysers").size()
+	waited = 0.0
+	while waited < 2.0 and player.hp >= hp_pre_geyser:
+		await _wait(0.1)
+		waited += 0.1
+	# 掉血已确认=喷发进行中（柱寿 0.55s 窗口内）再截：柱必须满幅在画
+	await _screenshot("08a_saltmill_geyser.png")
+	var geyser_damage := hp_pre_geyser - player.hp
+	print("[autotest] saltmill geyser: marks=", geysers,
+			" hp ", hp_pre_geyser, " -> ", player.hp, " damage=", geyser_damage,
+			" [", "OK" if geyser_damage == BalanceWorld8.SALT_GEYSER_DAMAGE else "FAIL",
+			" 应=", BalanceWorld8.SALT_GEYSER_DAMAGE,
+			"]（站桩=恰吃一枚 mark 的汽柱；跳≠过，离=唯一反制）")
+	# ---- 技能A·跑离=免：再戳一手，镖出膛（mark 锚定）后瞬移跑离 500px，
+	#      全部柱在原位喷发→不掉血 ----
+	if is_instance_valid(boss) and boss.hp_ratio() > 0.0:
+		waited = 0.0
+		while waited < 10.0:
+			var leftover := _count_projectiles(func(c: Node) -> bool:
+				return c is SaltDart or c is SaltGeyser or c is MirrorBurn \
+						or (c is Bullet \
+						and c.damage != BalancePlayer.PLAYER_BULLET_DAMAGE))
+			var quiet := leftover == 0 \
+					and (boss._bstate == 0 or boss._bstate == 1)
+			if quiet:
+				break
+			await _wait(0.2)
+			waited += 0.2
+		boss._begin_skill_a()
+		waited = 0.0
+		while waited < 2.0 and get_tree().get_nodes_in_group("salt_darts").is_empty():
+			await _wait(0.1)
+			waited += 0.1
+		player.global_position = Vector2(player_x_before_run - 500.0,
+				player.global_position.y)
+		player.velocity = Vector2.ZERO
+		await _wait(2.8) # 出膛+飞行+mark+喷发全程走完
+		var run_damage := hp_pre_geyser - player.hp - geyser_damage
+		print("[autotest] saltmill geyser run-away: damage=", run_damage,
+				" [", "OK" if run_damage == 0 else "FAIL",
+				"]（mark 锚定后跑离 500px：柱在原位喷发，应=0）")
+	# ---- 技能B·定镜灼烤：两段账。①站桩吃首个 tick 恰 6（lead≈0 落脚下，
+	#      停=吃 6/0.3s）；②「读线挪位」——每枚灼点出线后（光束线窗 0.4s）
+	#      即挪开，梯次连点逐点躲=全章语言「变速变向」，余下 tick 全落空。
+	#      注：只躲首枚不够——梯次连点本来就是压挪位的（第二枚 lead 取的是
+	#      挪完后的新位置），逐点各躲各的才是机制正解。----
+	if is_instance_valid(boss) and boss.hp_ratio() > 0.0:
+		waited = 0.0
+		while waited < 10.0:
+			var leftover := _count_projectiles(func(c: Node) -> bool:
+				return c is SaltDart or c is SaltGeyser or c is MirrorBurn \
+						or (c is Bullet \
+						and c.damage != BalancePlayer.PLAYER_BULLET_DAMAGE))
+			var quiet := leftover == 0 \
+					and (boss._bstate == 0 or boss._bstate == 1)
+			if quiet:
+				break
+			await _wait(0.2)
+			waited += 0.2
+		var player_x_before_burn := player.global_position.x
+		boss._begin_skill_b()
+		waited = 0.0
+		while waited < 2.5 and get_tree().get_nodes_in_group("mirror_burns").is_empty():
+			await _wait(0.1)
+			waited += 0.1
+		await _wait(0.15) # 光束线驻留中段（蓄热窗 0.4s）
+		await _screenshot("08b_saltmill_burn.png")
+		var hp_pre_burn := player.hp
+		waited = 0.0
+		while waited < 2.0 and player.hp >= hp_pre_burn:
+			await _wait(0.1)
+			waited += 0.1
+		var burn_damage := hp_pre_burn - player.hp
+		# 首枚已吃一口，先挪出它的 tick 区（0.9s/0.3s 还剩至多 3 拍要躲）。
+		player.global_position = Vector2(player_x_before_burn + 500.0,
+				player.global_position.y)
+		player.velocity = Vector2.ZERO
+		# ②逐点躲：每见一枚新灼点出线就再挪 500（出线判定=mirror_burns 计数
+		# 增加），光束窗内挪开=该点落空；首枚已吃的一口不算躲账。
+		var dodge_from := player_x_before_burn + 500.0
+		var seen_burns := get_tree().get_nodes_in_group("mirror_burns").size()
+		waited = 0.0
+		while waited < 3.0:
+			await _wait(0.1)
+			waited += 0.1
+			var now_burns := get_tree().get_nodes_in_group("mirror_burns").size()
+			if now_burns > seen_burns:
+				dodge_from += 500.0
+				player.global_position = Vector2(dodge_from, player.global_position.y)
+				player.velocity = Vector2.ZERO
+				seen_burns = now_burns
+			if now_burns == 0:
+				break
+		var burn_total := hp_pre_burn - player.hp
+		print("[autotest] saltmill burn: first_tick=", burn_damage,
+			" total_after_dodge_all=", burn_total,
+			" [", "OK" if burn_damage == BalanceWorld8.MIRROR_BURN_DAMAGE
+			and burn_total == BalanceWorld8.MIRROR_BURN_DAMAGE else "FAIL",
+			" 应首 tick=", BalanceWorld8.MIRROR_BURN_DAMAGE, " 逐点躲后仍=",
+			BalanceWorld8.MIRROR_BURN_DAMAGE,
+			"]（停=吃 6/0.3s；读线逐点挪位=免）")
+	# 还原：结尾死亡探针要一刀必死
+	player.hp = BalancePlayer.PLAYER_MAX_HP
+	player.global_position = Vector2(player_x_before_run, player.global_position.y)
+	player.velocity = Vector2.ZERO
+	await _wait(0.1)
+	# 失衡探针：加深×1.5 在前、减防御在后（10 → ceili(15)−5 = 10）
+	if is_instance_valid(boss) and boss.hp_ratio() > 0.0:
+		boss.add_impact(999)
+		await _wait(0.15)
+		var staggered := boss.is_staggered()
+		var ratio_pre := boss.hp_ratio()
+		boss.take_damage(10)
+		await _wait(0.05)
+		var applied := roundi((ratio_pre - boss.hp_ratio()) * BalanceCombat.BOSS_MAX_HP)
+		var expected := ceili(10 * BalanceCombat.STAGGER_DMG_MULT) - BalanceCombat.BOSS_DEFENSE
+		await _screenshot("08e_boss_stagger.png")
+		print("[autotest] saltmill stagger: staggered=", staggered,
 				" impact_bar=", get_parent().get_node("HUD")._boss_impact_bar.visible,
 				" take 10 -> ", applied, " (失衡加深×防御应=", expected, ")")
 
@@ -1292,7 +1474,7 @@ func _is_hostile_shot(c: Node) -> bool:
 		return (c as Bullet).damage != BalancePlayer.PLAYER_BULLET_DAMAGE
 	return c is HeavyMissile or c is MortarShell or c is PlasmaMine or c is CoralOrb \
 			or c is CoralTide or c is FlakShell or c is ArcFence or c is SkipShell \
-			or c is DrillCharge or c is DepthCharge
+			or c is DrillCharge or c is DepthCharge or c is SaltDart
 
 
 ## 弹容器里按谓词数弹（BOSS 探针用：扫射弹/导弹分类计数）。

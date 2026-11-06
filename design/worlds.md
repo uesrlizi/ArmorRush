@@ -5,7 +5,7 @@
 
 ## 0. 场景池现状（洗牌袋轮换制，2026-10-21 起）
 
-七关已为平行场景，无顺序链、无末章：`scenes/world/world_1.tscn`（一「锈雨废都」）、`world_2`（二「精炼所工业带」）、`world_3`（三「雪原警戒点」）、`world_4`（四「珊瑚辐合夜」）、`world_5`（五「破晓云廊」）、`world_6`（六「赤沙矿区」；2026-10-23 用户验收后**已装回池子**——曾因 BOSS 待返工短暂出池一轮，凿岩齐射替换溜矿车+船体悬空返工完成后恢复）、`world_7`（七「溺海都会」，2026-11-02 实装入池，引擎流水线全绿，**待用户游戏内验收**）。开机入口 = `entry.tscn`（run/main_scene，**纯跳板**：开局即抽关立即跳转，启动页由第一关自己的 TitleScreen 负责）。
+八关已为平行场景，无顺序链、无末章：`scenes/world/world_1.tscn`（一「锈雨废都」）、`world_2`（二「精炼所工业带」）、`world_3`（三「雪原警戒点」）、`world_4`（四「珊瑚辐合夜」）、`world_5`（五「破晓云廊」）、`world_6`（六「赤沙矿区」；2026-10-23 用户验收后**已装回池子**——曾因 BOSS 待返工短暂出池一轮，凿岩齐射替换溜矿车+船体悬空返工完成后恢复）、`world_7`（七「溺海都会」，2026-11-02 实装入池，引擎流水线全绿，**待用户游戏内验收**）、`world_8`（八「镜盐之原」，2026-11-06 实装入池，引擎流水线全绿，**待用户游戏内验收**）。**world_8 号位曾属「闭园夜场」：2026-11-04 实装当天用户否决整章删除**（游乐园主题不合机甲+敌营奶油白配色难看）——场景/单位/弹种（dart_ring/finale_ball）/玩家斩碎接线（slashable 组+判定盒蒙版 20）/探针/烘焙脚本全数回退不留档；提案图同删，原九/十提案重编号为八/九（文件、目录、generate_proposals3 表、ground_v2 主题键 p8_salt/p9_forest 同步改名）；**原九「绿渊林场」提案同日用户删除**（generate_proposals3 函数与 p9_forest 主题/样式分支一并清掉）。开机入口 = `entry.tscn`（run/main_scene，**纯跳板**：开局即抽关立即跳转，启动页由第一关自己的 TitleScreen 负责）。
 
 - **轮换袋在 `RunState`**：`SCENES` 全场景池 + `FIRST_POOL` 开局白名单（"只包含"语义：不在白名单里的场景永远不会当首关）。入口"开始"调 `start_run()` 清分 + 整袋洗牌 + 只从白名单抽首关；此后每次通关 `draw_next()` 从袋抽下一关，袋空整袋重洗——每 N 关全场景恰好各一次、周期内不重复（袋边界首尾允许相接，Tetris 式）。**新章进池 = 往 `SCENES` 加一行**；不许当首关就不进 `FIRST_POOL`。
 - 转场：BOSS 击败 → `Spawner.stop()` → 真实时间 1.7s（`Balance.CHAPTER_CLEAR_DELAY`，让爆散播完）→ `RunState.begin_handoff()` + 全局黑场 → `change_scene_to_file(RunState.draw_next())`。
@@ -17,11 +17,11 @@
 
 ```
 scenes/   entry.tscn（入口跳板=main_scene）
-          world/    world_1..7.tscn（关卡）
+          world/    world_1..8.tscn（关卡）
           units/    enemy_N / enemy_drone_N / enemy_shield_N / elite_N / boss_N
           player/   player.tscn / thruster_flame.tscn
           weapons/  player_bullet / enemy_bullet / mortar_trail / slag_pool / plasma_bolt / dawn_bolt / coral_bolt / red_chip / red_lob / sea_bolt
-          props/    obstacle / platform_crate / scaffold_1..7
+          props/    obstacle / platform_crate / scaffold_1..8
           fx/       爆/闪/花/烟/尾迹/预警闪光
           ui/       touch_controls
           previews/ 开发预览场（rust/readability/fog_check/slash）
@@ -29,10 +29,10 @@ scenes/   entry.tscn（入口跳板=main_scene）
 scripts/  core/     autoload 五件（balance/run_state/comms/sfx/scene_fade）+ ui_font/platforms/entry
           world/    main（关卡控制器）/spawner/terrain/scroll_object/world_strip/obstacle/aerial_fog
           units/    敌/精英/BOSS 能力脚本全家 + eye_glow/overhead_bar
-          weapons/  bullet/heavy_missile/mortar_shell/plasma_missile/plasma_mine/ground_blast/slag_pool/coral_orb/coral_tide/flak_shell/arc_fence/drill_charge/skip_shell/depth_charge/sea_surge
+          weapons/  bullet/heavy_missile/mortar_shell/plasma_missile/plasma_mine/ground_blast/slag_pool/coral_orb/coral_tide/flak_shell/arc_fence/drill_charge/skip_shell/depth_charge/sea_surge/salt_dart/salt_geyser/mirror_burn
           player/   player/thruster_flame
           fx/ ui/ dev/（autotest + 预览脚本）
-assets/   world_1..7/（各章主题件）+ common/（跨章件）+ fonts/ branding/ sfx/ vo/
+assets/   world_1..8/（各章主题件）+ common/（跨章件）+ fonts/ branding/ sfx/ vo/
 ```
 
 - **场景文件名 = `<单位>_N.tscn`**（N=world 序号，从 1 起）；单位叫什么（哨兵/钢嵴/白鲸…）写在 BOSS 血条与文档里，不进文件名。
@@ -43,7 +43,7 @@ assets/   world_1..7/（各章主题件）+ common/（跨章件）+ fonts/ brand
 ## 1. 定章
 
 - 从 `art_proposals/proposal_N_*.svg` 拿定稿提案；从 `generate_proposals.py` 的 `PROPOSALS` 表取精确色板与分层账（远 0.9 / 中 0.55 / 地 0）。
-- 七套提案已实装（五=generate_proposals2.py 方案五，正本=`dawn_ch5/提案_v1_破晓云廊.md`；六=方案六，正本=`red_desert_ch6/提案_v1_赤沙矿区.md`；七=方案七，正本=`drowned_ch7/提案_v1_溺海都会.md`）。再做新章 = 先出提案评审再进本流程。
+- 八套提案已实装（五=generate_proposals2.py 方案五，正本=`dawn_ch5/提案_v1_破晓云廊.md`；六=方案六，正本=`red_desert_ch6/提案_v1_赤沙矿区.md`；七=方案七，正本=`drowned_ch7/提案_v1_溺海都会.md`；八=方案八，正本=`salt_ch8/提案_v1_镜盐之原.md`）。再做新章 = 先出提案评审再进本流程（**现存待评审提案=无**；原方案八「闭园夜场」已否决删除、原九「绿渊林场」提案已删，见 §0）。
 
 ## 2. 环境美术（半程序化）
 
@@ -53,13 +53,14 @@ assets/   world_1..7/（各章主题件）+ common/（跨章件）+ fonts/ brand
 | 件 | 画布 | tile | 世界账 |
 | --- | --- | --- | --- |
 | far 远景条 | 1024x1300 | 1024（视差 0.9） | 画布底=世界 730 |
-| mid 中景条 | **2048**x520 透明底 | 2048（视差 0.55） | 画布底=世界 700；多段各异构图防重复 |
+| mid 中景条 | **2048**x520 透明底 | 2048（视差 0.55） | 画布底=世界 700；多段各异构图防重复；**落地件脚 ≥ 画布 484（=地形顶 664），取 488..500** |
 | ground_top 表面带 | **640x66**（=A/B 两个 320 变体拼花） | 无平铺相位，terrain.gd 按块序号奇偶取半幅 | 纹内烘焙：顶缘亮线 0..2.5 / 走道带花 2.5..56 / 立面 AO 渐隐 56..66 / x=0,320,640 块间竖缝 |
 | ground_fill | 16x256 | — | 立面渐变 face_hi→face_lo（0.42 处到位）+ 烘焙 4 条层理横线；sprite 拉伸 320x634 接在带底 |
 | ground 兜底条 | 256x480 | — | = ground_top 内容 + 深处渐变 |
 | deck 桥面 | 720x26 | — | 桥墩色走 `scaffold_chX` 的 `pier_color`（章配） |
 
 - ThorVG 硬约束：禁 filter/pattern/use/text/transform；rect+rotate 会崩（烘等价 polygon）；平铺接缝两侧留空（far 24px / mid 40px）。
+- **背景体量与接地账（2026-11-06，ch8 v1 翻车立规）**：①mid 层凡「立在地上」的件（房/腿/架/堆/埂/台）脚线一律落画布 488..500——世界 y=画布 y+180，地形顶 664 对应画布 484，脚高于 484 就整排悬空（ch8 v1 把「世界 580..650」误当成地形后方，泵站/管桥腿/分埂/镜洼全浮 14..84px）；镜洼/水面类平面件不能单独漂在 mid 里，要坐在落地台面上。②far 层要有**成片主体块**（楼群/峡壁/山脉），轮廓顶到世界 ~250..430（画布 820..1000），细尖件只能当点缀；底雾只压脚（≤100px、op≤0.4），别把主体洗没。③mid 最高件对齐前章（顶到世界 ~380..420，画布 200..240）。交付前把 far+mid 按挂载账合成一帧、画出 664 地面线，和前章并排比（`%TEMP%` 下 PIL 合成即可，不必开游戏）。
 - **地块 v2 分层（2026-10-21 实装）**：走道带花低密度、A/B 两半按块序号奇偶交替（消灭平铺重复感）；立面=AO 渐隐（带正下投影，立体感主来源）+ 层理（fill 纹内烘焙，渐疏渐淡）+ 块间缝上密下疏（terrain.gd 顶点色）+ 露头细节横杆（`Terrain.seam_color/detail_color` @export 按章配，ch1 用脚本默认）；掉档墙面全露当剖面秀场，**不画顶缘包角**（用户定案）。设计语言正本=`art_proposals/terrain_blocks/ground_v2.py`（提案预览与实机同源）；四章纹理烘焙=`terrain_blocks/bake_ground_v2.py`（覆盖 assets/world_N 原名，tscn 引用不动）。**漏光坑（用户抓）**：band 纹里 AO 渐隐带（y56..66）是半透明，而 fill 精灵从 66 才起——AO 背后是空的直接透天空，高档位背后亮天空最明显；修=bake 时 AO 下垫不透明 face_hi 底，交付前像素断言四张 band min_alpha=255。提案层另有**桥面变体 `draw_ground_deck`**（云上高架/跨海栈桥：走道带+薄箱梁+排架柱渐隐入云海/海面），world 主题若要"桥"读法照此出提案——**五章已实装桥式读法（=拆地块桥面变体上机，地块读法=桥不是山体）**：terrain.gd 的 fill 缩放按**贴图实际尺寸**算（默认 16x256 行为不变），桥式模式为 opt-in 导出（`bridge_girder/brace/column_textures/column_xs/sea_y`）：每块画 箱梁（整幅宽，块间接缝烘贴图两端）+剪刀撑+排架柱 ×2，不再画 fill 立面/露头横杆/缝。排架柱=**实色细柱**（宽 20，无渐隐——半透明柱让海透过来=前后读反），按挡位选贴图：需要长度=sea_y−柱顶，取高度最接近且不短于的那张（三挡 110/170/230），柱底统一钉在 `bridge_sea_y`=860 的**固定海面线**上=海平面固定、柱随地形换挡，柱身按 (块序+柱序) 奇偶镜像微错。**云海=场景独立层**（不归地块管）：底层 GroundStrip（env_dawn_ground 3200×480，薰衣草底+椭圆云垫阵列+浅云带，低对比大笔触）+前景云沿 SeaFront（env_dawn_sea_front 3200×150，画在 Terrain 之后遮柱脚=「没入海面」的层级实体化）——两层都是 world 锚定（scroll=0）**与地面同速滚动**，柱上不烘云团（会动的柱驮云团在滚动海上=错层）；桥件贴图原生分辨率（拉伸小图糊不出柱子）。独层地标=天梯缆塔 3200×900，条带位 (8,270) **居中挂载**：画布 y0=世界 −180，塔基画布 840=世界 660 沉云海——新独层地标先按挂载点反推画布 y 再动笔。
 - **条带里不画"唯一地标"**（太阳、巨环等）：小 tile 同屏重复 2~3 份穿帮。大件地标走独层宽 tile，见 §5。
 - 种子固定（每条带一个），重跑结果一致。每章种子记进 §7 索引。
@@ -134,6 +135,10 @@ assets/   world_1..7/（各章主题件）+ common/（跨章件）+ fonts/ brand
 | `DepthCharge` | **深弹**：艉舱向艉侧抛出（抛离玩家一侧）→坠海白沫水花→定延时 0.6s 水下闷爆（青白晕）；弹体走**地形后方容器**（"sea_props_container"=坠入桥后海面不穿桥面），水花/闷爆走前景容器 | ch7 沉锚涌浪链 |
 | `SeaSurge` | **涌浪漫桥**（固定绝对高度带，珊瑚潮同类合法件）：深弹闷爆后水面从屏底涨到 FLOOD_Y（620/p2 584）→驻留→退去；不管地面零地形跟随，脚底（中心+24）过水面即吃（一次涌浪至多一次）——**低处=吃/高处=免/升空=免**；p2 纯跳不够（脚底 597>584）须推进或登高 | ch7 沉锚 |
 | `SeaBolt`（sea_bolt.tscn） | 直射弹=bullet.gd 纯换皮；v2=**共享机炮弹画法**（同 enemy_bullet 贴图/材质/碰撞——v1 暗壳曳光矢 60×10 配白色小迸溅读成「黑色块瞬间消失」判死，2026-11-03；亮底章弹体可读性归压暗天光承担，弹体回归全场统一）；fx_sea_bolt.svg 沉淀留档 | ch7 沉锚舰炮曳光 |
+| `SaltDart` | **裂地镖**（间歇泉的运载弹，ch6 装药同构）：弹落点=mark（弹体小 16×8 快速一闪即落，**读法归地面标记本身**）；真弹道浅弧（平飞速度档 clamp 时长解算初速），落地生成 SaltGeyser+落点光斑一闪，镖本体无伤即退 | ch8 精英喷井/盐磨泉幕 |
+| `SaltGeyser` | **间歇泉**（静止地裂→瞬时汽柱）：mark=地裂环纹+盐田粉蓄能环渐急+预漏白汽 0.7s → 汽柱瞬起 0.55s（宽 90 高 360，贴图顶钉地表−360，普通混合=墙的实体遮挡感）→ 收柱 0.2s 自灭；柱 AABB 判定（半宽 45+26，中心低于柱顶），一次喷发至多一次——**「柱是墙不是弹」：跳≠过（柱高=纯跳 5.4 倍），离=唯一反制，穿缝/等全灭=免**；mark=静止落点零地形跟随（装药同族） | ch8 精英喷井预教/盐磨泉幕 |
+| `MirrorBurn` | **定镜灼烤灼点**：`extends SlagPool` 语法换皮（tick 判定/蓄热窗/生命周期零改动，_ready 换贴图+加 mirror_burns 组）——蓄热期=**干燥光束线**（Line2D 镜面→落点+落点光斑驻留，无伤=反向预告「先看见烧哪」），tick 期=盐面灼白斑+蒸汽（6/0.3s r80）；落点=**半 lead**（玩家速度×1.1 clamp 400，ArcFence 同账）罚匀速不罚变速；**梯次连点压挪位**（第二枚 lead 取挪完后的新位置——只躲首枚不够，逐点各躲才是机制正解，探针账 ch8 踩过） | ch8 盐磨技能B |
+| `SaltBolt`（salt_bolt.tscn） | **融盐重弹**=bullet.gd 纯换皮（语法零改动，照 slag_slug 账）：暗盐壳+熔芯裂缝透光（杏金熔）+白热熔芯头+盐田粉热晕尾带（普通混合不 ADD，暖调天上靠暗壳剪影读）+mortar_trail 双层拖尾；发射方叠枪口焰+熔杏 FlashBurst+fire_heavy 专配出膛音。盐磨普攻 2026-11-06 用户换皮（「别像普通机枪，要配得上镜阵聚焦口」——镜阵聚热熔盐，同一个翼尖枪口）：单发点放朝玩家**出手瞬间**位置（无预判无逐发跟踪=离散点放，可跳越），p2 双发各自重瞄——ch2 排炮重弹「出手锁定的一次性形态」家族 | ch8 盐磨普攻 |
 | `coral_embers`/`coral_burst` | 珊瑚粒群粒子件（余烬尾迹/爆蕗绽放，fx_flame 交红 ramp）——**科若尔 FX 语汇=柔光+粒群+平滑波浪，禁锯齿/高频白芯（闪电感）** | ch4 全系 |
 | `GroundBlast` | 单次球状爆区（`flash_color` 可染，默认橙红；`show_flash` 可关） | 爆类落地/空中 |
 | `SlagPool` | 驻留 tick 区（蓄热二段预警） | ch2 火区 |
@@ -153,6 +158,10 @@ assets/   world_1..7/（各章主题件）+ common/（跨章件）+ fonts/ brand
 **章例（ch6；几何账正本=red_desert_ch6/提案_v1_赤沙矿区.md §2+v2 变更段）**：精英=打桩车「锚桩」（ElitePiler，预教电网闸：双桩炮架**固定射角**[垂发账，臂不俯仰]，单笼投放）；BOSS=斗轮采集舰「赤轮」（BossRedwheel，300×180 低矮宽驳、**斗轮=独立旋转件**[恒转+直射/装药期加速=signature 动画]、背甲双桩炮架+腹舱+船底双举升风扇[通用 fx_flame+加色]，独眼条带沿用）：电网闸（背甲炮架 Rack (210,38) 预警→双锚桩落到玩家**当时位置**两侧（无 lead，半 lead=按玩家速度 clamp LEAD_MAX 400 前后移）→蓄能火花渐亮→竖直电幕 [half 200/top 200/p2 蓄能 0.7→0.55]）⇄ 凿岩齐射（腹闸 BayPort (150,170) 预警→DrillCharge 装药 3/p2+1 枚 lead 走廊等距铺开，落地钉住定延时 1.0s 起爆——落点静止零地形跟随）+ 斗轮抛石（普攻；2026-11-02 机枪短梭→**斗轮=武器**：提速吐料一拍→red_lob 抛体弹石 5/p2+1 枚逐石从毂心抛出，初速解到玩家出手瞬间位置+固定扇 ±12° 错开——石群落点围玩家当时位置散布，站桩/直线冲脸=吃、看弧线挪位=免，弧线盖跳高滞空不免费；抛体不贴地）。分工账：站桩被电网罚+抛石落点罚、匀速跑被装药走廊罚、直线冲脸被石扇罚——反制=变速变向（相对速度语言，ch2/ch4 同族）。hover 370 同驳船档、斗轮缘 454=最低点（对 t536 台阶净空 76 同账）；碰撞 280×150；锚点账=bake_red_units.py 头注（精英 ArmPivot 画布 (44,12)→局部 (14,-28)、臂枢端 (17,40)/Muzzle 臂局部 (0,-34)；BOSS ArmPivot (-106,30)/Wheel 轮毂、Rack (60,-52)、BayPort (0,80)、风扇 (-30,64)/(80,64)）；数值全在 Balance `ELITE_PILER_*/REDWHEEL_*/REDWHEEL_CHARGE_*`。**教训三笔**：①**贴地跟随类移动危险件全禁**（2026-10-23 用户定案）——首版溜矿车贴地滚行跨台阶瞬移穿帮，与珊瑚潮 v1 同死因；危险件要么静止落点（桩/装药）要么固定绝对高度带（潮墙），矿车件已整体删除（ore_cart.gd/fx_red_cart.svg 不留档，从未出池无存量）；②**「滚过/越过」类方向性判定必须 ×行进方向归一取正**——矿车 past_player 判定符号写反，出舱时在玩家身后=负半轴是合法起点，首滚行帧即自毁（玩家永远见不到矿车，BOSS 观感"不对劲"的真凶）；③电网闸伤害=装药伤害（同 10）时，掉血值无法区分威胁源——单威胁源的"排空闸"必须把**驻留危险件（ArcFence/DrillCharge）连同预警态一起算进 quiet 判据**（BOSS 回 ST_ENTER/RECOVER 稳态才准戳），光等弹容器干净不够。④**BOSS 顶挂件连接账（2026-10-23 用户抓「顶上有条东西悬空」）**：上层构件必须与甲板几何咬合——腿/裙底边 y 要落到当地甲板线以下（埋 ≥1.5px）；与独立件（炮架等单独 Sprite）对接的裙座顶要与其枢座底**重叠 ≥2px**（独立件画在上层，重叠段被盖住=接缝归零）；条带类沿用锚点（眼条带 y57..69）而甲板够不着时，**甲板顶缘抬高包住条带**（ch5 抬到 y52 / ch6 抬到 y52..54，两例同手法）；改完必须光栅放大自检（boss6_zoom_check）。**独层地标排布教训**：太阳+巨机两个地标挤不进 tile 3200 的防回绕安全带 [1200+半宽, 3200−1200−半宽]——一章一个独层大件，白热天光交给天顶渐变+尘带承担。**入池状态**：2026-10-23 用户验收后装回 `RunState.SCENES`（此前因 BOSS 返工短暂出池）。
 
 **章例（ch7；几何账正本=drowned_ch7/提案_v1_溺海都会.md §2+v2 变更段）**：精英=海防炮车「岸炮」（EliteShore，预教跳弹：海防炮臂**俯仰真瞄**[响哨家族位]，双连平抛）；BOSS=打捞巡防舰「沉锚」（BossAnchor，300×180 低矮宽舰、艏炮俯仰真瞄[=敌基类 ArmPivot 瞄准层驱动]+艉舱+艏部下管+艉部打捞吊臂+船底双举升喷口[通用 fx_flame+加色青白]，独眼条带沿用；艏段甲板顶缘 y52..54 包条带，ch5/ch6 同手法）：跳弹齐射（**v2 平抛鱼雷**：技能A 先**压低到 ANCHOR_SKIP_FIRE_Y=480**[水线发射，本体压下来=预警的一半]→艏部下管 TorpedoPort 预警→逐发梯次 SkipShell 2/p2+1 **平抛**出膛[水平初速向玩家一侧，不瞄人；v1 落玩家脚下被判死=落点全在行进方向身后]→触甲板连跳三次末跳球爆——对冲几何：停=被平射段命中/跳过弹体=免）⇄ 深弹涌浪（艉舱 BayPort (226,146) 预警→深弹 2 枚向艉侧抛出落海[地形后方容器]→闷爆→SeaSurge 固定高度带漫桥 620/p2 584——低处=吃/高处=免/升空=免）+ 舰炮曳光直射（sea_bolt.tscn v2=共享机炮弹画法）。分工账：跳弹 hunts 地面站位与顺向跑、涌浪 hunts 低处停留——两手都把玩家往"上"赶。**亮背景章（青绿海光；v2 天光压暗返工——提案高调色板照搬=天空近白吃掉特效可读性，雪原初版同罪；v2=#5e8a8f→#8fb8b2→#b7d5cd 战斗带落中调，§6 补执行细则：提案色板只定色相不定明度）**：敌营=**舰灰蓝 #3f5a66 族**（与走道带青绿 #5a7268 分色相），浮标橙 #ff5a3c=本章信号色，HUD 深字。地块=桥式（p7_sea 走道带+箱梁+排架柱钉 bridge_sea_y=860 海面固定线；GroundStrip=青绿海+日光碎光路[浪纹 v2 压扁成光纹条，v1 椭圆浪带读成睡莲撞五章]，SeaFront=白沫浪沿遮柱脚）+ 独层地标=倾覆巨舰 env_sea_wreck（tex_x=1600）；**深弹落海要专门的地形后方容器**（场景里 `SeaProps` 组 "sea_props_container"，夹在 GroundStrip 与 Terrain 之间——弹坠桥后海面不穿桥面，水花/闷爆走前景）。hover 370 同驳船档（技能A 发射段压到 480 档）；碰撞 280×150；锚点账=bake_sea_units.py 头注（精英 ArmPivot 画布 (44,12)→局部 (14,-28)、臂枢端 (28,13)/Muzzle 臂局部 (-22,-3)；BOSS ArmPivot (46,45)→局部 (-104,-45)、BayPort (226,146)→局部 (76,56)、**TorpedoPort (28,138)→局部 (-122,48)**、喷口 (-40,66)/(60,66)）；数值全在 Balance `ELITE_SHORE_*/ANCHOR_*/SKIP_SHELL_*/DEPTH_CHARGE_*/SEA_SURGE_*`。**教训五笔**：①**敌基类要求每个单位场景都有 `Visuals/ArmPivot`**——BOSS 场景用别的名字（Cannon 等）挂炮臂时，基类俯仰层 `_arm_pivot` 拿到 null 直接炸 `_physics_process`（转场探针里 world_7 首跑暴露）；正解=炮臂节点就叫 ArmPivot 交给基类瞄准层（同响哨账），自写 `_tick_visual` 重复瞄准=白干；②**Area2D 原生就有 `gravity` 属性**——bullet.gd 抛体语法首版成员裸名 `gravity` 撞成 "Member redefined" 解析错，全工程子弹挂脚本=全部场景加载失败；成员名带语义前缀（`lob_gravity`）；③BOSS 顶挂件连接账三处重犯（吊臂柱脚悬空/炮座裙压条带/艉舱口在艉部收窄段外凸 14px）——光栅放大自检照 ch6 手法全抓回；④**.tscn 属性行内 `#` 注释不合法**（v2 改色时在 sky_color 行尾加 `# 说明`→解析器把注释吞进值→后续节点 type 级联失效：实测报 "Script inherits from native type 'Sprite2D', can't be assigned to Node2D"+Main 脚本失挂→score/spawner 假死；tscn 注释只能独立成行用 `;`，「注释不跨行」的姊妹坑，v2 定位耗了半场——**先查自己上一轮 diff 加了什么，再怀疑引擎**）；⑤**跳弹类「落点在行进方向身后」=无效设计**（v1 判死）——新弹种几何账必须对上玩家行进方向：跑酷游戏玩家恒 +X，向 −X 跳的东西落点会落到身后；v2 平抛对冲（迎面相遇）才立住。**入池状态**：2026-11-02 实装入池；2026-11-03 v2 返工（天光压暗/曳光换共享弹/跳弹平抛鱼雷化）后引擎流水线全绿，**待用户游戏内验收**。
+
+**章例（ch8「闭园夜场」号位曾属者；已随整章否决删除 2026-11-04，规约教训留档）**：曾按 park_ch8/提案_v1 实装「掷环/谢幕」+威胁弹可斩碎（DartRing 入组 "slashable"+判定盒蒙版放行弹层+`_scan_melee_hits` 分支），用户以「游乐园主题不合机甲+敌营配色难看」否决，全数回退（见 §0）。**留下两条通用规约**：①**冲撞/通场类招式的运动与判定必须在 `_tick_screen_lock`/速度出口层覆写**——`_tick_attack` 受贴脸压招闸调度，冲进玩家 700px 内整段冻结=冲撞冻在半路、伤害判定跟着停（ch5 俯冲是现成先例）；②**近战交互类探针的弹道要按「玩家会冲过来」的合速度算**（突进 0.45s×900+预压 −26px，静态盒账会误算出手距离）；另录：探针「冻结窗」手法=戳招前把 BOSS 冻进 `_bstate=ST_RECOVER+_bt=99`（只倒数不出招）+清杂兵=真单威胁源。
+
+**章例（ch8；几何账正本=salt_ch8/提案_v1_镜盐之原.md §2，2026-11-06 实装）**：精英=钻机车「喷井」（EliteGusher，预教间歇泉：钻塔**固定射角不俯仰**[锚桩家族垂发账]，单发裂地镖落玩家当时脚下无 lead）；BOSS=悬浮采盐联合机「盐磨」（BossSaltmill，300×180 低宽联合机+艏部斗轮鼓罩+驾驶楼+舷侧盐料斗，镜阵翼=独立件**俯仰真瞄=炮**[沉锚艏炮账，翼尖聚焦口=Muzzle]、腹裂地锚口 BayPort (0,78)、船底双举升喷口 fx_flame 加杏金，独眼条带沿用+甲板抬 y52..54 包带）：间歇泉幕（技能A：腹口预警→裂地镖 5 枚梯次远→近，落点锚玩家**当时**位置前后铺开[前方 900..身后 28 间距 232 无 lead]→各自 mark→汽柱——**离/穿缝/等=免，跳≠过**）⇄ 定镜灼烤（技能B：镜翼蓄光 0.5s 翼面泛粉[modulate 驱动]→逐点干燥光束线→灼点半 lead——**停=吃脚下/匀速跑=吃前路/变速变向=免**，梯次连点压挪位）+ 融盐重弹（普攻=**单发点放**[2026-11-06 用户换皮「别像普通机枪，要配得上镜阵聚焦口」——镜阵聚热熔盐，同一个翼尖枪口；salt_bolt.tscn=bullet.gd 纯换皮暗盐壳+熔芯裂缝+白热熔芯头+盐田粉尾带+mortar_trail 拖尾，枪口焰+熔杏 FlashBurst+fire_heavy；700/伤 12 朝玩家出手瞬间位置无预判无逐发跟踪=离散点放可跳越，p2 双发各自重瞄——ch2 排炮重弹「出手锁定一次性形态」家族]）。分工账：泉幕罚站桩与罚直线穿行、灼点罚匀速与罚慢挪——全章语言=「变速变向，读线走位」。中亮背景章（黄昏暖调不反转）：天顶杏金 #b8824e→中带 #dca878 落中调（§6 细则：提案色板只定色相不定明度——最亮绯粉地平带沉在远条底部=地形后方，战斗带白特效/墨青绿敌营都读得出）；敌营=墨青绿 #2e4a42 族（与走道带暖白灰、镜洼青绿三分色相），盐田粉 #f2789f=章信号色，HUD 深字。地块=普通山体 v2 @ p8_salt（盐壳龟裂+粉渍+结晶点花）；mid 层带**镜洼**（压扁光纹条画法 ry≤5=ch7 浪纹 v2 同语言，禁睡莲读法）；独层地标=搁浅采盐联合机 env_salt_harvester（tex_x=1600 半宽 365∈[1565,1835]✓，轮底沉盐层地形盖下半）。hover 370 同驳船档；碰撞 280×150；锚点账=bake_salt_units.py 头注（精英 ArmPivot 画布 (44,12)→局部 (14,-28) 固定射角、臂 34x44 枢端 (17,40)/Muzzle 臂局部 (0,-34)=钻尖[锚桩家族位]；BOSS ArmPivot 画布 (150,26)→局部 (0,-64)、翼 96x44 枢端 (78,22)/Muzzle 臂局部 (-68,0)=翼尖聚焦口、BayPort (0,78)、喷口 (-40,66)/(60,66)）；数值全在 Balance `ELITE_GUSHER_*/SALTMILL_*/SALT_GEYSER_*/SALT_DART_*/MIRROR_BURN_*`。**探针教训三笔**：①**入场收尾快的章别指望「自然首手」观测**——BOSS 入场 `_bt<=0 OR |x−anchor|<8` 可瞬收，skill_a 的镖在探针动作前就出膛，观测窗口不稳（ch7 同款解法=先排空[威胁件+回稳态]再戳招，确定性优先）；②探针轮询体的计数行丢了=轮询恒 0 必超时（一轮假 FAIL 定位耗两跑——改探针先 diff 自查改了什么）；③灼烤「梯次连点」的第二枚 lead 取的是挪完后的新位置=机制本体，「瞬移一次后不再掉血」的断言与设计相悖——逐点各躲（每见新灼点出线即挪）才是机制正解的探针账。**实装返工一笔（2026-11-06 用户报修「灼烤无警告+右侧屏外水平拉丝」）**：①**光束线坐标系坑**——`add_child` 当帧 `_ready` 建线，而调用方按「先入树后定位」惯例**之后**才写 global_position：`to_local=beam_source−global_position` 被算成「落点+翼尖世界坐标」双倍偏移，可见段=灼点伸向屏幕右侧外的近水平拉丝（≈-23° 坡读作水平）；修=建线 `call_deferred` 到落位后（凡「子节点几何依赖本节点落位」的 .new() 件全适用此账）。②镜翼蓄光单靠翼面 modulate 泛粉读不出预警（几十像素小挂件的色相偏移太弱）——蓄光窗改挂**翼尖 ThreatFlash**（标准预警语汇 warn/reset/rewarn 三处接全），粉光降为次级读法。**入池状态**：2026-11-06 实装入池，引擎流水线全绿；灼烤返工当日（编辑器在线，复验未跑）**已改待验**。**环境 v2（同日用户报「背景空+中景悬空」）**：far 加外缘山脉（后排折线雾山+前排平顶盐崖，k 整数正弦无缝）+ 盐晶塔两簇放大；mid 全件脚线落画布 496、加卤水罐/堆盐机长臂+盐山/灯塔桅，镜洼改坐盐田台地台面——规约见 §2「背景体量与接地账」。
 
 ## 5. WorldStrip 接线账（踩过的坑全在这）
 
@@ -174,7 +183,7 @@ assets/   world_1..7/（各章主题件）+ common/（跨章件）+ fonts/ brand
 1. `tasklist` 确认编辑器离线（autotest 自带在线守卫会拒跑）→
 2. `--headless --import` →
 3. 相邻两章 `--quit-after` 冒烟 →
-4. 无头 `transition_probe.tscn`（全链）→
+4. 无头 `transition_probe.tscn`（全链；2026-11-06 起按局内循环 v2 语义跑：一局账=普通段+RUSH 段+通关原地结算，新章进 SCENES 自动覆盖）→
 5. 带窗 autotest：**本章自己的探针必跑（机型分叉后各章能力不同，见 §4b）+ 任一未改章跑回归**（`-- --autotest`，`--` 必须带）→
 6. 光栅自验 + 游戏内截图 + `build_showcase.py` 对照表（暗底章环境条带要垫亮背板才读得出）→
 7. 回写本文档 + 会话记忆。
@@ -193,12 +202,14 @@ assets/   world_1..7/（各章主题件）+ common/（跨章件）+ fonts/ brand
 
 | 章 | 场景 | 烘焙脚本 | 种子 | 敌营色板 | BOSS | HUD 字 |
 | --- | --- | --- | --- | --- | --- | --- |
-| 一 锈雨废都 | world/world_1 | art_proposals/bake_rust_assets.py | — | 暖褐近黑 | 重型武直「dreadnought」 | 深 |
+| 一 锈雨废都 | world/world_1 | art_proposals/bake_rust_assets.py | — | 暖褐近黑 | 重型武直「无畏」（索引名 dreadnought，HUD 显示「无畏」） | 深 |
 | 二 精炼所工业带 | world/world_2 | refinery_ch2/bake_ref_assets.py | — | 冷绿 #4d5348 族 | 熔渣驳船「钢嵴」（BossBarge：封路+弹幕墙；船艏炮门画布 (27,70)/(19.5,100)/(35,123)） | 深 |
 | 三 雪原警戒点 | world/world_3 | snowfield_ch3/bake_snow_assets.py | 3031/3032/3033 | 冷蓝灰 #5d6c76 族 | 强袭悬空机甲「哨兵」v3（`boss_ch3.tscn`+BossSentinel：电浆弹雨+浮雷齐撒+电浆枪直射；布雷闸画布 (122,138)；**弹雨仓口=右肩双孔 (151/167,26)，4 发回绕复用**（v3b 砍前肩）；无旋翼=推进焰脉动；v3 提案=同目录 提案_v3_哨兵重设计.md） | 深 |
 | 四 珊瑚辐合夜 | world/world_4 | coral_ch4/bake_coral_assets.py + bake_coral_units.py（v2 单位/特效覆写） | 4041-4044 | 亮钢蓝 #5d6d94 族（反转） | 深海猎杀舰「鮟鱇」（BossAngler：珊瑚重炮+珊瑚潮+钓灯爆闪；Cannon/Muzzle (150,28)、ArmPivot (86,42)、BayPort (150,174)；精英=炮台车「海葵」预教重弹[ArmPivot (44,8)]；正本=coral_ch4/提案_v2_珊瑚重设计.md） | 浅 #dfe6ff |
 | 五 破晓云廊 | world/world_5 | dawn_ch5/bake_dawn_assets.py + bake_dawn_units.py | 5051-5054（地块花=band 内 3111/3222） | 暗紫罗兰 #4e3c64 族（金霞补色域，不反转） | 高空截击机「断云」（BossInterceptor：啸雷齐射+俯冲突袭+机鼻曳光；Cannon (150,34)、ArmPivot (60,74)、Nose (14,84)、尾焰 (286,86)/(286,106)；精英=防空炮车「响哨」预教啸雷[ArmPivot (44,12)]；独层地标=天梯缆 env_dawn_ladder；正本=dawn_ch5/提案_v1_破晓云廊.md） | 浅 #dfe6ff |
 | 六 赤沙矿区 | world/world_6 | red_desert_ch6/bake_red_assets.py + bake_red_units.py | 6061-6064/6071-6080（地块花=band 内 3111/3222） | 赤红暗棕 #6e3424 族（亮背景章，不反转） | 斗轮采集舰「赤轮」（BossRedwheel：电网闸+凿岩齐射+斗轮抛石；Wheel 轮毂画布 (44,120)=独立旋转件、Rack (210,38)、BayPort (150,170)、风扇 (120,154)/(230,154)；精英=打桩车「锚桩」预教电网闸[ArmPivot (44,12)，臂不俯仰]；独层地标=斗轮巨机 env_red_wheel；正本=red_desert_ch6/提案_v1_赤沙矿区.md §2+v2）） | 深 |
 | 七 溺海都会 | world/world_7 | drowned_ch7/bake_sea_assets.py + bake_sea_units.py | 7071-7076/7081-7090（地块花=band 内 3111/3222；天光 v2 压暗 #5e8a8f→#8fb8b2→#b7d5cd） | 舰灰蓝 #3f5a66 族（亮背景章，不反转；浮标橙 #ff5a3c=章信号色） | 打捞巡防舰「沉锚」（BossAnchor：跳弹齐射[v2 平抛鱼雷：压高 480→艏部下管 TorpedoPort 局部 (-122,48) 平抛，提案 v2 变更段]+深弹涌浪+舰炮曳光[sea_bolt v2=共享机炮弹画法]；ArmPivot (46,45)→局部 (-104,-45)、BayPort (226,146)→局部 (76,56)、喷口 (-40,66)/(60,66)；精英=海防炮车「岸炮」预教平射跳弹[ArmPivot (44,12)，俯仰真瞄]；独层地标=倾覆巨舰 env_sea_wreck；深弹落海容器=SeaProps 组 "sea_props_container"；正本=drowned_ch7/提案_v1_溺海都会.md §2+v2） | 深 |
+| 八 镜盐之原 | world/world_8 | salt_ch8/bake_salt_assets.py + bake_salt_units.py | 9091-9096/9101-9110（地块花=band 内 3111/3222、兜底条 3111；天顶杏金 #b8824e→#dca878→#f0b890 战斗带落中调） | 墨青绿 #2e4a42 族（中亮背景章，不反转；盐田粉 #f2789f=章信号色） | 悬浮采盐联合机「盐磨」（BossSaltmill：间歇泉幕[裂地镖 5 枚锚玩家当时位置前后 900..28 铺开→SaltGeyser mark 0.7s→柱 0.55s 高 360「柱是墙不是弹」]+定镜灼烤[镜翼蓄光→干燥光束线→MirrorBurn 半 lead 灼点 6/0.3s r80]+融盐重弹[salt_bolt 单发点放 700/伤12 可跳越]；ArmPivot (150,26)→局部 (0,-64)[镜阵翼俯仰真瞄，翼 96x44 枢端 (78,22)/Muzzle (-68,0)]、BayPort (0,78)、喷口 (-40,66)/(60,66)；精英=钻机车「喷井」预教间歇泉[ArmPivot (44,12) 固定射角，Muzzle=钻尖臂局部 (0,-34)]；独层地标=搁浅采盐联合机 env_salt_harvester（tex_x=1600）；正本=salt_ch8/提案_v1_镜盐之原.md §2） | 深 |
+
 
 通用命名：`env_<主题>_far/mid/ground/ground_top/ground_fill/deck` + `enemy_<主题>_*` + `boss_<主题>_*`；独层地标另起名（如 `env_coral_ring`）。

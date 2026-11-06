@@ -50,9 +50,13 @@ func _ready() -> void:
 
 
 ## 进入战斗才调：从这一刻起按位移开始刷（首次间距已掷好，起步留一段空白）。
+## RUSH 终局（run_loop.md §1）例外：落地即战——BOSS 立即进场，不等击杀分
+## （旧制 rush_active 恒假，照旧攒分触发）。
 func start() -> void:
 	_active = true
 	_last_player_x = _player.global_position.x
+	if RunState.rush_active and boss_enabled:
+		debug_spawn_boss()
 
 
 ## 章末转场窗口：彻底停刷（障碍一并停，画面安静等黑场）。
@@ -67,17 +71,21 @@ func _physics_process(_delta: float) -> void:
 	_last_player_x = _player.global_position.x
 	_obstacle_accumulator += dx
 	var boss_here := get_tree().get_first_node_in_group("boss") != null
-	if not boss_here:
+	# 杂兵闸：BOSS 遭遇战期间停刷；RUSH 终局（无杂兵细则，run_loop.md §1）
+	# 整场停刷——小怪/精英一并停，障碍照常=跑酷不断。
+	var mobs_allowed := not boss_here \
+			and not (BalanceGlobal.RUSH_NO_MOBS and RunState.rush_active)
+	if mobs_allowed:
 		_enemy_accumulator += dx # 遭遇战期间冻结累计：打完不洪泛，刷怪节奏从原地续
 	_tick_boss(boss_here)
 	# 先刷障碍再刷敌人：同帧撞在一起时，敌人的重叠检测才能看到刚落地的障碍。
-	# 障碍照常刷（跑酷不断），小怪在 BOSS 在场时停刷。
+	# 障碍照常刷（跑酷不断），小怪在杂兵闸关着时停刷。
 	if obstacles_enabled:
 		while _obstacle_accumulator >= _obstacle_next_distance:
 			_obstacle_accumulator -= _obstacle_next_distance
 			_obstacle_next_distance = _roll(false)
 			_spawn(_pick_obstacle_scene(), false)
-	if not boss_here:
+	if mobs_allowed:
 		while _enemy_accumulator >= _enemy_next_distance:
 			_enemy_accumulator -= _enemy_next_distance
 			_enemy_next_distance = _roll(true)

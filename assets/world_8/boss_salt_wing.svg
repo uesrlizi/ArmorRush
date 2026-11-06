@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 44" width="96" height="44">
+<!-- 第八章 BOSS 镜阵翼 96x44（独立件，俯仰真瞄=炮）。
+枢端画布 (78,22)=镜阵翼枢；两片镜面 V 张开朝 -X，翼尖聚焦口画布 (10,22)
+=Muzzle（臂局部 (-68,0)）。蓄光时整翼泛粉（代码 modulate）。 -->
+<defs>
+
+</defs>
+<polygon points="10,20 52,6 74,14 74,30 52,22" fill="#c8dcd4" opacity="0.95"/>
+<polygon points="12,26 50,26 72,34 70,40 48,34 14,32" fill="#9fc4b8" opacity="0.95"/>
+<line x1="12" y1="20" x2="52" y2="8" stroke="#f2f0ff" stroke-width="1.6" opacity="0.8"/>
+<line x1="16" y1="28" x2="50" y2="30" stroke="#f2f0ff" stroke-width="1.2" opacity="0.6"/>
+<line x1="34" y1="12" x2="36" y2="22" stroke="#9fc4b8" stroke-width="1.8" opacity="0.9"/>
+<line x1="52" y1="10" x2="54" y2="20" stroke="#9fc4b8" stroke-width="1.8" opacity="0.9"/>
+<line x1="40" y1="28" x2="42" y2="34" stroke="#9fc4b8" stroke-width="1.6" opacity="0.9"/>
+<line x1="50" y1="20" x2="78" y2="20" stroke="#2e4a42" stroke-width="5" opacity="0.95"/>
+<line x1="56" y1="30" x2="78" y2="26" stroke="#2e4a42" stroke-width="3.4" opacity="0.95"/>
+<rect x="74" y="12" width="10" height="18" fill="#1e332e"/>
+<circle cx="78" cy="22" r="4.4" fill="#1e332e"/>
+<circle cx="78" cy="22" r="2" fill="#4e6a5e"/>
+<circle cx="14" cy="22" r="7" fill="#1e332e"/>
+<circle cx="12" cy="22" r="5" fill="#2e4a42"/>
+<circle cx="10" cy="22" r="3.2" fill="#f2f0ff" opacity="0.95"/>
+<circle cx="10" cy="22" r="1.6" fill="#f2789f" opacity="0.9"/>
+<circle cx="30" cy="14" r="1.2" fill="#f2789f" opacity="0.8"/>
+</svg>

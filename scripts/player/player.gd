@@ -173,7 +173,8 @@ func _physics_process(delta: float) -> void:
 	# AC6 式飞行：地面按跳起跳；空中按住跳持续推进上升，耗 BOOST 槽，松开或耗尽即落。
 	# 近战全程滞空（AC6 同款"不下坠"）：竖直速度由近战阶段自己管，重力跳过。
 	var thrusting := false
-	if _melee_phase != MeleePhase.IDLE:
+	var melee_active := _melee_phase != MeleePhase.IDLE
+	if melee_active:
 		match _melee_phase:
 			MeleePhase.WINDUP:
 				# 前摇：悬停钉住（推进器撑住，速度快速归零）。
@@ -198,9 +199,10 @@ func _physics_process(delta: float) -> void:
 		# 上升/下降段重力分开：下降略小，体感为机体在下落时主动反推缓降。
 		var g := BalancePlayer.PLAYER_GRAVITY_ASCENT if velocity.y < 0.0 else BalancePlayer.PLAYER_GRAVITY_DESCENT
 		velocity.y += g * delta
-	if not thrusting:
+	if not thrusting and not melee_active:
 		# AC6 式回充：空中松开推进后只隔很短一拍就开始（没有"晾一段时间"的门槛），
 		# 落地则立即回充且不受倒计时影响；速率本身调快。
+		# 近战全程（后摇结束前）不回充不倒计时：固定耗气已在起手一次扣完，收势后恢复常规回充。
 		if is_on_floor() or _boost_regen_delay <= 0.0:
 			boost = minf(boost + BalancePlayer.BOOST_REGEN_PER_SEC * delta, BalancePlayer.BOOST_CAPACITY)
 		else:
@@ -536,6 +538,8 @@ func _start_swing(linked: bool) -> void:
 	# 段序固定：空闲/重新起手永远是一段（下劈）；只有一段后摇走完时吃到
 	# 预输入（linked）才进二段（上挑）。二段之后下一刀重新从一段开始。
 	_melee_swing = 2 if linked else 1
+	# 固定耗气：每刀起手一口价（不管突进/悬停拖多久），扣到 0 不打断出招。
+	boost = maxf(boost - BalancePlayer.MELEE_BOOST_COST, 0.0)
 	_melee_phase = MeleePhase.WINDUP
 	# 闲置起手有明显停顿前摇（架势），连段衔接的停顿短一点（AC6 同款）。
 	_melee_t = BalancePlayer.MELEE_WINDUP_COMBO_TIME if linked else BalancePlayer.MELEE_WINDUP_TIME
@@ -749,6 +753,21 @@ func take_damage(amount: int) -> void:
 	if _dead:
 		return
 	hp = maxi(hp - amount, 0)
+	hp_changed.emit(hp, max_hp)
+	# 受击=钝：多感官同步（哈迪斯/死亡细胞同款），震屏+强电机低频一起上。
+	add_shake(BalancePlayer.PLAYER_DAMAGE_SHAKE_STRENGTH)
+	Sfx.play(&"hit_player")
+	_rumble(0.25, 0.6, 0.15)
+	if hp == 0:
+		_die()
+
+
+## RUSH 击破间不回血（run_loop.md §1）：黑场交接落地时接上一台打完的血量。
+## ≤0 = 不携带（照旧满血开场）；头顶条经 hp_changed 当场刷新。
+func carry_over_hp(value: int) -> void:
+	if value <= 0:
+		return
+	hp = clampi(value, 1, max_hp)
 	hp_changed.emit(hp, max_hp)
 	# 受击=钝：多感官同步（哈迪斯/死亡细胞同款），震屏+强电机低频一起上。
 	add_shake(BalancePlayer.PLAYER_DAMAGE_SHAKE_STRENGTH)

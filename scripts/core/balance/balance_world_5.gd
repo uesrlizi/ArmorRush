@@ -14,7 +14,6 @@ const FLAK_SHELL_SPEED := 2400.0      # 弹速（=玩家弹速档：读法靠炮
 # ---- 第五章精英·防空炮车「响哨」（双管高炮俯仰跟踪，双连啸雷弹） ----
 # 教学位：把「断云」的啸雷提前教给玩家——读炮口预警+引信芯快闪，
 # 爆点=开火瞬间自己所在点：听到/看到预警就保持移动，停=吃。
-const ELITE_SIREN_MAX_HP := 15
 const ELITE_SIREN_SCORE := 60
 const ELITE_SIREN_ATTACK_RANGE := 2200.0
 const ELITE_SIREN_VOLLEY_HALF_LIFE := 2.4 # 齐射触发半衰期（同前四章精英的泊松节奏）
@@ -32,7 +31,6 @@ const ELITE_SIREN_FLAK_BLAST_RADIUS := 90.0 # 爆区球（+玩家半宽 26 宽�
 # 玩家被迫两头换层。俯冲线每帧 clamp 中心 y ≤ 当地地表−120（滑过台阶上缘
 # 不穿模）；通场带覆盖 [地表−210, 地表−30]：站立=被撞、纯跳 apex −127=被撞
 # （压"跳过一切"）、推进 ≥204px 或横移出锁定线=免。
-const INTERCEPTOR_MAX_HP := 750
 const INTERCEPTOR_HOVER_Y := 370.0
 const INTERCEPTOR_FLAK_COUNT := 3        # 一轮啸雷数（phase2 +1）
 const INTERCEPTOR_FLAK_STAGGER := 0.35   # 弹串节拍（追赶读法：每 840px 一朵）

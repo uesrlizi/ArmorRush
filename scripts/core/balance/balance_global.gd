@@ -23,8 +23,24 @@ const HP_BAR_IMPACT_COLOR := Color(1.0, 0.8, 0.22)    # 冲击条黄（AC6 式�
 const HP_BAR_IMPACT_FILL_COLOR := Color(1.0, 1.0, 1.0) # 冲击条实值白（虚值黄=IMPACT_COLOR，用户定的反转）
 # ---- 死亡结算与章节转场 ----
 const GAME_OVER_DELAY := 1.1              # 死亡→定格的延迟：让玩家爆炸播完再暂停出结算
+# 结算重开闸（防误触）：入场动画播完才受理重开，「点击屏幕或按任意键重新开始」
+# 提示与开闸同拍亮起=看见提示才能按。开关拨 false 回旧制（面板一出即开闸）。
+const RESULT_RESTART_AFTER_INTRO := true
+const RESULT_RESTART_LOCK := 0.0          # 阵亡结算：动画播完后再多锁几秒
+const CLEAR_RESTART_LOCK := 1.0           # 通关结算：多锁 1 秒（打赢那一下手最忙，最易误触）
+const RESULT_CUT_HELD_INPUT := true       # 战斗结束（阵亡/通关）即断开按住的操作：须松开重按才算
 # ---- 章节转场（击败 BOSS → 延迟 → 黑场 → 下一章；下一章场景路径在各 Main 场景上） ----
 const CHAPTER_CLEAR_DELAY := 1.7          # 击败→黑场的延迟（秒）：连串爆散先播完，胜利余韵一拍再切
+# ---- 局内循环 v2（design/run_loop.md §1：固定 5 关 + RUSH 终局 + 通关结算） ----
+# 整批新机制全带开关：总开关拨 false 即整套退回旧制（无限滚动关、每章转场满血），
+# 分项开关再单独回退各自细则——快速 A/B 与回退都只动这里。
+const RUN_LOOP_ENABLED := true        # 总开关：false=旧制无限滚动关（RUSH/通关结算一并消失）
+const RUN_NORMAL_LEVELS := 4          # 普通关数：洗牌袋照抽；没抽到的场景留作 RUSH 阵容
+const RUN_RUSH_COUNT := 3             # RUSH 连战 BOSS 台数（7 场景池=每局恰好看满 7 台；池更大=从没抽到的里随机挑）
+const RUSH_NO_MOBS := true            # RUSH 无杂兵：小怪/精英全停（障碍照常=跑酷不断）
+const RUSH_HP_DISCOUNT_ON := true     # RUSH BOSS 血量打折（未经精英预教=一阶段整段缺席）
+const RUSH_HP_DISCOUNT := 0.7         # 打折系数 ×全量血（数字待调参）
+const RUSH_NO_HEAL := true            # RUSH 击破间不回血：血量跨场景携带（满血只给到进 RUSH 为止）
 # ---- 启动页（小恐龙式站桩待机 → 进战斗） ----
 const COMBAT_INPUT_DELAY := 0.5      # 进战斗后到解锁操作的延迟（秒）：启动演出期不应答输入
 const IDLE_PUFF_TIME := 0.4          # 待机小喷焰单口时长
@@ -48,7 +64,8 @@ const COMMS_RADIO_SLAP_LEVEL_DB := -18.0
 const COMMS_NOISE_BED_DB := -26.0     # 常驻静噪沙底电平（频道开着的"底"）
 # ---- 刷怪间距（按玩家带符号位移累计） ----
 const ELITE_MIN_DISTANCE := 3000.0  # 玩家跑过这段距离后精英才进选怪池
-const BOSS_SCORE_TRIGGER := 250       # 击杀分攒满刷一场 BOSS；打完清零重计
+#const BOSS_SCORE_TRIGGER := 250 
+const BOSS_SCORE_TRIGGER := 50       # 击杀分攒满刷一场 BOSS；打完清零重计
 const SPAWN_ENEMY_GAP_MIN := 1200.0
 const SPAWN_ENEMY_GAP_MAX := 2400.0
 const SPAWN_OBSTACLE_GAP_MIN := 1800.0

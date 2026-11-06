@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 40" width="140" height="40">
+<!-- 地裂环纹 mark 140x40（中心=落点）：间歇泉预警主读出件——地裂环纹
+（暗环+放射裂缝）+盐田粉蓄能环（代码驱动渐急）+预漏白汽。 -->
+<defs>
+
+</defs>
+<ellipse cx="70" cy="26" rx="56" ry="10" fill="#142320" opacity="0.55"/>
+<ellipse cx="70" cy="26" rx="40" ry="7" fill="#0d1a15" opacity="0.75"/>
+<ellipse cx="70" cy="26" rx="30" ry="5" fill="#1e332e" opacity="0.9"/>
+<line x1="98.2" y1="29.3" x2="120.7" y2="31.9" stroke="#142320" stroke-width="2.4" opacity="0.8"/>
+<line x1="101.9" y1="29.7" x2="111.3" y2="32.7" stroke="#4e6a5e" stroke-width="1.2" opacity="0.5"/>
+<line x1="82.7" y1="34.7" x2="92.8" y2="41.7" stroke="#142320" stroke-width="2.4" opacity="0.8"/>
+<line x1="84.3" y1="35.9" x2="88.6" y2="38.9" stroke="#4e6a5e" stroke-width="1.2" opacity="0.5"/>
+<line x1="59.7" y1="35" x2="51.5" y2="42.2" stroke="#142320" stroke-width="2.4" opacity="0.8"/>
+<line x1="58.3" y1="36.2" x2="54.9" y2="39.2" stroke="#4e6a5e" stroke-width="1.2" opacity="0.5"/>
+<line x1="42.8" y1="30" x2="21" y2="33.3" stroke="#142320" stroke-width="2.4" opacity="0.8"/>
+<line x1="39.2" y1="30.6" x2="30.1" y2="33.6" stroke="#4e6a5e" stroke-width="1.2" opacity="0.5"/>
+<line x1="41.8" y1="22.7" x2="19.3" y2="20.1" stroke="#142320" stroke-width="2.4" opacity="0.8"/>
+<line x1="38.1" y1="22.3" x2="28.7" y2="25.3" stroke="#4e6a5e" stroke-width="1.2" opacity="0.5"/>
+<line x1="57.3" y1="17.3" x2="47.2" y2="10.3" stroke="#142320" stroke-width="2.4" opacity="0.8"/>
+<line x1="55.7" y1="16.1" x2="51.4" y2="19.1" stroke="#4e6a5e" stroke-width="1.2" opacity="0.5"/>
+<line x1="80.3" y1="17" x2="88.5" y2="9.8" stroke="#142320" stroke-width="2.4" opacity="0.8"/>
+<line x1="81.7" y1="15.8" x2="85.1" y2="18.8" stroke="#4e6a5e" stroke-width="1.2" opacity="0.5"/>
+<line x1="97.2" y1="22" x2="119" y2="18.7" stroke="#142320" stroke-width="2.4" opacity="0.8"/>
+<line x1="100.8" y1="21.4" x2="109.9" y2="24.4" stroke="#4e6a5e" stroke-width="1.2" opacity="0.5"/>
+<ellipse cx="70" cy="26" rx="44" ry="8" fill="#f2789f" opacity="0.4"/>
+<ellipse cx="62" cy="8" rx="4" ry="7" fill="#eef6f2" opacity="0.7"/>
+<ellipse cx="70" cy="5" rx="5" ry="8" fill="#eef6f2" opacity="0.8"/>
+<ellipse cx="78" cy="9" rx="3.4" ry="6" fill="#eef6f2" opacity="0.6"/>
+</svg>

@@ -13,7 +13,6 @@ class_name BalanceWorld6
 # ---- 第六章精英·打桩车「锚桩」（双桩炮架固定射角，落点围栏预教电网闸） ----
 # 教学位：把「赤轮」的电网闸提前教给玩家——读桩落点与蓄能火花，
 # 桩钉住的是你现在的位置：看到落桩就保持移动，停=被围。
-const ELITE_PILER_MAX_HP := 15
 const ELITE_PILER_SCORE := 60
 const ELITE_PILER_ATTACK_RANGE := 2200.0
 const ELITE_PILER_VOLLEY_HALF_LIFE := 2.4 # 齐射触发半衰期（同前五章精英的泊松节奏）
@@ -32,7 +31,6 @@ const ELITE_PILER_STAKE_FLIGHT := 0.5  # 桩抛体飞行时长（弹道解算用
 # 停=围/动=免/出笼交税或飞越），凿岩齐射 hunts 匀速跑线路径（lead 走廊），抛石
 # 落点锁定 hunts 站桩与直线冲脸——玩家被迫在站/跑/飞三态间换挡，反制=变速变向
 # （相对速度语言，ch2/ch4 同族）。
-const REDWHEEL_MAX_HP := 750
 const REDWHEEL_HOVER_Y := 370.0
 const REDWHEEL_FENCE_HALF := 200.0     # 桩落点半宽（笼内=被围）
 const REDWHEEL_FENCE_TOP := 200.0      # 幕高（推进 ≥204 飞越=免）

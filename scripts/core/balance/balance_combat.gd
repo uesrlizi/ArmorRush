@@ -44,7 +44,7 @@ const STAGGER_DMG_MULT := 1.5        # 失衡期受伤加深（AC6 同款乘区�
 const STAGGER_SFX_DELAY := 0.15      # 失衡音延迟（秒）：主击声先落地，钟鸣随后补位
 const IMPACT_RESIST_GRUNT := 40.0    # 杂兵失衡
 const IMPACT_RESIST_ELITE := 40.0    # 精英
-const IMPACT_RESIST_BOSS := 240.0    # BOSS
+const IMPACT_RESIST_BOSS := 300.0    # BOSS
 const STAGGER_TIME_GRUNT := 0.9      # 失衡硬直时长
 const STAGGER_TIME_ELITE := 1.8
 const STAGGER_TIME_BOSS := 4.0
@@ -57,6 +57,7 @@ const BOSS_STAGGER_SINK := 26.0      # BOSS 失衡瘫沉幅度（px，瘫而不�
 # 把 BOSS 压近、倒退把它甩出画面右缘（出画不打断出招，站定它自己踱回来）；
 # 扫射只变高度（压到射高开火）。动作之间只隔各自后摇，无独立间歇；
 # 离玩家过近压住不出招（贴脸反应窗）。
+const BOSS_MAX_HP := 400            # 全 BOSS 统一血量（2026-11-04 用户定：不按章分，取原 ch1 档）
 const BOSS_DEFENSE := 5             # 防御力
 									# 近战绕盾全额（15/25）——强化"枪射攒失衡→近战爆发"的分工
 const BOSS_SCORE := 50
@@ -78,13 +79,15 @@ const BOSS_DIRECT_RECOVER := 0.9    # 普攻直射后摇（秒）
 const BOSS_PHASE2_RECOVER_SCALE := 0.6 # 二阶段后摇缩短比例
 const BOSS_PHASE2_RATIO := 0.5      # 半血进二阶段
 const BOSS_ATTACK_MIN_DISTANCE := 700.0 # 离玩家水平距小于此不出招：硬直贪刀后 BOSS 弹回这个距离才重新开火（脱身反应窗）
+const BOSS_RETREAT_SPEED_MULT := 2.0 # 贴脸压招期回正移速倍率（乘在机动上限上）：出招被冻结的
+									 # 同时快速弹回安全距离，缩短贪刀真空（用户 2026-11-04 定：1.5 或 2 倍取 2）
 # ---- 机枪流基准档（跨章共用：真瞄直射/扫射的弹道与旋翼表现；ch2/3/5/7 按此档换皮参照） ----
 const BOSS_SWEEP_FIRE_INTERVAL := 0.085 # 机枪发弹间隔（≈12 发/秒）
 const BOSS_ROTOR_SPIN := 14.0        # 尾旋翼转速（rad/s，整周旋转）
 const BOSS_ROTOR_WOBBLE := 0.035     # 主旋翼呼吸摆幅（rad：侧视刃边不整周旋转）
 const BOSS_ROTOR_WOBBLE_SPEED := 19.0 # 主旋翼摆动频率
 const BOSS_SWEEP_SPEED := 1000.0
-const BOSS_SWEEP_DAMAGE := 8        # 机枪单发轻（12发/s 持续流）；威胁靠命中数累积
+const BOSS_SWEEP_DAMAGE := 4        # 机枪单发轻（12发/s 持续流）；威胁靠命中数累积
 # 直射=普攻：同一把机枪换瞄准——枪臂真瞄玩家（无预判）朝人扫一短梭，子弹与高扫
 # 同款（SPEED/DAMAGE 共用 BOSS_SWEEP_*），只有射击时长不同。无重击警告（枪臂全程
 # 真瞄，瞄准本身就是预警），技能（扫射/弹雨）之间各插一段。

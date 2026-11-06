@@ -11,6 +11,11 @@ var _ghost := 1.0 # 虚影右缘（血量比例 0..1，≥当前血量比例）
 
 
 func _process(delta: float) -> void:
+	# 录制隐藏档 2（RunState.ui_tier，F2）：头顶血条/气槽一并全隐——
+	# 玩家条与所有敌人条共用本类，逐帧闸一次管全部（含后刷的敌人）。
+	visible = RunState.ui_tier < 2
+	if not visible:
+		return
 	var ratio := _hp_ratio()
 	if ratio > _ghost:
 		_ghost = ratio # 回满/回血/池化重置：瞬移，不倒放虚影

@@ -29,7 +29,6 @@ const CORAL_TIDE_DAMAGE := 8          # 灼烧一次即溃散（浪墙不是驻�
 # 教学位：把「鮟鱇」的珊瑚重炮提前教给玩家——读炮口预警+看慢弹落点，
 # 变向/急停离承诺带，匀速直线跑被逐发压在路径上。
 # 弹数下限 v2.1 统一上调（用户：憋半天就两发太少；ch1 基准不动）。
-const ELITE_ANEMONE_MAX_HP := 15
 const ELITE_ANEMONE_SCORE := 60
 const ELITE_ANEMONE_ATTACK_RANGE := 2200.0
 const ELITE_ANEMONE_VOLLEY_HALF_LIFE := 2.4 # 齐射触发半衰期（同前三章精英的泊松节奏）
@@ -47,7 +46,6 @@ const ELITE_ANEMONE_LEAD_MAX := 620.0    # 承诺带前沿上限
 # 等分圆周，弹=coral_bolt.tscn 纯换皮；拉开距离即躲，贴脸 700 压招保底）。
 # 三招三种几何：重炮=点（lead 慢弹）、潮=线（贴地涌浪）、爆闪=面（径向弹雾）。
 # 重弹出膛瞬间 lead 解算（瞄准锁定在开火时机，真实枪口律）。
-const ANGLER_MAX_HP := 750
 const ANGLER_HOVER_Y := 370.0
 const ANGLER_VOLLEY_COUNT := 4        # 一轮重弹数（v2.1 3→4，对齐 ch1/ch3 弹雨档；phase2 +1）
 const ANGLER_VOLLEY_STAGGER := 0.55
