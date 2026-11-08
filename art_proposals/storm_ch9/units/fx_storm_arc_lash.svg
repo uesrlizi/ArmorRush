@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 24" width="128" height="24">
+<!-- 普攻断缆弧弹 128x24，锚点中心 (64,12)，+X=飞行方向；带电读色 芯 #f0e6ff+外辉 #c9a6ff，普通混合不 ADD。 -->
+<defs>
+
+</defs>
+<path d="M 6 14 Q 34 6 64 12 T 122 10" fill="none" stroke="#c9a6ff" stroke-width="9" stroke-linecap="round" opacity="0.45"/>
+<path d="M 6 14 Q 34 6 64 12 T 122 10" fill="none" stroke="#3a3346" stroke-width="4.5" stroke-linecap="round"/>
+<path d="M 6 14 Q 34 6 64 12 T 122 10" fill="none" stroke="#f0e6ff" stroke-width="1.6" stroke-linecap="round" opacity="0.95"/>
+<circle cx="122" cy="10" r="3.5" fill="#f0e6ff" opacity="0.95"/>
+<circle cx="6" cy="14" r="2.5" fill="#c9a6ff" opacity="0.8"/>
+</svg>

@@ -422,7 +422,7 @@ func _run() -> void:
 				return c is HeavyMissile or c is MortarShell \
 						or c is PlasmaMine or c is CoralOrb \
 						or c is FlakShell or c is ArcFence \
-						or c is SkipShell or c is SaltDart) > 0
+						or c is SkipShell or c is SaltDart or c is LiveSpan) > 0
 		await _screenshot("07_elite_volley.png")
 		print("[autotest] elite heavy shot: ", saw_missile,
 				" (当前章精英在场应出重击弹)")
@@ -456,6 +456,8 @@ func _run() -> void:
 			await _probe_boss_anchor(boss as BossAnchor)
 		elif boss is BossSaltmill:
 			await _probe_boss_saltmill(boss as BossSaltmill)
+		elif boss is BossConductor:
+			await _probe_boss_conductor(boss as BossConductor)
 		elif boss is Boss:
 			await _probe_boss_heli(boss as Boss)
 		elif boss is PursuitBoss:
@@ -1462,6 +1464,53 @@ func _probe_boss_saltmill(boss: BossSaltmill) -> void:
 				" take 10 -> ", applied, " (失衡加深×防御应=", expected, ")")
 
 
+## ch9 引雷：autotest 段只做在场/接线冒烟（跨缆在场、针链在场+针数、失衡账），
+## 躲法判据的确定性断言在本章独立探针 scenes/previews/probe_world_9.tscn。
+func _probe_boss_conductor(boss: BossConductor) -> void:
+	var player := get_tree().get_first_node_in_group("player") as Player
+	player.hp = 99999
+	for node in get_tree().get_nodes_in_group("enemies"):
+		if node.is_in_group("boss"):
+			continue
+		(node as Enemy).take_damage(999)
+	boss._bstate = PursuitBoss.ST_RECOVER
+	boss._bt = 99.0
+	for c in get_tree().get_nodes_in_group("live_spans") + get_tree().get_nodes_in_group("rod_chains"):
+		c.queue_free()
+	await _wait(0.3)
+	boss._begin_skill_a()
+	await _wait(1.0)
+	var spans := get_tree().get_nodes_in_group("live_spans").size()
+	await _screenshot("08a_conductor_span.png")
+	print("[autotest] conductor span: live_spans=", spans, " [", "OK" if spans >= 1 else "FAIL",
+			"]（跨缆网出膛应 ≥1 套）")
+	await _wait(2.6)
+	boss._bstate = PursuitBoss.ST_RECOVER
+	boss._bt = 99.0
+	boss._begin_skill_b()
+	await _wait(1.6)
+	var chains := get_tree().get_nodes_in_group("rod_chains")
+	var rods := (chains[0] as RodChain).rod_xs.size() if not chains.is_empty() else 0
+	await _screenshot("08b_conductor_rods.png")
+	print("[autotest] conductor rods: chains=", chains.size(), " rods=", rods, " [",
+			"OK" if rods >= BalanceWorld9.ROD_COUNT else "FAIL", "]（针链应 ≥", BalanceWorld9.ROD_COUNT, " 针）")
+	await _wait(1.6)
+	boss._bstate = PursuitBoss.ST_RECOVER
+	boss._bt = 0.5
+	player.hp = BalancePlayer.PLAYER_MAX_HP
+	await _wait(0.1)
+	if is_instance_valid(boss) and boss.hp_ratio() > 0.0:
+		boss.add_impact(999)
+		await _wait(0.15)
+		var staggered := boss.is_staggered()
+		var ratio_pre := boss.hp_ratio()
+		boss.take_damage(10)
+		await _wait(0.05)
+		var applied := roundi((ratio_pre - boss.hp_ratio()) * BalanceCombat.BOSS_MAX_HP)
+		var expected := ceili(10 * BalanceCombat.STAGGER_DMG_MULT) - BalanceCombat.BOSS_DEFENSE
+		print("[autotest] conductor stagger: staggered=", staggered, " take 10 -> ", applied,
+				" [", "OK" if staggered and applied == expected else "FAIL", "] (失衡加深×防御应=", expected, ")")
+
 func _wait(seconds: float) -> void:
 	await get_tree().create_timer(seconds).timeout
 
@@ -1480,7 +1529,7 @@ func _is_hostile_shot(c: Node) -> bool:
 		return (c as Bullet).damage != BalancePlayer.PLAYER_BULLET_DAMAGE
 	return c is HeavyMissile or c is MortarShell or c is PlasmaMine or c is CoralOrb \
 			or c is CoralTide or c is FlakShell or c is ArcFence or c is SkipShell \
-			or c is DrillCharge or c is DepthCharge or c is SaltDart
+			or c is DrillCharge or c is DepthCharge or c is SaltDart 			or c is LiveSpan or c is RodChain
 
 
 ## 弹容器里按谓词数弹（BOSS 探针用：扫射弹/导弹分类计数）。

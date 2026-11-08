@@ -1,0 +1,96 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/units/boss_conductor.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/world_9/boss_storm_body.svg" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/fx/muzzle_flash.tscn" id="3"]
+[ext_resource type="Texture2D" path="res://assets/world_9/boss_storm_arm.svg" id="4"]
+[ext_resource type="Script" path="res://scripts/units/eye_glow.gd" id="5"]
+[ext_resource type="PackedScene" path="res://scenes/fx/threat_flash.tscn" id="6"]
+[ext_resource type="Texture2D" path="res://assets/common/fx_flame.svg" id="7"]
+
+; 第九章 BOSS·浮空巡线舰「引雷」（BossConductor，架线与引雷能力套件）：
+; 独眼条带 y60..66 含 (55,63)（EyeGlow (-95,-27) 沿用）；
+; ArmPivot=前臂绝缘子串枢画布 (150,26)→局部 (0,-64)（俯仰真瞄=敌基类瞄准层驱动，
+; 同沉锚/盐磨账；臂画布 96x44 枢端 (78,22)→offset(-78,-22)，放电球画布 (10,22)
+; =Muzzle 局部 (-68,0)，hover 370 静姿世界 y=306；普攻甩弧与针链主弧共用源点）；
+; BayPort=腹舱双桩口画布 (150,168)→局部 (0,78)（ThreatFlash=跨缆网预警）；
+; RodPort1..3=背部三孔画布 (206,52)/(230,56)/(254,60)→局部 (56,-38)/(80,-34)/(104,-30)
+; （各挂 ThreatFlash=出针前逐孔预警，p2 第四针回绕复用 1 号孔）；
+; Thruster1/2=局部 (-40,66)/(60,66)（通用 fx_flame+加色装饰紫，举升喷口呼吸）。
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
+size = Vector2(280, 150)
+
+[sub_resource type="CanvasItemMaterial" id="addmat"]
+blend_mode = 1
+
+[node name="BossConductor" type="CharacterBody2D"]
+collision_layer = 4
+collision_mask = 0
+script = ExtResource("1")
+feet_offset = 90.0
+body_size = Vector2(300, 180)
+
+[node name="Visuals" type="Node2D" parent="."]
+
+[node name="Sprite2D" type="Sprite2D" parent="Visuals"]
+texture = ExtResource("2")
+
+[node name="EyeGlow" type="Node2D" parent="Visuals/Sprite2D"]
+position = Vector2(-95, -27)
+scale = Vector2(1.2, 1.2)
+script = ExtResource("5")
+
+[node name="ArmPivot" type="Node2D" parent="Visuals"]
+position = Vector2(0, -64)
+
+[node name="Sprite2D" type="Sprite2D" parent="Visuals/ArmPivot"]
+texture = ExtResource("4")
+centered = false
+offset = Vector2(-78, -22)
+
+[node name="Muzzle" type="Marker2D" parent="Visuals/ArmPivot"]
+position = Vector2(-68, 0)
+
+[node name="Flash" parent="Visuals/ArmPivot/Muzzle" instance=ExtResource("3")]
+
+[node name="ThreatFlash" parent="Visuals/ArmPivot/Muzzle" instance=ExtResource("6")]
+
+[node name="BayPort" type="Marker2D" parent="Visuals"]
+position = Vector2(0, 78)
+
+[node name="ThreatFlash" parent="Visuals/BayPort" instance=ExtResource("6")]
+
+[node name="Flash" parent="Visuals/BayPort" instance=ExtResource("3")]
+
+[node name="RodPort1" type="Marker2D" parent="Visuals"]
+position = Vector2(56, -38)
+
+[node name="ThreatFlash" parent="Visuals/RodPort1" instance=ExtResource("6")]
+
+[node name="RodPort2" type="Marker2D" parent="Visuals"]
+position = Vector2(80, -34)
+
+[node name="ThreatFlash" parent="Visuals/RodPort2" instance=ExtResource("6")]
+
+[node name="RodPort3" type="Marker2D" parent="Visuals"]
+position = Vector2(104, -30)
+
+[node name="ThreatFlash" parent="Visuals/RodPort3" instance=ExtResource("6")]
+
+[node name="Thruster1" type="Sprite2D" parent="Visuals"]
+modulate = Color(0.43, 0.32, 0.63, 0.6)
+material = SubResource("addmat")
+position = Vector2(-40, 66)
+scale = Vector2(1.1, 1.1)
+texture = ExtResource("7")
+
+[node name="Thruster2" type="Sprite2D" parent="Visuals"]
+modulate = Color(0.43, 0.32, 0.63, 0.6)
+material = SubResource("addmat")
+position = Vector2(60, 66)
+scale = Vector2(1.1, 1.1)
+texture = ExtResource("7")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_1")

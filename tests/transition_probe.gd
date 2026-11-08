@@ -59,7 +59,7 @@ func _run() -> void:
 
 	# ---- 袋逻辑直测（纯 API，不进场景；局内循环 v2 语义=design/run_loop.md §1）----
 	# 一局 = 首关 +（RUN_NORMAL_LEVELS−1）普通抽 + RUSH 阵容（RUN_RUSH_COUNT 台）
-	# + ""（通关结算原地）。一局恰好看 SCENES.size()−1 台（少的那张=没抽到）；
+	# + ""（通关结算原地）。一局看 普通关+RUSH 阵容 台（阵容从没抽到的里挑）；
 	# 局内（=旧「周期」概念）不重复、相邻永不相同——普通段/RUSH 段/两段边界都算。
 	for trial in 200:
 		var seen := {}
@@ -102,9 +102,13 @@ func _run() -> void:
 			prev = s
 		if not RunState.draw_next().is_empty():
 			return _fail("阵容打空后未返回空串（通关结算信号，trial %d）" % trial)
-		if seen.size() != RunState.SCENES.size() - 1:
-			return _fail("纯 API 一局落地 %d 张，应=场景池-1（%d；trial %d）"
-					% [seen.size(), RunState.SCENES.size() - 1, trial])
+		# 一局张数 = 普通关 + RUSH 阵容（阵容=没抽到的里至多 RUN_RUSH_COUNT 台）：
+		# 8 场景池时恰=池−1；池再大（9 起）恰=RUN_NORMAL_LEVELS+RUN_RUSH_COUNT。
+		var expect_run := BalanceGlobal.RUN_NORMAL_LEVELS + mini(BalanceGlobal.RUN_RUSH_COUNT,
+				RunState.SCENES.size() - BalanceGlobal.RUN_NORMAL_LEVELS)
+		if seen.size() != expect_run:
+			return _fail("纯 API 一局落地 %d 张，应=普通关+RUSH 阵容（%d；trial %d）"
+					% [seen.size(), expect_run, trial])
 	# 长跑连抽压测（跨局边界）：通关空串即开新一局续抽——相邻相同在任何边界
 	# （普通袋尾/RUSH 阵容/新一局首抽）都不允许。start_run 的返回值=新一局
 	# 首关，必须接进比较链（漏了会把「隔一关」误当「相邻」假 FAIL）。

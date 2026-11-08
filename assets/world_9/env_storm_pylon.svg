@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3200 900" width="3200" height="900">
+<!-- 第九章独层地标：倒伏门型巨塔 3200x900（视差 0.9，tile 3200 同屏一份）。
+tex_x=1600，整件 x 1208..1977 ⊂ [1200,2000] 防回绕安全带。条带位 (8,270) 居中挂载：画布 y = 世界 y + 180；
+塔根画布 852 = 世界 672（沉入地形），塔头断口画布 ~340 = 世界 ~160。种子 9094。 -->
+<defs>
+
+</defs>
+<ellipse cx="1500" cy="850" rx="220" ry="7" fill="#221c28" opacity="0.5"/>
+<line x1="1300" y1="852" x2="1880" y2="380" stroke="#4c4a56" stroke-width="12" opacity="0.97"/>
+<line x1="1270" y1="778" x2="1862" y2="340" stroke="#4c4a56" stroke-width="10" opacity="0.97"/>
+<line x1="1300" y1="852" x2="1354.6" y2="715.4" stroke="#4c4a56" stroke-width="4" opacity="0.9"/>
+<line x1="1270" y1="778" x2="1382.9" y2="784.6" stroke="#4c4a56" stroke-width="4" opacity="0.9"/>
+<line x1="1300" y1="852" x2="1270" y2="778" stroke="#38363f" stroke-width="5" opacity="0.95"/>
+<line x1="1382.9" y1="784.6" x2="1439.1" y2="652.9" stroke="#4c4a56" stroke-width="4" opacity="0.9"/>
+<line x1="1354.6" y1="715.4" x2="1465.7" y2="717.1" stroke="#4c4a56" stroke-width="4" opacity="0.9"/>
+<line x1="1382.9" y1="784.6" x2="1354.6" y2="715.4" stroke="#38363f" stroke-width="5" opacity="0.95"/>
+<line x1="1465.7" y1="717.1" x2="1523.7" y2="590.3" stroke="#4c4a56" stroke-width="4" opacity="0.9"/>
+<line x1="1439.1" y1="652.9" x2="1548.6" y2="649.7" stroke="#4c4a56" stroke-width="4" opacity="0.9"/>
+<line x1="1465.7" y1="717.1" x2="1439.1" y2="652.9" stroke="#38363f" stroke-width="5" opacity="0.95"/>
+<line x1="1548.6" y1="649.7" x2="1608.3" y2="527.7" stroke="#4c4a56" stroke-width="4" opacity="0.9"/>
+<line x1="1523.7" y1="590.3" x2="1631.4" y2="582.3" stroke="#4c4a56" stroke-width="4" opacity="0.9"/>
+<line x1="1548.6" y1="649.7" x2="1523.7" y2="590.3" stroke="#38363f" stroke-width="5" opacity="0.95"/>
+<line x1="1631.4" y1="582.3" x2="1692.9" y2="465.1" stroke="#4c4a56" stroke-width="4" opacity="0.9"/>
+<line x1="1608.3" y1="527.7" x2="1714.3" y2="514.9" stroke="#4c4a56" stroke-width="4" opacity="0.9"/>
+<line x1="1631.4" y1="582.3" x2="1608.3" y2="527.7" stroke="#38363f" stroke-width="5" opacity="0.95"/>
+<line x1="1714.3" y1="514.9" x2="1777.4" y2="402.6" stroke="#4c4a56" stroke-width="4" opacity="0.9"/>
+<line x1="1692.9" y1="465.1" x2="1797.1" y2="447.4" stroke="#4c4a56" stroke-width="4" opacity="0.9"/>
+<line x1="1714.3" y1="514.9" x2="1692.9" y2="465.1" stroke="#38363f" stroke-width="5" opacity="0.95"/>
+<line x1="1797.1" y1="447.4" x2="1862" y2="340" stroke="#4c4a56" stroke-width="4" opacity="0.9"/>
+<line x1="1777.4" y1="402.6" x2="1880" y2="380" stroke="#4c4a56" stroke-width="4" opacity="0.9"/>
+<line x1="1797.1" y1="447.4" x2="1777.4" y2="402.6" stroke="#38363f" stroke-width="5" opacity="0.95"/>
+<line x1="1880" y1="380" x2="1862" y2="340" stroke="#38363f" stroke-width="6" opacity="0.95"/>
+<line x1="1274" y1="775" x2="1864" y2="337" stroke="#8e9ab0" stroke-width="1.6" opacity="0.55"/>
+<polygon points="1230,860 1264,776 1280,782 1252,860" fill="#38363f" opacity="0.95"/>
+<polygon points="1294,860 1304,848 1320,852 1316,860" fill="#38363f" opacity="0.95"/>
+<rect x="1208" y="840" width="130" height="20" fill="#4e4856" opacity="0.95"/>
+<rect x="1208" y="840" width="130" height="3" fill="#8a8492" opacity="0.85"/>
+<line x1="1820" y1="348" x2="1950" y2="314" stroke="#4c4a56" stroke-width="9" opacity="0.97"/>
+<line x1="1840" y1="370" x2="1940" y2="344" stroke="#4c4a56" stroke-width="6" opacity="0.95"/>
+<line x1="1950" y1="314" x2="1953" y2="304" stroke="#8e9ab0" stroke-width="1.6" opacity="0.75"/>
+<line x1="1955" y1="312" x2="1958" y2="301" stroke="#8e9ab0" stroke-width="1.6" opacity="0.75"/>
+<line x1="1960" y1="310" x2="1963" y2="298" stroke="#8e9ab0" stroke-width="1.6" opacity="0.75"/>
+<line x1="1965" y1="308" x2="1968" y2="295" stroke="#8e9ab0" stroke-width="1.6" opacity="0.75"/>
+<line x1="1970" y1="306" x2="1973" y2="292" stroke="#8e9ab0" stroke-width="1.6" opacity="0.75"/>
+<line x1="1830" y1="352" x2="1830" y2="408" stroke="#38363f" stroke-width="2.4" opacity="0.95"/>
+<ellipse cx="1830" cy="360" rx="7" ry="2.6" fill="#b0a4bc" opacity="0.9"/>
+<ellipse cx="1830" cy="360" rx="7" ry="1" fill="#7e7290" opacity="0.8"/>
+<ellipse cx="1830" cy="368" rx="7" ry="2.6" fill="#b0a4bc" opacity="0.9"/>
+<ellipse cx="1830" cy="368" rx="7" ry="1" fill="#7e7290" opacity="0.8"/>
+<ellipse cx="1830" cy="376" rx="7" ry="2.6" fill="#b0a4bc" opacity="0.9"/>
+<ellipse cx="1830" cy="376" rx="7" ry="1" fill="#7e7290" opacity="0.8"/>
+<ellipse cx="1830" cy="384" rx="7" ry="2.6" fill="#b0a4bc" opacity="0.9"/>
+<ellipse cx="1830" cy="384" rx="7" ry="1" fill="#7e7290" opacity="0.8"/>
+<ellipse cx="1830" cy="392" rx="7" ry="2.6" fill="#b0a4bc" opacity="0.9"/>
+<ellipse cx="1830" cy="392" rx="7" ry="1" fill="#7e7290" opacity="0.8"/>
+<ellipse cx="1830" cy="400" rx="7" ry="2.6" fill="#b0a4bc" opacity="0.9"/>
+<ellipse cx="1830" cy="400" rx="7" ry="1" fill="#7e7290" opacity="0.8"/>
+<line x1="1920" y1="326" x2="1920" y2="382" stroke="#38363f" stroke-width="2.4" opacity="0.95"/>
+<ellipse cx="1920" cy="334" rx="7" ry="2.6" fill="#b0a4bc" opacity="0.9"/>
+<ellipse cx="1920" cy="334" rx="7" ry="1" fill="#7e7290" opacity="0.8"/>
+<ellipse cx="1920" cy="342" rx="7" ry="2.6" fill="#b0a4bc" opacity="0.9"/>
+<ellipse cx="1920" cy="342" rx="7" ry="1" fill="#7e7290" opacity="0.8"/>
+<ellipse cx="1920" cy="350" rx="7" ry="2.6" fill="#b0a4bc" opacity="0.9"/>
+<ellipse cx="1920" cy="350" rx="7" ry="1" fill="#7e7290" opacity="0.8"/>
+<ellipse cx="1920" cy="358" rx="7" ry="2.6" fill="#b0a4bc" opacity="0.9"/>
+<ellipse cx="1920" cy="358" rx="7" ry="1" fill="#7e7290" opacity="0.8"/>
+<ellipse cx="1920" cy="366" rx="7" ry="2.6" fill="#b0a4bc" opacity="0.9"/>
+<ellipse cx="1920" cy="366" rx="7" ry="1" fill="#7e7290" opacity="0.8"/>
+<ellipse cx="1920" cy="374" rx="7" ry="2.6" fill="#b0a4bc" opacity="0.9"/>
+<ellipse cx="1920" cy="374" rx="7" ry="1" fill="#7e7290" opacity="0.8"/>
+<path d="M 1920,382 Q 1960,642 1975,852" fill="none" stroke="#38363f" stroke-width="3" stroke-linecap="round" opacity="0.85"/>
+<line x1="1830" y1="408" x2="1824" y2="438" stroke="#38363f" stroke-width="2.6" opacity="0.9"/>
+<circle cx="1824" cy="438" r="2.2" fill="#8e9ab0" opacity="0.7"/>
+<circle cx="1595.6" cy="531.1" r="8" fill="#6e52a0" opacity="0.35"/>
+<circle cx="1595.6" cy="531.1" r="16" fill="#6e52a0" opacity="0.14"/>
+<circle cx="1595.6" cy="531.1" r="3.2" fill="#6e52a0"/>
+<polygon points="1340.6,856 1353.6,844.7 1366.6,856" fill="#403848" opacity="0.95"/>
+<polygon points="1331.6,856 1339.9,848.7 1348.2,856" fill="#403848" opacity="0.95"/>
+<polygon points="1323.9,856 1332.6,842.3 1341.2,856" fill="#403848" opacity="0.95"/>
+<polygon points="1305.8,856 1321.3,843.6 1336.8,856" fill="#403848" opacity="0.95"/>
+<polygon points="1303.8,856 1317.6,845.4 1331.5,856" fill="#403848" opacity="0.95"/>
+<polygon points="1276.1,856 1287.3,848.8 1298.4,856" fill="#403848" opacity="0.95"/>
+</svg>

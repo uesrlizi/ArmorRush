@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 118" width="28" height="118">
+<!-- 高缆桩 28x118。锚点画布 (ax,ay)=(14,116) 底部接地点；缆端=桩顶 (14,6)=局部 (0,-110)。 -->
+<defs>
+
+</defs>
+<polygon points="6,116 22,116 18,108 10,108" fill="#262032"/>
+<rect x="11.5" y="20" width="5" height="90" fill="#3a3346"/>
+<rect x="11.5" y="20" width="1.6" height="90" fill="#5a5068" opacity="0.8"/>
+<rect x="10" y="40" width="8" height="2.4" fill="#191524"/>
+<rect x="10" y="70" width="8" height="2.4" fill="#191524"/>
+<rect x="10" y="96" width="8" height="2.4" fill="#191524"/>
+<ellipse cx="14" cy="10.8" rx="9" ry="1.5" fill="#7e7290"/>
+<ellipse cx="14" cy="10" rx="9" ry="1.4" fill="#b0a4bc"/>
+<ellipse cx="14" cy="16.8" rx="9" ry="1.5" fill="#7e7290"/>
+<ellipse cx="14" cy="16" rx="9" ry="1.4" fill="#b0a4bc"/>
+<rect x="12" y="4" width="4" height="4" fill="#191524"/>
+</svg>

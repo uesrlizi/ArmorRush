@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 44" width="34" height="44">
+<!-- 第九章精英双管桩炮架 34x44。枢端 (17,40)；炮口 (17,6)=Muzzle 臂局部 (0,-34)，ThreatFlash 挂此。 -->
+<defs>
+
+</defs>
+<rect x="10" y="32" width="14" height="10" fill="#262032"/>
+<circle cx="17" cy="40" r="3.4" fill="#262032"/>
+<rect x="11" y="8" width="5" height="26" fill="#3a3346"/>
+<rect x="18" y="8" width="6" height="26" fill="#3a3346"/>
+<rect x="11" y="8" width="1.6" height="26" fill="#5a5068" opacity="0.8"/>
+<rect x="18" y="8" width="1.8" height="26" fill="#5a5068" opacity="0.8"/>
+<rect x="9.5" y="4" width="8" height="5" fill="#191524"/>
+<rect x="16.5" y="4" width="9" height="5" fill="#191524"/>
+<circle cx="13.5" cy="6" r="1.6" fill="#b0a4bc"/>
+<circle cx="21" cy="6" r="2" fill="#b0a4bc"/>
+<rect x="9" y="20" width="17" height="3" fill="#262032"/>
+<circle cx="26" cy="28" r="1.2" fill="#6e52a0" opacity="0.9"/>
+</svg>

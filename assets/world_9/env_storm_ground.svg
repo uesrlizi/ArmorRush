@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 480" width="256" height="480">
+<!-- 第九章兜底条 256x480：表面带内容（单变体）+ 深处焦土渐变。种子 3111。 -->
+<defs>
+<linearGradient id="fbao9" x1="0" y1="0.0" x2="0" y2="1.0"><stop offset="0" stop-color="#2c2532" stop-opacity="0.8"/><stop offset="1" stop-color="#2c2532" stop-opacity="0.0"/></linearGradient>
+<linearGradient id="fbdeep9" x1="0" y1="0.0" x2="0" y2="1.0"><stop offset="0" stop-color="#282230" stop-opacity="1"/><stop offset="0.5" stop-color="#241e2a" stop-opacity="1"/><stop offset="1" stop-color="#1a1620" stop-opacity="1"/></linearGradient>
+</defs>
+<rect x="0" y="2.5" width="256" height="53.5" fill="#4e4452"/>
+<rect x="78.9" y="7.2" width="22.3" height="3.4" fill="#8e9ab0" opacity="0.5"/>
+<line x1="78.9" y1="7" x2="78.9" y2="10.4" stroke="#372f3b" stroke-width="0.8" opacity="0.8"/>
+<line x1="101.2" y1="7" x2="101.2" y2="10.4" stroke="#372f3b" stroke-width="0.8" opacity="0.8"/>
+<rect x="173.5" y="49.5" width="2" height="1.5" fill="#372f3b" opacity="0.5692108850774837"/>
+<rect x="167.9" y="9.7" width="2" height="1.5" fill="#372f3b" opacity="0.4719091689349003"/>
+<rect x="104" y="23.7" width="2" height="1.5" fill="#372f3b" opacity="0.5735567208145301"/>
+<rect x="178.8" y="10.3" width="2" height="1.5" fill="#372f3b" opacity="0.46352440034308356"/>
+<rect x="231.2" y="28.8" width="2" height="1.5" fill="#372f3b" opacity="0.571384634364112"/>
+<rect x="0" y="53.6" width="256" height="2.4" fill="#3c3440"/>
+<rect x="0" y="0" width="256" height="2.8" fill="#b0a4bc"/>
+<rect x="0" y="56" width="256" height="10" fill="#453b4a"/>
+<rect x="0" y="56" width="256" height="10" fill="url(#fbao9)"/>
+<rect x="0" y="66" width="256" height="414" fill="url(#fbdeep9)"/>
+<line x1="0" y1="120" x2="256" y2="120" stroke="#332b3c" stroke-width="2" opacity="0.3"/>
+<line x1="0" y1="210" x2="256" y2="210" stroke="#332b3c" stroke-width="2" opacity="0.22"/>
+<line x1="0" y1="310" x2="256" y2="310" stroke="#332b3c" stroke-width="2" opacity="0.15"/>
+<line x1="0" y1="410" x2="256" y2="410" stroke="#332b3c" stroke-width="2" opacity="0.1"/>
+<rect x="0" y="66" width="3" height="414" fill="#211b28" opacity="0.5"/>
+<rect x="253" y="66" width="3" height="414" fill="#211b28" opacity="0.5"/>
+</svg>

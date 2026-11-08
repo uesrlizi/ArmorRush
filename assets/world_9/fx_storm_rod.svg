@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 140" width="36" height="140">
+<!-- 引雷针 36x140。锚点画布 (ax,ay)=(18,138) 底部接地点；针尖 (18,18)=局部 (0,-120)；杆宽 8，充能环直径 28。 -->
+<defs>
+
+</defs>
+<polygon points="6,138 30,138 24,126 12,126" fill="#262032"/>
+<rect x="14" y="46" width="8" height="81" fill="#3a3346"/>
+<rect x="14" y="46" width="2.4" height="81" fill="#5a5068" opacity="0.85"/>
+<rect x="12.5" y="60" width="11" height="3" fill="#191524"/>
+<rect x="12.5" y="84" width="11" height="3" fill="#191524"/>
+<rect x="12.5" y="108" width="11" height="3" fill="#191524"/>
+<circle cx="18" cy="34" r="14" fill="#191524"/>
+<circle cx="18" cy="34" r="11.5" fill="#7e7290"/>
+<circle cx="18" cy="34" r="9" fill="#262032"/>
+<circle cx="18" cy="34" r="5" fill="#3a3346"/>
+<polygon points="18,18 20.6,34 15.4,34" fill="#b0a4bc"/>
+<line x1="12" y1="32" x2="10.5" y2="23" stroke="#b0a4bc" stroke-width="1.6"/>
+<line x1="24" y1="32" x2="25.5" y2="23" stroke="#b0a4bc" stroke-width="1.6"/>
+<circle cx="18" cy="34" r="2.2" fill="#b0a4bc"/>
+</svg>

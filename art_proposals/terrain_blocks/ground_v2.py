@@ -134,6 +134,15 @@ THEMES = {
         "seam": "#5c4f3c", "detail": "#e8dcc0", "foot": "#d8c8a8",
         "accent": "#f2789f",
     },
+    # 九 雷暴线场：焦紫灰硬质荒原走道带（缆槽盖板/电蚀焦痕/砾石点）+ 焦土断面
+    "p9_storm": {
+        "style": "storm",
+        "top_line": "#b0a4bc", "band": "#4e4452", "band_edge": "#3c3440",
+        "band_dark": "#372f3b", "band_light": "#665a6e", "ao": "#2c2532",
+        "face_hi": "#453b4a", "face_lo": "#282230", "strata": "#332b3c",
+        "seam": "#211b28", "detail": "#8e9ab0", "foot": "#403848",
+        "accent": "#a678e8",
+    },
 }
 
 
@@ -249,6 +258,23 @@ def band_detail(s, th, x0, top, bw, band, k, rng):
         for _ in range(5):  # 结晶点
             s.rect(x0 + rng.uniform(3, bw - 6) * k, top + rng.uniform(5, band - 6),
                    1.8 * k, 1.4 * k, th["detail"], rng.uniform(0.4, 0.8))
+    elif st == "storm":
+        gx = rng.uniform(0.15, 0.45) * bw + x0  # 缆槽盖板（钢青长条+端缝）
+        gw = rng.uniform(22, 34) * k
+        s.rect(gx, top + rng.uniform(7, 10) * k, gw, 3.4 * k, th["detail"], 0.5)
+        s.line(gx, top + 7 * k, gx, top + 10.4 * k, th["band_dark"], 0.8 * k, 0.8)
+        s.line(gx + gw, top + 7 * k, gx + gw, top + 10.4 * k, th["band_dark"], 0.8 * k, 0.8)
+        if rng.random() < 0.6:  # 电蚀焦痕（雷光紫微光短线，收敛贴带）
+            jx = rng.uniform(0.2, 0.6) * bw + x0
+            jy = top + rng.uniform(12, 20) * k
+            for _s2 in range(2):
+                ln = rng.uniform(6, 12) * k
+                s.line(jx, jy, jx + ln, jy + rng.uniform(-1.5, 1.5) * k,
+                       th["accent"], 1.6 * k, 0.22)
+                jx += ln + rng.uniform(3, 7) * k
+        for _ in range(5):  # 砾石点
+            s.rect(x0 + rng.uniform(3, bw - 6) * k, top + rng.uniform(5, band - 6),
+                   2.0 * k, 1.5 * k, th["band_dark"], rng.uniform(0.4, 0.7))
 
 
 # ============================================================
@@ -293,6 +319,14 @@ def face_detail(s, th, x0, top, bw, band, k, rng):
         if rng.random() < 0.5:  # 粉盐渍带（断面渗色）
             s.rect(x0 + rng.uniform(0.2, 0.6) * bw, fy + rng.uniform(10, 22) * k,
                    rng.uniform(14, 26) * k, 3 * k, th["accent"], 0.22)
+    elif st == "storm":
+        px = x0 + rng.uniform(0.2, 0.7) * bw  # 断面露头铁件（锚栓/断缆头）
+        s.line(px, fy + rng.uniform(9, 14) * k, px + 9 * k,
+               fy + rng.uniform(9, 14) * k, th["detail"], 1.3 * k, 0.8)
+        s.circle(px + 11 * k, fy + rng.uniform(9, 14) * k, 1.1 * k, th["detail"], 0.85)
+        if rng.random() < 0.5:  # 埋缆警示紫杠（断面渗色）
+            s.rect(x0 + rng.uniform(0.2, 0.6) * bw, fy + rng.uniform(12, 22) * k,
+                   rng.uniform(14, 24) * k, 3 * k, th["accent"], 0.24)
 
 
 # ============================================================
@@ -346,6 +380,14 @@ def wall_foot(s, th, wx, low_top, k, rng, rise=False, hi_top=None):
         rx = wx + rng.uniform(4, 18) * k
         s.poly([(rx, low_top + 1.4 * k), (rx + 5 * k, low_top - 4 * k),
                 (rx + 11 * k, low_top + 1.4 * k)], th["band_light"], 0.9)
+    elif st == "storm":
+        for _ in range(3):  # 碎砾石堆（墙基）
+            rx = wx + rng.uniform(3, 24) * k
+            rw = rng.uniform(6, 13) * k
+            rh = rng.uniform(2.5, 5) * k
+            s.poly([(rx, low_top + 1.4 * k), (rx + rw * 0.5, low_top + 1.4 * k - rh),
+                    (rx + rw, low_top + 1.4 * k)], th["foot"], rng.uniform(0.85, 1.0))
+        s.ellipse(wx + 14 * k, low_top + 2 * k, 12 * k, 2.2 * k, th["foot"], 0.55)
 
 
 # ============================================================

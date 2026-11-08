@@ -1,0 +1,32 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+
+[probe] bag sim x200 一局账 + 10N 跨局连抽防相邻 OK (t=0.0s)
+WARNING: res://scenes/units/boss_3.tscn:4 - ext_resource, invalid UID: uid://bixuorjtl4etf - using text path instead: res://assets/world_3/boss_snow_body.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] _redirect (res://scripts/core/entry.gd:13)
+WARNING: res://scenes/units/boss_3.tscn:6 - ext_resource, invalid UID: uid://d10eqbbrs05b5 - using text path instead: res://assets/world_3/boss_snow_gun.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] _redirect (res://scripts/core/entry.gd:13)
+[probe] first scene landed: res://scenes/world/world_3.tscn (t=1.7s)
+[probe] landed #0 = res://scenes/world/world_3.tscn (t=1.7s)
+[probe] rerolled new run: res://scenes/world/world_3.tscn (t=3.8s)
+[probe] landed #1 = res://scenes/world/world_3.tscn (t=3.8s)
+[probe] landed #2 = res://scenes/world/world_1.tscn (t=6.4s)
+[probe] landed #3 = res://scenes/world/world_2.tscn (t=9.0s)
+[probe] landed #4 = res://scenes/world/world_9.tscn (t=11.7s)
+WARNING: res://scenes/world/world_4.tscn:16 - ext_resource, invalid UID: uid://b3xvytndijp88 - using text path instead: res://assets/world_4/env_coral_mid.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] <anonymous lambda> (res://scripts/world/main.gd:182)
+       [1] <anonymous lambda> (res://scripts/core/scene_fade.gd:44)
+WARNING: res://scenes/world/world_4.tscn:26 - ext_resource, invalid UID: uid://b0drbns0k8hmb - using text path instead: res://assets/world_4/env_coral_ring.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] <anonymous lambda> (res://scripts/world/main.gd:182)
+       [1] <anonymous lambda> (res://scripts/core/scene_fade.gd:44)
+[probe] landed #5 = res://scenes/world/world_4.tscn (t=14.3s)
+[probe] landed #6 = res://scenes/world/world_6.tscn (t=16.9s)
+[probe] landed #7 = res://scenes/world/world_7.tscn (t=19.6s)
+[probe] PASS: 死亡重掷 + 一整局 7 落地全过（4 普通关+RUSH 3 台）——白名单/局内不重复/相邻不同/通关原地结算/跨关分数/交接满血 (t=22.2s)
