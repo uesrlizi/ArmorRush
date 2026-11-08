@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 180" width="300" height="180">
+<!-- 第十章 BOSS「井口」井场管线母舰 300x180=碰撞体，原点 (150,90)，原生朝左，hover 370 船底 460。独眼条带 y60..66 含 (55,63)；NozzlePort (4,144)=局部 (-146,54)=世界 y424；DrillPort (150,168)=局部 (0,78)；VentPort (246,46)=局部 (96,-44)；ArmPivot (150,26)=局部 (0,-64)。 -->
+<defs>
+
+</defs>
+<polygon points="8,84 36,54 140,52 238,56 286,66 294,90 288,122 244,146 186,162 118,164 64,154 22,126" fill="#4a2a3a"/>
+<polygon points="36,54 140,52 238,56 282,65 278,71 236,62 140,58 42,60" fill="#6a4456" opacity="0.7"/>
+<polygon points="22,126 64,154 118,164 186,162 240,146 230,138 120,152 66,140 30,118" fill="#321c28"/>
+<rect x="60" y="92" width="170" height="2" fill="#20121a" opacity="0.3"/>
+<rect x="40" y="104" width="228" height="6" fill="#321c28"/>
+<rect x="40" y="104" width="228" height="1.4" fill="#6a4456" opacity="0.45"/>
+<rect x="40" y="114" width="228" height="6" fill="#20121a"/>
+<rect x="40" y="114" width="228" height="1.4" fill="#6a4456" opacity="0.45"/>
+<rect x="56" y="102" width="4" height="19" fill="#7a6a72" opacity="0.85"/>
+<rect x="90" y="102" width="4" height="19" fill="#7a6a72" opacity="0.85"/>
+<rect x="124" y="102" width="4" height="19" fill="#7a6a72" opacity="0.85"/>
+<rect x="158" y="102" width="4" height="19" fill="#7a6a72" opacity="0.85"/>
+<rect x="192" y="102" width="4" height="19" fill="#7a6a72" opacity="0.85"/>
+<rect x="226" y="102" width="4" height="19" fill="#7a6a72" opacity="0.85"/>
+<rect x="260" y="102" width="4" height="19" fill="#7a6a72" opacity="0.85"/>
+<circle cx="128" cy="98" r="4" fill="#7a6a72"/>
+<circle cx="128" cy="98" r="2.9" fill="#321c28"/>
+<circle cx="128" cy="98" r="0.9" fill="#7a6a72"/>
+<circle cx="196" cy="98" r="4" fill="#7a6a72"/>
+<circle cx="196" cy="98" r="2.9" fill="#321c28"/>
+<circle cx="196" cy="98" r="0.9" fill="#7a6a72"/>
+<polygon points="118,54 128,54 144,20 140,20" fill="#321c28"/>
+<polygon points="182,54 172,54 156,20 160,20" fill="#321c28"/>
+<rect x="126" y="44" width="48" height="2.4" fill="#20121a"/>
+<rect x="132" y="34" width="36" height="2.4" fill="#20121a"/>
+<line x1="128" y1="52" x2="166" y2="22" stroke="#20121a" stroke-width="1.4" opacity="0.7"/>
+<line x1="172" y1="52" x2="134" y2="22" stroke="#20121a" stroke-width="1.4" opacity="0.7"/>
+<rect x="136" y="14" width="28" height="10" fill="#4a2a3a"/>
+<rect x="138" y="14" width="24" height="3" fill="#6a4456" opacity="0.7"/>
+<circle cx="150" cy="26" r="5" fill="#20121a"/>
+<rect x="236" y="40" width="20" height="20" fill="#321c28"/>
+<rect x="236" y="40" width="20" height="2.5" fill="#6a4456" opacity="0.7"/>
+<rect x="233" y="38" width="26" height="4" fill="#20121a"/>
+<rect x="239" y="42" width="14" height="6" fill="#120a10"/>
+<ellipse cx="246" cy="45" rx="6" ry="2.4" fill="#48b4ff" opacity="0.6"/>
+<ellipse cx="246" cy="45" rx="3" ry="1.2" fill="#c8ecff" opacity="0.9"/>
+<rect x="258" y="50" width="6" height="10" fill="#321c28"/>
+<rect x="130" y="150" width="40" height="14" fill="#20121a"/>
+<rect x="130" y="150" width="40" height="3" fill="#6a4456" opacity="0.5"/>
+<rect x="140" y="158" width="20" height="12" fill="#321c28"/>
+<rect x="144" y="162" width="12" height="7" fill="#120a10"/>
+<polygon points="147,164 153,164 150,170" fill="#7a6a72"/>
+<circle cx="135" cy="158" r="2.6" fill="#7a6a72"/>
+<circle cx="135" cy="158" r="1.5" fill="#321c28"/>
+<circle cx="135" cy="158" r="0.9" fill="#7a6a72"/>
+<circle cx="165" cy="158" r="2.6" fill="#7a6a72"/>
+<circle cx="165" cy="158" r="1.5" fill="#321c28"/>
+<circle cx="165" cy="158" r="0.9" fill="#7a6a72"/>
+<circle cx="150" cy="146" r="3.6" fill="#48b4ff" opacity="0.18"/>
+<circle cx="150" cy="146" r="1.4" fill="#48b4ff" opacity="0.95"/>
+<rect x="206" y="78" width="7" height="6" fill="#e0c8d4" opacity="0.65"/>
+<rect x="220" y="78" width="7" height="6" fill="#e0c8d4" opacity="0.65"/>
+<rect x="234" y="78" width="7" height="6" fill="#e0c8d4" opacity="0.65"/>
+<rect x="248" y="78" width="7" height="6" fill="#e0c8d4" opacity="0.65"/>
+<polygon points="80,60 106,58 104,78 82,80" fill="#20121a" opacity="0.9"/>
+<polygon points="84,62 102,60 101,66 85,67" fill="#e0c8d4" opacity="0.6"/>
+<rect x="98" y="148" width="24" height="10" fill="#321c28"/>
+<rect x="198" y="142" width="24" height="10" fill="#321c28"/>
+<ellipse cx="110" cy="160" rx="10" ry="3" fill="#48b4ff" opacity="0.35"/>
+<ellipse cx="210" cy="154" rx="10" ry="3" fill="#48b4ff" opacity="0.35"/>
+<polygon points="22,118 40,128 20,150 12,140" fill="#321c28"/>
+<line x1="30" y1="128" x2="14" y2="144" stroke="#4a2a3a" stroke-width="9"/>
+<line x1="30" y1="126" x2="15" y2="141" stroke="#6a4456" stroke-width="2" opacity="0.6"/>
+<polygon points="0,134 12,136 14,152 0,154" fill="#20121a"/>
+<rect x="11" y="135" width="3" height="18" fill="#7a6a72"/>
+<circle cx="4" cy="144" r="5.5" fill="#48b4ff" opacity="0.22"/>
+<circle cx="4" cy="144" r="3.2" fill="#48b4ff" opacity="0.9"/>
+<circle cx="4" cy="144" r="1.4" fill="#c8ecff"/>
+<polygon points="0,82 14,74 20,74 20,98 6,92" fill="#321c28"/>
+<rect x="38" y="57" width="34" height="12" fill="#ff4640" opacity="0.18"/>
+<rect x="42" y="60" width="26" height="6" fill="#ff4640" opacity="0.95"/>
+<rect x="88" y="128" width="3" height="4" fill="#7a6a72" opacity="0.8"/>
+<rect x="95" y="128" width="3" height="4" fill="#20121a" opacity="0.8"/>
+<rect x="102" y="128" width="3" height="4" fill="#7a6a72" opacity="0.8"/>
+<rect x="109" y="128" width="3" height="4" fill="#20121a" opacity="0.8"/>
+<ellipse cx="70" cy="140" rx="6" ry="1.8" fill="#c8b048" opacity="0.4"/>
+<ellipse cx="180" cy="150" rx="7" ry="1.8" fill="#c8b048" opacity="0.4"/>
+<ellipse cx="226" cy="66" rx="5" ry="1.4" fill="#c8b048" opacity="0.4"/>
+<ellipse cx="60" cy="74" rx="5" ry="1.4" fill="#c8b048" opacity="0.4"/>
+</svg>

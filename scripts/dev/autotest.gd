@@ -422,7 +422,8 @@ func _run() -> void:
 				return c is HeavyMissile or c is MortarShell \
 						or c is PlasmaMine or c is CoralOrb \
 						or c is FlakShell or c is ArcFence \
-						or c is SkipShell or c is SaltDart or c is LiveSpan) > 0
+						or c is SkipShell or c is SaltDart or c is LiveSpan \
+						or c is SulfurVent) > 0
 		await _screenshot("07_elite_volley.png")
 		print("[autotest] elite heavy shot: ", saw_missile,
 				" (当前章精英在场应出重击弹)")
@@ -1529,7 +1530,7 @@ func _is_hostile_shot(c: Node) -> bool:
 		return (c as Bullet).damage != BalancePlayer.PLAYER_BULLET_DAMAGE
 	return c is HeavyMissile or c is MortarShell or c is PlasmaMine or c is CoralOrb \
 			or c is CoralTide or c is FlakShell or c is ArcFence or c is SkipShell \
-			or c is DrillCharge or c is DepthCharge or c is SaltDart 			or c is LiveSpan or c is RodChain
+			or c is DrillCharge or c is DepthCharge or c is SaltDart 			or c is LiveSpan or c is RodChain or c is SulfurVent or c is SulfurCloud
 
 
 ## 弹容器里按谓词数弹（BOSS 探针用：扫射弹/导弹分类计数）。

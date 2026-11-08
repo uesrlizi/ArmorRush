@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 480" width="256" height="480">
+<!-- 第十章兜底条 256x480：表面带内容（单变体）+ 深处玄武渐变。种子 3111。 -->
+<defs>
+<linearGradient id="fbao10" x1="0" y1="0.0" x2="0" y2="1.0"><stop offset="0" stop-color="#2a2926" stop-opacity="0.8"/><stop offset="1" stop-color="#2a2926" stop-opacity="0.0"/></linearGradient>
+<linearGradient id="fbdeep10" x1="0" y1="0.0" x2="0" y2="1.0"><stop offset="0" stop-color="#222120" stop-opacity="1"/><stop offset="0.5" stop-color="#1c1b1a" stop-opacity="1"/><stop offset="1" stop-color="#141312" stop-opacity="1"/></linearGradient>
+</defs>
+<rect x="0" y="2.5" width="256" height="53.5" fill="#4c4a44"/>
+<line x1="93.1" y1="5.1" x2="99.6" y2="8.8" stroke="#6e6c62" stroke-width="1" opacity="0.6"/>
+<line x1="99.6" y1="8.8" x2="111.1" y2="12.7" stroke="#6e6c62" stroke-width="1" opacity="0.6"/>
+<line x1="111.1" y1="12.7" x2="121.6" y2="14.7" stroke="#6e6c62" stroke-width="1" opacity="0.6"/>
+<line x1="38.9" y1="6.2" x2="48.2" y2="6.7" stroke="#6e6c62" stroke-width="1" opacity="0.6"/>
+<line x1="48.2" y1="6.7" x2="58.8" y2="9" stroke="#6e6c62" stroke-width="1" opacity="0.6"/>
+<line x1="58.8" y1="9" x2="65.8" y2="8.2" stroke="#6e6c62" stroke-width="1" opacity="0.6"/>
+<ellipse cx="145.8" cy="29.8" rx="12" ry="1.7" fill="#c8b048" opacity="0.3909080783159023"/>
+<rect x="49" y="43.2" width="1.8" height="1.4" fill="#a89c60" opacity="0.5320993621289977"/>
+<rect x="71.6" y="5" width="1.8" height="1.4" fill="#a89c60" opacity="0.652325045237643"/>
+<rect x="104.9" y="18.4" width="1.8" height="1.4" fill="#a89c60" opacity="0.524427079154706"/>
+<rect x="201.8" y="6.3" width="1.8" height="1.4" fill="#a89c60" opacity="0.4375379398071753"/>
+<rect x="204.6" y="22.8" width="1.8" height="1.4" fill="#a89c60" opacity="0.6384384986854763"/>
+<rect x="0" y="53.6" width="256" height="2.4" fill="#3a3934"/>
+<rect x="0" y="0" width="256" height="2.8" fill="#c8bc78"/>
+<rect x="0" y="56" width="256" height="10" fill="#403e39"/>
+<rect x="0" y="56" width="256" height="10" fill="url(#fbao10)"/>
+<rect x="0" y="66" width="256" height="414" fill="url(#fbdeep10)"/>
+<line x1="0" y1="120" x2="256" y2="120" stroke="#34322e" stroke-width="2" opacity="0.3"/>
+<line x1="0" y1="210" x2="256" y2="210" stroke="#34322e" stroke-width="2" opacity="0.22"/>
+<line x1="0" y1="310" x2="256" y2="310" stroke="#34322e" stroke-width="2" opacity="0.15"/>
+<line x1="0" y1="410" x2="256" y2="410" stroke="#34322e" stroke-width="2" opacity="0.1"/>
+<rect x="0" y="66" width="3" height="414" fill="#1e1d1b" opacity="0.5"/>
+<rect x="253" y="66" width="3" height="414" fill="#1e1d1b" opacity="0.5"/>
+</svg>

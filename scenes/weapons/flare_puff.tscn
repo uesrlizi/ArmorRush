@@ -1,0 +1,25 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/weapons/flare_puff.gd" id="1"]
+; 井口硫焰扫掠焰团（普攻出手锁定分层火鞭，bullet.gd 直线语法 + 触地闸）。
+; 贴图 fx_sulfur_flare_puff.svg 48x48 锚点中心 (24,24)：白热芯 #c8ecff + 硫焰蓝 #48b4ff
+; + 暗焰边 #1e4a66，普通混合不走 ADD。碰撞=胶囊 32x28（沿 +X）。
+; 只扫玩家层（mask 2）：触地由 flare_puff.gd 按弹心过当地地表判（威胁设计 §a 口径），
+; 胶囊边缘擦地不灭——贴地那根要一路压到玩家 x 才触地。
+[ext_resource type="Texture2D" path="res://assets/world_10/fx_sulfur_flare_puff.svg" id="2"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_1"]
+radius = 14.0
+height = 32.0
+
+[node name="FlarePuff" type="Area2D"]
+collision_layer = 16
+collision_mask = 2
+script = ExtResource("1")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_1")

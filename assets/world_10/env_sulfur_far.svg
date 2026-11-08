@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1300" width="1024" height="1300">
+<!-- 第十章远景条 1024x1300（视差 0.9，tile 1024）：硫烟赭橄榄天
+#5a5632→#8a8348→#b2a866（战斗带落中调）+ 破火山口壁两排（k 整数正弦无缝）+ 硫烟柱 + 地平硫雾辉 + 底雾压脚。
+画布 y = 世界 y + 570。种子 10101。 -->
+<defs>
+<linearGradient id="sky10f" x1="0" y1="0.0" x2="0" y2="1.0"><stop offset="0" stop-color="#5a5632" stop-opacity="1"/><stop offset="0.5" stop-color="#76703e" stop-opacity="1"/><stop offset="0.82" stop-color="#8a8348" stop-opacity="1"/><stop offset="1" stop-color="#b2a866" stop-opacity="1"/></linearGradient>
+<radialGradient id="rg1"><stop offset="0" stop-color="#d6cc8a" stop-opacity="0.24"/><stop offset="1" stop-color="#d6cc8a" stop-opacity="0.0"/></radialGradient>
+<radialGradient id="rg2"><stop offset="0" stop-color="#d8d4b4" stop-opacity="0.3"/><stop offset="1" stop-color="#d8d4b4" stop-opacity="0.0"/></radialGradient>
+<radialGradient id="rg3"><stop offset="0" stop-color="#d8d4b4" stop-opacity="0.2625"/><stop offset="1" stop-color="#d8d4b4" stop-opacity="0.0"/></radialGradient>
+<radialGradient id="rg4"><stop offset="0" stop-color="#d8d4b4" stop-opacity="0.22499999999999998"/><stop offset="1" stop-color="#d8d4b4" stop-opacity="0.0"/></radialGradient>
+<radialGradient id="rg5"><stop offset="0" stop-color="#d8d4b4" stop-opacity="0.1875"/><stop offset="1" stop-color="#d8d4b4" stop-opacity="0.0"/></radialGradient>
+<radialGradient id="rg6"><stop offset="0" stop-color="#d8d4b4" stop-opacity="0.15"/><stop offset="1" stop-color="#d8d4b4" stop-opacity="0.0"/></radialGradient>
+<radialGradient id="rg7"><stop offset="0" stop-color="#d8d4b4" stop-opacity="0.11249999999999999"/><stop offset="1" stop-color="#d8d4b4" stop-opacity="0.0"/></radialGradient>
+<radialGradient id="rg8"><stop offset="0" stop-color="#d8d4b4" stop-opacity="0.075"/><stop offset="1" stop-color="#d8d4b4" stop-opacity="0.0"/></radialGradient>
+<radialGradient id="rg9"><stop offset="0" stop-color="#d8d4b4" stop-opacity="0.3"/><stop offset="1" stop-color="#d8d4b4" stop-opacity="0.0"/></radialGradient>
+<radialGradient id="rg10"><stop offset="0" stop-color="#d8d4b4" stop-opacity="0.2625"/><stop offset="1" stop-color="#d8d4b4" stop-opacity="0.0"/></radialGradient>
+<radialGradient id="rg11"><stop offset="0" stop-color="#d8d4b4" stop-opacity="0.22499999999999998"/><stop offset="1" stop-color="#d8d4b4" stop-opacity="0.0"/></radialGradient>
+<radialGradient id="rg12"><stop offset="0" stop-color="#d8d4b4" stop-opacity="0.1875"/><stop offset="1" stop-color="#d8d4b4" stop-opacity="0.0"/></radialGradient>
+<radialGradient id="rg13"><stop offset="0" stop-color="#d8d4b4" stop-opacity="0.15"/><stop offset="1" stop-color="#d8d4b4" stop-opacity="0.0"/></radialGradient>
+<radialGradient id="rg14"><stop offset="0" stop-color="#d8d4b4" stop-opacity="0.11249999999999999"/><stop offset="1" stop-color="#d8d4b4" stop-opacity="0.0"/></radialGradient>
+<radialGradient id="rg15"><stop offset="0" stop-color="#d8d4b4" stop-opacity="0.075"/><stop offset="1" stop-color="#d8d4b4" stop-opacity="0.0"/></radialGradient>
+<radialGradient id="rg16"><stop offset="0" stop-color="#d8d4b4" stop-opacity="0.3"/><stop offset="1" stop-color="#d8d4b4" stop-opacity="0.0"/></radialGradient>
+<radialGradient id="rg17"><stop offset="0" stop-color="#d8d4b4" stop-opacity="0.2625"/><stop offset="1" stop-color="#d8d4b4" stop-opacity="0.0"/></radialGradient>
+<radialGradient id="rg18"><stop offset="0" stop-color="#d8d4b4" stop-opacity="0.22499999999999998"/><stop offset="1" stop-color="#d8d4b4" stop-opacity="0.0"/></radialGradient>
+<radialGradient id="rg19"><stop offset="0" stop-color="#d8d4b4" stop-opacity="0.1875"/><stop offset="1" stop-color="#d8d4b4" stop-opacity="0.0"/></radialGradient>
+<radialGradient id="rg20"><stop offset="0" stop-color="#d8d4b4" stop-opacity="0.15"/><stop offset="1" stop-color="#d8d4b4" stop-opacity="0.0"/></radialGradient>
+<radialGradient id="rg21"><stop offset="0" stop-color="#d8d4b4" stop-opacity="0.11249999999999999"/><stop offset="1" stop-color="#d8d4b4" stop-opacity="0.0"/></radialGradient>
+<radialGradient id="rg22"><stop offset="0" stop-color="#d8d4b4" stop-opacity="0.075"/><stop offset="1" stop-color="#d8d4b4" stop-opacity="0.0"/></radialGradient>
+<radialGradient id="rg23"><stop offset="0" stop-color="#48b4ff" stop-opacity="0.36000000000000004"/><stop offset="1" stop-color="#48b4ff" stop-opacity="0.0"/></radialGradient>
+<radialGradient id="rg24"><stop offset="0" stop-color="#c8ecff" stop-opacity="0.5599999999999999"/><stop offset="1" stop-color="#c8ecff" stop-opacity="0.0"/></radialGradient>
+<radialGradient id="rg25"><stop offset="0" stop-color="#48b4ff" stop-opacity="0.36000000000000004"/><stop offset="1" stop-color="#48b4ff" stop-opacity="0.0"/></radialGradient>
+<radialGradient id="rg26"><stop offset="0" stop-color="#c8ecff" stop-opacity="0.5599999999999999"/><stop offset="1" stop-color="#c8ecff" stop-opacity="0.0"/></radialGradient>
+<linearGradient id="fog10f" x1="0" y1="0.0" x2="0" y2="1.0"><stop offset="0" stop-color="#b2a866" stop-opacity="0.0"/><stop offset="1" stop-color="#b2a866" stop-opacity="0.36"/></linearGradient>
+</defs>
+<rect x="0" y="0" width="1024" height="1300" fill="url(#sky10f)"/>
+<ellipse cx="654" cy="160" rx="260" ry="14" fill="#4a462a" opacity="0.12"/>
+<ellipse cx="357.5" cy="280" rx="300" ry="14" fill="#4a462a" opacity="0.1"/>
+<ellipse cx="780.2" cy="420" rx="220" ry="14" fill="#4a462a" opacity="0.08"/>
+<ellipse cx="512" cy="1225" rx="440" ry="70" fill="url(#rg1)"/>
+<ellipse cx="180" cy="1000" rx="21" ry="16.8" fill="url(#rg2)"/>
+<ellipse cx="181.9" cy="936.7" rx="32" ry="25.6" fill="url(#rg3)"/>
+<ellipse cx="187.6" cy="873.3" rx="43" ry="34.4" fill="url(#rg4)"/>
+<ellipse cx="197.1" cy="810" rx="54" ry="43.2" fill="url(#rg5)"/>
+<ellipse cx="210.4" cy="746.7" rx="65" ry="52" fill="url(#rg6)"/>
+<ellipse cx="227.5" cy="683.3" rx="76" ry="60.8" fill="url(#rg7)"/>
+<ellipse cx="248.4" cy="620" rx="87" ry="69.6" fill="url(#rg8)"/>
+<ellipse cx="560" cy="1000" rx="21" ry="16.8" fill="url(#rg9)"/>
+<ellipse cx="562.3" cy="923.3" rx="32" ry="25.6" fill="url(#rg10)"/>
+<ellipse cx="569.2" cy="846.7" rx="43" ry="34.4" fill="url(#rg11)"/>
+<ellipse cx="580.7" cy="770" rx="54" ry="43.2" fill="url(#rg12)"/>
+<ellipse cx="596.8" cy="693.3" rx="65" ry="52" fill="url(#rg13)"/>
+<ellipse cx="617.5" cy="616.7" rx="76" ry="60.8" fill="url(#rg14)"/>
+<ellipse cx="642.8" cy="540" rx="87" ry="69.6" fill="url(#rg15)"/>
+<ellipse cx="850" cy="1000" rx="21" ry="16.8" fill="url(#rg16)"/>
+<ellipse cx="851.6" cy="945" rx="32" ry="25.6" fill="url(#rg17)"/>
+<ellipse cx="856.6" cy="890" rx="43" ry="34.4" fill="url(#rg18)"/>
+<ellipse cx="864.9" cy="835" rx="54" ry="43.2" fill="url(#rg19)"/>
+<ellipse cx="876.4" cy="780" rx="65" ry="52" fill="url(#rg20)"/>
+<ellipse cx="891.2" cy="725" rx="76" ry="60.8" fill="url(#rg21)"/>
+<ellipse cx="909.4" cy="670" rx="87" ry="69.6" fill="url(#rg22)"/>
+<polygon points="0,1300 0,915 64,902 128,890 192,883 256,880 320,883 384,890 448,902 512,915 576,928 640,940 704,947 768,950 832,947 896,940 960,928 1024,915 1024,1300" fill="#6e6846" opacity="0.72"/>
+<polygon points="0,1300 0,965 64,960 128,969 192,988 256,1005 320,1010 384,1001 448,982 512,965 576,960 640,969 704,988 768,1005 832,1010 896,1001 960,982 1024,965 1024,1300" fill="#4c4836" opacity="0.94"/>
+<line x1="0" y1="965" x2="64" y2="960" stroke="#8c8456" stroke-width="1.6" opacity="0.6"/>
+<line x1="320" y1="1010" x2="384" y2="1001" stroke="#8c8456" stroke-width="1.6" opacity="0.6"/>
+<line x1="384" y1="1001" x2="448" y2="982" stroke="#8c8456" stroke-width="1.6" opacity="0.6"/>
+<line x1="448" y1="982" x2="512" y2="965" stroke="#8c8456" stroke-width="1.6" opacity="0.6"/>
+<line x1="512" y1="965" x2="576" y2="960" stroke="#8c8456" stroke-width="1.6" opacity="0.6"/>
+<line x1="832" y1="1010" x2="896" y2="1001" stroke="#8c8456" stroke-width="1.6" opacity="0.6"/>
+<line x1="896" y1="1001" x2="960" y2="982" stroke="#8c8456" stroke-width="1.6" opacity="0.6"/>
+<line x1="960" y1="982" x2="1024" y2="965" stroke="#8c8456" stroke-width="1.6" opacity="0.6"/>
+<ellipse cx="327.9" cy="1095.9" rx="29.6" ry="3" fill="#c8b048" opacity="0.32"/>
+<ellipse cx="399.4" cy="1077" rx="23.6" ry="3" fill="#c8b048" opacity="0.32"/>
+<ellipse cx="664.3" cy="1083.5" rx="19.6" ry="3" fill="#c8b048" opacity="0.32"/>
+<ellipse cx="744.2" cy="1112.2" rx="14.1" ry="3" fill="#c8b048" opacity="0.32"/>
+<ellipse cx="65.8" cy="1166.1" rx="20.3" ry="3" fill="#c8b048" opacity="0.32"/>
+<ellipse cx="849.1" cy="1149.7" rx="25.2" ry="3" fill="#c8b048" opacity="0.32"/>
+<ellipse cx="413.7" cy="1090.6" rx="21.9" ry="3" fill="#c8b048" opacity="0.32"/>
+<ellipse cx="50.1" cy="1160.3" rx="25.4" ry="3" fill="#c8b048" opacity="0.32"/>
+<ellipse cx="586.5" cy="1152.2" rx="28.1" ry="3" fill="#c8b048" opacity="0.32"/>
+<ellipse cx="300" cy="1158.3" rx="8.3" ry="15.6" fill="url(#rg23)"/>
+<ellipse cx="300" cy="1162.2" rx="3.6" ry="8.3" fill="url(#rg24)"/>
+<ellipse cx="720" cy="1158.3" rx="8.3" ry="15.6" fill="url(#rg25)"/>
+<ellipse cx="720" cy="1162.2" rx="3.6" ry="8.3" fill="url(#rg26)"/>
+<rect x="0" y="1200" width="1024" height="100" fill="url(#fog10f)"/>
+</svg>

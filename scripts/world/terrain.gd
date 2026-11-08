@@ -38,6 +38,9 @@ var _chunks := {}    # 块索引 -> StaticBody2D
 var _seg_start := {} # 段索引 -> 该段首块的块索引（缓存窗口，可按种子重建）
 var _seed := 0
 var _primed := false
+## 探针注入（只给 scenes/previews 探针用，常规运行恒为空）：非空时块 i 的档位 = fn(i)，
+## 取代种子段函数——探针在固定 tier 序列地形上跑判据（第十章终审 R13）。
+var probe_tier_fn := Callable()
 
 
 func _ready() -> void:
@@ -76,7 +79,7 @@ func _update() -> void:
 
 func _spawn_chunk(i: int) -> void:
 	var w := BalanceGlobal.TERRAIN_CHUNK_WIDTH
-	var top := _tier_y(_seg_tier(_seg_of_chunk(i)))
+	var top := _chunk_top(i)
 	var chunk := StaticBody2D.new()
 	chunk.collision_layer = 1
 	chunk.collision_mask = 0
@@ -299,4 +302,17 @@ func surface_y_at(x: float) -> float:
 	var i := floori(x / BalanceGlobal.TERRAIN_CHUNK_WIDTH)
 	if _chunks.has(i):
 		return _chunks[i].get_meta("top")
+	return _chunk_top(i)
+
+
+func _chunk_top(i: int) -> float:
+	if probe_tier_fn.is_valid():
+		return _tier_y(int(probe_tier_fn.call(i)))
 	return _tier_y(_seg_tier(_seg_of_chunk(i)))
+
+
+## 探针用：丢弃全部已生成地块，下一物理帧按当前档位函数重建。
+func probe_rebuild() -> void:
+	for i in _chunks.keys():
+		_chunks[i].queue_free()
+	_chunks.clear()

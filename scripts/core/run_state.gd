@@ -24,6 +24,7 @@ const SCENES: Array[String] = [
 	"res://scenes/world/world_7.tscn", # 七 溺海都会
 	"res://scenes/world/world_8.tscn", # 八 镜盐之原
 	"res://scenes/world/world_9.tscn", # 九 雷暴线场
+	"res://scenes/world/world_10.tscn", # 十 硫焰地热田
 ]
 ## 开局第一关候选（"只包含"白名单：新场景默认不进这里，除非允许它当第一关；
 ## 加场景时只动 SCENES，白名单按需加）。

@@ -1,0 +1,92 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/units/boss_wellhead.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/world_10/boss_sulfur_body.svg" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/fx/muzzle_flash.tscn" id="3"]
+[ext_resource type="Texture2D" path="res://assets/world_10/boss_sulfur_arm.svg" id="4"]
+[ext_resource type="Script" path="res://scripts/units/eye_glow.gd" id="5"]
+[ext_resource type="PackedScene" path="res://scenes/fx/threat_flash.tscn" id="6"]
+[ext_resource type="Texture2D" path="res://assets/common/fx_flame.svg" id="7"]
+
+; 第十章 BOSS·井场管线母舰「井口」（BossWellhead，井口与硫云能力套件）：
+; 独眼条带 y60..66 含 (55,63)（EyeGlow (-95,-27) 沿用）；
+; ArmPivot=井架吊杆枢画布 (150,26)→局部 (0,-64)（俯仰件=敌基类瞄准层驱动，无发光口、
+; 不出弹；臂画布 96x44 枢端 (78,22)→offset(-78,-22)，吊钩座 Muzzle 局部 (-68,0)）；
+; NozzlePort=艏部井口喷嘴画布 (4,144)→局部 (-146,54)，hover 370 世界 y=424（普攻唯一出弹口）；
+; DrillPort=腹舱钻杆井口画布 (150,168)→局部 (0,78)（ThreatFlash=井压线预警）；
+; VentPort=艉部排烟囱口画布 (246,46)→局部 (96,-44)（ThreatFlash=硫云爆燃预警）；
+; Thruster1/2=举升喷口画布 (110,156)/(210,156)→局部 (-40,66)/(60,66)（通用 fx_flame+加色硫焰蓝）。
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
+size = Vector2(280, 150)
+
+[sub_resource type="CanvasItemMaterial" id="addmat"]
+blend_mode = 1
+
+[node name="BossWellhead" type="CharacterBody2D"]
+collision_layer = 4
+collision_mask = 0
+script = ExtResource("1")
+feet_offset = 90.0
+body_size = Vector2(300, 180)
+
+[node name="Visuals" type="Node2D" parent="."]
+
+[node name="Sprite2D" type="Sprite2D" parent="Visuals"]
+texture = ExtResource("2")
+
+[node name="EyeGlow" type="Node2D" parent="Visuals/Sprite2D"]
+position = Vector2(-95, -27)
+scale = Vector2(1.2, 1.2)
+script = ExtResource("5")
+
+[node name="ArmPivot" type="Node2D" parent="Visuals"]
+position = Vector2(0, -64)
+
+[node name="Sprite2D" type="Sprite2D" parent="Visuals/ArmPivot"]
+texture = ExtResource("4")
+centered = false
+offset = Vector2(-78, -22)
+
+[node name="Muzzle" type="Marker2D" parent="Visuals/ArmPivot"]
+position = Vector2(-68, 0)
+
+[node name="Flash" parent="Visuals/ArmPivot/Muzzle" instance=ExtResource("3")]
+
+[node name="ThreatFlash" parent="Visuals/ArmPivot/Muzzle" instance=ExtResource("6")]
+
+[node name="NozzlePort" type="Marker2D" parent="Visuals"]
+position = Vector2(-146, 54)
+
+[node name="Flash" parent="Visuals/NozzlePort" instance=ExtResource("3")]
+
+[node name="DrillPort" type="Marker2D" parent="Visuals"]
+position = Vector2(0, 78)
+
+[node name="ThreatFlash" parent="Visuals/DrillPort" instance=ExtResource("6")]
+
+[node name="Flash" parent="Visuals/DrillPort" instance=ExtResource("3")]
+
+[node name="VentPort" type="Marker2D" parent="Visuals"]
+position = Vector2(96, -44)
+
+[node name="ThreatFlash" parent="Visuals/VentPort" instance=ExtResource("6")]
+
+[node name="Flash" parent="Visuals/VentPort" instance=ExtResource("3")]
+
+[node name="Thruster1" type="Sprite2D" parent="Visuals"]
+modulate = Color(0.28, 0.71, 1, 0.6)
+material = SubResource("addmat")
+position = Vector2(-40, 66)
+scale = Vector2(1.1, 1.1)
+texture = ExtResource("7")
+
+[node name="Thruster2" type="Sprite2D" parent="Visuals"]
+modulate = Color(0.28, 0.71, 1, 0.6)
+material = SubResource("addmat")
+position = Vector2(60, 66)
+scale = Vector2(1.1, 1.1)
+texture = ExtResource("7")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_1")

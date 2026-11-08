@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 84" width="40" height="84">
+<!-- 硫云爆燃锋线 40x84，锚点 (20,42)；画布 y0..84 ↔ 世界 y428..512；锋头朝左推进，蓝焰只用于此件。 -->
+<defs>
+
+</defs>
+<path d="M 22 2 Q 8 20 12 42 Q 8 64 22 82 L 40 82 L 40 2 Z" fill="#1e4a66" opacity="0.8"/>
+<path d="M 24 6 Q 13 22 16 42 Q 13 62 24 78 L 34 78 L 34 6 Z" fill="#48b4ff" opacity="0.95"/>
+<path d="M 26 14 Q 20 28 22 42 Q 20 56 26 70 L 29 70 L 29 14 Z" fill="#c8ecff"/>
+</svg>

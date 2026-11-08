@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 38 42" width="38" height="42">
+<!-- 第十章无人机换皮「烟道飞眼」38x42。眼 (12,14.4)；ArmPivot (15.2,21)。 -->
+<defs>
+
+</defs>
+<line x1="20" y1="5.5" x2="20" y2="2.5" stroke="#20121a" stroke-width="1.2"/>
+<circle cx="20" cy="2.4" r="3.1" fill="#48b4ff" opacity="0.18"/>
+<circle cx="20" cy="2.4" r="1.2" fill="#48b4ff" opacity="0.95"/>
+<ellipse cx="20" cy="12" rx="15" ry="7" fill="#4a2a3a"/>
+<ellipse cx="20" cy="10.5" rx="13" ry="4.5" fill="#6a4456" opacity="0.85"/>
+<ellipse cx="20" cy="14" rx="15" ry="3" fill="#321c28"/>
+<rect x="6.5" y="15" width="3" height="5" fill="#20121a"/>
+<ellipse cx="8" cy="20.5" rx="2.6" ry="1.2" fill="#48b4ff" opacity="0.55"/>
+<rect x="30.5" y="15" width="3" height="5" fill="#20121a"/>
+<ellipse cx="32" cy="20.5" rx="2.6" ry="1.2" fill="#48b4ff" opacity="0.55"/>
+<polygon points="9,19 29,19 32,24 28,31 10,31 6,24" fill="#4a2a3a"/>
+<polygon points="9,19 29,19 30,21 10,21" fill="#6a4456" opacity="0.8"/>
+<polygon points="11,28 27,28 25,31 13,31" fill="#321c28"/>
+<rect x="7.5" y="11.5" width="9" height="6" fill="#20121a"/>
+<circle cx="12" cy="14.4" r="4.4" fill="#ff4640" opacity="0.22"/>
+<circle cx="12" cy="14.4" r="2" fill="#ff4640" opacity="0.95"/>
+<rect x="18.5" y="31" width="2.5" height="3" fill="#20121a"/>
+<rect x="15" y="33.5" width="9.5" height="6.5" rx="2.5" fill="#321c28"/>
+<rect x="16" y="34.5" width="2" height="4.5" fill="#7a6a72" opacity="0.8"/>
+<rect x="15" y="22.5" width="8" height="2.2" fill="#48b4ff" opacity="0.75"/>
+</svg>

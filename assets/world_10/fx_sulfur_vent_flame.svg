@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 224" width="72" height="224">
+<!-- 井口焰柱 72x224。锚点画布 (ax,ay)=(36,222) 底部接地点；焰顶 (36,2)=局部 (0,-220)；焰体宽 64。 -->
+<defs>
+<linearGradient id="vf_o" x1="0" y1="0.0" x2="0" y2="1.0"><stop offset="0" stop-color="#1e4a66" stop-opacity="0.0"/><stop offset="0.12" stop-color="#1e4a66" stop-opacity="0.75"/><stop offset="1" stop-color="#1e4a66" stop-opacity="0.92"/></linearGradient>
+<linearGradient id="vf_m" x1="0" y1="0.0" x2="0" y2="1.0"><stop offset="0" stop-color="#48b4ff" stop-opacity="0.0"/><stop offset="0.15" stop-color="#48b4ff" stop-opacity="0.85"/><stop offset="1" stop-color="#48b4ff" stop-opacity="0.95"/></linearGradient>
+<linearGradient id="vf_c" x1="0" y1="0.0" x2="0" y2="1.0"><stop offset="0" stop-color="#c8ecff" stop-opacity="0.0"/><stop offset="0.25" stop-color="#c8ecff" stop-opacity="0.85"/><stop offset="1" stop-color="#c8ecff" stop-opacity="1.0"/></linearGradient>
+</defs>
+<path d="M 4 222 L 6 120 Q 10 40 36 2 Q 62 40 66 120 L 68 222 Z" fill="url(#vf_o)"/>
+<path d="M 14 222 L 15 130 Q 20 60 36 16 Q 52 60 57 130 L 58 222 Z" fill="url(#vf_m)"/>
+<path d="M 26 222 L 27 150 Q 30 90 36 50 Q 42 90 45 150 L 46 222 Z" fill="url(#vf_c)"/>
+<ellipse cx="36" cy="216" rx="34" ry="7" fill="#48b4ff" opacity="0.6"/>
+<ellipse cx="36" cy="218" rx="18" ry="4" fill="#c8ecff" opacity="0.9"/>
+</svg>

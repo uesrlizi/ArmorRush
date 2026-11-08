@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+<!-- 普攻蓝白焰团 48x48，锚点中心 (24,24)；芯 #c8ecff/主焰 #48b4ff/暗焰边 #1e4a66，普通混合不 ADD。 -->
+<defs>
+
+</defs>
+<circle cx="24" cy="24" r="22" fill="#1e4a66" opacity="0.85"/>
+<polygon points="4,26 10,12 20,4 30,6 40,12 45,24 40,38 28,45 14,42 6,36" fill="#1e4a66" opacity="0.6"/>
+<circle cx="24" cy="24" r="16" fill="#48b4ff" opacity="0.95"/>
+<circle cx="27" cy="22" r="8.5" fill="#c8ecff"/>
+</svg>

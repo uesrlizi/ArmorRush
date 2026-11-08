@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 84" width="200" height="84">
+<!-- 硫云爆燃带段 200x84，锚点左上 (0,0)；画布 y0..84 ↔ 世界 y428..512 绝对带，横向平铺；硫褐烟墙 #5a4a18 主体+上下 2px #d8c040 带界亮边。 -->
+<defs>
+<linearGradient id="sc_b" x1="0" y1="0.0" x2="0" y2="1.0"><stop offset="0" stop-color="#6e5c22" stop-opacity="0.95"/><stop offset="0.5" stop-color="#5a4a18" stop-opacity="0.95"/><stop offset="1" stop-color="#463a12" stop-opacity="0.95"/></linearGradient>
+</defs>
+<rect x="0" y="2" width="200" height="80" fill="url(#sc_b)"/>
+<circle cx="0" cy="20" r="14" fill="#6e5c22" opacity="0.8"/>
+<circle cx="40" cy="18" r="15" fill="#6e5c22" opacity="0.8"/>
+<circle cx="80" cy="22" r="14" fill="#6e5c22" opacity="0.8"/>
+<circle cx="120" cy="17" r="15" fill="#6e5c22" opacity="0.8"/>
+<circle cx="160" cy="21" r="14" fill="#6e5c22" opacity="0.8"/>
+<circle cx="200" cy="20" r="14" fill="#6e5c22" opacity="0.8"/>
+<circle cx="20" cy="64" r="14" fill="#463a12" opacity="0.8"/>
+<circle cx="60" cy="66" r="14" fill="#463a12" opacity="0.8"/>
+<circle cx="100" cy="64" r="14" fill="#463a12" opacity="0.8"/>
+<circle cx="140" cy="66" r="14" fill="#463a12" opacity="0.8"/>
+<circle cx="180" cy="64" r="14" fill="#463a12" opacity="0.8"/>
+<ellipse cx="30" cy="40" rx="18" ry="7" fill="#6e5c22" opacity="0.5"/>
+<ellipse cx="90" cy="46" rx="18" ry="7" fill="#6e5c22" opacity="0.5"/>
+<ellipse cx="150" cy="38" rx="18" ry="7" fill="#6e5c22" opacity="0.5"/>
+<rect x="0" y="0" width="200" height="2" fill="#d8c040"/>
+<rect x="0" y="82" width="200" height="2" fill="#d8c040"/>
+</svg>

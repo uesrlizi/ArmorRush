@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 44" width="96" height="44">
+<!-- 第十章 BOSS 井架吊杆 96x44（俯仰件，无发光口）。枢端 (78,22)；杆端吊钩座 (10,22)=Muzzle 臂局部 (-68,0)，本章不从此出弹。 -->
+<defs>
+
+</defs>
+<rect x="74" y="12" width="10" height="20" fill="#321c28"/>
+<circle cx="78" cy="22" r="4.4" fill="#321c28"/>
+<circle cx="78" cy="22" r="2" fill="#6a4456"/>
+<polygon points="14,19 76,15 76,18 14,21" fill="#4a2a3a"/>
+<polygon points="14,23 76,26 76,29 14,25" fill="#4a2a3a"/>
+<polygon points="14,19 76,15 76,16 14,20" fill="#6a4456" opacity="0.8"/>
+<line x1="18" y1="20" x2="27.5" y2="26.5" stroke="#20121a" stroke-width="1.6"/>
+<line x1="27.5" y1="20" x2="37" y2="26.5" stroke="#20121a" stroke-width="1.6"/>
+<line x1="37" y1="20" x2="46.5" y2="26.5" stroke="#20121a" stroke-width="1.6"/>
+<line x1="46.5" y1="20" x2="56" y2="26.5" stroke="#20121a" stroke-width="1.6"/>
+<line x1="56" y1="20" x2="65.5" y2="26.5" stroke="#20121a" stroke-width="1.6"/>
+<line x1="65.5" y1="20" x2="75" y2="26.5" stroke="#20121a" stroke-width="1.6"/>
+<circle cx="10" cy="22" r="6" fill="#321c28"/>
+<circle cx="10" cy="22" r="3.2" fill="#7a6a72"/>
+<circle cx="10" cy="22" r="1.2" fill="#20121a"/>
+<line x1="10" y1="28" x2="10" y2="36" stroke="#20121a" stroke-width="1.2"/>
+<path d="M 10 36 Q 13 41 8 41" fill="none" stroke="#7a6a72" stroke-width="1.6"/>
+</svg>
