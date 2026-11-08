@@ -12,6 +12,7 @@ signal killed(points: int)
 @export var score_value := 0        # 被击毁时的得分（障碍为 0）
 @export var feet_offset := 40.0     # 原点到脚底的距离，出生时用来贴地
 @export var despawn_margin := 200.0 # 越过屏幕左缘多少像素后回收
+@export var right_despawn_margin := 200.0 # 越过屏幕右缘多少像素后回收（仅参与右缘回收的单位用）
 @export var body_size := Vector2.ZERO # 本体碰撞盒尺寸（刷怪重叠检测用）
 
 var _despawn_requested := false
@@ -23,7 +24,7 @@ func _ready() -> void:
 
 
 func _physics_process(_delta: float) -> void:
-	if is_past_left_edge():
+	if is_past_left_edge() or (_despawn_past_right() and is_past_right_edge()):
 		request_despawn()
 
 
@@ -43,6 +44,24 @@ func is_past_left_edge() -> bool:
 	var left_edge := cam.get_screen_center_position().x - half_width
 	var right_edge := global_position.x + body_size.x * 0.5
 	return right_edge < left_edge - despawn_margin
+
+
+## 对称判定：本体左缘越过屏幕右缘余量线（玩家往左跑被甩在身后的小怪）。
+func is_past_right_edge() -> bool:
+	var cam := get_viewport().get_camera_2d()
+	if cam == null:
+		return false
+	var half_width := get_viewport_rect().size.x * 0.5
+	var right_edge := cam.get_screen_center_position().x + half_width
+	var left_edge := global_position.x - body_size.x * 0.5
+	return left_edge > right_edge + right_despawn_margin
+
+
+## 被甩出右缘时是否参与回收。默认关：追击 BOSS 满速倒退会主动短暂出画
+## （出画不停攻，见 boss.gd/pursuit_boss.gd 的左缘覆写），按出画清场会把
+## 遭遇战清没；只有杂兵/精英开（enemy.gd 覆写为真，余量放半屏）。
+func _despawn_past_right() -> bool:
+	return false
 
 
 ## 请求回收（Spawner 监听 despawned 信号后归还对象池）。

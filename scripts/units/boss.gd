@@ -65,6 +65,11 @@ func _rush_discount() -> bool:
 	return true
 
 
+## 难度阶梯体量增长资格（血量+失衡阈值，run_loop.md §3）：章 BOSS 全开。
+func _ladder_scaling() -> bool:
+	return true
+
+
 func _species_score() -> int:
 	return BalanceCombat.BOSS_SCORE
 
@@ -313,10 +318,12 @@ func _tick_attack(delta: float) -> void:
 			pass
 
 
-## 动作收势：各招自己的后摇（二阶段按比例缩短），到点直接出下一手。
+## 动作收势：各招自己的后摇（二阶段按比例缩短，再乘难度阶梯的关序缩放——
+## 阶梯只管 BOSS 出招密度，run_loop.md §3），到点直接出下一手。
 func _enter_recover(base: float) -> void:
 	_bstate = BState.RECOVER
-	_bt = base * (BalanceCombat.BOSS_PHASE2_RECOVER_SCALE if _phase2 else 1.0)
+	_bt = base * RunState.ladder_recover_factor() \
+			* (BalanceCombat.BOSS_PHASE2_RECOVER_SCALE if _phase2 else 1.0)
 
 
 func _begin_sweep() -> void:
@@ -398,7 +405,9 @@ func _launch_ticker(delta: float) -> void:
 
 
 func _rain_count() -> int:
-	return BalanceWorld1.BOSS_RAIN_COUNT + (BalanceWorld1.BOSS_PHASE2_RAIN_BONUS if _phase2 else 0)
+	return BalanceWorld1.BOSS_RAIN_COUNT \
+			+ (BalanceWorld1.BOSS_PHASE2_RAIN_BONUS if _phase2 else 0) \
+			+ RunState.ladder_bullets_extra()
 
 
 func take_damage(amount: int, ignore_defense: bool = false) -> void:
@@ -425,10 +434,16 @@ func is_past_left_edge() -> bool:
 	return false
 
 
+## 右缘回收闸同此防线：满速倒退甩出画面是追击演出的一部分，按出画清场
+## 会把遭遇战清没（还会闩上 _despawn_requested 冻成木桩）。
+func _despawn_past_right() -> bool:
+	return false
+
+
 ## 失衡（AC6 式冲击/STAGGER）：枪弹持续命中 ≈4s 打满上限即瘫——
 ## 停摆+受伤加深+瘫沉，这就是近战爆发窗（枪射攒失衡→砍的正式循环）。
 func _impact_resistance() -> float:
-	return BalanceCombat.IMPACT_RESIST_BOSS
+	return BalanceCombat.IMPACT_RESIST_BOSS * RunState.ladder_growth_factor()
 
 
 func _stagger_time() -> float:

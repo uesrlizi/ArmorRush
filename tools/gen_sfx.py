@@ -568,6 +568,27 @@ def melee_slash(down=True, sweep=1.0):
     return normalize(load_ref(fname, 0.9 * sweep))
 
 
+def pickup():
+    """装备到手（design/run_loop.md §4 生效瞬间的「物品音」）：模块卡入的实录轻金属咔
+    （源质感，变调提亮=小件）+ 上行纯五度双音电子确认（电子源 sting）。
+    与 threat_warn 区分：那是 1.5kHz 方波双声（危险），这里是正弦上行（到手=正向）。"""
+    out = [0.0] * int(0.46 * SR)
+    mix_at(out, load_ref("impactGeneric_light_002.ogg", 1.3), 0.0, 0.5)
+
+    def tone(f, at_s, len_s, amp):
+        at = int(at_s * SR)
+        for i in range(int(len_s * SR)):
+            t = i / SR
+            a = min(t / 0.006, 1.0) * math.exp(-t / 0.09)
+            ph = 2.0 * math.pi * f * t
+            if at + i < len(out):
+                out[at + i] += (math.sin(ph) + 0.22 * math.sin(2.0 * ph)) * a * amp
+
+    tone(783.99, 0.03, 0.22, 0.32)   # G5
+    tone(1174.66, 0.11, 0.32, 0.36)  # D6：纯五度上行
+    return normalize(out)
+
+
 # ---- 清单（新文件一律加在末尾） -------------------------------------------
 
 def main():
@@ -611,6 +632,8 @@ def main():
         random.seed(zlib.crc32(key.encode("utf-8")))
         x = master(stagger(**kw))
         write_wav(key, [s * 10.0 ** (-4.0 / 20.0) for s in x])
+    # 装备到手（轻肉鸽 §4）：实录轻金属卡入 + 电子上行确认
+    convert("pickup", pickup)
     print("完成。")
 
 

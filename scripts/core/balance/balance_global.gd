@@ -41,6 +41,54 @@ const RUSH_NO_MOBS := true            # RUSH 无杂兵：小怪/精英全停（�
 const RUSH_HP_DISCOUNT_ON := true     # RUSH BOSS 血量打折（未经精英预教=一阶段整段缺席）
 const RUSH_HP_DISCOUNT := 0.7         # 打折系数 ×全量血（数字待调参）
 const RUSH_NO_HEAL := true            # RUSH 击破间不回血：血量跨场景携带（满血只给到进 RUSH 为止）
+# ---- 疾驰倍率（design/run_loop.md §2：动态难度=负反馈，不是玩家成长） ----
+# ×1~×5：按对敌输出（防御后实际伤害）涨进度+击杀收头，受击按伤害量扣（不按发数，
+# =唯一掉档来源，无停手流失——2026-11-08 用户调向：BOSS 战靠输出爬升、停手不罚）；
+# 进度跨关保持不清（只 start_run 新一局归零）；档位=刷怪密度档（SPAWN_ENEMY_GAP
+# 乘区，打得越好怪越凶，受击掉档=自动退出高密度）+计分乘数（计分用涨前档，见
+# Main._on_enemy_killed）。BOSS 触发照旧按基础分（Spawner._boss_score_accum 不乘）
+# ——否则高倍率吞掉自己的收益。状态正本在 RunState（mult_* 段），数字全待调参。
+# 反制（威胁擦身结算）随擦弹砍掉降级为结算展示，暂无事件源。失衡不独立涨：失衡期
+# 受伤×1.5 加深会多打出伤害，输出渠道自动兑现打失衡的奖励。
+const MULT_ENABLED := true       # 总开关：false=旧制（计分不乘、密度不动、结算不带受击/倍率行）
+const MULT_MAX := 5              # 档位上限 ×N
+const MULT_STEP := 20.0          # 每涨 1 档所需进度
+const MULT_DAMAGE_FACTOR := 0.2  # 输出涨进度=防御后实际伤害×此系数（BOSS 400 实伤=80=+4 档，用户锚点）
+const MULT_KILL_FACTOR := 0.6    # 击杀收头涨进度=基础击杀分×此系数（无人机5→3/步行10→6/盾卫25→15/BOSS 50→30）
+const MULT_HIT_FACTOR := 10.0    # 受击扣进度=伤害量×此系数（严苛档：弹雨 10 伤=-100 清空，1 伤蹭弹=-10 半档）
+const MULT_GAP_STEP := 0.86      # 密度乘区：每档 SPAWN_ENEMY_GAP ×此系数（×5≈0.547=1.8 倍密度，2026-11-08 用户定放缓）
+# ---- 难度阶梯（design/run_loop.md §3：关序只管 BOSS 出招密度+体量增长） ----
+# 后摇 ×0.95^(n−1)（下限 0.9=封顶档实际生效，出招密度最高 +11%）、第 4 关起齐射
+# 弹数 +1、BOSS 血量/失衡阈值 ×1.12^(n−1) 封顶 ×1.4（2026-11-08 用户修正：原
+# 「血量一律不加」红线废止——难度梯度不只节奏，体量也涨；杂兵/精英血量仍不加）。
+# 杂兵/精英密度归疾驰倍率，阶梯不碰刷怪流（两旋钮不拧一条流互相污染因果）。
+# 凶度封顶第 4 关档：RUSH 连战（stage=5）与旧制无限滚动都封在 RUN_NORMAL_LEVELS
+# 档（换算入口在 RunState.ladder_* 三方法）。
+const LADDER_ENABLED := true          # 总开关：false=旧制（阶梯三项全不随关序缩放）
+const LADDER_RECOVER_MULT := 0.95     # 后摇每关缩放系数（BOSS 出招密度渐紧）
+const LADDER_RECOVER_MIN := 0.9       # 后摇缩放下限（封顶后出招节奏封死；0.857 的实际最低点被它接住）
+const LADDER_EXTRA_BULLET_STAGE := 4  # 从这关起齐射类弹数 +1
+const LADDER_GROWTH_MULT := 1.12      # BOSS 血量/失衡阈值每关缩放系数（1.12³=1.405）
+const LADDER_GROWTH_MAX := 1.4        # 体量增长封顶倍率（用户 1.3~1.5 取中；RUSH ×0.7 折扣后 ≈0.98≈原血量）
+# ---- 轻肉鸽装备（design/run_loop.md §4：BOSS 概率爆装备，槽位/成员正本在 balance_mods.gd） ----
+# 掉落源=BOSS 击杀（普通 4+RUSH 3）×爆率=期望 ≈3.5 次/局；同槽位不爆（从未持有槽掷）；
+# 通用小件×成员色 tint，颜色即预告；磁吸半径≈全屏=实际必捡（禁「躲弹漏捡」双随机叠加）；
+# 转场窗口 1.7s 兜底=Main 对在途件自动授予。状态正本在 RunState（mods_* 段），数字全待调参。
+const LOOT_ENABLED := true            # 总开关：false=旧制（BOSS 不掉装备）
+const LOOT_DROP_CHANCE := 0.5         # 每台 BOSS 的爆率（7.6 待定旋钮：RUSH 是否同率、精英 25% 备选）
+# 出膛段=从击杀点（BOSS 悬浮高度 240~390）小幅上抛 → 重力落到正下方地表 → 弹一次 → 立稳，
+# 全程连续轨迹（逐帧位移 ≤~35px）；出膛 0.5~0.7s 全程可见=颜色预告窗。
+const LOOT_POP_SPEED := 520.0        # 出膛上抛初速（px/s）：顶点比击杀点高 ~22px，读作「从爆点蹦出」
+const LOOT_FALL_GRAVITY := 5200.0    # 出膛段重力（px/s²）：金属小件下坠干脆（玩家重力的 6.5 倍）
+const LOOT_BOUNCE := 0.2             # 触地反弹系数（只弹一次：~15px 小跳=落地感，不读成第二次出膛）
+const LOOT_BOUNCE_MIN_SPEED := 250.0 # 触地速度低于此不弹（直接立稳）
+const LOOT_SPIN := 6.0               # 空中翻滚角速度（rad/s）；首次触地后转角指数回正
+const LOOT_SETTLE_RATE := 30.0       # 回正速率（/s）：弹跳 ~0.15s 内转角归零，立稳时无跳变
+const LOOT_MAGNET_RADIUS := 2400.0   # 磁吸半径（≈全屏对角：进圈必捡，玩家疾驰只是加速到手）
+const LOOT_MAGNET_ACCEL := 9000.0    # 磁吸加速度（px/s²）：落地立稳后从静止起扑，跑过去=加速收包
+const LOOT_MAGNET_SPEED := 2600.0    # 磁吸极速（px/s，逐帧 ≤43px）：1480px 站桩最坏账出膛+磁吸 ≈1.37s
+                                     # < 转场窗口 1.7s（玩家迎面跑来更快）
+const LOOT_GRAB_RANGE := 46.0        # 抵达判定距离（px，到玩家碰撞中心近旁即授予）
 # ---- 启动页（小恐龙式站桩待机 → 进战斗） ----
 const COMBAT_INPUT_DELAY := 0.5      # 进战斗后到解锁操作的延迟（秒）：启动演出期不应答输入
 const IDLE_PUFF_TIME := 0.4          # 待机小喷焰单口时长
@@ -70,6 +118,8 @@ const SPAWN_ENEMY_GAP_MIN := 1200.0
 const SPAWN_ENEMY_GAP_MAX := 2400.0
 const SPAWN_OBSTACLE_GAP_MIN := 1800.0
 const SPAWN_OBSTACLE_GAP_MAX := 2600.0
+const SPAWN_BACKTRACK_MAX := 600.0  # 往左跑的负位移记账上限：最多欠这么多，回头不用跑全程补给
+const ENEMY_LEFT_BEHIND_MARGIN := 1200.0 # 被玩家往左甩脱的小怪：完全出右缘再留半屏即回收（须远大于出生点距右缘 ~360）
 const OBSTACLE_DESPAWN_MARGIN := 1200.0 # 障碍完全出画面后再留半屏才回收（玩家回头走不見消失）
 const PLATFORM_HOVER_MIN := 100.0  # 断桥顶面悬在地表上方的最小高度
 const PLATFORM_HOVER_MAX := 200.0  # 断桥顶面悬在地表上方的最大高度

@@ -254,14 +254,17 @@ func _reset_warnings() -> void:
 
 func _orb_count() -> int:
 	return BalanceWorld4.ANGLER_VOLLEY_COUNT \
-			+ (BalanceWorld4.ANGLER_PHASE2_VOLLEY_BONUS if _phase2 else 0)
+			+ (BalanceWorld4.ANGLER_PHASE2_VOLLEY_BONUS if _phase2 else 0) \
+			+ RunState.ladder_bullets_extra()
 
 
 func _tide_count() -> int:
 	return BalanceWorld4.ANGLER_TIDE_COUNT \
-			+ (BalanceWorld4.ANGLER_PHASE2_TIDE_BONUS if _phase2 else 0)
+			+ (BalanceWorld4.ANGLER_PHASE2_TIDE_BONUS if _phase2 else 0) \
+			+ RunState.ladder_bullets_extra()
 
 
 func _flash_count() -> int:
 	return BalanceWorld4.ANGLER_FLASH_COUNT \
-			+ (BalanceWorld4.ANGLER_PHASE2_FLASH_BONUS if _phase2 else 0)
+			+ (BalanceWorld4.ANGLER_PHASE2_FLASH_BONUS if _phase2 else 0) \
+			+ RunState.ladder_bullets_extra()

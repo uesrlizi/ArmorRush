@@ -239,6 +239,11 @@ func _fill_lib() -> void:
 	# 节流=文件时长（0.48s 取整），导弹车/BOSS 弹雨的预警确立瞬间触发，循环感由再次触发承担。
 	_lib[&"threat_warn"] = {"paths": ["threat_warn"],
 			"db": -12.0, "pitch": [1.0, 1.0], "throttle": 500}
+	# 装备到手（轻肉鸽，design/run_loop.md §4 生效瞬间的物品音）：实录轻金属卡入+上行
+	# 纯五度电子确认。文件响度 -8.8（profile_sfx）→ 键位 -9 落在 ui_gameover 档下、
+	# 枪声之上（正弦音性声在枪炮宽带噪声里低响度照样穿）；pitch 恒定保辨识度。
+	_lib[&"pickup"] = {"paths": ["pickup"],
+			"db": -9.0, "pitch": [1.0, 1.0], "throttle": 0}
 	for key: StringName in _lib:
 		_lib[key]["paths"] = (_lib[key]["paths"] as Array) \
 				.map(func(n: String) -> String: return "%s/%s.wav" % [SFX_DIR, n])

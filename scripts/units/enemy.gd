@@ -56,6 +56,9 @@ const STAGGER_TILT_DOWN := 0.7  # 回正时长（秒，带一点过冲晃动）
 func on_spawned() -> void:
 	super()
 	add_to_group("enemies")
+	# 被玩家往左甩脱的清场余量：出右缘再留半屏（须远大于出生点距右缘的 ~360，
+	# 否则刚刷出的自己把自己回收了）。
+	right_despawn_margin = BalanceGlobal.ENEMY_LEFT_BEHIND_MARGIN
 	# 有效最大血量：物种基准 × 缩放。RUSH 终局（run_loop.md §1）只给 BOSS 打折
 	# ——未经精英预教=一阶段整段缺席；头顶条/血条比例全走 _max_hp，打折不把
 	# 二阶段阈值提前。缩放每次出场重算（池化复用兜底）。
@@ -103,12 +106,29 @@ func hp_ratio() -> float:
 
 ## 有效最大血量：物种基准 × 缩放（默认 1=原血）。血条比例/二阶段阈值唯一出处。
 func _max_hp() -> int:
-	return maxi(1, roundi(_species_max_hp() * _hp_scale))
+	# 难度阶梯体量增长（run_loop.md §3，2026-11-08 用户修正血量红线）：只 BOSS 线
+	# 乘（资格闸门同 _rush_discount 模式）；杂兵/精英血量账不动。RUSH 折扣在
+	# _hp_scale 里已先行，两者叠加 1.4×0.7≈0.98。
+	var hp := _species_max_hp() * _hp_scale
+	if _ladder_scaling():
+		hp *= RunState.ladder_growth_factor()
+	return maxi(1, roundi(hp))
 
 
 ## RUSH 血量打折资格：只章 BOSS 开（Boss / PursuitBoss 覆写为真），杂兵/精英恒关。
 func _rush_discount() -> bool:
 	return false
+
+
+## 难度阶梯体量增长资格（血量+失衡阈值）：只章 BOSS 开（同 _rush_discount 模式），
+## 杂兵/精英恒关——杂兵两刀必失衡、精英预教账都不随关序漂。
+func _ladder_scaling() -> bool:
+	return false
+
+
+## 右缘回收资格（玩家往左甩脱的清场）：杂兵/精英开；BOSS 两层覆写回关。
+func _despawn_past_right() -> bool:
+	return true
 
 
 ## 伤害结算：常规伤害先扣防御力（下限 1——盾"打不动"但不完全免疫）；
@@ -119,7 +139,9 @@ func take_damage(amount: int, ignore_defense: bool = false) -> void:
 		return
 	if _staggered:
 		amount = ceili(amount * BalanceCombat.STAGGER_DMG_MULT)
-	_hp -= amount if ignore_defense else maxi(amount - _defense(), 1)
+	var dealt := amount if ignore_defense else maxi(amount - _defense(), 1)
+	_hp -= dealt
+	RunState.mult_add_damage(dealt) # 输出涨倍率（run_loop.md §2；按防御后实伤记，失衡加深已含在 amount）
 	if _hp <= 0:
 		_explode()
 		killed.emit(_species_score())

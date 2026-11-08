@@ -18,6 +18,11 @@ var damage := 10
 var impact_tint := Color(1.0, 0.92, 0.6) # 命中迸溅染色：玩家弹暖金，敌弹出膛时覆写为红
 var impact := 0.0 # 冲击值（失衡积累，AC6 式）：发射方赋值——玩家弹 >0，敌弹默认 0 不积累
 var lob_gravity := 0.0 # px/s²，>0=抛体弹种（发射方赋值；场景不存副本，同 speed/damage 惯例）
+## 曳光换色（装备通道，design/run_loop.md §4）：发射方赋值，入树时替换弹体 Sprite 的
+## modulate（不是叠乘——场景里的 modulate 是把黄贴图压成火焰橙的出厂源色，叠乘只会
+## 更橙）；成员色×贴图黄=有效源色，全在黄色族内（敌我共弹语言不重开）。透明=出厂色。
+var tracer_tint := Color(0.0, 0.0, 0.0, 0.0)
+var knockback_scale := 1.0 # 击退倍率（穿甲装备，§4）：发射方赋值，默认 1=出厂击退
 
 var _direction := Vector2.RIGHT
 var _inherit := Vector2.ZERO
@@ -42,6 +47,8 @@ func setup(direction: Vector2, inherit_velocity: Vector2 = Vector2.ZERO) -> void
 func _ready() -> void:
 	body_entered.connect(_on_body_entered)
 	area_entered.connect(_on_area_entered)
+	if tracer_tint.a > 0.0:
+		_sprite.modulate = tracer_tint
 	_refresh()
 
 
@@ -125,7 +132,7 @@ func _on_body_entered(body: Node2D) -> void:
 		if body.has_method("add_impact"): # 冲击只进敌人（失衡积累），玩家没有该入口
 			body.add_impact(impact)
 		if body.has_method("apply_knockback"): # 只有敌人响应击退（玩家没有该入口）
-			body.apply_knockback(_direction * BalanceEnemy.ENEMY_KNOCKBACK_GUN)
+			body.apply_knockback(_direction * BalanceEnemy.ENEMY_KNOCKBACK_GUN * knockback_scale)
 		_spawn_impact(global_position)
 	else:
 		_spawn_impact(global_position, true)
@@ -138,7 +145,7 @@ func _on_area_entered(area: Area2D) -> void:
 		if area.has_method("add_impact"):
 			area.add_impact(impact)
 		if area.has_method("apply_knockback"):
-			area.apply_knockback(_direction * BalanceEnemy.ENEMY_KNOCKBACK_GUN)
+			area.apply_knockback(_direction * BalanceEnemy.ENEMY_KNOCKBACK_GUN * knockback_scale)
 	_spawn_impact(_impact_point(area))
 	queue_free()
 

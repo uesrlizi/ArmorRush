@@ -3,6 +3,7 @@
 autotest_shots/
 /export/
 /autotest_*.log
+/probe_*.log
 /at*.txt
 tools/piper_voices/*.onnx
 __pycache__/

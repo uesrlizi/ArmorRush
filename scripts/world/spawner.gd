@@ -7,7 +7,7 @@ extends Node
 ## 回收的对象不销毁，按场景归类进池子复用。
 
 signal enemy_killed(points: int)
-signal boss_defeated # BOSS 被击败（死亡演出即启）：Main 借此排章末转场
+signal boss_defeated(at: Vector2) # BOSS 被击败（死亡演出即启）：Main 借此排章末转场+落装备（at=击杀点）
 
 @export var obstacles_enabled := true # 障碍生成开关
 @export var crates_enabled := false   # 两种箱子（方块/长条平台）暂禁用，只刷脚手架平台
@@ -34,6 +34,7 @@ var _enemy_next_distance := 0.0
 var _obstacle_next_distance := 0.0
 var _boss_score_accum := 0 # 距下一场 BOSS 的击杀分累计（打完一场清零重计）
 var _boss_engaged := false
+var _elite_gate_x := 0.0 # 精英门槛用「到过的最远 x」：往左折返不掉出选怪池
 var _pools := {} # scene_path -> Array[ScrollObject]
 var _stopped := false
 var _active := false # 启动页待机时不刷怪，start() 后才上线
@@ -69,14 +70,19 @@ func _physics_process(_delta: float) -> void:
 		return
 	var dx := _player.global_position.x - _last_player_x
 	_last_player_x = _player.global_position.x
-	_obstacle_accumulator += dx
+	# 负位移记账上限：往左跑最多欠 SPAWN_BACKTRACK_MAX，回头不用跑全程补——
+	# 不封顶的话往左跑多远，就得往右跑回多远才恢复补给。
+	_obstacle_accumulator = maxf(_obstacle_accumulator + dx, -BalanceGlobal.SPAWN_BACKTRACK_MAX)
+	# 精英距离门槛按「到过的最远」记：往左折返不该把精英暂时踢出选怪池。
+	_elite_gate_x = maxf(_elite_gate_x, _player.global_position.x)
 	var boss_here := get_tree().get_first_node_in_group("boss") != null
 	# 杂兵闸：BOSS 遭遇战期间停刷；RUSH 终局（无杂兵细则，run_loop.md §1）
 	# 整场停刷——小怪/精英一并停，障碍照常=跑酷不断。
 	var mobs_allowed := not boss_here \
 			and not (BalanceGlobal.RUSH_NO_MOBS and RunState.rush_active)
 	if mobs_allowed:
-		_enemy_accumulator += dx # 遭遇战期间冻结累计：打完不洪泛，刷怪节奏从原地续
+		# 遭遇战期间冻结累计：打完不洪泛，刷怪节奏从原地续（同受欠账上限约束）
+		_enemy_accumulator = maxf(_enemy_accumulator + dx, -BalanceGlobal.SPAWN_BACKTRACK_MAX)
 	_tick_boss(boss_here)
 	# 先刷障碍再刷敌人：同帧撞在一起时，敌人的重叠检测才能看到刚落地的障碍。
 	# 障碍照常刷（跑酷不断），小怪在杂兵闸关着时停刷。
@@ -119,7 +125,7 @@ func debug_spawn_boss() -> Node2D:
 	boss.global_position = Vector2(x, BalanceCombat.BOSS_HOVER_Y)
 	_container.add_child(boss) # 入树即 _ready→on_spawned：亮血条 + WARNING
 	boss.killed.connect(_on_killed)
-	boss.killed.connect(func(_points: int) -> void: boss_defeated.emit())
+	boss.killed.connect(func(_points: int) -> void: boss_defeated.emit(boss.global_position))
 	boss.reset_physics_interpolation()
 	return boss
 
@@ -130,7 +136,7 @@ func debug_spawn_boss() -> Node2D:
 func _pick_enemy_scene() -> PackedScene:
 	var r := randf()
 	var elite_ok := elite_enabled and elite_scene != null \
-			and _player.global_position.x >= BalanceGlobal.ELITE_MIN_DISTANCE
+			and _elite_gate_x >= BalanceGlobal.ELITE_MIN_DISTANCE
 	if elite_ok and r < 0.15:
 		return elite_scene
 	if r < 0.55 or drone_scene == null:
@@ -142,7 +148,10 @@ func _pick_enemy_scene() -> PackedScene:
 
 func _roll(is_enemy: bool) -> float:
 	if is_enemy:
-		return randf_range(BalanceGlobal.SPAWN_ENEMY_GAP_MIN, BalanceGlobal.SPAWN_ENEMY_GAP_MAX)
+		# 疾驰倍率密度乘区（run_loop.md §2）：档越高间距越短=刷得越凶；每次重掷都
+		# 现读乘区——受击掉档从下一次重掷起回落，不加缓冲。
+		return randf_range(BalanceGlobal.SPAWN_ENEMY_GAP_MIN, BalanceGlobal.SPAWN_ENEMY_GAP_MAX) \
+				* RunState.mult_density_factor()
 	return randf_range(BalanceGlobal.SPAWN_OBSTACLE_GAP_MIN, BalanceGlobal.SPAWN_OBSTACLE_GAP_MAX)
 
 
@@ -171,8 +180,12 @@ func _spawn(scene: PackedScene, is_enemy: bool, at_x: float = INF) -> ScrollObje
 	var y := _terrain.surface_y_at(x) - obj.feet_offset
 	var obstacle := obj as Obstacle
 	if obstacle != null and obstacle.floating:
-		# 空中平台（断桥）：顶面悬在所在地表上方 PLATFORM_HOVER_* 区间，随地形起伏。
-		var surface := _terrain.surface_y_at(x)
+		# 空中平台（断桥）：顶面悬在「桥面所跨整段的最高地表」上方 PLATFORM_HOVER_*
+		# 区间。只按出生中心取地表会漏跨档——桥面宽过两块地块，邻块高一两档时
+		# 悬高小于档差，桥面反比旁边地块矮（断桥插进地里）。地表是种子纯函数，
+		# 未生成的块也算得出，出生时无需等地块成形即可检测。
+		var half_w := obj.body_size.x * 0.5
+		var surface := _highest_surface(x - half_w, x + half_w)
 		var top := maxf(surface - randf_range(BalanceGlobal.PLATFORM_HOVER_MIN, BalanceGlobal.PLATFORM_HOVER_MAX), 20.0)
 		y = top + obj.feet_offset
 	obj.global_position = Vector2(x, y)
@@ -186,6 +199,15 @@ func _spawn(scene: PackedScene, is_enemy: bool, at_x: float = INF) -> ScrollObje
 	# 会从旧位置（池复用=上次回收点，新实例=原点）向出生点拖一帧残影。
 	obj.reset_physics_interpolation()
 	return obj
+
+
+## [x0, x1] 所跨地块中最高的地表 y（取最小值）。档位按块恒定，逐块取样即精确。
+func _highest_surface(x0: float, x1: float) -> float:
+	var w := BalanceGlobal.TERRAIN_CHUNK_WIDTH
+	var top := INF
+	for i in range(floori(x0 / w), floori(x1 / w) + 1):
+		top = minf(top, _terrain.surface_y_at((float(i) + 0.5) * w))
+	return top
 
 
 ## 自测辅助：在指定 x 处刷一只贴地敌人并返回（确定性探针用）。

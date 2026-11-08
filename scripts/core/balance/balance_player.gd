@@ -17,6 +17,14 @@ const PLAYER_AUTO_FIRE_RANGE := 1400.0 # 自动开火射程（与杂兵攻击距
 # ---- 地面滑行火花 ----
 const SLIDE_SPARK_MIN_SPEED := 220.0 # 贴地水平速度超过该值才刮火花
 const SLIDE_SPARK_LAND_VY := 450.0   # 重落地踢火花的下坠速度门槛
+# ---- 滑行下蹲（腿部两骨 IK：Visuals/LegRig，轴点可拖、骨长按节点位置现算） ----
+# 判据=移动输入按下（非实际速度：按下即蹲，无加速爬坡延迟）；贴地滑行身体下沉
+# SLIDE_CROUCH_HEIGHT、屈膝、脚掌钉地；直立/浮空回手绘站姿（=最高位，0 即站直）。
+# 落地缓冲：任意 空中→地面 必先快速蹲到底再慢起，无论有无移动指令。
+const SLIDE_CROUCH_HEIGHT := 4.0     # 下蹲深度（局部 px，身体下沉量）
+const SLIDE_CROUCH_DOWN_RATE := 30.0 # 蹲下速率（指数趋近 /s，快蹲）
+const SLIDE_CROUCH_UP_RATE := 6.0    # 起立速率（/s，慢起；只管贴地起身）
+const SLIDE_CROUCH_EXTEND_GAIN := 0.1 # 空中伸腿速率=|跳跃初速|×本系数（反推：起跳越猛伸越快）
 # ---- 喷口可动摆动（玩家） ----
 const NOZZLE_SWING_DEG := 35.0   # 喷口摆幅上限（度）：默认朝左下；纯前进抬向正后(+)，倒退/竖直推进/缓降压向正下(−)
 const NOZZLE_TURN_SPEED := 240.0 # 喷口摆动速度（度/秒）

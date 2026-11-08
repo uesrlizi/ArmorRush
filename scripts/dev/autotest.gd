@@ -16,6 +16,12 @@ func _ready() -> void:
 		get_tree().quit()
 		return
 	RunState.hold_chapter = true # 探针需要世界原地活着：击败 BOSS 不触发章末黑场
+	# 疾驰倍率冻结（run_loop.md §2）：探针一路杀怪会攒倍率→刷怪密度乘区跟着变，
+	# 各段刷怪节奏漂移；冻结闸让涨/扣全停、乘区恒 1，探针照旧确定性。
+	RunState.mult_frozen = true
+	# 装备掉落冻结（run_loop.md §4，§6「autotest 不碰 mods」）：hold_chapter 已让击败
+	# BOSS 不走掉落分支，这里再闸一道——满血还原/弹种按伤害值分辨等断言都按出厂账写。
+	RunState.loot_frozen = true
 	_run()
 
 

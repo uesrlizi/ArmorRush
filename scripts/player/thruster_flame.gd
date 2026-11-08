@@ -9,6 +9,8 @@ extends Node2D
 ## 也挂水平姿控固定喷口（腿焰朝 -X=前进、腰焰朝 +X=倒退，rotate ±90°），分档同款。
 ## （2026-10-16 曾短暂换过 GPUParticles2D 粒子版，用户实测观感不佳回退本版——
 ## 火箭引擎焰是固定形态的持续焰，直接绘制比粒子合适；粒子版见 git/记忆。）
+## 三层色板可换（装备通道，design/run_loop.md §4：背推=主焰色、腿推=姿控焰色），
+## 默认=出厂暖焰；只换色相不动形态与各层透明度账。
 
 const ATTACK_SPEED := 14.0 # 点火：强度上升速率（级/秒），要跟手
 const RELEASE_SPEED := 6.0 # 熄火：强度回落速率（级/秒），带一点余焰
@@ -17,10 +19,23 @@ const MAX_LEVEL := 1.5     # 强度上限：近战冲刺主焰/腿焰过烧档�
 
 var _level := 0.0  # 当前强度（平滑后）
 var _target := 0.0 # 目标强度
+# 外层/中层/热芯色（RGB；透明度按层固定×强度，见 _draw）。热芯 2026-10-19 从近白
+# (1.0,0.96,0.86) 压暖到琥珀：三章冰白天底上白芯直接消失（亮度≈天空），暖芯在深底
+# 三章都保读；形态不动（钦定例外）。
+var _outer := Color(1.0, 0.5, 0.12)
+var _mid := Color(1.0, 0.76, 0.28)
+var _core := Color(1.0, 0.87, 0.52)
 
 
 func set_target(level: float) -> void:
 	_target = clampf(level, 0.0, MAX_LEVEL)
+
+
+## 换焰色（外/中/芯三层）：装备生效瞬间与跨关恢复调用。
+func set_palette(outer: Color, mid: Color, core: Color) -> void:
+	_outer = outer
+	_mid = mid
+	_core = core
 
 
 func _process(delta: float) -> void:
@@ -37,12 +52,10 @@ func _draw() -> void:
 	var flicker := 1.0 + 0.16 * sin(t * 47.0) + 0.1 * sin(t * 89.0 + 1.7)
 	var sway := 1.6 * sin(t * 61.0 + 0.6) * _level
 	var flame_len := LEN * _level * flicker
-	# 外层橙锥 → 内层黄锥 → 热芯，逐层收窄缩短。
-	# 热芯 2026-10-19 从近白 (1.0,0.96,0.86) 压暖到琥珀：三章冰白天底上
-	# 白芯直接消失（亮度≈天空），暖芯在深底三章都保读；形态不动（钦定例外）。
-	_draw_cone(5.5, flame_len, sway, Color(1.0, 0.5, 0.12, 0.42 * _level))
-	_draw_cone(3.4, flame_len * 0.78, sway * 0.7, Color(1.0, 0.76, 0.28, 0.7 * _level))
-	_draw_cone(1.9, flame_len * 0.52, sway * 0.45, Color(1.0, 0.87, 0.52, 0.95 * _level))
+	# 外层锥 → 内层锥 → 热芯，逐层收窄缩短。
+	_draw_cone(5.5, flame_len, sway, Color(_outer, 0.42 * _level))
+	_draw_cone(3.4, flame_len * 0.78, sway * 0.7, Color(_mid, 0.7 * _level))
+	_draw_cone(1.9, flame_len * 0.52, sway * 0.45, Color(_core, 0.95 * _level))
 
 
 ## 等腰焰锥：喷口宽 w，长 l，焰尖横偏 sway，朝 +Y。

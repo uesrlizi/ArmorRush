@@ -299,4 +299,5 @@ func _reset_warnings() -> void:
 
 func _flak_count() -> int:
 	return BalanceWorld5.INTERCEPTOR_FLAK_COUNT \
-			+ (BalanceWorld5.INTERCEPTOR_PHASE2_FLAK_BONUS if _phase2 else 0)
+			+ (BalanceWorld5.INTERCEPTOR_PHASE2_FLAK_BONUS if _phase2 else 0) \
+			+ RunState.ladder_bullets_extra()

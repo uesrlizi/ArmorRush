@@ -176,7 +176,8 @@ func _launch_ticker(delta: float) -> void:
 
 func _charge_count() -> int:
 	return BalanceWorld6.REDWHEEL_CHARGE_COUNT \
-			+ (BalanceWorld6.REDWHEEL_PHASE2_CHARGE_BONUS if _phase2 else 0)
+			+ (BalanceWorld6.REDWHEEL_PHASE2_CHARGE_BONUS if _phase2 else 0) \
+			+ RunState.ladder_bullets_extra()
 
 
 ## ---- 普攻：斗轮抛石 ----
@@ -273,7 +274,8 @@ func _throw_lob(index: int) -> void:
 
 func _lob_count() -> int:
 	return BalanceWorld6.REDWHEEL_LOB_COUNT \
-			+ (BalanceWorld6.REDWHEEL_PHASE2_LOB_BONUS if _phase2 else 0)
+			+ (BalanceWorld6.REDWHEEL_PHASE2_LOB_BONUS if _phase2 else 0) \
+			+ RunState.ladder_bullets_extra()
 
 
 ## 压招期间断掉的预警，回距重走完整程——预警只认发射器，压掉的半截不算数。

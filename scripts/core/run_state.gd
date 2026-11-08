@@ -41,11 +41,31 @@ var rush_lineup: Array[String] = [] # RUSH 连战阵容（本局没抽到的场�
 var rush_total := 0 # RUSH 阵容总台数（进 RUSH 时定）：进度「最终战 n/总」的分母
 var run_complete := false # 通关记号：阵容打空时置真，draw_next 返回 ""，Main 原地出通关结算
 var handover_hp := -1 # RUSH 击破间不回血：击败时记下的玩家血量，下一台 BOSS 场景取走落地（-1=不携带）
+var handover_shield := -1 # 同上账的护盾镜像（§4）：RUSH 击破间盾不回充，随血量一起跨场景携带（-1=不携带→满盾照旧）
 ## 录制隐藏档（HUD 接 F1/F2，跨章/跨局延续）：0=正常；1=F1 隐顶栏信息 HUD+结算
 ## 面板，语音播报（含字幕文字）一并停；2=F2 在 1 的基础上连头顶血条/气槽、
 ## BOSS 名条/血条/冲击条、WARNING 全隐=画面完全无 UI。状态正本在此单一存放，
 ## HUD 每次进场景落地即沿用（录制多章不用重按）。
 var ui_tier := 0
+
+## 疾驰倍率（design/run_loop.md §2，数字全在 balance_global「疾驰倍率」段）：动态难度
+## 负反馈——按对敌输出涨进度+击杀收头，档位=刷怪密度档+计分乘数；受击按伤害量扣
+## （唯一掉档来源，无停手流失：打完没怪可打的跑图期不该罚）。进度跨关保持不清
+## （打得越好全程越凶；只 start_run 新一局归零），max_run/hits_taken 是局级统计
+## （结算展示）。mult_frozen：dev 冻结闸（autotest/transition_probe 置真）——涨/扣
+## 全停、密度乘区恒 1，探针照旧确定性（同 hold_chapter 惯例，不随 start_run 清）。
+var mult_progress := 0.0 # 当前档进度（0..(MULT_MAX-1)×MULT_STEP）
+var mult_max_run := 1    # 本局最高档（只涨不落，结算展示）
+var hits_taken := 0      # 本局受击次数（倍率关/冻结时一并停记=旧制口径）
+var mult_frozen := false # dev 冻结闸：autotest 探针置真保确定性
+
+## 轻肉鸽装备（design/run_loop.md §4）：持有表=槽->成员（StringName），同槽位不爆
+## ——掉落掷骰（roll_loot）只从「未持有槽」里掷；玩家读有效数值走 mod_stat 统一
+## 访问器（Balance*/BalanceMods 保持纯默认值/纯数据）。跨关保持，只 start_run
+## 归零。loot_frozen：dev 冻结闸（autotest/transition_probe 置真，同 mult_frozen
+## 惯例不随 start_run 清）——BOSS 不掉装备，探针照旧确定性。
+var mods := {}
+var loot_frozen := false # dev 冻结闸：autotest 探针置真保确定性
 
 var _handoff := false
 var _touch_holds: Array[Dictionary] = [] # 换场景时仍被按住的触控指（旧场景触控件离场暂存，新场景认领）
@@ -97,6 +117,11 @@ func start_run() -> String:
 	rush_total = 0
 	run_complete = false
 	handover_hp = -1
+	handover_shield = -1
+	mult_progress = 0.0
+	mult_max_run = 1
+	hits_taken = 0
+	mods = {} # 新一局装备全卸（本局拾取清单随之清空）
 	_touch_holds = [] # 新一局不带上一局的残指（死亡路径本就不暂存，双保险）
 	_bag = SCENES.duplicate()
 	var first: String = FIRST_POOL[_rng.randi_range(0, FIRST_POOL.size() - 1)]
@@ -179,3 +204,155 @@ func take_handover_hp() -> int:
 	var value := handover_hp
 	handover_hp = -1
 	return value
+
+
+## 新场景 _ready 取走携带盾量（取即清）：RUSH 击破间盾不回充的落地端（§4）。
+## -1=不携带（满盾开场照旧；普通关转场满血时盾也回满，不走这里）。
+func take_handover_shield() -> int:
+	var value := handover_shield
+	handover_shield = -1
+	return value
+
+
+## ---- 轻肉鸽装备（design/run_loop.md §4；槽位/成员正本在 balance_mods.gd） ----
+
+## 拾取授予：记入持有表，返回所属槽位（掉落表随持有表收窄=同槽位不爆）。
+func equip(member: StringName) -> StringName:
+	var slot: StringName = BalanceMods.MEMBERS[member]["slot"]
+	mods[slot] = member
+	return slot
+
+
+## 槽位当前装备的成员（未持有返回 &""）。视觉通道换色/换形与肩炮/盾的有无都查它。
+func mod_member(slot: StringName) -> StringName:
+	return mods.get(slot, &"")
+
+
+## 有效数值统一访问器：遍历持有成员的 stats 表找同名键（键全游戏唯一，按域命名
+## ——每把"钥匙"只属于一个槽位的成员），没有=Balance* 默认值。消费点一律走这里，
+## 不在脚本里散抄成员分支。
+func mod_stat(key: StringName, default: float) -> float:
+	for slot: StringName in BalanceMods.SLOTS:
+		if mods.has(slot):
+			var stats: Dictionary = BalanceMods.MEMBERS[mods[slot]]["stats"]
+			if stats.has(key):
+				return stats[key]
+	return default
+
+
+## 掉落掷骰：从「未持有槽」里掷一个槽，再在槽内掷一个成员，返回成员 id。
+## 全持有（掉落表空）返回 &""。本方法只管"掉什么"（爆率见 roll_drop），掷骰
+## 走 _rng 同袋（探针设 _rng.seed 即可复现）。
+func roll_loot() -> StringName:
+	var open_slots: Array[StringName] = []
+	for slot: StringName in BalanceMods.SLOTS:
+		if not mods.has(slot):
+			open_slots.append(slot)
+	if open_slots.is_empty():
+		return &""
+	var slot: StringName = open_slots[_rng.randi_range(0, open_slots.size() - 1)]
+	var roster: Array[StringName] = []
+	for id: StringName in BalanceMods.MEMBERS:
+		if BalanceMods.MEMBERS[id]["slot"] == slot:
+			roster.append(id)
+	return roster[_rng.randi_range(0, roster.size() - 1)]
+
+
+## 一台 BOSS 的掉落（爆率 LOOT_DROP_CHANCE × 掉落表）：掷不中或全持有返回 &""。
+## 开关与 dev 冻结闸在调用方（Main._spawn_loot）；掷骰同走 _rng。
+func roll_drop() -> StringName:
+	if _rng.randf() >= BalanceGlobal.LOOT_DROP_CHANCE:
+		return &""
+	return roll_loot()
+
+
+## 本局拾取清单文案（结算回执唯一出处）：按槽位序拿成员名，用 · 连接；
+## 一件没捡返回空串（结算不建「拾取」组）。
+func loot_labels() -> String:
+	var labels: PackedStringArray = []
+	for slot: StringName in BalanceMods.SLOTS:
+		if mods.has(slot):
+			labels.append(BalanceMods.MEMBERS[mods[slot]]["label"])
+	return "·".join(labels)
+
+
+## ---- 疾驰倍率（design/run_loop.md §2；开关与数字全在 balance_global「疾驰倍率」段） ----
+
+## 当前倍率档 ×1..×MULT_MAX（进度整除换算，恰满一格进档）。倍率关/冻结=恒 1，
+## 计分公式在 Main 里据此退化为旧制。进度=伤害×小数系数的累加，恰满一档时 double
+## 噪声可能落在 19.99…，换算带浮点补偿（窗口 0.01 << 最小进度颗粒 0.2，抬不进假档）。
+func multiplier() -> int:
+	if not BalanceGlobal.MULT_ENABLED or mult_frozen:
+		return 1
+	return clampi(1 + floori((mult_progress + 0.01) / BalanceGlobal.MULT_STEP),
+			1, BalanceGlobal.MULT_MAX)
+
+
+## 倍率档→刷怪密度乘区（<1：档越高间距越短怪越密；障碍间距不乘=跑酷节奏不归倍率管）。
+func mult_density_factor() -> float:
+	if not BalanceGlobal.MULT_ENABLED or mult_frozen:
+		return 1.0
+	return pow(BalanceGlobal.MULT_GAP_STEP, multiplier() - 1.0)
+
+
+## 输出涨进度（Enemy.take_damage 按防御后实际伤害喂；失衡期伤害加深已含在数额里
+## =打失衡的奖励由这里间接兑现）。BOSS 一场 ≈400 实伤=+4 档，杂兵 20 伤=零头。
+func mult_add_damage(dealt: int) -> void:
+	if not BalanceGlobal.MULT_ENABLED or mult_frozen or dealt <= 0:
+		return
+	mult_progress = minf(mult_progress + dealt * BalanceGlobal.MULT_DAMAGE_FACTOR,
+			(BalanceGlobal.MULT_MAX - 1) * BalanceGlobal.MULT_STEP)
+	mult_max_run = maxi(mult_max_run, multiplier())
+
+
+## 击杀收头涨进度（按基础击杀分折算：盾卫/BOSS 等高分目标涨得多）。计分侧用涨前档
+## ——Main 先读 multiplier() 结账再调本方法，涨档从下一次击杀开始生效。
+func mult_add_kill(base_points: int) -> void:
+	if not BalanceGlobal.MULT_ENABLED or mult_frozen:
+		return
+	mult_progress = minf(mult_progress + base_points * BalanceGlobal.MULT_KILL_FACTOR,
+			(BalanceGlobal.MULT_MAX - 1) * BalanceGlobal.MULT_STEP)
+	mult_max_run = maxi(mult_max_run, multiplier())
+
+
+## 受击扣进度+计数（按伤害量不按发数；=唯一掉档来源，删除停手流失后力度上调）。
+func mult_take_hit(damage: int) -> void:
+	if not BalanceGlobal.MULT_ENABLED or mult_frozen or damage <= 0:
+		return
+	hits_taken += 1
+	mult_progress = maxf(mult_progress - damage * BalanceGlobal.MULT_HIT_FACTOR, 0.0)
+
+
+## ---- 难度阶梯（design/run_loop.md §3）：关序只管 BOSS 出招密度，杂兵密度归倍率 ----
+## 凶度封顶第 4 关档：RUSH 连战（stage=5）与旧制无限滚动都封在 RUN_NORMAL_LEVELS 档。
+
+## BOSS 后摇缩放系数 ×0.95^(关序−1) 下限 0.7：boss.gd 与 pursuit_boss.gd 的
+## _enter_recover 调用（saltmill 覆写走 super，同被覆盖）。倍率关照常生效（阶梯
+## 与倍率是两把旋钮，LADDER_ENABLED 才是它的总开关）。
+func ladder_recover_factor() -> float:
+	if not BalanceGlobal.LADDER_ENABLED:
+		return 1.0
+	var capped := mini(stage, BalanceGlobal.RUN_NORMAL_LEVELS)
+	return maxf(pow(BalanceGlobal.LADDER_RECOVER_MULT, capped - 1),
+			BalanceGlobal.LADDER_RECOVER_MIN)
+
+
+## 齐射弹数加成：第 LADDER_EXTRA_BULLET_STAGE 关起 +1（封顶同后摇）。各 BOSS 的
+## 齐射计数读取位包一层；直射持续流（扫射时长定义）不适用=弹数没得加。
+func ladder_bullets_extra() -> int:
+	if not BalanceGlobal.LADDER_ENABLED or mini(stage,
+			BalanceGlobal.RUN_NORMAL_LEVELS) < BalanceGlobal.LADDER_EXTRA_BULLET_STAGE:
+		return 0
+	return 1
+
+
+## BOSS 体量增长系数 ×1.12^(关序−1) 封顶 ×1.4（2026-11-08 用户修正：难度梯度
+## 不只出招密度，血量与失衡阈值也涨）：Enemy._max_hp() 与 Boss/PursuitBoss 的
+## _impact_resistance() 调用；资格闸门=Enemy._ladder_scaling()（只 BOSS 线开，
+## 杂兵/精英血量与失衡账不动）。RUSH 折扣叠加在其后：1.4×0.7≈0.98≈原血量。
+func ladder_growth_factor() -> float:
+	if not BalanceGlobal.LADDER_ENABLED:
+		return 1.0
+	var capped := mini(stage, BalanceGlobal.RUN_NORMAL_LEVELS)
+	return minf(pow(BalanceGlobal.LADDER_GROWTH_MULT, capped - 1),
+			BalanceGlobal.LADDER_GROWTH_MAX)

@@ -87,10 +87,15 @@ func _begin_skill_a() -> void:
 	_bay_warn.warn() # 预警统一入口：腹口闪光 + 警告音
 
 
+## 泉幕镖数（难度阶梯第 4 关档起 +1）：几何铺开与时序窗口全走这里取数=同一把尺。
+func _geyser_count() -> int:
+	return BalanceWorld8.SALTMILL_GEYSER_COUNT + RunState.ladder_bullets_extra()
+
+
 ## 出膛节拍：蓄力结束首镖即出，逐发梯次远→近；落点锚**出膛轮开始时**玩家的
 ## 位置（无 lead——当时位置；mark 各自 0.7s 预警，跑离/穿缝/等=免）。
 func _launch_ticker(delta: float) -> void:
-	if _darts_launched >= BalanceWorld8.SALTMILL_GEYSER_COUNT:
+	if _darts_launched >= _geyser_count():
 		return
 	_launch_t -= delta
 	if _launch_t > 0.0:
@@ -103,7 +108,7 @@ func _launch_ticker(delta: float) -> void:
 	var i := _darts_launched
 	var spread := BalanceWorld8.SALTMILL_GEYSER_SPAN + BalanceWorld8.SALTMILL_GEYSER_REAR
 	var tx := _geyser_anchor_x + BalanceWorld8.SALTMILL_GEYSER_SPAN \
-			- spread * i / float(BalanceWorld8.SALTMILL_GEYSER_COUNT - 1)
+			- spread * i / float(_geyser_count() - 1)
 	var from := ($Visuals/BayPort as Node2D).global_position
 	var target := Vector2(tx, terrain.surface_y_at(tx))
 	var dart := SaltDart.new()
@@ -132,7 +137,8 @@ func _begin_skill_b() -> void:
 ## 自带（beam_source=翼尖聚焦口，真实源点），蓄热窗=线驻留窗，随后灼点咬人。
 func _launch_burns(delta: float) -> void:
 	var count := BalanceWorld8.SALTMILL_BURN_COUNT \
-			+ (BalanceWorld8.SALTMILL_PHASE2_BURN_BONUS if _phase2 else 0)
+			+ (BalanceWorld8.SALTMILL_PHASE2_BURN_BONUS if _phase2 else 0) \
+			+ RunState.ladder_bullets_extra()
 	if _burns_launched >= count:
 		return
 	_launch_t -= delta
@@ -193,7 +199,7 @@ func _tick_attack(delta: float) -> void:
 						else global_position.x
 				_darts_launched = 0
 				_launch_t = 0.0
-				_bt = (BalanceWorld8.SALTMILL_GEYSER_COUNT - 1) \
+				_bt = (_geyser_count() - 1) \
 						* BalanceWorld8.SALTMILL_GEYSER_STAGGER \
 						+ BalanceWorld8.SALT_DART_FLIGHT_MAX \
 						+ BalanceWorld8.SALT_GEYSER_WARN \
@@ -214,7 +220,8 @@ func _tick_attack(delta: float) -> void:
 				_burns_launched = 0
 				_launch_t = 0.0
 				var count := BalanceWorld8.SALTMILL_BURN_COUNT \
-						+ (BalanceWorld8.SALTMILL_PHASE2_BURN_BONUS if _phase2 else 0)
+						+ (BalanceWorld8.SALTMILL_PHASE2_BURN_BONUS if _phase2 else 0) \
+						+ RunState.ladder_bullets_extra()
 				var stagger := BalanceWorld8.SALTMILL_PHASE2_BURN_STAGGER if _phase2 \
 						else BalanceWorld8.SALTMILL_BURN_STAGGER
 				_bt = (count - 1) * stagger + BalanceWorld8.MIRROR_BURN_BEAM \

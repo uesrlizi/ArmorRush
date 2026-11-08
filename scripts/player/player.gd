@@ -43,11 +43,15 @@ const MELEE_SWINGS := [
 var hp := 0
 var max_hp := 0
 var boost := 0.0 # 剩余推进量（秒）
+var shield := 0  # 护盾余量（§4，一次性吸收层）：先于 hp 扣，吸掉的部分不进倍率惩罚账
+var shield_max := 0 # 护盾容量（0=没装护盾）：装备入账，普通关转场满血时回满
 var search_direction := 1.0 # 索敌优先方向，由左右移动决定
 var input_enabled := false # 启动页待机锁操作：Main 进战斗才开（小恐龙式站桩开局）
 var auto_fire := true # 自动开火副开关（自测探针临时关掉保确定性；总开关在 BalancePlayer.PLAYER_AUTO_FIRE）
 
 var _fire_timer := 0.0
+var _pod_timer := 0.0 # 肩炮独立冷却（与主枪各走各的节拍）
+var _guard_t := 0.0   # 破盾无敌缓冲剩余时间（复合盾专属，窗内完全免伤）
 var _dead := false
 var _face_dir := 1.0
 var _camera_y := 0.0 # 本局镜头锁死高度（桌面=BalanceGlobal.CAMERA_Y，移动端再下移两档）
@@ -74,6 +78,9 @@ var _control_scale := 1.0    # 水平操控系数（后摇期降为 MELEE_RECOVE
 var _shake_strength := 0.0
 var _boost_regen_delay := 0.0 # 空中松开推进后到开始回充的倒计时（落地清零立即回）
 var _slide_kick := 0.0       # 重落地踢火花的剩余喷射时长（秒）
+var _crouch := 0.0           # 当前滑行下蹲量（px，向目标指数趋近；腿部 IK 由 LegRig 自解算）
+var _land_crouching := false # 落地缓冲进行中：先蹲到底再交还常规目标（快蹲慢起）
+var _slide_sparks_base_y := 0.0 # 滑行火花原位（Visuals 下蹲时火花要钉回地面）
 var _phys_prev := Vector2.ZERO # 上一个物理步位置（镜头亚步补间用，见 _process）
 var _phys_curr := Vector2.ZERO
 
@@ -94,13 +101,18 @@ var _phys_curr := Vector2.ZERO
 @onready var _melee_hitbox: Area2D = $MeleeHitbox
 @onready var _melee_hitbox_shape: CollisionShape2D = $MeleeHitbox/CollisionShape2D
 @onready var _overhead_bar: OverheadBar = $OverheadBar
+@onready var _shield_ring: Sprite2D = $Visuals/ShieldRing           # 护盾环（§4 护盾槽通道）
+@onready var _pod: Node2D = $Visuals/ShoulderPod                     # 背挂副炮（§4 肩部武器槽通道）
+@onready var _pod_muzzle: Marker2D = $Visuals/ShoulderPod/Muzzle
+@onready var _pod_flash: MuzzleFlash = $Visuals/ShoulderPod/Muzzle/Flash
 
 
 func _ready() -> void:
 	add_to_group("player")
-	max_hp = BalancePlayer.PLAYER_MAX_HP
+	# 装甲装备（§4）：上限加成跨关保持——新玩家实例按持有表算有效上限，满血开场。
+	max_hp = BalancePlayer.PLAYER_MAX_HP + int(RunState.mod_stat(&"max_hp_bonus", 0.0))
 	hp = max_hp
-	boost = BalancePlayer.BOOST_CAPACITY
+	boost = boost_capacity()
 	# 移动端镜头额外下移两档（战斗区抬到屏幕上半躲手指），桌面为 0。
 	_camera_y = BalanceGlobal.CAMERA_Y \
 			+ (BalanceGlobal.MOBILE_CAMERA_Y_OFFSET if Platforms.is_mobile() else 0.0)
@@ -124,6 +136,7 @@ func _ready() -> void:
 	# 滑行火花原生朝 +X 喷（滑行后方）：本地固定镜像一次，朝向换边由
 	# Visuals 整体翻转承担（不再随 _face_dir 逐帧重写）。
 	_slide_sparks.scale.x = -1.0
+	_slide_sparks_base_y = _slide_sparks.position.y
 	# 刃光前后分层：同一道弧画两遍，近段裁掉上半（观众半侧）、远段裁掉下半。
 	_slash_near.clip = SlashArc.Clip.LOWER
 	_slash_far.clip = SlashArc.Clip.UPPER
@@ -131,6 +144,11 @@ func _ready() -> void:
 	_slash_far.depth_dim = BalancePlayer.MELEE_FAR_DIM
 	# 启动页待机空场不挂牌（overhead_bar 侧也不画）；进战斗由 reveal_overhead_bar 淡入。
 	_overhead_bar.modulate.a = 0.0
+	# 装备恢复（§4）：持有表跨关保持——新玩家实例把盾量与通道表现全部装回
+	# （盾满、肩炮在位、焰转色；枪/刀通道在出弹/出刀时现读，无驻留件）。
+	shield_max = int(RunState.mod_stat(&"shield_capacity", 0.0))
+	shield = shield_max
+	_refresh_mod_visuals()
 
 
 ## 镜头横向跟随玩家，高度锁死（飞行范围由天花板约束在画面内）；命中时叠加震动。
@@ -153,6 +171,7 @@ func _process(delta: float) -> void:
 func _physics_process(delta: float) -> void:
 	if _dead:
 		return
+	_guard_t = maxf(_guard_t - delta, 0.0) # 破盾无敌缓冲倒计时（复合盾）
 
 	# 启动页待机：不读任何输入，机体站桩（重力/镜头照常，脚下是平地）。
 	var axis := 0.0
@@ -193,7 +212,8 @@ func _physics_process(delta: float) -> void:
 		velocity.y = move_toward(
 			velocity.y, -BalancePlayer.BOOST_MAX_ASCENT_SPEED, BalancePlayer.BOOST_THRUST_ACCEL * delta)
 		boost = maxf(boost - BalancePlayer.BOOST_DRAIN_PER_SEC * delta, 0.0)
-		_boost_regen_delay = BalancePlayer.BOOST_REGEN_DELAY_AIR # 推进即重置回充倒计时
+		# 推进即重置回充倒计时（腿推装备可缩短空中回气延迟，§4）
+		_boost_regen_delay = RunState.mod_stat(&"boost_regen_delay_air", BalancePlayer.BOOST_REGEN_DELAY_AIR)
 		thrusting = true
 	else:
 		# 上升/下降段重力分开：下降略小，体感为机体在下落时主动反推缓降。
@@ -204,10 +224,11 @@ func _physics_process(delta: float) -> void:
 		# 落地则立即回充且不受倒计时影响；速率本身调快。
 		# 近战全程（后摇结束前）不回充不倒计时：固定耗气已在起手一次扣完，收势后恢复常规回充。
 		if is_on_floor() or _boost_regen_delay <= 0.0:
-			boost = minf(boost + BalancePlayer.BOOST_REGEN_PER_SEC * delta, BalancePlayer.BOOST_CAPACITY)
+			boost = minf(boost + RunState.mod_stat(&"boost_regen_per_sec", BalancePlayer.BOOST_REGEN_PER_SEC) * delta,
+					boost_capacity())
 		else:
 			_boost_regen_delay -= delta
-	boost_changed.emit(boost, BalancePlayer.BOOST_CAPACITY)
+	boost_changed.emit(boost, boost_capacity())
 
 	if axis != 0.0:
 		search_direction = signf(axis)
@@ -218,6 +239,38 @@ func _physics_process(delta: float) -> void:
 	# 记录前后两个物理步的位置，给 _process 的镜头亚步补间用。
 	_phys_prev = _phys_curr
 	_phys_curr = global_position
+
+	# 滑行下蹲（腿部两骨 IK，解算在 Visuals/LegRig 自跑）：按移动输入驱动
+	# （非实际速度——按下即蹲，无加速爬坡延迟），贴地滑行身体下沉屈膝、
+	# 脚掌钉地（LegRig 读本值补账）；直立与浮空回手绘站姿（=最高位）。
+	# 落地缓冲：任意 空中→地面 必先快速蹲到底、再慢起，无论有无移动指令；
+	# 到底判据=贴近满深（指数逼近的工程截止），到底即交还常规目标（慢起接管）。
+	# 快蹲慢起：下沉走 DOWN（贴地蹲+落地缓冲）；起立贴地走 UP（慢起从容），
+	# 空中走伸腿速率（按跳跃初速反推：起跳越猛伸越快，空中不用慢起拖姿态）。
+	# 近战贴地突进按住方向同享。
+	if not is_on_floor():
+		_land_crouching = false # 离地即撤（跳离缓冲不被钉在蹲姿）
+	elif not was_on_floor:
+		_land_crouching = true # 落地瞬间起蹲
+	elif _land_crouching and _crouch >= BalancePlayer.SLIDE_CROUCH_HEIGHT - 0.1:
+		_land_crouching = false
+	var crouch_target := 0.0
+	if _land_crouching:
+		crouch_target = BalancePlayer.SLIDE_CROUCH_HEIGHT
+	elif is_on_floor() and axis != 0.0:
+		crouch_target = BalancePlayer.SLIDE_CROUCH_HEIGHT # 滑行下蹲：按输入即蹲
+	var crouch_rate: float
+	if crouch_target > _crouch:
+		crouch_rate = BalancePlayer.SLIDE_CROUCH_DOWN_RATE # 蹲下
+	elif is_on_floor():
+		crouch_rate = BalancePlayer.SLIDE_CROUCH_UP_RATE # 贴地起身
+	else:
+		crouch_rate = -BalancePlayer.PLAYER_JUMP_VELOCITY \
+				* BalancePlayer.SLIDE_CROUCH_EXTEND_GAIN # 空中伸腿
+	_crouch = lerpf(_crouch, crouch_target, 1.0 - exp(-crouch_rate * delta))
+	_visuals.position.y = _crouch
+	# 滑行火花钉地面：不跟身体下沉。
+	_slide_sparks.position.y = _slide_sparks_base_y - _crouch
 
 	# 地面滑行火花：贴地高速刮地（跑动/近战突进/前摇预压都算），重落地再踢一脚。
 	if is_on_floor() and not was_on_floor and pre_vy > BalancePlayer.SLIDE_SPARK_LAND_VY:
@@ -304,9 +357,10 @@ func _physics_process(delta: float) -> void:
 			BalancePlayer.VERNIER_CRUISE_FLAME if nozzle_backward else 0.0)
 
 	_fire_timer = maxf(_fire_timer - delta, 0.0)
+	_pod_timer = maxf(_pod_timer - delta, 0.0)
 
-	if input_enabled and _fire_timer == 0.0:
-		_tick_auto_fire() # 开火全自动：手动开火键已移除（操控只剩移动/跳跃/斩击）
+	if input_enabled:
+		_tick_auto_fire() # 开火全自动：手动开火键已移除（主枪冷却闸在内部，肩炮独立计时）
 
 	if input_enabled:
 		_tick_melee_input()
@@ -420,16 +474,14 @@ func _aim_at_target() -> bool:
 
 ## 开火：返回是否真的出弹。近战全程禁射（前摇→追击→斩击→后摇）是这里的底层硬闸
 ## ——不管谁调用都拦，挥刀滞空硬直里夹子弹会毁掉出招读法；调用方据此不空耗冷却。
+## 枪槽装备（§4）：弹伤/冲击/击退走 mod_stat，曳光与迸溅转成员色（黄色族红线：
+## 敌我共弹语言不重开）；双曳光=同一拍两发沿垂向错开（同道齐射读法，不散角）。
 func _fire() -> bool:
 	if _melee_phase != MeleePhase.IDLE:
 		return false
 	var container := get_tree().get_first_node_in_group("projectile_container")
 	if container == null:
 		return false
-	var bullet := PLAYER_BULLET.instantiate()
-	bullet.speed = BalancePlayer.PLAYER_BULLET_SPEED
-	bullet.damage = BalancePlayer.PLAYER_BULLET_DAMAGE
-	bullet.impact = BalanceCombat.PLAYER_BULLET_IMPACT # 冲击值：失衡积累用（衰减>扫射注入，近战主积累）
 	var fire_dir := Vector2(search_direction, 0.0)
 	var target := _acquire_target()
 	if target != null:
@@ -437,10 +489,24 @@ func _fire() -> bool:
 		var aim_at := Bullet.aim_point(_muzzle.global_position, target, BalancePlayer.PLAYER_BULLET_SPEED)
 		fire_dir = Bullet.solve_fire_direction(
 			_muzzle.global_position, aim_at, BalancePlayer.PLAYER_BULLET_SPEED, velocity)
-	bullet.setup(fire_dir, velocity)
-	container.add_child(bullet)
-	bullet.global_position = _muzzle.global_position
-	bullet.reset_physics_interpolation() # 先入树后定位：重置插值基点，出膛不拖残影
+	var gun := RunState.mod_member(&"gun")
+	var shots := 2 if gun == &"gun_twin" else 1
+	for i in shots:
+		var bullet := PLAYER_BULLET.instantiate()
+		bullet.speed = BalancePlayer.PLAYER_BULLET_SPEED
+		bullet.damage = int(RunState.mod_stat(&"bullet_damage", BalancePlayer.PLAYER_BULLET_DAMAGE))
+		# 冲击值：失衡积累用（衰减>扫射注入，近战主积累）
+		bullet.impact = RunState.mod_stat(&"bullet_impact", BalanceCombat.PLAYER_BULLET_IMPACT)
+		if not gun.is_empty():
+			var tint: Color = BalanceMods.MEMBERS[gun]["tint"]
+			bullet.tracer_tint = tint
+			bullet.impact_tint = tint
+			bullet.knockback_scale = RunState.mod_stat(&"bullet_knockback_scale", 1.0)
+		bullet.setup(fire_dir, velocity)
+		container.add_child(bullet)
+		var offset := (float(i) - float(shots - 1) * 0.5) * BalanceMods.TWIN_TRACER_GAP
+		bullet.global_position = _muzzle.global_position + fire_dir.orthogonal() * offset
+		bullet.reset_physics_interpolation() # 先入树后定位：重置插值基点，出膛不拖残影
 	# 枪口焰是 Muzzle 的子节点，天然跟随枪臂的俯仰/镜像/移动，不落世界空间。
 	_muzzle_flash.fire(fire_dir.angle())
 	Sfx.play(&"fire_player")
@@ -448,7 +514,8 @@ func _fire() -> bool:
 
 
 ## 自动开火（唯一的开火方式，手动开火已移除）：索敌目标在射程内、枪口→目标连线
-## 不被地形挡住才出弹；冷却与近战禁射闸都在 _fire 这一层。
+## 不被地形挡住才出弹；冷却与近战禁射闸都在 _fire 这一层。肩炮（§4）共用这道
+## 索敌/射程/LOS 闸，独立冷却（_tick_pod）。
 ## LOS 只查世界地形层（层 1）：障碍层对子弹透明（obstacle.gd 头注——掩体不挡弹），
 ## 也就不该挡开火判定。
 func _tick_auto_fire() -> void:
@@ -463,8 +530,45 @@ func _tick_auto_fire() -> void:
 		return
 	if _terrain_blocks(from, to):
 		return
-	if _fire():
-		_fire_timer = BalancePlayer.PLAYER_FIRE_COOLDOWN
+	if _fire_timer == 0.0 and _fire():
+		_fire_timer = RunState.mod_stat(&"fire_cooldown", BalancePlayer.PLAYER_FIRE_COOLDOWN)
+	_tick_pod(target)
+
+
+## 肩部副炮（§4 肩部武器槽）：背挂件自己的枪口出弹，独立冷却；近战禁射硬闸同
+## 主枪（挥刀滞空硬直里不夹子弹）。弹体=主枪弹缩小+成员色曳光（复用
+## player_bullet 场景，不建新弹种）；霰副炮=同一拍小散角多发。
+func _tick_pod(target: Node2D) -> void:
+	if not _pod.visible or _pod_timer > 0.0 or _melee_phase != MeleePhase.IDLE:
+		return
+	var from := _pod_muzzle.global_position
+	if _terrain_blocks(from, target.global_position):
+		return
+	var container := get_tree().get_first_node_in_group("projectile_container")
+	if container == null:
+		return
+	var pod := RunState.mod_member(&"shoulder")
+	var tint: Color = BalanceMods.MEMBERS[pod]["tint"]
+	var shots := int(RunState.mod_stat(&"pod_shots", 1.0))
+	var speed := BalancePlayer.PLAYER_BULLET_SPEED * BalanceMods.POD_BULLET_SPEED_SCALE
+	var aim_at := Bullet.aim_point(from, target, speed)
+	var dir := Bullet.solve_fire_direction(from, aim_at, speed, velocity)
+	for i in shots:
+		var bullet := PLAYER_BULLET.instantiate()
+		bullet.speed = speed
+		bullet.damage = int(RunState.mod_stat(&"pod_damage", 3.0))
+		bullet.impact = BalanceMods.POD_BULLET_IMPACT
+		bullet.tracer_tint = tint
+		bullet.impact_tint = tint
+		bullet.scale = Vector2.ONE * BalanceMods.POD_BULLET_SCALE
+		var spread := (float(i) - float(shots - 1) * 0.5) * deg_to_rad(BalanceMods.POD_SCATTER_DEG)
+		bullet.setup(dir.rotated(spread), velocity)
+		container.add_child(bullet)
+		bullet.global_position = from
+		bullet.reset_physics_interpolation()
+	_pod_flash.fire(dir.angle())
+	_pod_timer = RunState.mod_stat(&"pod_cooldown", 0.45)
+	Sfx.play(&"fire_player", BalanceMods.POD_FIRE_SFX_STRENGTH)
 
 
 ## 枪口→目标连线是否被地形（碰撞层 1，见 terrain.gd）截断。
@@ -541,8 +645,9 @@ func _start_swing(linked: bool) -> void:
 	# 固定耗气：每刀起手一口价（不管突进/悬停拖多久），扣到 0 不打断出招。
 	boost = maxf(boost - BalancePlayer.MELEE_BOOST_COST, 0.0)
 	_melee_phase = MeleePhase.WINDUP
-	# 闲置起手有明显停顿前摇（架势），连段衔接的停顿短一点（AC6 同款）。
-	_melee_t = BalancePlayer.MELEE_WINDUP_COMBO_TIME if linked else BalancePlayer.MELEE_WINDUP_TIME
+	# 闲置起手有明显停顿前摇（架势），连段衔接的停顿短一点（AC6 同款）；刀槽装备可缩（§4）。
+	_melee_t = RunState.mod_stat(&"melee_windup_combo_time", BalancePlayer.MELEE_WINDUP_COMBO_TIME) \
+			if linked else RunState.mod_stat(&"melee_windup_time", BalancePlayer.MELEE_WINDUP_TIME)
 	_melee_buffered = false
 	_combo_window_t = 0.0
 	_melee_hits.clear()
@@ -590,6 +695,12 @@ func _enter_strike() -> void:
 	var thickness: float = cfg.thickness
 	var color_core: Color = cfg.color_core
 	var color_outer: Color = cfg.color_outer
+	# 刀槽装备（§4）：刃光整套转成员色——两段各有配色，段间色差保留（读法不动）。
+	var blade := RunState.mod_member(&"blade")
+	if not blade.is_empty():
+		var tones: Dictionary = BalanceMods.MEMBERS[blade]["blade"]
+		color_core = tones["core1"] if _melee_swing == 1 else tones["core2"]
+		color_outer = tones["outer1"] if _melee_swing == 1 else tones["outer2"]
 	for arc: SlashArc in [_slash_far, _slash_near]:
 		arc.pivot_offset = pivot
 		arc.radius = radius
@@ -609,8 +720,10 @@ func _enter_strike() -> void:
 
 func _enter_recover() -> void:
 	_melee_phase = MeleePhase.RECOVER
-	_melee_t = BalancePlayer.MELEE_RECOVER_1 if _melee_swing == 1 else BalancePlayer.MELEE_RECOVER_2
-	_combo_window_t = BalancePlayer.MELEE_COMBO_WINDOW # 连段窗口从斩击完成这刻起算
+	_melee_t = RunState.mod_stat(&"melee_recover_1", BalancePlayer.MELEE_RECOVER_1) if _melee_swing == 1 \
+			else RunState.mod_stat(&"melee_recover_2", BalancePlayer.MELEE_RECOVER_2)
+	# 连段窗口从斩击完成这刻起算（刀槽装备可延长，§4）
+	_combo_window_t = RunState.mod_stat(&"melee_combo_window", BalancePlayer.MELEE_COMBO_WINDOW)
 	_control_scale = BalancePlayer.MELEE_RECOVER_CONTROL
 
 
@@ -620,7 +733,8 @@ func _end_swing() -> void:
 
 
 func _scan_melee_hits() -> void:
-	var damage := BalancePlayer.MELEE_DAMAGE_1 if _melee_swing == 1 else BalancePlayer.MELEE_DAMAGE_2
+	var damage := int(RunState.mod_stat(&"melee_damage_1", BalancePlayer.MELEE_DAMAGE_1) if _melee_swing == 1
+			else RunState.mod_stat(&"melee_damage_2", BalancePlayer.MELEE_DAMAGE_2))
 	# 敌人本体是 CharacterBody2D（body），跨屏弹等旧 Area 命中路径已不存在；
 	# 两边都扫一遍 + as Enemy 过滤，兼容一切挂敌层 4 的碰撞体。
 	var hits: Array[Node2D] = []
@@ -750,8 +864,22 @@ func enable_input_delayed(delay: float) -> void:
 
 
 func take_damage(amount: int) -> void:
-	if _dead:
-		return
+	if _dead or _guard_t > 0.0:
+		return # 破盾无敌缓冲（复合盾）窗内完全免伤：防连击穿透
+	# 护盾（§4）：先于 hp 吸收；全吸=没掉血=没挨打（不进倍率惩罚账、不记受击、
+	# 不震屏），格挡音+环闪白当公告；吸穿=碎盾，余量照常扣血。
+	if shield > 0:
+		var absorbed := mini(shield, amount)
+		shield -= absorbed
+		amount -= absorbed
+		Sfx.play(&"hit_deflect")
+		if shield == 0:
+			_break_shield()
+		else:
+			_flash_shield_ring()
+		if amount <= 0:
+			return
+	RunState.mult_take_hit(amount) # 受击按伤害量扣倍率进度+计数（run_loop.md §2；倍率关/冻结内部空转）
 	hp = maxi(hp - amount, 0)
 	hp_changed.emit(hp, max_hp)
 	# 受击=钝：多感官同步（哈迪斯/死亡细胞同款），震屏+强电机低频一起上。
@@ -775,6 +903,92 @@ func carry_over_hp(value: int) -> void:
 	_rumble(0.25, 0.6, 0.15)
 	if hp == 0:
 		_die()
+
+
+## RUSH 击破间盾不回充（§4，同不回血账）：黑场交接落地接上一台打完的盾量。
+## <0 = 不携带（满盾照旧）；没装护盾时无事可做。
+func carry_over_shield(value: int) -> void:
+	if value < 0 or shield_max <= 0:
+		return
+	shield = clampi(value, 0, shield_max)
+	_update_shield_ring()
+
+
+## ---- 轻肉鸽装备（design/run_loop.md §4；数值/颜色正本在 BalanceMods） ----
+
+## 生效瞬间（掉落小件授予时调，RunState.equip 已先入表）：数值当场入账 +
+## 通道当场换色/换形=公告（战斗内零文字）。装甲=上限加成并回补同量；护盾=
+## 容量入账、满盾亮环；肩炮亮相；焰转色。枪/刀通道在出弹/出刀时现读。
+func apply_mod(member: StringName) -> void:
+	match BalanceMods.MEMBERS[member]["slot"]:
+		&"armor":
+			var bonus := int(RunState.mod_stat(&"max_hp_bonus", 0.0))
+			max_hp += bonus
+			hp = mini(hp + bonus, max_hp)
+			hp_changed.emit(hp, max_hp)
+		&"shield":
+			shield_max = int(RunState.mod_stat(&"shield_capacity", 0.0))
+			shield = shield_max
+			_guard_t = 0.0
+	_refresh_mod_visuals()
+
+
+## 有效推进容量（背推装备可 +0.3s，黄线内）：回充钳制与头顶气槽比例统一走它。
+func boost_capacity() -> float:
+	return RunState.mod_stat(&"boost_capacity", BalancePlayer.BOOST_CAPACITY)
+
+
+## 头顶血条宽（装甲装备=条加宽，§4 装甲槽通道）：OverheadBar 取宽走它。
+func bar_width() -> float:
+	return RunState.mod_stat(&"hp_bar_width", BalanceGlobal.HP_BAR_PLAYER_WIDTH)
+
+
+## 装备→驻留表现（拾取瞬间与跨关恢复共用）：主焰三层换色、腰/腿姿控焰换色、
+## 肩炮在位、护盾环上色。没装的槽保持出厂表现（焰件默认色板不动）。
+func _refresh_mod_visuals() -> void:
+	var back := RunState.mod_member(&"back")
+	if not back.is_empty():
+		var main_flame: Array = BalanceMods.MEMBERS[back]["flame"]
+		_thruster.set_palette(main_flame[0], main_flame[1], main_flame[2])
+	var leg := RunState.mod_member(&"leg")
+	if not leg.is_empty():
+		var vernier: Array = BalanceMods.MEMBERS[leg]["flame"]
+		_leg_thruster.set_palette(vernier[0], vernier[1], vernier[2])
+		_waist_thruster.set_palette(vernier[0], vernier[1], vernier[2])
+	_pod.visible = not RunState.mod_member(&"shoulder").is_empty()
+	var guard := RunState.mod_member(&"shield")
+	if not guard.is_empty():
+		_shield_ring.self_modulate = BalanceMods.MEMBERS[guard]["ring"]
+	_update_shield_ring()
+
+
+## 护盾环=盾量读法：有盾才显示，残盾更淡（满盾全亮）。
+func _update_shield_ring() -> void:
+	_shield_ring.visible = shield > 0
+	if shield > 0:
+		_shield_ring.modulate.a = lerpf(BalanceMods.SHIELD_RING_ALPHA_MIN, 1.0,
+				float(shield) / float(maxi(shield_max, 1)))
+
+
+## 格挡公告：环闪白回落到成员色（吸收成立的那一下）。
+func _flash_shield_ring() -> void:
+	_update_shield_ring()
+	var ring: Color = BalanceMods.MEMBERS[RunState.mod_member(&"shield")]["ring"]
+	var tw := create_tween()
+	tw.tween_property(_shield_ring, "self_modulate", ring, 0.18).from(Color.WHITE)
+
+
+## 破盾：环隐 + 碎散火花；复合盾追加无敌缓冲（stats 里读，相位盾为 0=无缓冲）。
+func _break_shield() -> void:
+	_guard_t = RunState.mod_stat(&"shield_guard_time", 0.0)
+	_update_shield_ring()
+	var container := get_tree().get_first_node_in_group("projectile_container")
+	if container == null:
+		return
+	var burst := SPARK_BURST.instantiate() as Node2D
+	burst.position = global_position # 先定位再入树：one_shot 粒子入树即整批出生
+	container.add_child(burst)
+	burst.scale = Vector2.ONE * 1.6
 
 
 ## 手柄震动；没接手柄时静默跳过。

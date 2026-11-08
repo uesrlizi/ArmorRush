@@ -60,6 +60,7 @@ func _ready() -> void:
 		# （触控件经 RunState 交接认领，按住的手指同理）。
 		_title_screen.queue_free()
 		_player.carry_over_hp(RunState.take_handover_hp())
+		_player.carry_over_shield(RunState.take_handover_shield())
 		_enter_combat(true)
 	# 开机亮屏：首启与重开回来同路，从全黑渐亮露出启动页。
 	Fade.reveal()
@@ -76,6 +77,7 @@ func _process(delta: float) -> void:
 		return
 	RunState.play_time += delta
 	_hud.set_play_time(RunState.play_time)
+	_hud.set_mult(RunState.multiplier()) # 疾驰倍率读数上屏（跳变才重绘；跨关保持不清档）
 
 
 ## 进战斗：系统播报 + HUD 依次点亮 + 机体切换（掐待机汽/头顶条渐亮/操作
@@ -86,12 +88,17 @@ func _enter_combat(handoff := false) -> void:
 	_hud.play_intro()
 	_touch_controls.fade_in_controls()
 	Comms.notify_combat_start(not handoff)
+	_hud.set_mult(RunState.multiplier()) # 落地显示携带档（跨关保持，run_loop.md §2；首喂不闪）
 	_spawner.start()
 	_clock_running = true
 
 
 func _on_enemy_killed(points: int) -> void:
-	score += points
+	# 计分唯一公式=击杀分×当时倍率（run_loop.md §2）：用涨前档——这一刀按你正在骑的
+	# 倍率结账，涨档从下一次击杀生效；倍率关=档恒 1，公式退化为旧制加分。
+	var mult := RunState.multiplier()
+	RunState.mult_add_kill(points)
+	score += points * mult
 	RunState.score = score
 	_hud.set_score(score)
 
@@ -107,7 +114,8 @@ func _on_player_died() -> void:
 	# 敌人/BOSS 认 is_dead 停火、移动层照常=自然待机；重开受理在结算动画播完才开闸。
 	get_tree().create_timer(BalanceGlobal.GAME_OVER_DELAY, true, false, true).timeout.connect(
 		func() -> void:
-			var intro := _hud.show_result(score, RunState.progress_parts(), RunState.play_time)
+			var intro := _hud.show_result(score, RunState.progress_parts(), RunState.play_time,
+					false, RunState.hits_taken, RunState.mult_max_run, RunState.loot_labels())
 			_arm_restart_after(intro, BalanceGlobal.RESULT_RESTART_LOCK)
 	)
 
@@ -145,19 +153,21 @@ func _on_restart_requested() -> void:
 		get_tree().change_scene_to_file(RunState.start_run()))
 
 
-## 本章通关（BOSS 被击败）：延迟让爆散演出播完 → 抽下一关 → 全局黑场切入
-## （旧制=轮换袋无限滚动）。局内循环 v2（run_loop.md §1）：第 RUN_NORMAL_LEVELS
-## 关后进 RUSH 终局逐台连战，击破间不回血（血量跨场景携带）；阵容打空=
-## 通关——不切场景，原地出通关结算，本局到此结束（重开=新一局）。
-## hold_chapter 锁章（自测）照旧不转场。
-func _on_boss_defeated() -> void:
+## 本章通关（BOSS 被击败）：掉装备（§4）→ 延迟让爆散演出播完 → 抽下一关 →
+## 全局黑场切入（旧制=轮换袋无限滚动）。局内循环 v2（run_loop.md §1）：第
+## RUN_NORMAL_LEVELS 关后进 RUSH 终局逐台连战，击破间不回血（血量跨场景携带）；
+## 阵容打空=通关——不切场景，原地出通关结算，本局到此结束（重开=新一局）。
+## hold_chapter 锁章（自测）照旧不转场也不掉装备（autotest 不碰 mods）。
+func _on_boss_defeated(at: Vector2) -> void:
 	if RunState.hold_chapter:
 		return
+	_spawn_loot(at) # 掉落在击杀瞬出生成：磁吸收包与 1.7s 转场窗口赛跑，转场前再兜底
 	_spawner.stop() # 转场窗口不再补怪（场上残敌照常行动，跑酷不断）
 	get_tree().create_timer(BalanceGlobal.CHAPTER_CLEAR_DELAY, true, false, true).timeout.connect(
 		func() -> void:
 			if _player.is_dead():
 				return # 延迟窗口内玩家暴毙：走死亡结算，不切场景
+			LootPickup.collect_in_flight() # 转场兜底：在途掉落就地授予，一次都不许丢
 			_clock_running = false # 转场/结算不计时：新关进战斗再接着走
 			var was_rush := RunState.rush_active # draw_next 会推进局状态，先留影
 			var next := RunState.draw_next()
@@ -166,10 +176,36 @@ func _on_boss_defeated() -> void:
 				return
 			if was_rush and BalanceGlobal.RUSH_NO_HEAL:
 				RunState.handover_hp = _player.hp # 击破间不回血：血量带进下一台
+				RunState.handover_shield = _player.shield # 盾同账：击破间不回充（§4）
 			RunState.begin_handoff()
 			Fade.transition(func() -> void:
 				get_tree().change_scene_to_file(next))
 	)
+
+
+## 装备掉落（run_loop.md §4）：开关/dev 冻结闸闸在这里，爆率×掉落表在
+## RunState.roll_drop（掉落表=未持有槽，全持有=空掷不掉）。
+func _spawn_loot(at: Vector2) -> void:
+	if not BalanceGlobal.LOOT_ENABLED or RunState.loot_frozen or _player.is_dead():
+		return
+	var member := RunState.roll_drop()
+	if not member.is_empty():
+		spawn_loot_drop(member, at)
+
+
+## 生成一件掉落小件（探针可直调定成员）：落点=击杀点收进画面内 + 地表吸附
+## （桥式章=桥面），通体成员色=到手通道的预告。
+func spawn_loot_drop(member: StringName, at: Vector2) -> void:
+	var terrain := get_tree().get_first_node_in_group("terrain") as Terrain
+	var container := get_tree().get_first_node_in_group("projectile_container")
+	if terrain == null or container == null:
+		return
+	var half_w := get_viewport_rect().size.x * 0.5
+	var cam_x := _player.global_position.x + BalanceGlobal.CAMERA_X_OFFSET
+	var x := clampf(at.x, cam_x - half_w + 120.0, cam_x + half_w - 120.0)
+	var drop := LootPickup.new()
+	drop.setup(member, Vector2(x, at.y), terrain.surface_y_at(x) - 12.0)
+	container.add_child(drop)
 
 
 ## 通关结算（run_loop.md §1）：不切场景不黑场——BOSS 已亡、刷怪已停，世界
@@ -181,5 +217,6 @@ func _show_clear_result() -> void:
 	_cut_held_input()
 	_touch_controls.fade_out_controls()
 	_hud.play_outro() # 顶栏退场（信息移入结算面板，不再重复）
-	var intro := _hud.show_result(score, RunState.progress_parts(), RunState.play_time, true)
+	var intro := _hud.show_result(score, RunState.progress_parts(), RunState.play_time,
+			true, RunState.hits_taken, RunState.mult_max_run, RunState.loot_labels())
 	_arm_restart_after(intro, BalanceGlobal.CLEAR_RESTART_LOCK)

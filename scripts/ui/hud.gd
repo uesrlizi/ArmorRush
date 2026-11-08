@@ -1,9 +1,10 @@
 class_name HUD
 extends CanvasLayer
-## 得分/关卡数/用时、操作提示、游戏结束面板。
+## 得分/关卡数/用时/倍率、操作提示、游戏结束面板。
 ## 血条/气槽已移到角色头顶（scripts/overhead_bar.gd），左上角不再有。
 ## 顶栏两角对称收边：左上「得分 → 横线 → 关卡 N」竖排一列，右上「用时 mm:ss
-## → 横线」镜像；BOSS 血条居中，三块共用顶带。
+## → 横线 → 倍率 ×N」镜像（倍率=疾驰档位读数，run_loop.md §2，倍率关时不建）；
+## BOSS 血条居中，共用顶带。
 ## 启动页待机时战斗 UI 整组藏起，进战斗按"横线展开 → 得分/用时滑入 → 关卡数
 ## 半拍跟进 → 帮助跟进"的次序点亮（系统启动感；每进一关重播=关卡数亮相）。
 ## 操作提示按输入设备分文案（手柄/键鼠，热插拔即切；
@@ -22,7 +23,6 @@ const RESULT_RULE_W := 620.0    # 标题下横线宽
 const RESULT_HINT_Y := 228.0    # 呼吸提示顶
 const RESULT_TEXT_SIZE := 28    # 统计行统一字号：单档消灭组间大小不齐（数字满墨/汉字 0.75 只靠明度分层）
 const BREATHE_PERIOD := 1.5     # 提示呼吸周期（与启动页同款）
-const RESULT_INTRO_TIME := 0.86 # 结算入场动画总长（末组统计浮齐）：重开闸从这之后才开，见 _play_result_intro
 const BREATHE_MIN := 0.45       # 呼吸下限（modulate.a）
 
 ## 操作提示只列最简 WASD（单手方案；方向键/空格同样可用但不占提示位）。
@@ -47,10 +47,15 @@ var _stage_home_x := 0.0
 var _time_label: Label
 var _time_home_offsets := Vector2.ZERO # 用时标签右锚偏移(左, 右)：滑入按偏移走，不依赖布局时机
 var _time_rule: ColorRect
+var _mult_label: Label               # 倍率档位读数（疾驰倍率，run_loop.md §2；倍率关=空文本不亮）
+var _mult_home_offsets := Vector2.ZERO # 倍率标签右锚偏移(左, 右)：滑入按偏移走，同用时标签
+var _shown_mult := 0                 # 倍率标签当前显示档（跳变才重绘；涨档闪一下提注意）
+var _mult_pop_tween: Tween
 var _shown_seconds := -1 # 用时标签当前显示的整秒（跳秒才刷新文本）
 var _result_title: Label       # 结算面板（顶部天空带，程序化搭，见 _build_result_ui）
 var _result_rule: ColorRect
-var _result_groups: Array = [] # 统计三组：[组= [字Label, 数Label]]，统一字号只靠明度分层
+var _result_groups: Array = [] # 统计组：[组= [字Label, 数Label]]，统一字号只靠明度分层
+var _loot_group: Array = [] # 拾取清单预备组（§4）：show_result 时有拾取才入列 _result_groups
 var _result_hint: Label
 var _result_tween: Tween
 var _boss_bar: BossBar
@@ -234,11 +239,26 @@ func _build_run_info(font: Font) -> void:
 	_time_rule.pivot_offset = Vector2(SCORE_RULE_WIDTH, 0.0) # 展开动画从右端长出
 	root.add_child(_time_rule)
 
+	# 倍率读数挂在用时横线下（右上组第二行，与左上「关卡」对称）。倍率关=空文本
+	# 照常进战斗 UI 组藏亮（省得各处判空），文本只有 set_mult（开）才写。
+	_mult_label = Label.new()
+	_mult_label.add_theme_font_override("font", font)
+	_mult_label.add_theme_font_size_override("font_size", STAGE_FONT_SIZE)
+	_mult_label.add_theme_color_override("font_color", Color(ink, 0.85))
+	_mult_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_mult_label.anchor_left = 1.0
+	_mult_label.anchor_right = 1.0
+	_mult_label.position = Vector2(-TIME_LABEL_WIDTH - _score_label.position.x,
+			_time_rule.position.y + 10.0)
+	_mult_label.size = Vector2(TIME_LABEL_WIDTH, _stage_label.size.y)
+	_mult_home_offsets = Vector2(_mult_label.offset_left, _mult_label.offset_right)
+	root.add_child(_mult_label)
+
 	_build_result_ui(font)
 
 
 ## 结算面板（顶部天空带，程序化搭同 BOSS UI；免改 7 个关卡场景）。
-## 构图（mock 七章验证过）：居中标题 → 短横线 → 统计三组（得分/关卡/用时，统一
+## 构图（mock 七章验证过）：居中标题 → 短横线 → 统计组（得分/关卡/用时/受击/倍率，统一
 ## 28 号同基线、组间距 64）→ 呼吸提示；整带 y 0..300 都是无天空/远景剪影区，
 ## 不压高架桥、地面与机体。信息与旧 HUD 重复（旧 HUD 已退场）。全平涂无底板；
 ## 字色/线色取本章得分同款（暗场章自动浅色），标题沿用各章结算标题色。
@@ -270,12 +290,20 @@ func _build_result_ui(font: Font) -> void:
 	_result_rule.pivot_offset = Vector2(RESULT_RULE_W * 0.5, 0.0) # 从中心向两侧展开
 	root.add_child(_result_rule)
 
-	# 统计三组「得分 1230 · 关卡 3 · 用时 05:32」：**整行统一 28 号**——大小混排的层级
-	# 试过两轮都被否（孤位大数字挖豁口/分数时长大关卡小=组间不齐），单尺寸从根上
-	# 消灭大小差；数字满墨、汉字 0.75 档只靠明度分层。同一基线、整行水平居中，
-	# 位置在 show_result 时按实际文本宽度现算。
+	# 统计组「得分 1230 · 关卡 3 · 用时 05:32 · 受击 2 · 最高倍率 ×4」：**整行统一 28 号**
+	# ——大小混排的层级试过两轮都被否（孤位大数字挖豁口/分数时长大关卡小=组间不齐），
+	# 单尺寸从根上消灭大小差；数字满墨、汉字 0.75 档只靠明度分层。同一基线、整行水平
+	# 居中，位置在 show_result 时按实际文本宽度现算。后两组=疾驰倍率的局级回执
+	# （run_loop.md §2；反制数待后续进组），倍率关不建（旧制三组）。
+	# 拾取清单（run_loop.md §4 结算回执）另建一组预备着：装备可能在本关中途才捡到，
+	# 建 UI 时还不知道有没有——show_result 时一件没捡就不入列（不占位不留空组）。
 	_result_groups = []
-	for spec: Array in [["得分", "0"], ["关卡", "2"], ["用时", "00:00"]]:
+	var specs: Array = [["得分", "0"], ["关卡", "2"], ["用时", "00:00"]]
+	if BalanceGlobal.MULT_ENABLED:
+		specs.append_array([["受击", "0"], ["最高倍率", "×1"]])
+	if BalanceGlobal.LOOT_ENABLED:
+		specs.append(["拾取", ""])
+	for spec: Array in specs:
 		var segs: Array = []
 		for i in 2:
 			var label := Label.new()
@@ -287,6 +315,8 @@ func _build_result_ui(font: Font) -> void:
 			root.add_child(label)
 			segs.append(label)
 		_result_groups.append(segs)
+	if BalanceGlobal.LOOT_ENABLED:
+		_loot_group = _result_groups.pop_back() # 预备组：不常驻列，show_result 按需入列
 
 	_result_hint = Label.new()
 	_result_hint.add_theme_font_override("font", font)
@@ -303,15 +333,17 @@ func _build_result_ui(font: Font) -> void:
 
 
 ## 结算建立（Main 在 GAME_OVER_DELAY 到点时调）：摆数据 → 播入场
-## （标题下落淡入 → 横线自中心展开 → 统计三组左到右依次上浮），返回入场
+## （标题下落淡入 → 横线自中心展开 → 统计组左到右依次上浮），返回入场
 ## 动画时长——重开提示不随入场出，由 Main 开闸时调 show_restart_hint 同拍点亮
 ## （看见提示=能按，防误触）。progress=RunState.progress_parts()（[标签, 读数]，
-## 「关卡 4/5」/「最终战 2/3」）。
+## 「关卡 4/5」/「最终战 2/3」）。hits/mult_max=疾驰倍率局级回执（受击数/最高倍率，
+## run_loop.md §2；倍率关不展示，传什么都行）。
 ## cleared=true 为通关结算（RUSH 阵容打空，run_loop.md §1）：换标题，不拍
-## gameover 音（暂无通关音，宁缺毋滥）。受击数/反制数/倍率/拾取清单待局内
-## 循环后续部分进组。录制隐藏档 1 起整面板不建（信息 UI，F1 档即隐），返回 0。
+## gameover 音（暂无通关音，宁缺毋滥）。loot=本局拾取清单（RunState.loot_labels()，
+## run_loop.md §4 结算回执；空串=一件没捡，不建组）。反制数待后续进组。
+## 录制隐藏档 1 起整面板不建（信息 UI，F1 档即隐），返回 0。
 func show_result(score: int, progress: PackedStringArray, play_time: float,
-		cleared := false) -> float:
+		cleared := false, hits := 0, mult_max := 1, loot := "") -> float:
 	if RunState.ui_tier >= 1:
 		return 0.0
 	_result_title.text = "作战完成" if cleared else "游戏结束"
@@ -326,6 +358,13 @@ func show_result(score: int, progress: PackedStringArray, play_time: float,
 	_result_groups[1][1].text = progress[1]
 	_result_groups[2][0].text = "用时"
 	_result_groups[2][1].text = format_time(play_time)
+	if BalanceGlobal.MULT_ENABLED:
+		_result_groups[3][1].text = str(hits)
+		_result_groups[4][1].text = "×%d" % mult_max
+	_result_groups.erase(_loot_group) # 拾取组按本局实况入列（重复调用不叠组）
+	if not loot.is_empty() and not _loot_group.is_empty():
+		_loot_group[1].text = loot
+		_result_groups.append(_loot_group)
 	_layout_result_units()
 	for node: CanvasItem in [_result_title, _result_rule, _result_hint]:
 		node.visible = true
@@ -335,19 +374,28 @@ func show_result(score: int, progress: PackedStringArray, play_time: float,
 	_play_result_intro()
 	if not cleared:
 		Sfx.play(&"ui_gameover")
-	return RESULT_INTRO_TIME
+	return _result_intro_time()
 
 
-## 统计三组（得分 1230 · 关卡 3 · 用时 05:32）同一基线水平居中：得分/用时数字 40 号
-## 统计三组（得分 1230 · 关卡 3 · 用时 05:32）整行统一 28 号（数字满墨、汉字 0.75 档，
-## 只靠明度分层），同一基线水平居中。组间距 64 > 段内 8：先分组成一张成绩单。
+## 结算入场动画总长（末组统计浮齐）：重开闸从这之后才开（Main 拿返回值锁闸）。
+## 组数随倍率开关变（旧制三组=0.86s / 带受击+最高倍率五组=1.02s），与
+## _play_result_intro 的时序公式对账（末组 delay 0.3+0.08×(n−1) + 0.4）。
+func _result_intro_time() -> float:
+	return 0.3 + 0.08 * (_result_groups.size() - 1) + 0.4
+
+
+## 统计组（得分 1230 · 关卡 3 · 用时 05:32 · 受击 2 · 最高倍率 ×4）整行统一 28 号
+## （数字满墨、汉字 0.75 档，只靠明度分层），同一基线水平居中。
+## 组间距 64 > 段内 8：先分组成一张成绩单。
 func _layout_result_units() -> void:
 	var group_gap := 64.0
 	var seg_gap := 8.0
 	var font: Font = (_result_groups[0][0] as Label).get_theme_font(&"font")
 	# 单字号下基线天然同线；仍走 ascent 计算定位（字号将来要调也只动常量）。
 	var baseline_y := RESULT_TITLE_Y + 110.0 + font.get_ascent(RESULT_TEXT_SIZE)
-	# 先摆一遍拿真实宽度（隐藏的 Label 尺寸照常随文本长）。
+	# 先摆一遍拿真实宽度：Label 换文本后尺寸是延迟跟随的（同帧读 size 仍是旧文本宽——
+	# 拾取组建 UI 时是空串，不先归位就按 0 宽排，整行被推偏半个清单宽），量前先
+	# reset_size 把尺寸收回到当前文本的最小尺寸。
 	var widths: Array[float] = []
 	var total := 0.0
 	for gi in _result_groups.size():
@@ -356,6 +404,7 @@ func _layout_result_units() -> void:
 		for si in segs.size():
 			if si > 0:
 				w += seg_gap
+			(segs[si] as Label).reset_size()
 			w += (segs[si] as Label).size.x
 		if gi > 0:
 			w += group_gap
@@ -375,8 +424,8 @@ func _layout_result_units() -> void:
 			x += label.size.x
 
 
-## 结算入场：标题自上落位淡入 → 横线自中心展开 → 统计三组左到右依次上浮。
-## 时序须与 RESULT_INTRO_TIME 对账（末组 delay 0.3+0.08×2 + 0.4 = 0.86s）。
+## 结算入场：标题自上落位淡入 → 横线自中心展开 → 统计组左到右依次上浮。
+## 总时长须与 _result_intro_time 对账（末组 delay 0.3+0.08×(n−1) + 0.4）。
 ## 重开提示不在这里出：留到开闸（show_restart_hint）。
 func _play_result_intro() -> void:
 	if _result_tween != null:
@@ -440,7 +489,7 @@ func hide_result() -> void:
 	for node: CanvasItem in [_result_title, _result_rule, _result_hint]:
 		node.visible = false
 		node.modulate.a = 0.0
-	for segs: Array in _result_groups:
+	for segs: Array in _result_groups + [_loot_group]:
 		for node: CanvasItem in segs:
 			node.visible = false
 			node.modulate.a = 0.0
@@ -449,7 +498,8 @@ func hide_result() -> void:
 ## 战斗 UI 整组（启动页藏起、进战斗点亮）。
 func _combat_nodes() -> Array[CanvasItem]:
 	var nodes: Array[CanvasItem] = [
-		_score_label, _score_rule, _stage_label, _time_label, _time_rule, _help_label]
+		_score_label, _score_rule, _stage_label, _time_label, _time_rule,
+		_mult_label, _help_label]
 	return nodes
 
 
@@ -476,6 +526,8 @@ func show_combat_instant() -> void:
 	_time_label.offset_left = _time_home_offsets.x
 	_time_label.offset_right = _time_home_offsets.y
 	_time_rule.scale.x = 1.0
+	_mult_label.offset_left = _mult_home_offsets.x
+	_mult_label.offset_right = _mult_home_offsets.y
 
 
 ## 进战斗启动动画：两角横线同拍展开（左线向右长、右线从右端向左长），得分/用时
@@ -505,6 +557,12 @@ func play_intro() -> void:
 			.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	tw.tween_property(_time_rule, "scale:x", 1.0, 0.4) \
 			.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tw.tween_property(_mult_label, "modulate:a", 1.0, 0.35).set_delay(0.15) \
+			.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tw.tween_property(_mult_label, "offset_left", _mult_home_offsets.x, 0.35).set_delay(0.15) \
+			.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tw.tween_property(_mult_label, "offset_right", _mult_home_offsets.y, 0.35).set_delay(0.15) \
+			.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	tw.tween_property(_stage_label, "modulate:a", 1.0, 0.35).set_delay(0.15) \
 			.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	tw.tween_property(_stage_label, "position:x", _stage_home_x, 0.35).set_delay(0.15) \
@@ -524,6 +582,9 @@ func _prepare_intro_outro() -> void:
 	_time_label.offset_left = _time_home_offsets.x + SCORE_SLIDE
 	_time_label.offset_right = _time_home_offsets.y + SCORE_SLIDE
 	_time_rule.scale.x = 0.0
+	_mult_label.modulate.a = 0.0
+	_mult_label.offset_left = _mult_home_offsets.x + SCORE_SLIDE
+	_mult_label.offset_right = _mult_home_offsets.y + SCORE_SLIDE
 	_help_label.modulate.a = 0.0
 
 
@@ -550,6 +611,12 @@ func play_outro() -> void:
 	tw.tween_property(_time_label, "offset_left", _time_home_offsets.x + SCORE_SLIDE, 0.3) \
 			.set_delay(0.08).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
 	tw.tween_property(_time_label, "offset_right", _time_home_offsets.y + SCORE_SLIDE, 0.3) \
+			.set_delay(0.08).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+	tw.tween_property(_mult_label, "modulate:a", 0.0, 0.3).set_delay(0.08) \
+			.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+	tw.tween_property(_mult_label, "offset_left", _mult_home_offsets.x + SCORE_SLIDE, 0.3) \
+			.set_delay(0.08).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+	tw.tween_property(_mult_label, "offset_right", _mult_home_offsets.y + SCORE_SLIDE, 0.3) \
 			.set_delay(0.08).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
 	tw.tween_property(_time_rule, "scale:x", 0.0, 0.35).set_delay(0.1) \
 			.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
@@ -581,6 +648,24 @@ func set_play_time(seconds: float) -> void:
 		return
 	_shown_seconds = whole
 	_time_label.text = "用时 " + format_time(seconds)
+
+
+## 倍率档位读数（Main 每帧喂 RunState.multiplier()，跳档才动文本）。涨档闪一下
+## 提注意——档位=刷怪密度档，「怪变凶的因」在这里可见；掉档是负反馈不庆祝，
+## 安静回落。倍率关/Main 没喂过=不亮（空文本）。开场首喂（0→1）不算涨档。
+func set_mult(tier: int) -> void:
+	if not BalanceGlobal.MULT_ENABLED or tier == _shown_mult:
+		return
+	var rose := tier > _shown_mult and _shown_mult > 0
+	_shown_mult = tier
+	_mult_label.text = "倍率 ×%d" % tier
+	if rose and _mult_label.visible:
+		if _mult_pop_tween != null:
+			_mult_pop_tween.kill()
+		_mult_label.modulate.a = 0.3
+		_mult_pop_tween = create_tween()
+		_mult_pop_tween.tween_property(_mult_label, "modulate:a", 1.0, 0.3) \
+				.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 
 
 ## 正计时读数 mm:ss（分钟不封顶：一小时以上读作 75:12）。

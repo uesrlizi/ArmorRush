@@ -9,6 +9,15 @@
 [ext_resource type="Script" uid="uid://bpkk5im4wjcam" path="res://scripts/units/overhead_bar.gd" id="7"]
 [ext_resource type="PackedScene" path="res://scenes/fx/ground_sparks.tscn" id="8"]
 [ext_resource type="Texture2D" uid="uid://ue5pjr78qlte" path="res://assets/common/player_mech_user_nozzle.svg" id="9"]
+[ext_resource type="Script" uid="uid://c0gateksqjggt" path="res://scripts/player/leg_ik.gd" id="10"]
+[ext_resource type="Texture2D" uid="uid://3ldqflqn3wi2" path="res://assets/common/player_mech_user_leg_far_thigh.svg" id="11"]
+[ext_resource type="Texture2D" uid="uid://ccvegm27vl3v7" path="res://assets/common/player_mech_user_leg_far_shin.svg" id="12"]
+[ext_resource type="Texture2D" uid="uid://dmlegms47e4bh" path="res://assets/common/player_mech_user_leg_near_thigh.svg" id="13"]
+[ext_resource type="Texture2D" uid="uid://dnit1q5hy2xoe" path="res://assets/common/player_mech_user_leg_far_foot.svg" id="14"]
+[ext_resource type="Texture2D" uid="uid://b3jguo1gty0fs" path="res://assets/common/player_mech_user_leg_near_foot.svg" id="15"]
+[ext_resource type="Texture2D" uid="uid://5qpahvni2klm" path="res://assets/common/player_mech_user_leg_near_shin.svg" id="16"]
+[ext_resource type="Texture2D" path="res://assets/common/shield_ring.svg" id="17"]
+[ext_resource type="Texture2D" path="res://assets/common/shoulder_pod.svg" id="18"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
 size = Vector2(40, 60)
@@ -28,6 +37,12 @@ script = ExtResource("3")
 [node name="SlashNear" type="Node2D" parent="Visuals/SlashRoot" unique_id=1453486963]
 script = ExtResource("3")
 
+[node name="ShieldRing" type="Sprite2D" parent="Visuals"]
+visible = false
+position = Vector2(3, -2)
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("17")
+
 [node name="NozzlePivot" type="Node2D" parent="Visuals" unique_id=1997803361]
 position = Vector2(-17.820473, -13)
 
@@ -42,7 +57,7 @@ rotation = 0.61086524
 scale = Vector2(0.7, 1)
 
 [node name="LegThruster" parent="Visuals" unique_id=1985387049 instance=ExtResource("6")]
-position = Vector2(-9.279721, 21.648956)
+position = Vector2(-2.7797232, 21.648956)
 rotation = 1.5707963
 scale = Vector2(0.5, 0.8)
 
@@ -50,6 +65,71 @@ scale = Vector2(0.5, 0.8)
 position = Vector2(6.94597, 1.5540298)
 rotation = -1.5707963
 scale = Vector2(0.5, 0.8)
+
+[node name="LegRig" type="Node2D" parent="Visuals" unique_id=21877703]
+script = ExtResource("10")
+
+[node name="FootFar" type="Sprite2D" parent="Visuals/LegRig" unique_id=477265430]
+position = Vector2(6.499998, 0)
+scale = Vector2(0.5833333, 0.5833333)
+texture = ExtResource("14")
+
+[node name="HipFar" type="Node2D" parent="Visuals/LegRig" unique_id=1821291534]
+position = Vector2(-3.125002, 2.0417)
+
+[node name="Thigh" type="Sprite2D" parent="Visuals/LegRig/HipFar" unique_id=1700962388]
+position = Vector2(9.625, -2.0417)
+scale = Vector2(0.5833333, 0.5833333)
+texture = ExtResource("11")
+
+[node name="KneeFar" type="Node2D" parent="Visuals/LegRig/HipFar" unique_id=27504095]
+position = Vector2(2.0417, 11.6667)
+
+[node name="Shin" type="Sprite2D" parent="Visuals/LegRig/HipFar/KneeFar" unique_id=70778911]
+position = Vector2(7.5833, -13.7083)
+scale = Vector2(0.5833333, 0.5833333)
+texture = ExtResource("12")
+
+[node name="AnkleFar" type="Marker2D" parent="Visuals/LegRig/HipFar/KneeFar" unique_id=1621424944]
+position = Vector2(-3.9667, 12.25)
+
+[node name="FootNear" type="Sprite2D" parent="Visuals/LegRig" unique_id=1995407127]
+position = Vector2(6.499998, 0)
+scale = Vector2(0.5833333, 0.5833333)
+texture = ExtResource("15")
+
+[node name="HipNear" type="Node2D" parent="Visuals/LegRig" unique_id=1371125662]
+position = Vector2(2.159998, 2.0417)
+
+[node name="Thigh" type="Sprite2D" parent="Visuals/LegRig/HipNear" unique_id=1606410687]
+position = Vector2(4.34, -2.0417)
+scale = Vector2(0.5833333, 0.5833333)
+texture = ExtResource("13")
+
+[node name="KneeNear" type="Node2D" parent="Visuals/LegRig/HipNear" unique_id=281996488]
+position = Vector2(2.0417, 11.6667)
+
+[node name="Shin" type="Sprite2D" parent="Visuals/LegRig/HipNear/KneeNear" unique_id=1834545360]
+position = Vector2(2.2983, -13.7083)
+scale = Vector2(0.5833333, 0.5833333)
+texture = ExtResource("16")
+
+[node name="AnkleNear" type="Marker2D" parent="Visuals/LegRig/HipNear/KneeNear" unique_id=297054672]
+position = Vector2(-3.9667, 12.25)
+
+[node name="ShoulderPod" type="Node2D" parent="Visuals"]
+visible = false
+position = Vector2(-6, -35)
+
+[node name="Sprite2D" type="Sprite2D" parent="Visuals/ShoulderPod"]
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("18")
+
+[node name="Muzzle" type="Marker2D" parent="Visuals/ShoulderPod"]
+position = Vector2(17, -0.5)
+
+[node name="Flash" parent="Visuals/ShoulderPod/Muzzle" instance=ExtResource("4")]
+scale = Vector2(0.6, 0.6)
 
 [node name="Sprite2D" type="Sprite2D" parent="Visuals" unique_id=1108497758]
 position = Vector2(6.1795273, 0)
@@ -69,9 +149,16 @@ position = Vector2(42.06, 11.69)
 [node name="Flash" parent="Visuals/ArmPivot/Muzzle" unique_id=96916808 instance=ExtResource("4")]
 
 [node name="SlideSparks" parent="Visuals" unique_id=1395716773 instance=ExtResource("8")]
-position = Vector2(-0.96788025, 29.67007)
+position = Vector2(5.532118, 29.67007)
+
+[node name="FootAnchorFar" type="Marker2D" parent="Visuals" unique_id=911725362]
+position = Vector2(-5.050002, 30.275)
+
+[node name="FootAnchorNear" type="Marker2D" parent="Visuals" unique_id=1439335208]
+position = Vector2(0.23499823, 30.275)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1055136549]
+visible = false
 shape = SubResource("RectangleShape2D_1")
 
 [node name="MeleeHitbox" type="Area2D" parent="." unique_id=2087817626]

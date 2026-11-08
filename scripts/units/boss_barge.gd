@@ -304,7 +304,8 @@ func _reset_warnings() -> void:
 ## ---- 二阶段数值 ----
 
 func _slag_count() -> int:
-	return BalanceWorld2.BARGE_SLAG_COUNT + (BalanceWorld2.BARGE_PHASE2_SLAG_BONUS if _phase2 else 0)
+	return BalanceWorld2.BARGE_SLAG_COUNT + (BalanceWorld2.BARGE_PHASE2_SLAG_BONUS if _phase2 else 0) \
+			+ RunState.ladder_bullets_extra()
 
 
 func _burst() -> int:

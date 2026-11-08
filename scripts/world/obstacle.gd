@@ -25,8 +25,16 @@ func _ready() -> void:
 func on_spawned() -> void:
 	super()
 	despawn_margin = BalanceGlobal.OBSTACLE_DESPAWN_MARGIN # 宽体平台：出画面后再留半屏余量
+	# 右缘同款余量：玩家往左跑远时一并清掉——否则回头时刷怪欠账已封顶，新平台
+	# 会刷在仍留在原地的旧平台附近（障碍之间不做重叠检测）叠成一摞。
+	right_despawn_margin = BalanceGlobal.OBSTACLE_DESPAWN_MARGIN
 	add_to_group("obstacles")
 	_rebuild_piers()
+
+
+## 障碍参与右缘回收（出生点左缘距右缘仅 ~120..200，半屏余量不会误清新刷的）。
+func _despawn_past_right() -> bool:
+	return true
 
 
 ## 断桥桥墩：一根超长矩形插到地面之下，画在主场景 BridgePiers 层

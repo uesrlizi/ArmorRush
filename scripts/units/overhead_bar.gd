@@ -49,13 +49,13 @@ func _draw_player(player: Player) -> void:
 	# 启动页待机空场不挂牌（modulate 淡入由 Player.play_ignition 管）。
 	if player.is_dead() or not player.input_enabled:
 		return
-	var w := BalanceGlobal.HP_BAR_PLAYER_WIDTH
+	var w := player.bar_width() # 装甲装备=条加宽（§4 装甲槽通道），无装备=出厂宽
 	var y := BalanceGlobal.HP_BAR_PLAYER_OFFSET_Y
 	_bar(-w * 0.5, y, w, BalanceGlobal.HP_BAR_HEIGHT, clampf(float(player.hp) / float(player.max_hp), 0.0, 1.0),
 			BalanceGlobal.HP_BAR_PLAYER_COLOR)
 	_bar(-w * 0.5, y + BalanceGlobal.HP_BAR_HEIGHT + BalanceGlobal.BOOST_BAR_GAP, w, BalanceGlobal.BOOST_BAR_HEIGHT,
-			clampf(player.boost / BalancePlayer.BOOST_CAPACITY, 0.0, 1.0), BalanceGlobal.HP_BAR_BOOST_COLOR,
-			false, true) # 气槽：不掉血无虚影；从中心向两边填充
+			clampf(player.boost / player.boost_capacity(), 0.0, 1.0), BalanceGlobal.HP_BAR_BOOST_COLOR,
+			false, true) # 气槽：不掉血无虚影；从中心向两边填充（容量走有效值：背推装备可扩容）
 
 
 func _draw_enemy(enemy: Enemy) -> void:

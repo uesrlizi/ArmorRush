@@ -22,6 +22,13 @@ var _current: Node = null # 当前落地场景（等下一跳转场时对照用�
 
 func _ready() -> void:
 	_t0 = Time.get_ticks_msec()
+	# 疾驰倍率冻结（run_loop.md §2）：倍率跨关保持后「每关得分=BOSS_SCORE×关序」
+	# 不再成立（第 2 关起按携带档结账）；本探针验的是转场账不是倍率账，冻结回
+	# 旧公式账最稳（倍率公式归 probe_run_loop G 段纯逻辑验）。
+	RunState.mult_frozen = true
+	# 装备掉落冻结（run_loop.md §4）：真实路径杀 BOSS 会爆装备——装甲板抬血量上限后
+	# 「每关满血=PLAYER_MAX_HP」断言不再成立；本探针验转场账，冻结回出厂账。
+	RunState.loot_frozen = true
 	_setup.call_deferred() # 场景装载期内 root 忙，deferred 一拍再动
 
 

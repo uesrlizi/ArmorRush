@@ -123,7 +123,8 @@ func _launch_ticker(delta: float) -> void:
 
 func _skip_count() -> int:
 	return BalanceWorld7.ANCHOR_SKIP_COUNT \
-			+ (BalanceWorld7.ANCHOR_PHASE2_SKIP_BONUS if _phase2 else 0)
+			+ (BalanceWorld7.ANCHOR_PHASE2_SKIP_BONUS if _phase2 else 0) \
+			+ RunState.ladder_bullets_extra()
 
 
 func _skip_stagger() -> float:
@@ -144,7 +145,7 @@ func _begin_skill_b() -> void:
 ## 在往海里丢东西）；弹体走地形后方容器（"sea_props_container"=坠入桥后海面，
 ## 不穿桥面）；首枚出舱时启动涌浪（lead=落海+引信：闷爆之后开始涨潮）。
 func _launch_charges(delta: float) -> void:
-	if _charges_launched >= BalanceWorld7.ANCHOR_CHARGE_COUNT:
+	if _charges_launched >= BalanceWorld7.ANCHOR_CHARGE_COUNT + RunState.ladder_bullets_extra():
 		return
 	_launch_t -= delta
 	if _launch_t > 0.0:
@@ -215,7 +216,8 @@ func _tick_attack(delta: float) -> void:
 				_bstate = ST_SURGE_DROP
 				_charges_launched = 0
 				_launch_t = 0.0
-				_bt = (BalanceWorld7.ANCHOR_CHARGE_COUNT - 1) * BalanceWorld7.ANCHOR_CHARGE_STAGGER \
+				_bt = (BalanceWorld7.ANCHOR_CHARGE_COUNT + RunState.ladder_bullets_extra() - 1) \
+						* BalanceWorld7.ANCHOR_CHARGE_STAGGER \
 						+ _charge_fall() + BalanceWorld7.DEPTH_CHARGE_FUSE \
 						+ BalanceWorld7.SEA_SURGE_SWELL + BalanceWorld7.SEA_SURGE_RISE \
 						+ BalanceWorld7.SEA_SURGE_HOLD + 0.4 # 全事件链窗口

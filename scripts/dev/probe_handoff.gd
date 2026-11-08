@@ -102,8 +102,9 @@ class Runner extends Node:
 
 		# ---- 第一次章末交接：走 main._on_boss_defeated 原路径 ----
 		player.hp = 99999 # 交接窗口里杂兵蹭血别打死玩家（死亡会取消切场景）
+		RunState.loot_frozen = true # 本探针验交接连续性，不掉装备（run_loop.md §4）
 		var old_scene := get_tree().current_scene
-		old_scene.call("_on_boss_defeated")
+		old_scene.call("_on_boss_defeated", player.global_position)
 		var waited := await _await_scene_switch(old_scene)
 		_check(get_tree().current_scene != old_scene, "A1 scene switched",
 				"waited=%.1fs" % waited)
@@ -140,7 +141,7 @@ class Runner extends Node:
 		Input.action_press("jump", 1.0)
 		player2.hp = 99999
 		var old_scene2 := get_tree().current_scene
-		old_scene2.call("_on_boss_defeated")
+		old_scene2.call("_on_boss_defeated", player2.global_position)
 		await _await_scene_switch(old_scene2)
 		await _wait(0.15)
 		var player3 := _player()
