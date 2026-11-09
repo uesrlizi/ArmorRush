@@ -13,6 +13,8 @@ extends Node2D
 ## 身上接不住它（消失承接规范 design/worlds.md §4c）。
 
 const CHIP_TEXTURE := preload("res://assets/common/loot_chip.svg")
+const CHIP_SCALE := 0.46   # 芯片框缩放（贴图 128 画布 → 逻辑 59：底板 43、白边 50，约机体高 0.8）
+const GLYPH_SIZE := 33.0   # 芯片上槽位图标边长（逻辑 px；底板 43 的 3/4，四周留边）
 const POP_IN_TIME := 0.24 # 芯片亮相回弹（出生一拍）
 
 var member := &"" # 装备成员 id（setup 赋值）
@@ -35,10 +37,12 @@ func _ready() -> void:
 	add_to_group("loot_pickups") # 转场兜底按组就地授予
 	var chip := Sprite2D.new()
 	chip.texture = CHIP_TEXTURE
+	chip.scale = Vector2.ONE * CHIP_SCALE
 	chip.self_modulate = BalanceMods.MEMBERS[member]["tint"]
 	add_child(chip)
 	_glyph = Sprite2D.new()
 	_glyph.texture = LootIcons.glyph_of(member)
+	_glyph.scale = Vector2.ONE * GLYPH_SIZE / float(_glyph.texture.get_width())
 	_glyph.self_modulate = BalanceMods.MEMBERS[member]["tint"]
 	add_child(_glyph)
 	# 亮相回弹一拍（出生即满屏弹跳读法不成立：芯片是小牌，弹跳=二次弹出误读）。
