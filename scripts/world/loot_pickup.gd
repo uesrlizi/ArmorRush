@@ -99,6 +99,9 @@ func _grant(player: Player) -> void:
 	player.apply_mod(member)
 	Sfx.play(&"pickup")
 	_spawn_grant_flash(player)
+	# 芯片+字形出残影原地快淡：转场兜底授予时芯片可能离玩家很远，授予闪光在
+	# 玩家身上接不住它（消失承接规范 design/worlds.md §4c）
+	VanishGhost.spawn_tree(self)
 	queue_free()
 
 

@@ -261,7 +261,7 @@ func roll_loot() -> StringName:
 
 
 ## 一台 BOSS 的掉落（爆率 LOOT_DROP_CHANCE × 掉落表）：掷不中或全持有返回 &""。
-## 开关与 dev 冻结闸在调用方（Main._spawn_loot）；掷骰同走 _rng。
+## 开关与 dev 冻结闸在调用方（Main._roll_loot）；掷骰同走 _rng。
 func roll_drop() -> StringName:
 	if _rng.randf() >= BalanceGlobal.LOOT_DROP_CHANCE:
 		return &""

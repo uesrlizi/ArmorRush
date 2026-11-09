@@ -24,12 +24,13 @@ var pool_lifetime := 2.8
 var _vel := Vector2.ZERO
 var _terrain: Terrain
 var _trail: Node2D
+var _body: Sprite2D
 
 
 func _ready() -> void:
-	var sprite := Sprite2D.new()
-	sprite.texture = BODY_TEXTURE
-	add_child(sprite)
+	_body = Sprite2D.new()
+	_body.texture = BODY_TEXTURE
+	add_child(_body)
 	_trail = TRAIL.instantiate()
 	_trail.position = Vector2(-10.0, 0.0) # 弹尾（随弹体旋转，永远在速度反侧）
 	add_child(_trail)
@@ -77,6 +78,7 @@ func _detonate() -> void:
 				(p as GPUParticles2D).emitting = false
 		if container != null:
 			_trail.reparent(container)
+			_trail.reset_physics_interpolation() # 过继后清补间基点（否则整条尾从原点补间一步=闪一帧）
 			get_tree().create_timer(0.8).timeout.connect(_trail.queue_free)
 	if container != null:
 		if splash and damage > 0:
@@ -92,9 +94,13 @@ func _detonate() -> void:
 			pool.lifetime = pool_lifetime
 			pool.position = at
 			container.add_child(pool)
-		var boom := EXPLOSION.instantiate() as Node2D
+		var boom := EXPLOSION.instantiate() as ExplosionBurst
 		boom.scale = Vector2(1.5, 1.5) if splash else Vector2(0.9, 0.9)
 		boom.position = at + Vector2(0.0, -14.0) # 容器在原点，position 即全局位
+		# 白闪起跳半径=弹体面积折算（无溅射精英弹 ×0.9 的原版白闪首帧只有 ~8px，接不住
+		# 32x16 弹体；面积承接，design/worlds.md §4c）
+		boom.cover_radius = ExplosionBurst.area_cover_radius(
+				ExplosionBurst.sprite_area(_body)) / boom.scale.x
 		container.add_child(boom)
 	Sfx.play(&"boom_enemy")
 	var player := get_tree().get_first_node_in_group("player") as Player

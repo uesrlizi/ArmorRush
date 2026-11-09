@@ -53,12 +53,15 @@ color_ramp = SubResource("gtex_ember")
 
 [node name="MortarTrail" type="Node2D"]
 
+; 剔除框放大到拖尾全长：粒子留在世界空间（local_coords=false），重弹 1000px/s
+; 拖出的尾长 ~400px，默认 ±100 框跟着弹头走——弹头一出屏整条尾巴连屏内段一起被剔
 [node name="Smoke" type="GPUParticles2D" parent="."]
 emitting = true
 amount = 40
 lifetime = 0.4
 local_coords = false
 fixed_fps = 0
+visibility_rect = Rect2(-600, -600, 1200, 1200)
 texture = ExtResource("1")
 process_material = SubResource("pm_smoke")
 
@@ -69,5 +72,6 @@ amount = 18
 lifetime = 0.35
 local_coords = false
 fixed_fps = 0
+visibility_rect = Rect2(-600, -600, 1200, 1200)
 texture = ExtResource("2")
 process_material = SubResource("pm_ember")

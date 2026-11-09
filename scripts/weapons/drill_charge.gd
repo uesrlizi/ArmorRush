@@ -110,13 +110,14 @@ func _plant(surface: float) -> void:
 		var container0 := get_tree().get_first_node_in_group("projectile_container")
 		if container0 != null:
 			_trail.reparent(container0)
+			_trail.reset_physics_interpolation() # 过继后清补间基点（否则整条尾从原点补间一步=闪一帧）
 			get_tree().create_timer(0.8).timeout.connect(_trail.queue_free)
 		_trail = null
 	var container := get_tree().get_first_node_in_group("projectile_container")
 	if container != null:
 		var dust := PLANT_DUST.instantiate() as Node2D
+		dust.position = Vector2(global_position.x, surface - 4.0) # 先定位再入树（OneShotFx 规矩）
 		container.add_child(dust)
-		dust.position = Vector2(global_position.x, surface - 4.0)
 	Sfx.play(&"hit_deflect") # 占位：凿岩落定暂用弹开声
 
 
@@ -125,9 +126,12 @@ func target_y_fallback() -> float:
 
 
 ## 起爆：一次性球爆（无驻留区），爆心贴地；判定归 GroundBlast（爆区闪
-## 关掉——硬边大盘判丑），视觉全权归 RedBurst 五层平涂爆裂。
+## 关掉——硬边大盘判丑），视觉全权归 RedBurst 五层平涂爆裂。装药+灯晕出残影
+## 原地快淡（星闪实心芯 ~7px 接不住 24x46 弹体，消失承接规范 design/worlds.md §4c）。
 func _detonate() -> void:
 	_popped = true
+	VanishGhost.spawn(_visual)
+	VanishGhost.spawn(_lamp)
 	var surface := _terrain.surface_y_at(global_position.x) \
 			if _terrain != null else global_position.y
 	var at := Vector2(global_position.x, surface - 8.0)

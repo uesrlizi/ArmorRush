@@ -75,12 +75,17 @@ func _spawn(root: Node2D, e: Dictionary) -> void:
 	var n: Node = e.mk.call()
 	if n == null:
 		return
-	root.add_child(n)
+	# 先定位再入树（同游戏内出生规矩）：全局物理插值下入树后再挪，首个物理步会
+	# 从页面原点补间扫过来=满屏闪现；钉位件（枪口焰/预警）的 _ready 也读到原点。
 	if n is Node2D:
 		(n as Node2D).position = e.pos
+	root.add_child(n)
 	var af: Callable = e.get("af", Callable())
 	if not af.is_null():
 		af.call(n, e.pos)
+	# af 里可能再挪（launch/涌浪归零等）：当帧写定的变换一律当补间基点。
+	if n is Node2D:
+		(n as Node2D).reset_physics_interpolation()
 
 
 func _label(root: Node2D, pos: Vector2, text: String) -> void:
@@ -231,6 +236,15 @@ func _af_bullet(n: Node, _pos: Vector2, speed: float) -> void:
 	var m = n
 	m.speed = speed
 	m.setup(Vector2.LEFT, Vector2.ZERO)
+
+
+## 排炮重弹：BOSS 朝玩家**出手瞬间**位置点放——预览按「玩家站在左前方路面」瞄，
+## 落空的弹沿原线扎进地表（命中爆、拖尾过继淡完都在页内）。
+func _af_slug(n: Node, pos: Vector2) -> void:
+	var m = n
+	var tx := pos.x - 1100.0
+	m.speed = BalanceWorld2.BARGE_SLUG_SPEED
+	m.setup(pos.direction_to(Vector2(tx, _terrain.surface_y_at(tx) - 50.0)), Vector2.ZERO)
 
 
 ## 斗轮抛石：bullet.gd 抛体语法——按 BOSS 档重力解初速，落到左前方 1300px 的地表
@@ -473,7 +487,7 @@ func _build_pages() -> Array:
 			"lpos": Vector2(250, 540), "period": 2.6, "mk": _mk_mortar, "af": _af_mortar},
 		{"label": "排炮重弹(普攻·慢速熔渣大弹)", "pos": Vector2(2400, 300), "period": 2.0,
 			"mk": _mk_scene.bind("res://scenes/weapons/slag_slug.tscn"),
-			"af": _af_bullet.bind(BalanceWorld2.BARGE_SLUG_SPEED)},
+			"af": _af_slug},
 		{"label": "敌人击毁", "pos": Vector2(cols[3], 596), "period": 3.0,
 			"mk": _mk_enemy.bind("res://scenes/units/enemy_2.tscn"),
 			"af": _af_enemy},

@@ -30,7 +30,7 @@ const HEAVY_MISSILE_THROW_SPEED := 800.0 # 上抛初速大小（px/s，独立于
 const HEAVY_MISSILE_COAST_GRAVITY := 2600.0 # 滑行段重力（px/s²）：拉弧的急缓
 const HEAVY_MISSILE_COAST_TIME := 0.2   # 滑行时长（秒）：到点开机点火（不等过顶）
 const HEAVY_MISSILE_PN_N := 3.5         # 比例导引导航比 N：转向率=N×视线角速度
-const HEAVY_BLAST_LINGER := 0.25      # 爆炸闪光驻留（纯视觉，伤害只在引爆帧结算）
+const HEAVY_BLAST_LINGER := 0.25      # 爆炸判定件驻留下限（纯视觉，伤害只在引爆帧结算；爆闪子件播完前不清，闪光时长归 FlashBurst）
 # ---- 失衡（AC6 式冲击/STAGGER：枪射打满失衡→BOSS 瘫住→近战砍） ----
 # 枪弹冲击注入远超衰减——**持续射击就能打满失衡**；停止受击宽限一段时间后
 # 冲击才开始掉（掉速快，断了节奏就前功尽弃）。失衡恢复后有一段免疫期攒不了，
@@ -98,3 +98,7 @@ const MORTAR_GRAVITY := 4000.0        # ≈4×玩家重力：弧快不掉速，�
 const KILL_SHAKE_STRENGTH := 6.0  # 击毁镜头震动幅度（近战命中 7，这里略低）
 const KILL_HITSTOP_TIME := 0.04   # 击毁顿帧时长（真实时间）
 const KILL_HITSTOP_SCALE := 0.15  # 击毁顿帧时间流速（比近战顿帧温和）
+# BOSS 击退演出：错峰小爆炸链（0~0.72s）放完 → 终爆（击毁爆炸模板 ×SCALE）把整机盖过去，
+# 本体在终爆那一帧炸没，装备掉落同拍爆出（boss.gd/pursuit_boss.gd 与 Main 读同一时刻）
+const BOSS_DEATH_FINALE_TIME := 0.9  # 终爆时刻（击杀起算，秒）
+const BOSS_DEATH_FINALE_SCALE := 2.5 # 终爆尺寸倍率

@@ -10,8 +10,12 @@ extends Area2D
 ##（成员名带 lob_ 前缀：Area2D 原生就有 gravity 属性，裸名会撞成重定义解析错。）
 
 const IMPACT_BURST := preload("res://scenes/fx/impact_burst.tscn")
+const GHOST_TIME := 0.05 # 弹体消失残影时长（细弹两帧内收完，不读成「弹停住」）
 
 @export var max_lifetime := 5.0
+## 命中特效覆写（重弹系 slag_slug/salt_bolt 在场景里指 heavy_impact.tscn）：弹体大，
+## 通用小迸溅接不住弹体的消失；空=通用 ImpactBurst + 弹体残影。
+@export var impact_scene: PackedScene
 
 var speed := 700.0
 var damage := 10
@@ -74,7 +78,11 @@ func _physics_process(delta: float) -> void:
 	else:
 		position += (_direction * speed + _inherit) * delta
 	_lifetime += delta
-	if _lifetime > max_lifetime or _is_offscreen():
+	var offscreen := _is_offscreen()
+	if _lifetime > max_lifetime or offscreen:
+		if not offscreen:
+			_vanish_ghost() # 屏内寿终：原地淡出（屏外消失豁免）
+		_release_trail()
 		queue_free()
 
 
@@ -126,6 +134,7 @@ func _is_offscreen() -> bool:
 
 
 func _on_body_entered(body: Node2D) -> void:
+	_vanish_ghost() # 先出残影：命中迸溅后入树，画在残影之上
 	# 命中声分账：敌人/玩家各自发自己的受击声，这里只管打在地形/障碍上。
 	if body.has_method("take_damage"):
 		body.take_damage(damage)
@@ -136,10 +145,12 @@ func _on_body_entered(body: Node2D) -> void:
 		_spawn_impact(global_position)
 	else:
 		_spawn_impact(global_position, true)
+	_release_trail()
 	queue_free()
 
 
 func _on_area_entered(area: Area2D) -> void:
+	_vanish_ghost()
 	if area.has_method("take_damage"):
 		area.take_damage(damage)
 		if area.has_method("add_impact"):
@@ -147,14 +158,54 @@ func _on_area_entered(area: Area2D) -> void:
 		if area.has_method("apply_knockback"):
 			area.apply_knockback(_direction * BalanceEnemy.ENEMY_KNOCKBACK_GUN * knockback_scale)
 	_spawn_impact(_impact_point(area))
+	_release_trail()
 	queue_free()
+
+
+## 弹体消失承接（design/worlds.md §4c）：重弹由 impact_scene 的命中爆接住；其余弹种
+## 出短残影原地淡出——通用迸溅首帧只有 ~3px，接不住 22~30px 的弹体。
+func _vanish_ghost() -> void:
+	if impact_scene == null:
+		VanishGhost.spawn(_sprite, GHOST_TIME)
+
+
+## 拖尾过继（重弹系：弹体场景自带 Trail=mortar_trail 双层烟+火星）：命中/出界/寿终
+## 时断流、过继弹容器，按粒子寿命淡完再清——同臼炮/导弹拉烟收尾惯例。留在弹体下
+## 会随 queue_free 整条瞬灭（撞墙那帧弹+尾整团消失）。
+func _release_trail() -> void:
+	var trail := get_node_or_null("Trail")
+	if trail == null:
+		return
+	var container := get_tree().get_first_node_in_group("projectile_container")
+	if container == null:
+		return
+	var life := 0.0
+	for p in trail.get_children():
+		if p is GPUParticles2D:
+			(p as GPUParticles2D).emitting = false
+			life = maxf(life, (p as GPUParticles2D).lifetime)
+	trail.reparent(container)
+	# reparent=先入新父（插值基点落在旧局部位≈世界原点）再改回全局变换：不清基点，
+	# 整条尾巴会从原点补间一个物理步——画面上表现为命中瞬间拖尾消失一帧/横扫闪过。
+	trail.reset_physics_interpolation()
+	get_tree().create_timer(life + 0.1).timeout.connect(trail.queue_free)
 
 
 ## 命中迸溅：火花沿弹道反向回溅，生成在弹容器里（不随子弹销毁）。
 ## 出膛后飞满 BULLET_IMPACT_MIN_TRAVEL 才喷：贴脸撞墙时不在枪口上开花——
 ## 枪口焰是挂在 Muzzle 下的子节点（跟着枪走），落世界空间的是迸溅。
 ## world=true 表示打在无生命地形上，补一记轻弹着声（节流在 Sfx 音库里管）。
+## 场景配了 impact_scene（重弹）则换成命中爆：不吃最小飞行距离闸（弹体大，任何
+## 命中都得有东西接住它的消失），弹着声换爆炸声。
 func _spawn_impact(at: Vector2, world := false) -> void:
+	if impact_scene != null:
+		var container0 := get_tree().get_first_node_in_group("projectile_container")
+		if container0 != null:
+			var fx := impact_scene.instantiate() as Node2D
+			fx.position = at # 先定位再入树（一发粒子在 _ready 整批出生）
+			container0.add_child(fx)
+		Sfx.play(&"boom_enemy")
+		return
 	if _started and global_position.distance_to(_spawn_pos) < BalancePlayer.BULLET_IMPACT_MIN_TRAVEL:
 		return
 	if world:

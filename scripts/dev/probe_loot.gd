@@ -200,8 +200,12 @@ class Runner extends Node:
 		var old_scene := get_tree().current_scene
 		player.hp = 99999 # 转场窗口里别被残弹打死（死亡会取消切场景）
 		(boss as Enemy).take_damage(99999, true)
+		# 掉落跟 BOSS 终爆同拍爆出（击杀后 BOSS_DEATH_FINALE_TIME）：小爆炸链期间不该有
 		await _wait(0.2)
-		_check(get_tree().get_nodes_in_group("loot_pickups").size() == 1, "E1 真实击杀路径掉落（种子定中）")
+		_check(get_tree().get_nodes_in_group("loot_pickups").is_empty(), "E1a 小爆炸链期间未掉（等终爆）")
+		await _wait(BalanceCombat.BOSS_DEATH_FINALE_TIME)
+		_check(get_tree().get_nodes_in_group("loot_pickups").size() == 1,
+				"E1 真实击杀路径掉落（种子定中，终爆那一拍爆出）")
 		var waited := 0.0
 		while get_tree().current_scene == old_scene and waited < 6.0:
 			await _wait(0.1)

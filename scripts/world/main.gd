@@ -161,9 +161,21 @@ func _on_restart_requested() -> void:
 func _on_boss_defeated(at: Vector2) -> void:
 	if RunState.hold_chapter:
 		return
-	_spawn_loot(at) # 掉落在击杀瞬出生成：磁吸收包与 1.7s 转场窗口赛跑，转场前再兜底
+	# 掉落击杀瞬掷定、BOSS 终爆那一拍爆出（装备从终爆里炸出来）；定时器与
+	# boss.gd/pursuit_boss.gd 的终爆同签名=同受顿帧时间缩放，严格同拍。
+	var member := _roll_loot()
+	if not member.is_empty():
+		get_tree().create_timer(BalanceCombat.BOSS_DEATH_FINALE_TIME).timeout.connect(
+			func() -> void:
+				if not _player.is_dead():
+					spawn_loot_drop(member, at))
 	_spawner.stop() # 转场窗口不再补怪（场上残敌照常行动，跑酷不断）
-	get_tree().create_timer(BalanceGlobal.CHAPTER_CLEAR_DELAY, true, false, true).timeout.connect(
+	# 有掉落：转场窗口放到「终爆+最坏到手用时+一拍」之后，让芯片飞完再切（兜底仍在）
+	var delay := BalanceGlobal.CHAPTER_CLEAR_DELAY
+	if not member.is_empty():
+		delay = maxf(delay, BalanceCombat.BOSS_DEATH_FINALE_TIME
+				+ BalanceGlobal.LOOT_COLLECT_WORST + 0.3)
+	get_tree().create_timer(delay, true, false, true).timeout.connect(
 		func() -> void:
 			if _player.is_dead():
 				return # 延迟窗口内玩家暴毙：走死亡结算，不切场景
@@ -184,13 +196,12 @@ func _on_boss_defeated(at: Vector2) -> void:
 
 
 ## 装备掉落（run_loop.md §4）：开关/dev 冻结闸闸在这里，爆率×掉落表在
-## RunState.roll_drop（掉落表=未持有槽，全持有=空掷不掉）。
-func _spawn_loot(at: Vector2) -> void:
+## RunState.roll_drop（掉落表=未持有槽，全持有=空掷不掉）。返回掷中的成员
+## （空=不掉）；实体在 BOSS 终爆那一拍由 spawn_loot_drop 生成。
+func _roll_loot() -> StringName:
 	if not BalanceGlobal.LOOT_ENABLED or RunState.loot_frozen or _player.is_dead():
-		return
-	var member := RunState.roll_drop()
-	if not member.is_empty():
-		spawn_loot_drop(member, at)
+		return &""
+	return RunState.roll_drop()
 
 
 ## 生成一件掉落小件（探针可直调定成员）：落点=击杀点收进画面内 + 地表吸附

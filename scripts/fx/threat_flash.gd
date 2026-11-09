@@ -31,6 +31,9 @@ func _init() -> void:
 func _ready() -> void:
 	_m_curr = _muzzle_pos()
 	_m_prev = _m_curr
+	# top_level 的本体位默认在世界原点：入树同帧就 warn()（首个 _process 前）会在
+	# 原点闪一帧，入树即钉到枪口（MuzzleFlash 同款）。
+	global_position = _m_curr
 
 
 ## 预警统一入口：枪口闪光 + 警告音同拍出（调用方只调这一个，别自己拼）。

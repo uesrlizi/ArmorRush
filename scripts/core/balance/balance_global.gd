@@ -87,7 +87,9 @@ const LOOT_SETTLE_RATE := 30.0       # 回正速率（/s）：弹跳 ~0.15s 内�
 const LOOT_MAGNET_RADIUS := 2400.0   # 磁吸半径（≈全屏对角：进圈必捡，玩家疾驰只是加速到手）
 const LOOT_MAGNET_ACCEL := 9000.0    # 磁吸加速度（px/s²）：落地立稳后从静止起扑，跑过去=加速收包
 const LOOT_MAGNET_SPEED := 2600.0    # 磁吸极速（px/s，逐帧 ≤43px）：1480px 站桩最坏账出膛+磁吸 ≈1.37s
-									 # < 转场窗口 1.7s（玩家迎面跑来更快）
+									 #（玩家迎面跑来更快）
+const LOOT_COLLECT_WORST := 1.4      # 出膛到手最坏用时（秒，上行 1.37s 账取整）：掉落在 BOSS 终爆那一拍
+									 # 爆出，有掉落时转场窗口放到 终爆时刻+本值+0.3s 之后（Main）
 const LOOT_GRAB_RANGE := 46.0        # 抵达判定距离（px，到玩家碰撞中心近旁即授予）
 # ---- 启动页（小恐龙式站桩待机 → 进战斗） ----
 const COMBAT_INPUT_DELAY := 0.5      # 进战斗后到解锁操作的延迟（秒）：启动演出期不应答输入
