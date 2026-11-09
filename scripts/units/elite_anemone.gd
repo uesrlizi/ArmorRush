@@ -1,7 +1,7 @@
 class_name EliteAnemone
 extends Enemy
 ## 第四章精英·炮台车「海葵」：ch1 导弹车/ch2 臼炮车/ch3 布雷车的章节替位——
-## 预教 BOSS「鮟鱇」的「珊瑚重炮」（精英=BOSS 最难读一手的预教学位）。背驮
+## 预教 BOSS「灯笼鱼」的「珊瑚重炮」（精英=BOSS 最难读一手的预教学位）。背驮
 ## 海葵发射器（固定射角，臂枢不随玩家俯仰，同垂发惯例；发射器=美术本体，
 ## Muzzle=海葵口），周期性双连珊瑚重弹：发射器预警闪光（ThreatFlash）→
 ## **逐发在出膛瞬间 lead 瞄准**（CoralOrb.lead_direction：玩家速度×飞行时长，

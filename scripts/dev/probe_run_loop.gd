@@ -17,7 +17,8 @@ extends Node2D
 ##      凶度封顶第 4 关档（RUSH stage=5 与旧制滚动都封 RUN_NORMAL_LEVELS 档）；
 ##   I. 轻肉鸽装备（run_loop.md §4）：持有表/统一访问器、同槽位不爆（掉落表=未持有
 ##      槽，种子批跑）、全持有空掷、拾取清单文案、start_run 清空、冻结闸不随新局清、
-##      携带盾量取即清、成员表完整（键全游戏唯一）、机动红线与容量黄线不进池。
+##      携带盾量取即清、成员表完整（键全游戏唯一、名字/效果句齐）、机动红线与容量
+##      黄线不进池、展示账（每槽都有槽位图标）。
 ## 全过打印 ALL OK 退出码 0；有 FAIL 退出码 1；10s 看门狗兜底退出码 2。
 ## 旧制回退（RUN_LOOP_ENABLED/MULT_ENABLED=false）是编译期常量开关，探针验不到：
 ## 这些路径=改前逻辑原样保留，回退验收=人肉跑一局。
@@ -224,10 +225,10 @@ class Runner extends Node:
 		_check(rs.mods.is_empty() and rs.mod_member(&"gun").is_empty()
 				and is_equal_approx(rs.mod_stat(&"fire_cooldown", 0.22), 0.22),
 				"I1 开局空持有表：mod_member 空、mod_stat 回默认值")
-		var whitehot_cd: float = BalanceMods.MEMBERS[&"gun_whitehot"]["stats"][&"fire_cooldown"]
-		var slot: StringName = rs.equip(&"gun_whitehot")
-		_check(slot == &"gun" and rs.mod_member(&"gun") == &"gun_whitehot"
-				and is_equal_approx(rs.mod_stat(&"fire_cooldown", 0.22), whitehot_cd)
+		var rapid_cd: float = BalanceMods.MEMBERS[&"gun_rapid"]["stats"][&"fire_cooldown"]
+		var slot: StringName = rs.equip(&"gun_rapid")
+		_check(slot == &"gun" and rs.mod_member(&"gun") == &"gun_rapid"
+				and is_equal_approx(rs.mod_stat(&"fire_cooldown", 0.22), rapid_cd)
 				and is_equal_approx(rs.mod_stat(&"melee_damage_1", 15.0), 15.0),
 				"I2 装备入表：返回所属槽、访问器只改本成员的键",
 				"cd=%.2f" % rs.mod_stat(&"fire_cooldown", 0.22))
@@ -266,8 +267,8 @@ class Runner extends Node:
 		rs.handover_shield = 9
 		_check(rs.take_handover_shield() == 9 and rs.take_handover_shield() == -1,
 				"I8 携带盾量取走即清、默认 -1")
-		# 成员表完整：每槽 ≥1 成员、成员 slot 合法、tint 齐、stats 键全游戏唯一
-		# （每把"钥匙"只属于一个槽——mod_stat 首个命中即返回的前提）
+		# 成员表完整：每槽 ≥1 成员、成员 slot 合法、tint/label/desc 齐（desc=拾取播报行的
+		# 效果半句）、stats 键全游戏唯一（每把"钥匙"只属于一个槽——mod_stat 首个命中即返回的前提）
 		var table_ok := true
 		var key_owner := {}
 		for s: StringName in BalanceMods.SLOTS:
@@ -275,7 +276,7 @@ class Runner extends Node:
 			for id: StringName in BalanceMods.MEMBERS:
 				var mem: Dictionary = BalanceMods.MEMBERS[id]
 				if not (mem["slot"] in BalanceMods.SLOTS) or not mem.has("tint") \
-						or not mem.has("label") or not mem.has("stats"):
+						or not mem.has("label") or not mem.has("desc") or not mem.has("stats"):
 					table_ok = false
 				if mem["slot"] != s:
 					continue
@@ -322,6 +323,12 @@ class Runner extends Node:
 				"I11 爆率≈%.0f%%、全持有一台都不掉" % (BalanceGlobal.LOOT_DROP_CHANCE * 100.0),
 				"rate=%.3f full=%d" % [rate, full_drops])
 		rs.start_run()
+		# 展示账：每槽都有槽位图标（芯片/拾取栏/飞入图标同一枚，漏图标=芯片空牌）。
+		var show_ok := true
+		for s: StringName in BalanceMods.SLOTS:
+			if LootIcons.glyph(s) == null:
+				show_ok = false
+		_check(show_ok, "I12 展示账：每槽都有槽位图标", "slots=%d" % BalanceMods.SLOTS.size())
 
 		rs.free()
 		if _fails == 0:

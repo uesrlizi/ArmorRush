@@ -1,6 +1,6 @@
 class_name BossInterceptor
 extends PursuitBoss
-## 第五章 BOSS·高空截击机「断云」（破晓云廊守卫）：追击框架能力层——
+## 第五章 BOSS·高空截击机「截击机」（破晓云廊守卫）：追击框架能力层——
 ## 「防空截击」。细长镖形截击机（无旋翼，尾部双发短舱推进焰脉动；锚点账见
 ## bake_dawn_units.py 头注/提案_v1 §3）：
 ##   啸雷齐射（技能A）：背部炮塔（Cannon，俯仰跟随真瞄）预警 → 逐发梯次
@@ -54,7 +54,7 @@ var _dive_hit := false
 
 ## 血条上方显示的机体名。
 func _display_name() -> String:
-	return "断云"
+	return "截击机"
 
 
 func _species_max_hp() -> int:

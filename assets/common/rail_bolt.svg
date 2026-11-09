@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 12" width="96" height="12">
+<!-- 轻肉鸽·磁轨弹（design/run_loop.md §4 肩部武器槽）：+X=弹头，ADD 加色混合（同玩家曳光弹语言）；弹体全长=速度读法（速 3600 直线弹道）。
+     色板：#ffffff 杆芯/弹尖（ADD 下顶格亮）、#ffe9a8 翼与尾光；成员 tint=Sprite modulate 替换（黄色族红线：磁轨炮成员色 (0.95,0.95,0.72) 在黄族内）。
+     画布 96×12（2×）满幅，中心 (48,6)=节点原点；场景缩放 0.5 → 局内 48×6。
+     生成器：tools/gen_loot_art.py（改形改脚本重跑，别手改）。 -->
+  <polygon points="0.00,3.00 7.00,3.00 7.00,9.00 0.00,9.00" fill="#ffe9a8"/>
+  <polygon points="10.00,1.00 20.00,1.00 23.00,4.50 13.00,4.50" fill="#ffe9a8"/>
+  <polygon points="10.00,11.00 20.00,11.00 23.00,7.50 13.00,7.50" fill="#ffe9a8"/>
+  <polygon points="0.00,4.50 88.00,4.50 88.00,7.50 0.00,7.50" fill="#ffffff"/>
+  <polygon points="88.00,4.50 96.00,6.00 88.00,7.50" fill="#ffffff"/>
+</svg>

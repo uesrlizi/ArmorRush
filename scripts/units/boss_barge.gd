@@ -1,6 +1,6 @@
 class_name BossBarge
 extends PursuitBoss
-## 第二章 BOSS·悬浮冶炼驳船「钢嵴」（精炼所工业带）：低空悬浮的重装驳船。
+## 第二章 BOSS·悬浮冶炼驳船「浮堡」（精炼所工业带）：低空悬浮的重装驳船。
 ## 与 ch1 直升机的区分在威胁语法——不追人瞄准，而是改造场地 + 几何弹幕：
 ##   熔渣封路（技能）：背部 4 垂发孔逐孔高抛（预警闪在弹舱）→ 迫击炮弹
 ##     （MortarShell 真弹道，4×重力快弧），落点=按玩家速度推算的前方路面
@@ -55,7 +55,7 @@ var _direct_shoot_t := 0.0
 
 ## 血条上方显示的机体名。
 func _display_name() -> String:
-	return "钢嵴"
+	return "浮堡"
 
 
 func _species_max_hp() -> int:
@@ -153,7 +153,7 @@ func _fire_wall_shot(port: int) -> void:
 		return
 	var b := ENEMY_BULLET.instantiate() as Bullet
 	b.speed = BalanceCombat.BOSS_SWEEP_SPEED
-	b.damage = BalanceCombat.BOSS_SWEEP_DAMAGE
+	b.damage = BalanceWorld2.BARGE_WALL_DAMAGE
 	b.impact_tint = Color(1.0, 0.32, 0.25)
 	b.setup(Vector2.LEFT.rotated(deg_to_rad(-_wall_angles[port])), Vector2.ZERO)
 	container.add_child(b)

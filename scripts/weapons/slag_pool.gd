@@ -51,4 +51,4 @@ func _physics_process(delta: float) -> void:
 		return
 	if global_position.distance_to(player.global_position) \
 			<= radius + GroundBlast.PLAYER_RADIUS:
-		player.take_damage(damage)
+		player.take_damage(damage, true) # 驻留 tick：不进受击无敌窗（站着就每拍疼）

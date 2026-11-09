@@ -4,11 +4,11 @@ extends Node2D
 ## 落地 world_9（交接路径跳启动页）→ 停刷清场=单威胁源 → 全部用例都在开局平地段
 ## [−640, 2560]（terrain.gd 段 −1/0 固定同档，g=600）里跑，输入按物理帧写死。
 ## 判据正本=art_proposals/storm_ch9/威胁设计_ch9.md + 终审 R11–R14：
-##   E  精英「架线」跨缆：同台/高缆站桩 0/低缆站桩恰 10/带电前 0/满速+t2.0 跳按住 0/
+##   E  精英「架线」跨缆：同台/高缆站桩 0/低缆站桩恰 15/带电前 0/满速+t2.0 跳按住 0/
 ##      时序（落地 1.3、带电 2.2）/R5 冷却闸/R6 平移补时/R7 脚手架避让与取消；
 ##   BA BOSS 跨缆网：p1 低缆满速+t2.0 跳按住 0；p2 两段（x1′=x1+680、带电晚 0.6）
 ##      满速钻高缆后 t2.45 跳按住 0；
-##   BR BOSS 引雷针链：针落位/贴地、落地与放电时序、站缝心 0、满速直冲恰 10、
+##   BR BOSS 引雷针链：针落位/贴地、落地与放电时序、站缝心 0、满速直冲恰 15、
 ##      解一（t2.03 起刹停缝心）0、解二（t1.50 起刹停针列前）0、t2.30 纯跳恰 8、R7 避让；
 ##   AL BOSS 断缆甩弧：出膛点=Muzzle、方向恒定、静止恰 12、满速保持 0 且相遇 1.03s±1 帧。
 ## 探针坑规避：hp=99999；清杂兵跳过 boss 组；BOSS 冻结窗=_bstate=RECOVER+_bt=99；
@@ -135,6 +135,7 @@ class Runner extends Node:
 		_spawner.stop()
 		_player.auto_fire = false
 		_player.hp = 99999
+		_player.hurt_window_enabled = false # 几何探针：多段累计伤害账（N×单发）按无窗算
 		_clear()
 		var flat := true
 		for x in range(-640, 2560, 32):
@@ -209,12 +210,12 @@ class Runner extends Node:
 				"E-L 站桩落位：缆以玩家为中心（x1=px−160）", "x1-px=%.1f" % ((float(sp["x1"]) if not sp.is_empty() else 0.0) - r["px0"]))
 		await _frames(30)
 
-		# E3/E5：低缆 × 站桩：带电前 0、带电后恰 10 一次
+		# E3/E5：低缆 × 站桩：带电前 0、带电后恰 15 一次
 		await _stand(600.0)
 		r = await _elite_volley(elite, false, 240)
 		await _shot("elite_low_hit")
 		_check(r["dmg_before_live"] == 0, "E5 idle/爬电期在缆带内掉血 0", "dmg=%d" % r["dmg_before_live"])
-		_check(r["dmg"] == BalanceWorld9.LIVE_SPAN_DAMAGE, "E3 低缆对站立静止玩家恰 10 一次", "dmg=%d" % r["dmg"])
+		_check(r["dmg"] == BalanceWorld9.LIVE_SPAN_DAMAGE, "E3 低缆对站立静止玩家恰 15 一次", "dmg=%d" % r["dmg"])
 		await _frames(30)
 
 		# E4：低缆 × 满速 + t=2.0 起跳按住推进 → 0（R14）
@@ -416,11 +417,11 @@ class Runner extends Node:
 				_player.global_position.x = px + 150.0
 				_player.velocity = Vector2.ZERO,
 				220, {138: func() -> void: _key(true), 140: func() -> void: _key(false)})
-		_check(r["dmg"] == BalanceWorld9.ROD_ARC_DAMAGE, "BR5 t2.30 纯跳穿针1→针2 弧带 恰 8", "dmg=%d" % r["dmg"])
+		_check(r["dmg"] == BalanceWorld9.ROD_ARC_DAMAGE, "BR5 t2.30 纯跳穿针1→针2 弧带 恰 12", "dmg=%d" % r["dmg"])
 		await _frames(60)
 		_clear()
 
-		# BR4a：满速直冲不刹 → 恰 10（t2.45 压针2 底爆，R12）
+		# BR4a：满速直冲不刹 → 恰 15（t2.45 压针2 底爆，R12）
 		await _run_up()
 		var rod1 := [0.0]
 		r = await _boss_take(_boss._begin_skill_b, 200, {5: func() -> void:
@@ -430,7 +431,7 @@ class Runner extends Node:
 		Input.action_release("move_right")
 		var lead_ok := absf(float(rod1[0]) - (r["px0"] + 1170.0)) < 1.0
 		_check(lead_ok, "BR4-L 满速针位 px+1170/+1470/+1770", "rod1-px=%.0f" % (float(rod1[0]) - r["px0"]))
-		_check(r["dmg"] == BalanceWorld9.ROD_BURST_DAMAGE, "BR4a 满速直冲不刹 恰 10（压针2 底爆）", "dmg=%d" % r["dmg"])
+		_check(r["dmg"] == BalanceWorld9.ROD_BURST_DAMAGE, "BR4a 满速直冲不刹 恰 15（压针2 底爆）", "dmg=%d" % r["dmg"])
 		await _frames(60)
 		_clear()
 

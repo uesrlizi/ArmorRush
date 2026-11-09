@@ -72,25 +72,27 @@ const LADDER_GROWTH_MULT := 1.12      # BOSS 血量/失衡阈值每关缩放系�
 const LADDER_GROWTH_MAX := 1.4        # 体量增长封顶倍率（用户 1.3~1.5 取中；RUSH ×0.7 折扣后 ≈0.98≈原血量）
 # ---- 轻肉鸽装备（design/run_loop.md §4：BOSS 概率爆装备，槽位/成员正本在 balance_mods.gd） ----
 # 掉落源=BOSS 击杀（普通 4+RUSH 3）×爆率=期望 ≈3.5 次/局；同槽位不爆（从未持有槽掷）；
-# 通用小件×成员色 tint，颜色即预告；磁吸半径≈全屏=实际必捡（禁「躲弹漏捡」双随机叠加）；
-# 转场窗口 1.7s 兜底=Main 对在途件自动授予。状态正本在 RunState（mods_* 段），数字全待调参。
+# 装备芯片=槽位图标×成员色（颜色即预告）；斜抛+渐混吸附一条连续弧不落地=实际必捡
+# （禁「躲弹漏捡」双随机叠加）；转场兜底=Main 对在途件自动授予。
+# 状态正本在 RunState（mods_* 段），数字全待调参。
 const LOOT_ENABLED := true            # 总开关：false=旧制（BOSS 不掉装备）
 const LOOT_DROP_CHANCE := 0.5         # 每台 BOSS 的爆率（7.6 待定旋钮：RUSH 是否同率、精英 25% 备选）
-# 出膛段=从击杀点（BOSS 悬浮高度 240~390）小幅上抛 → 重力落到正下方地表 → 弹一次 → 立稳，
-# 全程连续轨迹（逐帧位移 ≤~35px）；出膛 0.5~0.7s 全程可见=颜色预告窗。
-const LOOT_POP_SPEED := 520.0        # 出膛上抛初速（px/s）：顶点比击杀点高 ~22px，读作「从爆点蹦出」
-const LOOT_FALL_GRAVITY := 5200.0    # 出膛段重力（px/s²）：金属小件下坠干脆（玩家重力的 6.5 倍）
-const LOOT_BOUNCE := 0.2             # 触地反弹系数（只弹一次：~15px 小跳=落地感，不读成第二次出膛）
-const LOOT_BOUNCE_MIN_SPEED := 250.0 # 触地速度低于此不弹（直接立稳）
-const LOOT_SPIN := 6.0               # 空中翻滚角速度（rad/s）；首次触地后转角指数回正
-const LOOT_SETTLE_RATE := 30.0       # 回正速率（/s）：弹跳 ~0.15s 内转角归零，立稳时无跳变
-const LOOT_MAGNET_RADIUS := 2400.0   # 磁吸半径（≈全屏对角：进圈必捡，玩家疾驰只是加速到手）
-const LOOT_MAGNET_ACCEL := 9000.0    # 磁吸加速度（px/s²）：落地立稳后从静止起扑，跑过去=加速收包
-const LOOT_MAGNET_SPEED := 2600.0    # 磁吸极速（px/s，逐帧 ≤43px）：1480px 站桩最坏账出膛+磁吸 ≈1.37s
-									 #（玩家迎面跑来更快）
-const LOOT_COLLECT_WORST := 1.4      # 出膛到手最坏用时（秒，上行 1.37s 账取整）：掉落在 BOSS 终爆那一拍
-									 # 爆出，有掉落时转场窗口放到 终爆时刻+本值+0.3s 之后（Main）
-const LOOT_GRAB_RANGE := 46.0        # 抵达判定距离（px，到玩家碰撞中心近旁即授予）
+# 斜抛+渐混吸附：击杀点弹出 → 朝玩家定速斜抛（缓弧看得清颜色预告）→ 后程渐混追踪。
+# 飞行时长 T=BASE+距离/PER 截到 [MIN,MAX]：近距也留够起飞读感、远距不拖节奏。
+const LOOT_FLIGHT_BASE := 0.55        # 斜抛时长基数（秒）
+const LOOT_FLIGHT_PER := 1100.0       # 每 px 距离加的时长（700px→1.19s / 1400px→1.82s）
+const LOOT_FLIGHT_MIN := 1.15         # 下限（秒）：颜色预告+起飞读感窗
+const LOOT_FLIGHT_MAX := 1.85         # 上限（秒）：远距不拖节奏
+const LOOT_SHOT_GRAVITY := 1300.0     # 斜抛重力（px/s²，玩家重力的 ~1/6）：缓弧看得出抛物线
+const LOOT_SHOT_LIFT_MAX := 700.0     # 竖直初速上限（px/s，向上）：弧顶≈起点上 190px，不出画面顶
+const LOOT_HOME_AT := 0.45            # 飞行进到这时长比例开始混入追踪
+const LOOT_HOME_FULL := 0.9           # 到这时长比例纯追踪（直奔玩家）
+const LOOT_HOME_MIN_SPEED := 650.0    # 追踪段速度下限（px/s）
+const LOOT_HOME_MAX_SPEED := 1000.0   # 追踪段速度上限（px/s）
+const LOOT_CLEAR_DELAY := 5.0         # 有掉落时击败→黑场延迟（秒，无掉落照旧 CHAPTER_CLEAR_DELAY）：
+									  # 斜抛+吸附 1.15~1.85s 到手 + 播报行滑入 0.35s + 停 2.6s + 一拍余量
+const LOOT_GRAB_RANGE := 46.0         # 抵达判定距离（px，到玩家碰撞中心近旁即授予）
+const LOOT_ICON_SHADOW_ALPHA := 0.45  # 图标硬投影不透明度（拾取栏/飞入图标的同形黑影；0=关）
 # ---- 启动页（小恐龙式站桩待机 → 进战斗） ----
 const COMBAT_INPUT_DELAY := 0.5      # 进战斗后到解锁操作的延迟（秒）：启动演出期不应答输入
 const IDLE_PUFF_TIME := 0.4          # 待机小喷焰单口时长

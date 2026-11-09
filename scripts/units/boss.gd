@@ -53,7 +53,7 @@ var _death_played := false
 
 ## 血条上方显示的机体名（§8 索引名 dreadnought 只作文档键，不上屏）。
 func _display_name() -> String:
-	return "无畏"
+	return "黄蜂"
 
 
 func _species_max_hp() -> int:

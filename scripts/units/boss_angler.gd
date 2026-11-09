@@ -1,6 +1,6 @@
 class_name BossAngler
 extends PursuitBoss
-## 第四章 BOSS·深海猎杀舰「鮟鱇」（珊瑚辐合夜）：追击框架能力层——「珊瑚
+## 第四章 BOSS·深海猎杀舰「灯笼鱼」（珊瑚辐合夜）：追击框架能力层——「珊瑚
 ## 能量武器」。v2 舰体按能力重设计（背驮大口径珊瑚重炮 + 艏部钓灯臂 + 腹下
 ## 吊挂放电舱，锚点账见 bake_coral_units.py 头注/提案_v2 §4）：
 ##   珊瑚重炮（技能A）：炮位（Cannon）预警 → 逐发梯次 CoralOrb 慢速能量重弹
@@ -45,7 +45,7 @@ var _direct_shoot_t := 0.0
 
 ## 血条上方显示的机体名。
 func _display_name() -> String:
-	return "鮟鱇"
+	return "灯笼鱼"
 
 
 func _species_max_hp() -> int:

@@ -461,8 +461,14 @@ func _run() -> void:
 			await _probe_boss_conductor(boss as BossConductor)
 		elif boss is Boss:
 			await _probe_boss_heli(boss as Boss)
-		elif boss is PursuitBoss:
+		elif boss is BossBarge:
 			await _probe_boss_barge(boss as BossBarge)
+		else:
+			# 没有通用能力探针的新章 BOSS（能力探针在本章 probe_world_N）：跳过，后面的
+			# 击杀/阵亡/结算探针照跑。旧兜底把所有 PursuitBoss 塞进驳船探针，非驳船
+			# 转型得 null 当场炸，血量停在 99999，后续死亡探针连锁失败。
+			print("[autotest] boss ability probe: skipped (", boss.scene_file_path,
+					" 无通用探针，见本章 probe_world_N)")
 		# 立刻击杀快进：站桩吃整轮雨/火区会被打死，污染后面的死亡探针。
 		# 此刻已出膛的 ≤2 发仍会命中（≤40 伤），玩家活。
 		var hp_before_kill := player.hp
@@ -484,7 +490,7 @@ func _run() -> void:
 
 	# 死亡 → 玩家爆炸演出（GAME_OVER_DELAY=1.1s）→ 出结算（世界不冻结：敌人/BOSS 认
 	# is_dead 停火、移动层照常=自然待机）→ 任意键重开。
-	# （无敌帧已移除：一刀必死。重载会释放本节点，收尾交给树级定时器。）
+	# （受击无敌窗只拦不大于本窗峰值的伤害，999 照样一刀必死。重载会释放本节点，收尾交给树级定时器。）
 	# 待机探针前置：现场刷一只 BOSS + 一只射程内杂兵，入场开打后再阵亡。
 	var idle_boss: Node2D = spawner.debug_spawn_boss()
 	spawner.debug_spawn_enemy(player.global_position.x + 500.0)
@@ -671,22 +677,22 @@ func _probe_boss_barge(boss: BossBarge) -> void:
 	player.velocity = Vector2.ZERO
 	await _wait(0.1)
 	# 弹幕墙：入场第一手（skill_a），贴脸压招解除后重走预警 → 开火；船 hover
-	# 恒 370 不压高（与直升机扫射的构图区别）。轮询等墙幕弹出膛——damage==
-	# BOSS_SWEEP_DAMAGE 现在只剩墙炮在用（旧版"定时 2.5s 单次计数"其实是靠普攻
-	# 短梭的同伤害弹蒙混过关，普攻换排炮重弹后那条路没了，改轮询才诚实）。
+	# 恒 370 不压高（与直升机扫射的构图区别）。轮询等墙幕弹出膛——墙幕弹以
+	# BARGE_WALL_DAMAGE 分辨（墙幕伤害已与机枪档分家；旧版"定时 2.5s 单次计数"
+	# 其实是靠普攻短梭的同伤害弹蒙混过关，改轮询才诚实）。
 	var wall_bullets := 0
 	var waited := 0.0
 	while waited < 8.0 and wall_bullets == 0:
 		await _wait(0.1)
 		waited += 0.1
 		wall_bullets = _count_projectiles(func(c: Node) -> bool:
-			return c is Bullet and c.damage == BalanceCombat.BOSS_SWEEP_DAMAGE)
+			return c is Bullet and c.damage == BalanceWorld2.BARGE_WALL_DAMAGE)
 	await _screenshot("08a_barge_wall.png")
 	print("[autotest] barge wall: y=", int(boss.global_position.y),
 			" bullets_on_screen=", wall_bullets,
 			" (hover 恒 370 附近、弹幕墙开火期应 ≥1)")
 	# 排炮重弹（普攻）：墙后摇 1.3s 接普攻段——轮询等 slag_slug 出膛（单发慢弹
-	# 寿命长，0.1s 轮询稳逮到）；弹种以伤害值分辨（BARGE_SLUG_DAMAGE≠墙弹 8）。
+	# 寿命长，0.1s 轮询稳逮到）；弹种以伤害值分辨（BARGE_SLUG_DAMAGE≠BARGE_WALL_DAMAGE）。
 	var slugs := 0
 	waited = 0.0
 	while waited < 6.0 and slugs == 0:
@@ -793,12 +799,12 @@ func _probe_boss_sentinel(boss: BossSentinel) -> void:
 				" take 10 -> ", applied, " (失衡加深×防御应=", expected, ")")
 
 
-## ch4 鮟鱇：镜像换边（钓灯+背炮+腹闸，无尾梁）→ 珊瑚重炮（CoralOrb 慢弹）
+## ch4 灯笼鱼：镜像换边（钓灯+背炮+腹闸，无尾梁）→ 珊瑚重炮（CoralOrb 慢弹）
 ## → 珊瑚潮（CoralTide 涌浪）→ 失衡加深（账同 ch2/ch3：加深×1.5 前置、
 ## 防御 5 后置）。
 func _probe_boss_angler(boss: BossAngler) -> void:
 	var player := get_tree().get_first_node_in_group("player") as Player
-	# 给巨量血：鮟鱇轮换深（珊瑚潮排第二技能），站桩探针期全程吃直射/重弹
+	# 给巨量血：灯笼鱼轮换深（珊瑚潮排第二技能），站桩探针期全程吃直射/重弹
 	# 蹭血——回满 100 也扛不住 ~20s 磨血，玩家一死全局暂停冻结世界，后续
 	# 探针全部落空（踩过：预警冻在腹闸、潮永不到来）。探针收尾还原满血，
 	# 让结尾的一刀必死死亡探针照常工作。
@@ -895,14 +901,14 @@ func _probe_boss_angler(boss: BossAngler) -> void:
 				" take 10 -> ", applied, " (失衡加深×防御应=", expected, ")")
 
 
-## ch5 断云：镜像换边（机鼻炮+背炮+机鼻预警点，无尾梁无旋翼）→ 啸雷齐射
+## ch5 截击机：镜像换边（机鼻炮+背炮+机鼻预警点，无尾梁无旋翼）→ 啸雷齐射
 ## （FlakShell 定距空爆弹）→ 俯冲突袭（确定性戳 _begin_skill_b：机体冲撞
 ## 掉血断言）→ 失衡加深（账同 ch2/ch3/ch4：加深×1.5 前置、防御 5 后置）。
 func _probe_boss_interceptor(boss: BossInterceptor) -> void:
 	var player := get_tree().get_first_node_in_group("player") as Player
-	# 给巨量血：断云轮换深（俯冲排第二技能），站桩探针期全程吃直射/啸雷
+	# 给巨量血：截击机轮换深（俯冲排第二技能），站桩探针期全程吃直射/啸雷
 	# 蹭血——回满 100 也扛不住 ~20s 磨血，玩家一死全局暂停冻结世界，后续
-	# 探针全部落空（同鮟鱇探针的教训）。探针收尾还原满血。
+	# 探针全部落空（同灯笼鱼探针的教训）。探针收尾还原满血。
 	player.hp = 99999
 	# 朝向镜像探针：Visuals 整层换边——机鼻炮口与臂根（炮座）都换到玩家一侧；
 	# 背炮塔与机鼻预警点都在机体中轴附近（局部 x=0/-136→镜像后 -0/+136…
@@ -977,6 +983,7 @@ func _probe_boss_interceptor(boss: BossInterceptor) -> void:
 					break
 				await _wait(0.2)
 				waited += 0.2
+			player.clear_hurt_window() # 量伤前清受击无敌窗（上一下的窗会吞掉/折扣这一下）
 			var hp_pre_dive := player.hp
 			boss._begin_skill_b()
 			waited = 0.0
@@ -1019,7 +1026,7 @@ func _probe_boss_redwheel(boss: BossRedwheel) -> void:
 	var player := get_tree().get_first_node_in_group("player") as Player
 	# 给巨量血：赤轮轮换深（凿岩齐射排第二技能），站桩探针期全程吃抛石/电网/
 	# 装药蹭血——回满 100 也扛不住 ~20s 磨血，玩家一死全局暂停冻结世界，
-	# 后续探针全部落空（同鮟鱇/断云探针的教训）。探针收尾还原满血。
+	# 后续探针全部落空（同灯笼鱼/截击机探针的教训）。探针收尾还原满血。
 	player.hp = 99999
 	# 朝向镜像探针：Visuals 整层换边——斗轮毂心与臂根（毂座）都换到玩家一侧；
 	# 腹舱在机体中轴（局部 x=0），镜像后仍居中（≈0）。各归其位即证明挂件
@@ -1106,6 +1113,7 @@ func _probe_boss_redwheel(boss: BossRedwheel) -> void:
 					break
 				await _wait(0.2)
 				waited += 0.2
+			player.clear_hurt_window() # 量伤前清受击无敌窗（上一下的窗会吞掉/折扣这一下）
 			var hp_pre_charge := player.hp
 			boss._begin_skill_b()
 			waited = 0.0
@@ -1154,7 +1162,7 @@ func _probe_boss_redwheel(boss: BossRedwheel) -> void:
 func _probe_boss_anchor(boss: BossAnchor) -> void:
 	var player := get_tree().get_first_node_in_group("player") as Player
 	# 给巨量血：沉锚轮换深（涌浪排第二技能），站桩探针期全程吃跳弹/直射蹭血
-	# ——同赤轮/断云探针的教训，玩家一死全局暂停冻结世界，后续探针全部落空。
+	# ——同赤轮/截击机探针的教训，玩家一死全局暂停冻结世界，后续探针全部落空。
 	# 探针收尾还原满血。
 	player.hp = 99999
 	# 朝向镜像探针：Visuals 整层换边——艏炮枢/管口与艏部下管（鱼雷管）都换到
@@ -1254,6 +1262,7 @@ func _probe_boss_anchor(boss: BossAnchor) -> void:
 						break
 					await _wait(0.2)
 					waited += 0.2
+				player.clear_hurt_window() # 量伤前清受击无敌窗（上一下的窗会吞掉/折扣这一下）
 				var hp_pre_surge := player.hp
 				boss._begin_skill_b()
 				waited = 0.0
@@ -1336,6 +1345,7 @@ func _probe_boss_saltmill(boss: BossSaltmill) -> void:
 		c.queue_free()
 	await _wait(0.2)
 	player.velocity = Vector2.ZERO
+	player.clear_hurt_window() # 量伤前清受击无敌窗（上一下的窗会吞掉/折扣这一下）
 	var hp_pre_geyser := player.hp
 	boss._begin_skill_a()
 	var geysers := 0
@@ -1410,6 +1420,7 @@ func _probe_boss_saltmill(boss: BossSaltmill) -> void:
 			waited += 0.1
 		await _wait(0.15) # 光束线驻留中段（蓄热窗 0.4s）
 		await _screenshot("08b_saltmill_burn.png")
+		player.clear_hurt_window() # 量伤前清受击无敌窗（上一下的窗会吞掉/折扣这一下）
 		var hp_pre_burn := player.hp
 		waited = 0.0
 		while waited < 2.0 and player.hp >= hp_pre_burn:

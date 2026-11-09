@@ -16,7 +16,7 @@ const SALT_GEYSER_ERUPT := 0.55    # 喷发持续（柱寿）
 const SALT_GEYSER_CLOSE := 0.2     # 收柱淡出
 const SALT_GEYSER_WIDTH := 90.0    # 柱宽（AABB 判定半宽 45+玩家半宽宽限）
 const SALT_GEYSER_HEIGHT := 360.0  # 柱顶高（地表−360；纯跳 67 的 5.4 倍）
-const SALT_GEYSER_DAMAGE := 10     # 一次喷发至多一次
+const SALT_GEYSER_DAMAGE := 15     # 一次喷发至多一次
 
 # ---- 裂地镖（间歇泉的运载弹：弹落点=mark，见 salt_dart.gd） ----
 # 真实枪口律：泉的 mark 由裂地镖从出膛口（精英钻尖/BOSS 腹口）落地生成
@@ -33,7 +33,7 @@ const ELITE_GUSHER_ATTACK_RANGE := 2200.0
 const ELITE_GUSHER_VOLLEY_HALF_LIFE := 2.4 # 齐射触发半衰期（同前七章精英的泊松节奏）
 
 # ---- 第八章 BOSS·悬浮采盐联合机「盐磨」（300×180 机体 hover 370：船底 460
-# =t2 站立头顶上方 10px、对最高台阶 536 净空 76px，同驳船/哨兵/鮟鱇/断云/
+# =t2 站立头顶上方 10px、对最高台阶 536 净空 76px，同驳船/哨兵/灯笼鱼/截击机/
 # 赤轮/沉锚档。招式=间歇泉幕（技能A）⇄ 定镜灼烤（技能B）+ 融盐重弹（普攻=
 # 单发点放，2026-11-06 用户「别像普通机枪，要配得上镜阵聚焦口」：镜阵聚热
 # 熔出的盐弹，同 ch2 排炮重弹「出手锁定的一次性形态」家族——离散点放无逐发
@@ -70,7 +70,7 @@ const MIRROR_BURN_LEAD_MAX := 400.0     # lead 距离 clamp（ArcFence 同账）
 const MIRROR_BURN_BEAM := 0.4           # 干燥光束线驻留（无伤预告）
 const MIRROR_BURN_TICK_TIME := 0.9      # 灼点 tick 区持续
 const MIRROR_BURN_RADIUS := 80.0
-const MIRROR_BURN_DAMAGE := 6           # 每 tick 6
+const MIRROR_BURN_DAMAGE := 9           # 每 tick 9（驻留 tick 不进受击无敌窗）
 const MIRROR_BURN_TICK := 0.3
 
 # ---- 融盐重弹（第八章 BOSS 普攻：镜阵聚热熔盐点放，见 salt_bolt.tscn） ----
@@ -79,7 +79,7 @@ const MIRROR_BURN_TICK := 0.3
 # 挪位；p2 双发各自重瞄（间隔内再瞄一次，仍是离散点放）。开火戏=枪口焰+熔杏
 # 爆闪双叠+fire_heavy 专配出膛音（同 ch2 重弹的「重炮点放」份量）。
 const SALTMILL_MOLTEN_SPEED := 700.0    # 机枪流七成档：慢大弹可读可跳越
-const SALTMILL_MOLTEN_DAMAGE := 12      # 单发（ch2 重弹同账：旧短梭满吃 48 → 单发 12，普攻低于技能）
+const SALTMILL_MOLTEN_DAMAGE := 12      # 单发普攻（ch2 重弹同账，不随技能上调；技能 15 仍更疼）
 const SALTMILL_MOLTEN_DELAY := 0.12     # 枪臂真瞄到位的一拍再点放（方向锁定在出手瞬间）
 const SALTMILL_MOLTEN_TWIN_GAP := 0.15  # p2 双发间隔（第二发各自重瞄）
 const SALTMILL_PHASE2_MOLTEN_BONUS := 1

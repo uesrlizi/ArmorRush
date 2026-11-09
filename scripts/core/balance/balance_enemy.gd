@@ -42,4 +42,4 @@ const SHIELD_SCORE := 25
 
 # ---- 敌人子弹 ----
 const ENEMY_BULLET_SPEED := 1040.0 # 原速 520 的两倍
-const ENEMY_BULLET_DAMAGE := 1     # 扫射多发命中：单发从 5 降为 2（一梭 3~5 发全中 6~10 伤，逼走位）
+const ENEMY_BULLET_DAMAGE := 3     # 杂兵一梭（3~5 发 ≤0.55s）落在受击无敌窗内=只结算一发

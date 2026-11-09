@@ -87,7 +87,7 @@ const BOSS_ROTOR_SPIN := 14.0        # 尾旋翼转速（rad/s，整周旋转）
 const BOSS_ROTOR_WOBBLE := 0.035     # 主旋翼呼吸摆幅（rad：侧视刃边不整周旋转）
 const BOSS_ROTOR_WOBBLE_SPEED := 19.0 # 主旋翼摆动频率
 const BOSS_SWEEP_SPEED := 1000.0
-const BOSS_SWEEP_DAMAGE := 4        # 机枪单发轻（12发/s 持续流）；威胁靠命中数累积
+const BOSS_SWEEP_DAMAGE := 6        # 机枪单发（12发/s 持续流）：受击无敌窗内一串只结算一发，吃一枚=吃一串；须≠PLAYER_BULLET_DAMAGE（探针排空谓词按伤害值认玩家弹）
 # 直射=普攻：同一把机枪换瞄准——枪臂真瞄玩家（无预判）朝人扫一短梭，子弹与高扫
 # 同款（SPEED/DAMAGE 共用 BOSS_SWEEP_*），只有射击时长不同。无重击警告（枪臂全程
 # 真瞄，瞄准本身就是预警），技能（扫射/弹雨）之间各插一段。

@@ -1,6 +1,6 @@
 class_name CoralOrb
 extends Node2D
-## 珊瑚重弹（第四章精英「海葵」/BOSS「鮟鱇」共用重击弹）：**慢速可见的能量
+## 珊瑚重弹（第四章精英「海葵」/BOSS「灯笼鱼」共用重击弹）：**慢速可见的能量
 ## 重球**——出膛=真实炮口×lead 瞄准方向×恒速直线（弹体自读：弹速 900 慢于
 ## 机枪流，看得见、侧移即躲），撞地即爆蕗（coral_burst 粒群绽放+Bloom 软爆闪，
 ## 无残留区；GroundBlast 平涂爆闪对珊瑚系关闭，见 show_flash）。lead 瞄准在发射瞬间一次解算（lead_direction：玩家

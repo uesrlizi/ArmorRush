@@ -4,7 +4,7 @@ class_name BalanceWorld2
 ## 跨章共用件见 balance_combat.gd（重击导弹/失衡/机枪流基准档）。
 # ---- 熔渣火区（第二章精英/BOSS 共用：驻留地面危险，tick 结算） ----
 const SLAG_POOL_RADIUS := 90.0
-const SLAG_POOL_DAMAGE := 3            # 每 tick 伤害（站满一轮 ≈ 16~21）
+const SLAG_POOL_DAMAGE := 4            # 每 tick 伤害（驻留 tick 不进受击无敌窗；站满一轮 ≈ 22~28）
 const SLAG_POOL_TICK := 0.4            # tick 周期
 const SLAG_POOL_WARMUP := 0.35         # 落地蓄热：开伤前缓冲（落地溅开→变危险，二段预警）
 # ---- 臼炮弹飞行时长（弹道解算用；滑行段重力=MORTAR_GRAVITY，见 balance_combat.gd） ----
@@ -36,12 +36,13 @@ const BARGE_WALL_SAMPLE_STEP := 80.0  # 射线地形采样步长
 const BARGE_WALL_SAMPLE_RANGE := 1500.0
 const BARGE_WALL_BURST := 5           # 每门发数（phase2 +2）
 const BARGE_WALL_BURST_INTERVAL := 0.09
+const BARGE_WALL_DAMAGE := 15         # 墙幕弹单发（技能档；同门一梭落在受击无敌窗内=吃一发）。弹体沿用机枪弹，伤害与机枪档分家；须≠BARGE_SLUG_DAMAGE（autotest 按伤害值分辨弹种）
 const BARGE_WALL_PORT_STAGGER := 0.12 # 炮位梯次间隔
 const BARGE_WALL_RECOVER := 1.3
 const BARGE_SLAG_COUNT := 4           # 一轮熔渣弹=4 垂发孔 1:1（phase2 +2 回绕）
 const BARGE_SLAG_STAGGER := 0.3
 const BARGE_SLAG_RECOVER := 1.4
-const BARGE_SLAG_DAMAGE := 8
+const BARGE_SLAG_DAMAGE := 12
 const BARGE_SLAG_BLAST_RADIUS := 45.0 # 落地小溅射（BOSS 版比精英多这一口）
 const BARGE_SLAG_POOL_TIME := 2.8
 const BARGE_SLAG_LEAD_MAX := 900.0
@@ -49,7 +50,7 @@ const BARGE_PHASE2_SLAG_BONUS := 2
 const BARGE_PHASE2_BURST_BONUS := 2
 const BARGE_PHASE2_SWEEP_DEG := 5.0
 const BARGE_SLUG_SPEED := 1000.0       # 排炮重弹（普攻）：机枪流 1000 的七成（2026-11-03 用户「太慢读不出炮弹」500→700），慢大弹仍可跳越
-const BARGE_SLUG_DAMAGE := 12         # 单发（旧短梭 6×8 满吃 48 → 单发 12，普攻仍低于技能弹）
+const BARGE_SLUG_DAMAGE := 12         # 单发普攻（本来就是重弹档，不随技能上调；技能弹 15 仍更疼）
 const BARGE_SLUG_DELAY := 0.12        # 枪臂真瞄到位的一拍再点放（方向锁定在出手瞬间）
 const BARGE_SLUG_TWIN_GAP := 0.15     # 二阶段双发间隔（第二发各自重瞄，仍是离散点放）
 const BARGE_PHASE2_SLUG_BONUS := 1    # 二阶段 +1 发

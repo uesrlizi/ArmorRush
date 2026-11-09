@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://rogh5m5bmyab"
-path="res://.godot/imported/shoulder_pod.svg-dfe086a4fb71eeb5636198e4cd93a73b.ctex"
+uid="uid://ct7fmhttiodyg"
+path="res://.godot/imported/missile_pod.svg-cb2e3c64d137a9206fb441e9d38a4f79.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/common/shoulder_pod.svg"
-dest_files=["res://.godot/imported/shoulder_pod.svg-dfe086a4fb71eeb5636198e4cd93a73b.ctex"]
+source_file="res://assets/common/missile_pod.svg"
+dest_files=["res://.godot/imported/missile_pod.svg-cb2e3c64d137a9206fb441e9d38a4f79.ctex"]
 
 [params]
 
@@ -23,7 +23,7 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=false
+mipmaps/generate=true
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""

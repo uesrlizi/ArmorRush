@@ -13,7 +13,7 @@ const PLASMA_MINE_WARMUP := 0.7        # 蓄能时长（渐显=变危险的二�
 const PLASMA_MINE_PROXIMITY := 110.0   # 近炸侦测半径（无宽限：宽限只给伤害判定）
 const PLASMA_MINE_FUSE := 0.28         # 引信时长（快闪）：跑动穿越的免雷窗口
 const PLASMA_MINE_LIFETIME := 4.5      # 悬停寿命，到点哑熄（无伤淡出）
-const PLASMA_MINE_DAMAGE := 10
+const PLASMA_MINE_DAMAGE := 15
 const PLASMA_MINE_BLAST_RADIUS := 80.0
 const PLASMA_MINE_FENCE_SPACING := 280.0 # 布雷带间距（>爆球直径 160：不连锁、缝可读）
 
@@ -38,7 +38,7 @@ const ELITE_MINE_FLIGHT := 0.85        # 高抛飞行时长（弹道解算用，
 const SENTINEL_HOVER_Y := 370.0
 const SENTINEL_RAIN_COUNT := 4         # 一轮电浆导弹=4 仓口 1:1（phase2 +2 回绕）
 const SENTINEL_RAIN_STAGGER := 0.26
-const SENTINEL_RAIN_DAMAGE := 10
+const SENTINEL_RAIN_DAMAGE := 15
 const SENTINEL_RAIN_BLAST_RADIUS := 70.0
 const SENTINEL_RAIN_RECOVER := 1.4
 const SENTINEL_MINE_COUNT := 4         # 一轮齐撒雷数（v2.1 3→4 弹数下限上调；phase2 +1）

@@ -6,7 +6,7 @@ extends Node2D
 ## 出手帧 px 的偏移，允差 ±1 物理帧位移；输入按物理帧写死。
 ## 判据正本=art_proposals/sulfur_ch10/威胁设计_ch10.md + 终审 R1–R17：
 ##   E  精英「窜井」：lead=px+1440/origin.y=g/ThreatFlash 同帧亮；息窗中点穿 0；第二喷
-##      穿恰 10；亮井期站井心 0；R10 边界避让 +96 与脚手架取消；冷却闸 ≤1；
+##      穿恰 15；亮井期站井心 0；R10 边界避让 +96 与脚手架取消；冷却闸 ≤1；
 ##   BA BOSS 井压线：三口 px+1440/1800/2160、首喷 2.3/2.9/3.5；盲冲 30；绿波 0；
 ##      3.2 起步 30；亮井期站井心 0；R11 闪烁单调+至多一口封顶；R10 脚手架取消 k=1
 ##      其余口不变；冷却=单套寿命内不重铺；
@@ -158,6 +158,7 @@ class Runner extends Node:
 		_spawner.stop()
 		_player.auto_fire = false
 		_player.hp = 99999
+		_player.hurt_window_enabled = false # 几何探针：多段累计伤害账（N×单发）按无窗算
 		_player.shield = 0
 		_clear()
 		await _uniform(1)
@@ -256,13 +257,13 @@ class Runner extends Node:
 		await _frames(60)
 		_clear()
 
-		# E3：第二喷中点满速穿（t=0 在 px−795）→ 恰 10
+		# E3：第二喷中点满速穿（t=0 在 px−795）→ 恰 15
 		elite = await _fresh_elite(9000.0)
 		await _run_up(3200.0)
 		p0 = _player.global_position.x
 		r = await _elite_volley(elite, 290, p0 + 795.0 + 1440.0)
 		_release_all()
-		_check(r["dmg"] == BalanceWorld10.VENT_DAMAGE, "E3 第二喷期间满速穿 恰 10", "dmg=%d" % r["dmg"])
+		_check(r["dmg"] == BalanceWorld10.VENT_DAMAGE, "E3 第二喷期间满速穿 恰 15", "dmg=%d" % r["dmg"])
 		await _frames(60)
 		_clear()
 
@@ -271,7 +272,7 @@ class Runner extends Node:
 		await _stand(4640.0)
 		r = await _elite_volley(elite, 150, 4640.0)
 		_check(r["dmg_lit"] == 0, "E4 亮井期站井心 掉血 0（亮≠喷）", "dmg_lit=%d" % r["dmg_lit"])
-		_check(r["dmg"] == BalanceWorld10.VENT_DAMAGE, "E4b 首喷后站井心 吃 10", "dmg=%d" % r["dmg"])
+		_check(r["dmg"] == BalanceWorld10.VENT_DAMAGE, "E4b 首喷后站井心 吃 15", "dmg=%d" % r["dmg"])
 		await _frames(120)
 		_clear()
 
@@ -403,7 +404,7 @@ class Runner extends Node:
 					or absf(float(e["first"]) - (2.3 + 0.6 * i)) > 0.001:
 				xs_ok = false
 		_check(xs_ok, "BA1 三口 origin=px+1440/1800/2160、y=600、首喷 2.3/2.9/3.5", detail)
-		_check(r["dmg"] == 3 * BalanceWorld10.VENT_DAMAGE, "BA2 满速盲冲 掉血 30", "dmg=%d" % r["dmg"])
+		_check(r["dmg"] == 3 * BalanceWorld10.VENT_DAMAGE, "BA2 满速盲冲 掉血 45", "dmg=%d" % r["dmg"])
 		_check(r11["bad"] == 0 and r11["pairs"] > 0 and r11["capped_max"] <= 1,
 				"BA5 R11 亮井闪烁：剩余首喷更少者 f 严格更大，任一时刻至多一口封顶 4Hz",
 				"pairs=%d bad=%d capped_max=%d" % [r11["pairs"], r11["bad"], r11["capped_max"]])
@@ -423,7 +424,7 @@ class Runner extends Node:
 			if is_equal_approx(float(go), 2.75):
 				_check(r["dmg"] == 0, "BA3 绿波：t2.113 刹停、2.75 起步满速 掉血 0", "dmg=%d" % r["dmg"])
 			else:
-				_check(r["dmg"] == 3 * BalanceWorld10.VENT_DAMAGE, "BA4 同脚本 3.2 起步 掉血 30", "dmg=%d" % r["dmg"])
+				_check(r["dmg"] == 3 * BalanceWorld10.VENT_DAMAGE, "BA4 同脚本 3.2 起步 掉血 45", "dmg=%d" % r["dmg"])
 			await _frames(30)
 			_freeze()
 			_clear()
@@ -541,7 +542,7 @@ class Runner extends Node:
 		_check(r["band_ok"], "BB1a 带 y 恒 [428,512]（节点钉绝对坐标，零地形跟随）")
 		_check(r["front_ok"], "BB1b 火锋 = 右端 − 2500×(t−1.8)，推到左端停")
 		_check(absf(float(r["xl"]) - r["px0"] - 600.0) <= 1.0, "BB4a 满速 带左端 = px+600", "xl−px=%.1f" % (float(r["xl"]) - r["px0"]))
-		_check(r["dmg"] == BalanceWorld10.SULFUR_CLOUD_DAMAGE, "BB2a tier2 满速贴地 掉血 12", "dmg=%d" % r["dmg"])
+		_check(r["dmg"] == BalanceWorld10.SULFUR_CLOUD_DAMAGE, "BB2a tier2 满速贴地 掉血 15", "dmg=%d" % r["dmg"])
 		_check(r["pre"] == 0, "BB3a 点燃前（t<1.8）掉血 0", "pre=%d" % r["pre"])
 		_check(r["post_dmg"] == 0 and r["gone_by"] > 0.0 and r["gone_by"] <= 2.75,
 				"BB3b 燃完后（t>2.4）掉血 0 且云自清无驻留", "post=%d gone=%.2f" % [r["post_dmg"], r["gone_by"]])
@@ -553,14 +554,14 @@ class Runner extends Node:
 		r = await _cloud_take(200, {roundi(1.7 / DT): func() -> void: _key(true),
 				roundi(1.7 / DT) + 2: func() -> void: _key(false)})
 		_release_all()
-		_check(r["dmg"] == BalanceWorld10.SULFUR_CLOUD_DAMAGE, "BB2b tier2 满速 1.7 起跳 掉血 12", "dmg=%d" % r["dmg"])
+		_check(r["dmg"] == BalanceWorld10.SULFUR_CLOUD_DAMAGE, "BB2b tier2 满速 1.7 起跳 掉血 15", "dmg=%d" % r["dmg"])
 		_freeze()
 		_clear()
 		await _frames(20)
 		# BB2c：tier2 站桩 → 12；带左端 = px
 		await _stand(3200.0)
 		r = await _cloud_take(200)
-		_check(r["dmg"] == BalanceWorld10.SULFUR_CLOUD_DAMAGE, "BB2c tier2 站桩 掉血 12（本招不保站桩）", "dmg=%d" % r["dmg"])
+		_check(r["dmg"] == BalanceWorld10.SULFUR_CLOUD_DAMAGE, "BB2c tier2 站桩 掉血 15（本招不保站桩）", "dmg=%d" % r["dmg"])
 		_check(absf(float(r["xl"]) - r["px0"]) <= 1.0, "BB4b 站桩 带左端 = px（lead ≥0，不铺身后）", "xl−px=%.1f" % (float(r["xl"]) - r["px0"]))
 		_freeze()
 		_clear()
@@ -685,7 +686,7 @@ class Runner extends Node:
 		_check(r["origin_ok"] and absf(nz.y - 424.0) < 0.5 and absf(nz.x - r["px0"] - 1254.0) < 0.5,
 				"SW1a 7 团起点 = NozzlePort.global_position（世界 (px+1254, 424)）", "nozzle=(px+%.1f, %.1f) n=%d" % [nz.x - r["px0"], nz.y, r["n"]])
 		_check(r["max_turn"] < 0.5, "SW1b 出手后各团方向恒定（夹角变化 <0.5°）", "max=%.3f°" % r["max_turn"])
-		_check(r["dmg"] == 3 * BalanceWorld10.FLARE_SWEEP_DAMAGE, "SW2a 站桩 掉血 21（三团各 7）", "dmg=%d" % r["dmg"])
+		_check(r["dmg"] == 3 * BalanceWorld10.FLARE_SWEEP_DAMAGE, "SW2a 站桩 掉血 27（三团各 9）", "dmg=%d" % r["dmg"])
 		_check(r["dmg"] <= 48, "SW3 单轮扫掠 ≤48", "dmg=%d" % r["dmg"])
 		_freeze()
 		_clear()
@@ -694,7 +695,7 @@ class Runner extends Node:
 		await _stand(3200.0)
 		r = await _sweep_take(170, {roundi(0.35 / DT): func() -> void: Input.action_press("move_right")})
 		_release_all()
-		_check(r["dmg"] == BalanceWorld10.FLARE_SWEEP_DAMAGE, "SW2b 0.35s 反应后向 BOSS 前冲 恰 7", "dmg=%d" % r["dmg"])
+		_check(r["dmg"] == BalanceWorld10.FLARE_SWEEP_DAMAGE, "SW2b 0.35s 反应后向 BOSS 前冲 恰 9", "dmg=%d" % r["dmg"])
 		_freeze()
 		_clear()
 		await _frames(20)
@@ -710,7 +711,7 @@ class Runner extends Node:
 		await _run_up(3200.0)
 		r = await _sweep_take(170, {0: func() -> void: Input.action_release("move_right")})
 		_release_all()
-		_check(r["dmg"] == 2 * BalanceWorld10.FLARE_SWEEP_DAMAGE, "SW2d 满速出手即刹 掉血 14", "dmg=%d" % r["dmg"])
+		_check(r["dmg"] == 2 * BalanceWorld10.FLARE_SWEEP_DAMAGE, "SW2d 满速出手即刹 掉血 18", "dmg=%d" % r["dmg"])
 		_freeze()
 		_clear()
 		await _frames(20)

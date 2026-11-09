@@ -2,10 +2,11 @@ extends Node
 ## F1/F2 录制隐藏档探针（窗口小场景自退，--probe-ui-tier 才跑，正常启动自删）：
 ## 装载 world_1（交接路径直进战斗+刷 BOSS）→ 逐档按键 → 断言显隐 + 截图四张。
 ## 断言账：
-##   档 0 基线：顶栏可见 / 未静音 / 头顶条可见 / BOSS 条可见（在场）
+##   档 0 基线：顶栏可见 / 未静音 / 头顶条可见 / BOSS 条可见（在场）/ 顶栏布局（用时+关卡
+##     左上、得分+倍率右上同侧右缘对齐、两组边距镜像——进场动画终态）
 ##   F1 → 档 1：顶栏隐 / 静音（语音+字幕停）/ 头顶条保留（档 1 不涉及）/ BOSS 条保留
 ##   F2 → 档 2：头顶条隐 / BOSS 三件套隐 / WARNING 隐 / 顶栏仍隐
-##   再按 F2 → 回落档 0：全还原
+##   再按 F2 → 回落档 0：全还原（顶栏布局再量一次——直进还原路径）
 
 const SHOTS_DIR := "autotest_shots"
 
@@ -42,6 +43,7 @@ func _run(world: Node2D) -> void:
 	_check("tier0 未静音", not Comms.muted)
 	_check("tier0 头顶条可见", pbar.visible)
 	_check("tier0 BOSS条可见", hud._boss_bar.visible)
+	_check_layout("tier0", hud) # 进场动画终态
 	await _shot(dir, "ui_tier_0_normal.png")
 
 	_press(KEY_F1)
@@ -63,6 +65,7 @@ func _run(world: Node2D) -> void:
 	_press(KEY_F2)
 	await _wait(0.3)
 	_check("回落 顶栏还原", hud._time_label.visible)
+	_check_layout("回落", hud) # 直进还原路径（show_combat_instant）
 	_check("回落 解除静音", not Comms.muted)
 	_check("回落 头顶条还原", pbar.visible)
 	_check("回落 BOSS条还原", hud._boss_bar.visible)
@@ -84,6 +87,24 @@ func _check(what: String, ok: bool) -> void:
 	if not ok:
 		_fails += 1
 	print("[ui-tier-probe] ", what, ": ", "OK" if ok else "FAIL")
+
+
+## 顶栏布局：左上=用时+横线+关卡，右上=得分+横线+倍率（得分与倍率同侧挨着读）；
+## 右上组右缘对齐、左右两组边距镜像。按 HUD 根控件里的全局矩形量（含横线展开缩放）。
+func _check_layout(tag: String, hud: HUD) -> void:
+	var root_w := (hud.get_node("Root") as Control).size.x
+	var time_r := hud._time_label.get_global_rect()
+	var score_r := hud._score_label.get_global_rect()
+	var mult_r := hud._mult_label.get_global_rect()
+	_check(tag + " 布局：用时/关卡在左上",
+			time_r.position.x < root_w * 0.5
+			and hud._stage_label.get_global_rect().position.x < root_w * 0.5
+			and hud._time_rule.get_global_rect().position.x < root_w * 0.5)
+	_check(tag + " 布局：得分/倍率同在右上、右缘对齐、与左组边距镜像",
+			score_r.position.x > root_w * 0.5
+			and hud._score_rule.get_global_rect().position.x > root_w * 0.5
+			and absf(score_r.end.x - mult_r.end.x) < 0.5
+			and absf((root_w - score_r.end.x) - time_r.position.x) < 0.5)
 
 
 func _wait(seconds: float) -> void:

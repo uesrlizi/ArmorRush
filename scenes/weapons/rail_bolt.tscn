@@ -1,0 +1,32 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/weapons/bullet.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/common/rail_bolt.svg" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/fx/heavy_impact.tscn" id="3"]
+
+; Sprite2D 材质 = 加色混合（同玩家曳光弹语言）：磁轨弹=一条亮线，亮天顶格变白兜底。
+; 出膛 modulate 由发射方 tracer_tint 整体替换（磁轨炮成员色 (0.95,0.95,0.72) 在黄色族内，
+; 敌我共弹语言不重开）；贴图本身白杆+淡黄翼=ADD 源色留提亮余量。
+[sub_resource type="CanvasItemMaterial" id="addmat"]
+blend_mode = 1
+
+; 碰撞 = 细长杆的内接胶囊（60x6）：磁轨弹全长 48px，胶囊沿 +X 随弹旋转。
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_1"]
+radius = 3.0
+height = 60.0
+
+[node name="RailBolt" type="Area2D"]
+collision_layer = 8
+collision_mask = 5
+script = ExtResource("1")
+impact_scene = ExtResource("3")
+max_lifetime = 2.0
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+material = SubResource("addmat")
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("2")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_1")

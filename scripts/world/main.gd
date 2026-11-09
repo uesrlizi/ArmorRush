@@ -170,11 +170,12 @@ func _on_boss_defeated(at: Vector2) -> void:
 				if not _player.is_dead():
 					spawn_loot_drop(member, at))
 	_spawner.stop() # 转场窗口不再补怪（场上残敌照常行动，跑酷不断）
-	# 有掉落：转场窗口放到「终爆+最坏到手用时+一拍」之后，让芯片飞完再切（兜底仍在）
+	# 有掉落：黑场拉长到 LOOT_CLEAR_DELAY（终爆拍爆出 → 斜抛+吸附到手 → 播报行读完
+	# 再切；用户反馈「显示文字之后太快到下一关」）。计时刻从击败起算：终爆 ~0.9s 在
+	# 窗口内播完，剩 ~4s 给斜抛 1.15~1.85s + 播报 2.6s，兜底仍在。
 	var delay := BalanceGlobal.CHAPTER_CLEAR_DELAY
 	if not member.is_empty():
-		delay = maxf(delay, BalanceCombat.BOSS_DEATH_FINALE_TIME
-				+ BalanceGlobal.LOOT_COLLECT_WORST + 0.3)
+		delay = BalanceGlobal.LOOT_CLEAR_DELAY
 	get_tree().create_timer(delay, true, false, true).timeout.connect(
 		func() -> void:
 			if _player.is_dead():
@@ -204,18 +205,17 @@ func _roll_loot() -> StringName:
 	return RunState.roll_drop()
 
 
-## 生成一件掉落小件（探针可直调定成员）：落点=击杀点收进画面内 + 地表吸附
-## （桥式章=桥面），通体成员色=到手通道的预告。
+## 生成一件装备芯片（探针可直调定成员）：从击杀点原地弹出（x 收进画面内），朝玩家
+## 位置斜抛、后程渐混吸附（不落地，不用地形）；图标=槽位、颜色=成员。
 func spawn_loot_drop(member: StringName, at: Vector2) -> void:
-	var terrain := get_tree().get_first_node_in_group("terrain") as Terrain
 	var container := get_tree().get_first_node_in_group("projectile_container")
-	if terrain == null or container == null:
+	if container == null:
 		return
 	var half_w := get_viewport_rect().size.x * 0.5
 	var cam_x := _player.global_position.x + BalanceGlobal.CAMERA_X_OFFSET
 	var x := clampf(at.x, cam_x - half_w + 120.0, cam_x + half_w - 120.0)
 	var drop := LootPickup.new()
-	drop.setup(member, Vector2(x, at.y), terrain.surface_y_at(x) - 12.0)
+	drop.setup(member, Vector2(x, at.y))
 	container.add_child(drop)
 
 

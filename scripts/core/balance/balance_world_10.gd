@@ -21,7 +21,7 @@ const VENT_FLARE_OFF := 0.75        # 息窗（周期 1.2）
 const VENT_PULSES := 3              # BOSS 纵队井每口喷数（相对首喷 0/1.2/2.4）
 const VENT_WIDTH := 64.0            # 井筒宽（判定半宽 32 + 玩家半宽 20 = 有效半宽 52）
 const VENT_HEIGHT := 220.0          # 焰柱高（纯跳脚底最高 83.4 = 38% → 跳≠过）
-const VENT_DAMAGE := 10             # 每次喷发至多结算一次
+const VENT_DAMAGE := 15             # 每次喷发至多结算一次
 const VENT_DRILL_STAGGER := 0.15    # 纵队钻头出膛梯次（只是视觉节奏，不进时间线）
 # 落位：xv = px + clamp(vx·2.4, 240, 1440)——满速玩家 t=2.4 抵达井位恰处第一喷。
 const VENT_LEAD_TIME := 2.4
@@ -71,7 +71,7 @@ const SULFUR_CLOUD_BAND_BOTTOM := 512.0
 const SULFUR_CLOUD_SPAN := 1000.0
 const SULFUR_CLOUD_LEAD_TIME := 1.0
 const SULFUR_CLOUD_LEAD_MAX := 600.0
-const SULFUR_CLOUD_DAMAGE := 12
+const SULFUR_CLOUD_DAMAGE := 15
 # 派招闸（R7）：[xL, xL+1000] 内 tier2(g=536) 累计宽度 ≥320 才派 B；
 # 受罚区间闸（R16）：xRrel = lead+1000，t* = (xRrel+4500)/(vx+2500)，
 # I = [px+vx·t*−20, px+vx·2.4+20]，tier2 与 I 的交集宽度 ≥40 才派 B。
@@ -94,7 +94,7 @@ const FLARE_SWEEP_H_STEP := 35.0
 const FLARE_SWEEP_SPEED := 850.0
 const FLARE_SWEEP_GAP := 0.07
 const FLARE_SWEEP_DELAY := 0.12
-const FLARE_SWEEP_DAMAGE := 7
+const FLARE_SWEEP_DAMAGE := 9       # 普攻火鞭 7 团连串：受击无敌窗内只结算一团（扫射类单发略提）
 const FLARE_SWEEP_SAMPLE := 16.0
 const FLARE_SWEEP_LIFT_DEG := 6.0
 const FLARE_SWEEP_LIFT_MAX := 2

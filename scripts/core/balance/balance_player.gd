@@ -38,11 +38,13 @@ const PLAYER_BULLET_SPEED := 2400.0
 const PLAYER_BULLET_DAMAGE := 5
 const BULLET_IMPACT_MIN_TRAVEL := 48.0 # 出膛后飞满这段才喷命中迸溅（贴脸撞墙不在枪口上开花）
 
-# ---- 近战（AC6 式二段斩：停顿前摇 → 追击突进 → 斩击 → 后摇，全程滞空不下坠） ----
+# ---- 近战（AC6 式连段斩：停顿前摇 → 追击突进 → 斩击 → 后摇，全程滞空不下坠） ----
+# 段数默认二段；刀槽成员 三连刃 可开三段（melee_max_stage=3，第三段=加宽压扁的大横扫，刀光略长）。
 # 伤害账（两刀约束验算）：普通敌 20 HP —— 15<20 不至一刀秒、15+25≥40 两刀斩净；
 # 盾卫 30 HP（近战绕盾全额）—— 15+15=30 恰好两刀，连段 15+25 更有余量。
 const MELEE_DAMAGE_1 := 15          # 一段伤害（原 10，为盾卫"两刀必杀"抬到这里）
 const MELEE_DAMAGE_2 := 25          # 二段伤害（原 15，同上）
+const MELEE_DAMAGE_3 := 35          # 三段伤害（三连刃专属收尾；无装备永远走不到）
 const MELEE_WINDUP_TIME := 0.2     # 闲置起手前摇：明显的停顿滞空（架势）
 const MELEE_WINDUP_COMBO_TIME := 0.05 # 连段衔接前摇：中间停顿短一点
 const MELEE_DASH_SPEED := 900.0     # 追击突进速度（超过跑速，AC6 同款"加速突进斩"）
@@ -70,6 +72,13 @@ const MELEE_REACH := 150.0          # 判定盒前向长度
 const MELEE_HEIGHT := 90.0          # 判定盒高度
 # ---- 玩家死亡与结算 ----
 const PLAYER_DAMAGE_SHAKE_STRENGTH := 8.0 # 玩家受击的镜头震动（击毁 6 / 死亡 10 之间）
+# 受击无敌窗：受击后这段时间内只结算「比本窗已吃的最大一击更大」的差价——
+# 机枪一串 = 吃一枚（直射一梭 0.5s / 杂兵一梭 ≤0.55s 都落在窗内），技能弹
+# 不会被先擦到的机枪弹免掉。驻留区 tick 伤（火区/灼点）不进窗（take_damage periodic）。
+const PLAYER_HURT_INVULN_TIME := 0.6
+const PLAYER_HURT_FLICKER := true          # 窗内机体轻闪（false=只有机制没有表现）
+const PLAYER_HURT_FLICKER_PERIOD := 0.1    # 闪烁周期（秒）
+const PLAYER_HURT_FLICKER_ALPHA := 0.55    # 暗相透明度
 const PLAYER_DEATH_SHAKE_STRENGTH := 10.0 # 玩家被毁的镜头震动（比击毁敌人更重）
 # ---- 飞行（AC6 式推进：地面按跳=跳跃；空中按住跳=持续上升） ----
 const BOOST_THRUST_ACCEL := 1000.0     # 推进加速度（px/s²），等比压缩

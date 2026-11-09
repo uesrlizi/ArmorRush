@@ -20,12 +20,12 @@ const ELITE_PILER_FENCE_HALF := 140.0  # 桩落点半宽（笼内=被围）
 const ELITE_PILER_FENCE_TOP := 150.0   # 幕高（纯跳 apex 底 −103 跳不过，教学纯净版幕稍矮）
 const ELITE_PILER_FENCE_WARMUP := 0.8  # 桩上火花蓄能（二段预警，比 BOSS 版多留 0.1s 读）
 const ELITE_PILER_FENCE_LIFE := 1.6    # 幕存活时长，到点哑熄（无伤）
-const ELITE_PILER_FENCE_DAMAGE := 8
+const ELITE_PILER_FENCE_DAMAGE := 12
 const ELITE_PILER_STAKE_FLIGHT := 0.5  # 桩抛体飞行时长（弹道解算用）
 
 # ---- 第六章 BOSS·斗轮采集舰「赤轮」（300×180 机体 hover 370：船底 460=t2 ----
 # 站立头顶上方 10px；最低点=斗轮缘 454（bob 后对最高台阶 536 净空 76），同
-# 驳船/哨兵/鮟鱇/断云档。招式=电网闸 ⇄ 凿岩齐射（腹舱抛装药封跑线路径，
+# 驳船/哨兵/灯笼鱼/截击机档。招式=电网闸 ⇄ 凿岩齐射（腹舱抛装药封跑线路径，
 # 见 DRILL_CHARGE 段），间插斗轮抛石普攻（见 REDWHEEL_LOB 段：斗轮提速吐料→
 # 朝玩家当时位置抛弹石群，机枪短梭已废）。分工账：电网闸 hunts 滞留者（笼+税：
 # 停=围/动=免/出笼交税或飞越），凿岩齐射 hunts 匀速跑线路径（lead 走廊），抛石
@@ -36,7 +36,7 @@ const REDWHEEL_FENCE_HALF := 200.0     # 桩落点半宽（笼内=被围）
 const REDWHEEL_FENCE_TOP := 200.0      # 幕高（推进 ≥204 飞越=免）
 const REDWHEEL_FENCE_WARMUP := 0.7     # 桩上火花蓄能（p2 0.55：跑=免的窗口收窄）
 const REDWHEEL_FENCE_LIFE := 2.2       # 幕存活时长
-const REDWHEEL_FENCE_DAMAGE := 10
+const REDWHEEL_FENCE_DAMAGE := 15
 const REDWHEEL_FENCE_LEAD_MAX := 400.0 # 半 lead：落带中心按玩家速度前/后移的上限
 									   # （惩罚缓移与后撤，全速跑仍出带）
 const REDWHEEL_FENCE_RECOVER := 1.3
@@ -55,7 +55,7 @@ const REDWHEEL_CHARGE_COUNT := 3        # 一轮装药数（p2 +1：走廊拉长
 const REDWHEEL_CHARGE_STAGGER := 0.18   # 出膛梯次
 const REDWHEEL_CHARGE_FLIGHT := 0.7     # 抛体飞行时长（MORTAR_GRAVITY 解算用）
 const REDWHEEL_CHARGE_FUSE := 1.0       # 落地定延时起爆（红灯渐急=二段预警）
-const REDWHEEL_CHARGE_DAMAGE := 10
+const REDWHEEL_CHARGE_DAMAGE := 15
 const REDWHEEL_CHARGE_RADIUS := 120.0
 const REDWHEEL_CHARGE_SPACING := 260.0  # 装药间距（>爆球直径 240：不连锁、缝可读）
 const REDWHEEL_CHARGE_LEAD_MAX := 700.0 # 半 lead：走廊中心前/后移的上限
@@ -68,7 +68,7 @@ const REDWHEEL_PHASE2_CHARGE_BONUS := 1
 # 再按序号在固定扇里错开初速方向——石群落点围着玩家当时位置散布：站桩/直线
 # 冲脸=吃，看弧线挪位=免；弧线从头顶盖下来，滞空不免费。抛体不贴地（贴地跟随
 # 类已判死），落地即 ImpactBurst 迸溅。提速吐料的一拍=读法（普攻不挂预警闪）。
-const REDWHEEL_LOB_COUNT := 5           # 一轮弹石数（p2 +1；5×8=40、p2 48 ≤ 旧短梭满吃 48）
+const REDWHEEL_LOB_COUNT := 5           # 一轮弹石数（p2 +1；石群落点散布，受击无敌窗内多石只结算一石）
 const REDWHEEL_LOB_DAMAGE := BalanceCombat.BOSS_SWEEP_DAMAGE # 跨文件引用：机枪流基准档（balance_combat.gd）。单石同机枪档：威胁分层不变，autotest 排空闸按此值数
 const REDWHEEL_LOB_GRAVITY := 2000.0    # 抛体重力：MORTAR 4000 的一半、玩家上升 1200 的 1.7×——弧看得见、落得干脆
 const REDWHEEL_LOB_RANGE_SPEED := 1000.0 # 飞行时长=水平距/此值（再 clamp）：远=飞久弧高

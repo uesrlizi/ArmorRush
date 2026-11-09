@@ -29,11 +29,11 @@ const ELITE_SHORE_ATTACK_RANGE := 2200.0
 const ELITE_SHORE_VOLLEY_HALF_LIFE := 2.4 # 齐射触发半衰期（同前六章精英的泊松节奏）
 const ELITE_SHORE_VOLLEY_COUNT := 2    # 轮内双发梯次
 const ELITE_SHORE_VOLLEY_STAGGER := 0.55
-const ELITE_SHORE_SKIP_DAMAGE := 8
+const ELITE_SHORE_SKIP_DAMAGE := 12
 const ELITE_SHORE_SKIP_BLAST_RADIUS := 90.0 # 末跳球爆（+玩家半宽宽限）
 
 # ---- 第七章 BOSS·打捞巡防舰「沉锚」（300×180 机体 hover 370：船底 460=t2 ----
-# 站立头顶上方 10px、对最高台阶 536 净空 76px，同驳船/哨兵/鮟鱇/断云/赤轮档。
+# 站立头顶上方 10px、对最高台阶 536 净空 76px，同驳船/哨兵/灯笼鱼/截击机/赤轮档。
 # 招式=跳弹齐射（艏炮俯仰真瞄→逐发梯次 SkipShell，每发落玩家**当时**脚下）
 # ⇄ 深弹涌浪（艉舱向艉侧抛 DepthCharge 落海→定延时闷爆→SeaSurge 固定高度带
 # 漫桥，见 SEA_SURGE 段），间插舰炮曳光直射（sea_bolt.tscn=bullet.gd 纯换皮，
@@ -49,7 +49,7 @@ const ANCHOR_SKIP_COUNT := 2           # 一轮跳弹数（p2 +1=三连波）
 const ANCHOR_SKIP_STAGGER := 0.45      # 弹串节拍（p2 0.35：追赶读法）
 const ANCHOR_PHASE2_SKIP_BONUS := 1
 const ANCHOR_PHASE2_SKIP_STAGGER := 0.35
-const ANCHOR_SKIP_DAMAGE := 10
+const ANCHOR_SKIP_DAMAGE := 15
 const ANCHOR_SKIP_BLAST_RADIUS := 100.0
 const ANCHOR_SKIP_RECOVER := 1.3
 const ANCHOR_CHARGE_COUNT := 2         # 一轮深弹数（同波涌浪，一次投放）
@@ -72,4 +72,4 @@ const SEA_SURGE_SWELL := 0.6           # 涌起预告（浪冠从屏底缓升）
 const SEA_SURGE_RISE := 0.35           # 漫桥（水面升到 FLOOD_Y）
 const SEA_SURGE_HOLD := 0.55           # 驻留
 const SEA_SURGE_RECEDE := 0.6          # 退去
-const SEA_SURGE_DAMAGE := 10
+const SEA_SURGE_DAMAGE := 15

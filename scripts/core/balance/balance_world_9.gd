@@ -25,7 +25,7 @@ const LIVE_SPAN_LENGTH := 320.0     # 跨距（缆 [x1, x1+320]）
 const LIVE_SPAN_HIGH_H := 110.0     # 高桩高 = 高缆高
 const LIVE_SPAN_LOW_H := 40.0       # 低桩高 = 低缆高
 const LIVE_SPAN_HALF_THICK := 8.0   # 缆判定半厚（玩家 AABB 40×60 到缆线段距离 ≤8）
-const LIVE_SPAN_DAMAGE := 10
+const LIVE_SPAN_DAMAGE := 15
 # 落位（R13）：x1 = px − 160 + clamp(vx·2.1, −400, 1260)。站桩=缆以玩家为中心；
 # 满速 x1=1100、缆 [1100,1420]，t=2.2 带电时玩家中心 1320 正在缆下。
 const LIVE_SPAN_LEAD_TIME := 2.1
@@ -81,8 +81,8 @@ const ROD_HEIGHT := 120.0
 const ROD_ARC_HALF_THICK := 8.0
 const ROD_ARC_LIFE := 0.15
 const ROD_BURST_RADIUS := 90.0
-const ROD_BURST_DAMAGE := 10
-const ROD_ARC_DAMAGE := 8
+const ROD_BURST_DAMAGE := 15
+const ROD_ARC_DAMAGE := 12
 const ROD_COUNT := 3
 const ROD_P2_BONUS := 1
 const ROD_SPACING := 300.0

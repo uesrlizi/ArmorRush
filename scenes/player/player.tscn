@@ -17,7 +17,9 @@
 [ext_resource type="Texture2D" uid="uid://b3jguo1gty0fs" path="res://assets/common/player_mech_user_leg_near_foot.svg" id="15"]
 [ext_resource type="Texture2D" uid="uid://5qpahvni2klm" path="res://assets/common/player_mech_user_leg_near_shin.svg" id="16"]
 [ext_resource type="Texture2D" path="res://assets/common/shield_ring.svg" id="17"]
-[ext_resource type="Texture2D" path="res://assets/common/shoulder_pod.svg" id="18"]
+[ext_resource type="Texture2D" path="res://assets/common/shoulder_mount.svg" id="18"]
+[ext_resource type="Texture2D" path="res://assets/common/missile_pod.svg" id="19"]
+[ext_resource type="Texture2D" path="res://assets/common/rail_gun.svg" id="20"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
 size = Vector2(40, 60)
@@ -121,15 +123,37 @@ position = Vector2(-3.9667, 12.25)
 visible = false
 position = Vector2(-6, -35)
 
-[node name="Sprite2D" type="Sprite2D" parent="Visuals/ShoulderPod"]
+; 肩部武器（§4 肩部武器槽）：AC 式越肩大件——支架固定焊死在机背，
+; 轴点（PodPivot）在支架与炮身之间，炮身绕轴瞄准（player.gd _tick_pod_aim 驱动）。
+; 两套炮身（导弹舱/磁轨炮）同挂一个轴，按成员亮其一；枪口各自独立。
+[node name="Mount" type="Sprite2D" parent="Visuals/ShoulderPod"]
 scale = Vector2(0.5, 0.5)
 texture = ExtResource("18")
 
-[node name="Muzzle" type="Marker2D" parent="Visuals/ShoulderPod"]
-position = Vector2(17, -0.5)
+[node name="PodPivot" type="Node2D" parent="Visuals/ShoulderPod"]
+position = Vector2(0, -5)
 
-[node name="Flash" parent="Visuals/ShoulderPod/Muzzle" instance=ExtResource("4")]
+[node name="MissilePod" type="Sprite2D" parent="Visuals/ShoulderPod/PodPivot"]
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("19")
+
+[node name="RailGun" type="Sprite2D" parent="Visuals/ShoulderPod/PodPivot"]
+visible = false
+position = Vector2(16, 0)
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("20")
+
+[node name="MuzzleMissile" type="Marker2D" parent="Visuals/ShoulderPod/PodPivot"]
+position = Vector2(17, 0)
+
+[node name="Flash" parent="Visuals/ShoulderPod/PodPivot/MuzzleMissile" instance=ExtResource("4")]
 scale = Vector2(0.6, 0.6)
+
+[node name="MuzzleRail" type="Marker2D" parent="Visuals/ShoulderPod/PodPivot"]
+position = Vector2(43, 0)
+
+[node name="Flash" parent="Visuals/ShoulderPod/PodPivot/MuzzleRail" instance=ExtResource("4")]
+scale = Vector2(0.9, 0.9)
 
 [node name="Sprite2D" type="Sprite2D" parent="Visuals" unique_id=1108497758]
 position = Vector2(6.1795273, 0)
