@@ -75,13 +75,16 @@ func _physics_process(delta: float) -> void:
 
 
 ## 爆蕗：粒群绽放 + 珊瑚红爆区（单次球状判定），余烬过继弹容器淡完再清。
+## 能量球体出残影原地快淡（星闪芯 ~10px 接不住 36px 的球，消失承接规范 §4c）。
 func _bloom() -> void:
+	VanishGhost.spawn(_visual)
 	var at := Vector2(global_position.x, _terrain.surface_y_at(global_position.x))
 	var container := get_tree().get_first_node_in_group("projectile_container")
 	if _embers != null:
 		_embers.emitting = false
 		if container != null:
 			_embers.reparent(container)
+			_embers.reset_physics_interpolation() # 过继后清补间基点（否则整团余烬从原点补间一步=闪一帧）
 			get_tree().create_timer(0.6).timeout.connect(_embers.queue_free)
 	if container != null:
 		var blast := GroundBlast.new()

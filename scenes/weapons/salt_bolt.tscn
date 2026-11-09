@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/weapons/bullet.gd" id="1"]
 ; 盐磨融盐重弹（普攻单发点放，bullet.gd 纯换皮：直线语法/速度/伤害由发射方赋值）。
@@ -9,6 +9,8 @@
 ; 开火爆闪（熔杏）与 fire_heavy 出膛音。贴图 36x16；碰撞 = 胶囊沿 +X，r5×长26。
 [ext_resource type="Texture2D" path="res://assets/world_8/fx_salt_bolt.svg" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/weapons/mortar_trail.tscn" id="3"]
+; 命中爆=heavy_impact（与排炮重弹共用：白闪起跳半径=弹体面积折算+熔橙爆区闪）
+[ext_resource type="PackedScene" path="res://scenes/fx/heavy_impact.tscn" id="4"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_1"]
 radius = 5.0
@@ -18,6 +20,7 @@ height = 26.0
 collision_layer = 16
 collision_mask = 3
 script = ExtResource("1")
+impact_scene = ExtResource("4")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("2")

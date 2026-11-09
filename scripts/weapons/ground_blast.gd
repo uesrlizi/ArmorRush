@@ -20,6 +20,7 @@ const PLAYER_RADIUS := 26.0
 const FLASH_BURST := preload("res://scenes/fx/flash_burst.tscn")
 
 var _judged := false
+var _flash: FlashBurst # 爆闪子节点：它自己播完淡出才自清，本体等它（见 _physics_process）
 
 
 func _init() -> void:
@@ -36,6 +37,7 @@ func _ready() -> void:
 		flash.modulate = flash_color
 		flash.size_scale = radius / 48.0
 		add_child(flash) # 先定位再入树：tween 在 _ready 起跑，晚定位会闪在原点
+		_flash = flash
 	reset_physics_interpolation()
 
 
@@ -44,7 +46,10 @@ func _physics_process(delta: float) -> void:
 		_judged = true
 		_judge()
 	linger -= delta
-	if linger <= 0.0:
+	# 爆闪挂在本节点下：本体先清会把正在淡出的闪光连根砍掉（linger 0.25s 砍在
+	# 0.33s 闪光的七成亮度、最大尺寸处=「爆炸到一半忽然消失」）。linger 只当
+	# 驻留下限，闪光自清后再走。
+	if linger <= 0.0 and not is_instance_valid(_flash):
 		queue_free()
 
 

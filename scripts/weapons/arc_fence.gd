@@ -146,9 +146,9 @@ func _plant() -> void:
 		var container := get_tree().get_first_node_in_group("projectile_container")
 		if container != null:
 			var spark := HIT_BURST.instantiate() as Node2D
-			container.add_child(spark)
-			spark.position = Vector2(_xs[i], ground_y - 6.0)
+			spark.position = Vector2(_xs[i], ground_y - 6.0) # 先定位再入树（OneShotFx 规矩）
 			spark.scale = Vector2(0.55, 0.55)
+			container.add_child(spark)
 	Sfx.play(&"fire_enemy") # 占位：落桩暂用敌枪声，打桩配方后配
 
 
@@ -200,8 +200,8 @@ func _tick_damage() -> void:
 			var container := get_tree().get_first_node_in_group("projectile_container")
 			if container != null:
 				var spark := HIT_BURST.instantiate() as Node2D
+				spark.position = player.global_position # 触电点迸花（结算读法；先定位再入树）
 				container.add_child(spark)
-				spark.position = player.global_position # 触电点迸花（结算读法）
 			Sfx.play(&"boom_enemy") # 占位：触电暂用敌爆声
 			_start_fade()
 			return

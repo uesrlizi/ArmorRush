@@ -148,7 +148,14 @@ func _detonate() -> void:
 		_smoke.emitting = false # 断烟，过继给弹容器让残余烟团淡完再清（不随弹体瞬灭）
 		if container != null:
 			_smoke.reparent(container)
+			_smoke.reset_physics_interpolation() # 过继后清补间基点（否则整条烟从原点补间一步=闪一帧）
 			get_tree().create_timer(1.2).timeout.connect(_smoke.queue_free)
+	if _flame != null:
+		_flame.emitting = false # 尾焰同烟：~100px 焰尾不随弹体瞬灭，过继淡完（消失承接规范 §4c）
+		if container != null:
+			_flame.reparent(container)
+			_flame.reset_physics_interpolation()
+			get_tree().create_timer(_flame.lifetime + 0.1).timeout.connect(_flame.queue_free)
 	if container != null:
 		# 爆区闪光（GroundBlast 的橙闪）先入树垫底：爆炸火球/冲击环/烟压在它
 		# 上面，橙光只从边缘露出当爆区光晕——后入树会画在最顶，把特效全罩住

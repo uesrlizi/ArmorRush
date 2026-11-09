@@ -43,6 +43,7 @@ func _detonate() -> void:
 				(p as GPUParticles2D).emitting = false
 		if container != null:
 			_trail.reparent(container) # 过继弹容器让残余电光淡完再清（同拉烟收尾惯例）
+			_trail.reset_physics_interpolation() # 过继后清补间基点（否则整条尾从原点补间一步=闪一帧）
 			get_tree().create_timer(0.8).timeout.connect(_trail.queue_free)
 	if container != null:
 		var blast := GroundBlast.new()

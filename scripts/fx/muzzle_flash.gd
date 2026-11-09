@@ -29,6 +29,9 @@ func _init() -> void:
 func _ready() -> void:
 	_m_curr = _muzzle_pos()
 	_m_prev = _m_curr
+	# top_level 的本体位默认在世界原点：入树同帧就 fire()（首个 _process 前）会在
+	# 原点闪一帧，入树即钉到枪口。
+	global_position = _m_curr
 
 
 func _muzzle_pos() -> Vector2:

@@ -79,8 +79,12 @@ func _physics_process(delta: float) -> void:
 
 
 ## 定距空爆：球状爆区（单次判定）+ 四层平涂空爆，无驻留区。
+## 曳光弹体 112px 长条，星闪实心芯只有 ~7px 接不住：弹体+引信芯出残影原地快淡
+##（消失承接规范 design/worlds.md §4c），残影先入容器、爆裂画在其上。
 func _detonate(at: Vector2) -> void:
 	_detonated = true
+	VanishGhost.spawn(_visual)
+	VanishGhost.spawn(_core_glow)
 	var container := get_tree().get_first_node_in_group("projectile_container")
 	if container != null:
 		var blast := GroundBlast.new()

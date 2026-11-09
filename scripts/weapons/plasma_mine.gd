@@ -94,6 +94,7 @@ func _physics_process(delta: float) -> void:
 			_hover += delta
 			_tick_visual(delta)
 			if _hover >= BalanceWorld3.PLASMA_MINE_LIFETIME:
+				_release_arcs() # 雷体已淡完，残余电弧过继淡完（不随节点瞬灭）
 				queue_free() # 引信期内没人靠近：照常哑熄（无伤）
 				return
 			_fuse_t -= delta
@@ -109,6 +110,7 @@ func _tick_hover(delta: float) -> void:
 			sin(_bob_t * BalanceEnemy.DRONE_BOB_SPEED * 0.6) * 3.0,
 			sin(_bob_t * BalanceEnemy.DRONE_BOB_SPEED) * 4.0)
 	if _hover >= BalanceWorld3.PLASMA_MINE_LIFETIME:
+		_release_arcs() # 雷体已淡完，残余电弧过继淡完（不随节点瞬灭）
 		queue_free() # 哑熄：无伤淡出（等出来的是安全，不是圈套）
 		return
 	var player := get_tree().get_first_node_in_group("player") as Player
@@ -138,13 +140,22 @@ func _tick_visual(_delta: float) -> void:
 	_visual.modulate.a = minf(alpha, fade_out)
 
 
+## 残余电弧过继弹容器淡完再清（同导弹拉烟收尾惯例；引爆与哑熄两条收尾共用）。
+func _release_arcs() -> void:
+	if _arcs == null:
+		return
+	_arcs.emitting = false
+	var container := get_tree().get_first_node_in_group("projectile_container")
+	if container != null:
+		_arcs.reparent(container)
+		_arcs.reset_physics_interpolation() # 过继后清补间基点（否则电弧从原点补间一步=闪一帧）
+		get_tree().create_timer(0.8).timeout.connect(_arcs.queue_free)
+	_arcs = null
+
+
 func _detonate() -> void:
 	var container := get_tree().get_first_node_in_group("projectile_container")
-	if _arcs != null:
-		_arcs.emitting = false
-		if container != null:
-			_arcs.reparent(container) # 残余电弧淡完再清（同导弹拉烟收尾惯例）
-			get_tree().create_timer(0.8).timeout.connect(_arcs.queue_free)
+	_release_arcs()
 	if container != null:
 		# 空中球状爆：GroundBlast 只做位置球判定（不依赖地面），雷下驻停必吃
 		var blast := GroundBlast.new()

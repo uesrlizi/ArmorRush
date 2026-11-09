@@ -458,7 +458,9 @@ func _stagger_immunity() -> float:
 	return BalanceCombat.STAGGER_IMMUNITY_BOSS
 
 
-## 击退演出：父类单体爆炸照播，再补一串错峰爆炸 + 收血条，1.4s 后自清。
+## 击退演出：父类单体爆炸 + 一串错峰小爆炸（机体留场、血条收起），到
+## BOSS_DEATH_FINALE_TIME 一发终爆把整机盖过去，本体就在那一帧炸没、装备同拍
+## 爆出（Main 读同一时刻；白闪起跳半径=整机面积折算，design/worlds.md §4c）。
 ## （本章通关的转场由 Main 监听 Spawner.boss_defeated 排程：延迟→黑场→下一章，
 ## 玩家满血来自新章的全新实例——原"击败回血"随章节机制废除。）
 func _explode() -> void:
@@ -482,4 +484,22 @@ func _explode() -> void:
 				container.add_child(boom)
 				Sfx.play(&"boom_enemy")
 			)
-	get_tree().create_timer(1.4).timeout.connect(queue_free)
+	get_tree().create_timer(BalanceCombat.BOSS_DEATH_FINALE_TIME).timeout.connect(func() -> void:
+		if is_instance_valid(container):
+			_spawn_death_finale(container)
+		queue_free() # 本体交给终爆首帧盖没
+	)
+
+
+## 终爆：击毁爆炸模板 ×BOSS_DEATH_FINALE_SCALE，白闪起跳半径=整机精灵面积折算。
+func _spawn_death_finale(container: Node) -> void:
+	var fin := EXPLOSION.instantiate() as ExplosionBurst
+	fin.scale = Vector2.ONE * BalanceCombat.BOSS_DEATH_FINALE_SCALE
+	fin.cover_radius = ExplosionBurst.area_cover_radius(
+			ExplosionBurst.tree_sprite_area(_visuals)) / fin.scale.x
+	fin.position = global_position # 先定位再入树（容器在原点，position 即全局位）
+	container.add_child(fin)
+	Sfx.play(&"boom_enemy")
+	var player := get_tree().get_first_node_in_group("player") as Player
+	if player != null:
+		player.add_shake(BalanceCombat.KILL_SHAKE_STRENGTH * 1.5)

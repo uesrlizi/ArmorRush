@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/fx/explosion_burst.tscn" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/fx/flash_burst.tscn" id="2"]
+
+; 重弹命中爆（排炮重弹 slag_slug / 融盐重弹 salt_bolt 共用，bullet.gd impact_scene 指过来）：
+; 击毁爆炸模板原尺寸 + 白闪起跳半径=弹体墨迹面积折算（fx_slag_slug 墨迹 ~276px²→
+; √(276/π)≈9.4，面积承接，不取外接圆）+ 熔橙爆区闪垫底（show_behind_parent=画在火球/
+; 环/粒子之下，首帧 r≈16 与白闪一起接住弹体，只从边缘露出当爆区光晕；modulate 照
+; GroundBlast 爆区闪同档=熔橙 0.6，满白会读成大平盘）。
+[node name="HeavyImpact" instance=ExtResource("1")]
+cover_radius = 9.5
+
+[node name="Glow" parent="." instance=ExtResource("2")]
+show_behind_parent = true
+modulate = Color(1, 0.55, 0.26, 0.6)
+size_scale = 1.1

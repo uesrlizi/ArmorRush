@@ -73,7 +73,7 @@ func _physics_process(delta: float) -> void:
 			var k := clampf(_t / BalanceWorld8.SALT_GEYSER_CLOSE, 0.0, 1.0)
 			_column.modulate.a = 1.0 - k
 			_mark.modulate.a = 1.0 - k
-			_glint.modulate.a = 0.0
+			_glint.modulate.a = 1.0 - k # 粉晕随柱同淡（不在收柱首帧一步归零，消失承接规范 §4c）
 			if k >= 1.0:
 				queue_free()
 

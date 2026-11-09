@@ -8,6 +8,9 @@ extends Node2D
 ## 全部可调参数在 BalanceGlobal 的 HP_BAR_* 段（用户直接手调 BalanceGlobal）。
 
 var _ghost := 1.0 # 虚影右缘（血量比例 0..1，≥当前血量比例）
+var _dead_t := 0.0 # 玩家阵亡后的淡出计时（消失承接规范 §4c：条随机体淡掉，不在阵亡帧瞬灭）
+
+const DEATH_FADE := 0.2
 
 
 func _process(delta: float) -> void:
@@ -16,6 +19,10 @@ func _process(delta: float) -> void:
 	visible = RunState.ui_tier < 2
 	if not visible:
 		return
+	var player := get_parent() as Player
+	if player != null and player.is_dead():
+		_dead_t += delta
+		self_modulate.a = clampf(1.0 - _dead_t / DEATH_FADE, 0.0, 1.0)
 	var ratio := _hp_ratio()
 	if ratio > _ghost:
 		_ghost = ratio # 回满/回血/池化重置：瞬移，不倒放虚影
@@ -46,8 +53,12 @@ func _hp_ratio() -> float:
 
 
 func _draw_player(player: Player) -> void:
-	# 启动页待机空场不挂牌（modulate 淡入由 Player.play_ignition 管）。
-	if player.is_dead() or not player.input_enabled:
+	# 启动页待机空场不挂牌（modulate 淡入由 Player.play_ignition 管）；阵亡后按
+	# _dead_t 淡完再停画（self_modulate 在 _process 里收）。
+	if player.is_dead():
+		if _dead_t >= DEATH_FADE:
+			return
+	elif not player.input_enabled:
 		return
 	var w := player.bar_width() # 装甲装备=条加宽（§4 装甲槽通道），无装备=出厂宽
 	var y := BalanceGlobal.HP_BAR_PLAYER_OFFSET_Y

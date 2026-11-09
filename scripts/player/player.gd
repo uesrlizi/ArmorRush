@@ -978,9 +978,12 @@ func _flash_shield_ring() -> void:
 	tw.tween_property(_shield_ring, "self_modulate", ring, 0.18).from(Color.WHITE)
 
 
-## 破盾：环隐 + 碎散火花；复合盾追加无敌缓冲（stats 里读，相位盾为 0=无缓冲）。
+## 破盾：环扩散淡出 + 碎散火花；复合盾追加无敌缓冲（stats 里读，相位盾为 0=无缓冲）。
 func _break_shield() -> void:
 	_guard_t = RunState.mod_stat(&"shield_guard_time", 0.0)
+	# 环不一帧隐掉：残影原地放大淡出（消失承接规范 design/worlds.md §4c；火花环
+	# 0.075s 才扩到环半径，接不住 104px 的环）
+	VanishGhost.spawn(_shield_ring, 0.15, 1.35)
 	_update_shield_ring()
 	var container := get_tree().get_first_node_in_group("projectile_container")
 	if container == null:
@@ -1011,6 +1014,8 @@ func _die() -> void:
 	# ——穿过空位飞走，不在尸体原来的空气里开花。层一撤全体敌弹自动失的。
 	collision_layer = 0
 	# 机体在爆炸里炸没：Visuals 整层隐藏（本体/枪臂/喷口/刃光/火花），不留残骸立全场。
+	# 隐藏前先量机体面积：爆炸白闪起跳半径按面积折算接住整机（§4c）。
+	var cover := ExplosionBurst.area_cover_radius(ExplosionBurst.tree_sprite_area(_visuals))
 	_visuals.visible = false
 	_thruster.set_target(0.0) # 推进器熄火
 	_leg_thruster.set_target(0.0)
@@ -1024,7 +1029,7 @@ func _die() -> void:
 	if _tip_sparks != null:
 		_tip_sparks.emitting = false # 余量粒子由其脚本自灭
 		_tip_sparks = null
-	_spawn_death_explosion()
+	_spawn_death_explosion(cover)
 	Sfx.play(&"boom_player")
 	add_shake(BalancePlayer.PLAYER_DEATH_SHAKE_STRENGTH)
 	_rumble(1.0, 1.0, 0.4) # 机体被毁：全强长震
@@ -1033,13 +1038,15 @@ func _die() -> void:
 	died.emit()
 
 
-## 玩家被毁爆炸：与敌人同款，机体更大所以放大一档。
-func _spawn_death_explosion() -> void:
+## 玩家被毁爆炸：与敌人同款，机体更大所以放大一档。机体当帧隐藏，白闪起跳半径
+## =机体面积折算（cover 为世界 px，换算到爆炸局部单位；面积承接 design/worlds.md §4c）。
+func _spawn_death_explosion(cover: float) -> void:
 	var container := get_tree().get_first_node_in_group("projectile_container")
 	if container == null:
 		return
-	var boom := EXPLOSION.instantiate() as Node2D
+	var boom := EXPLOSION.instantiate() as ExplosionBurst
 	boom.scale = Vector2(1.3, 1.3)
+	boom.cover_radius = cover / boom.scale.x
 	# 先定位再入树：one_shot 粒子在 _ready（add_child 时）整批出生，晚定位会喷在原点。
 	boom.position = global_position # 容器在原点且无变换，position 即全局位
 	container.add_child(boom)
