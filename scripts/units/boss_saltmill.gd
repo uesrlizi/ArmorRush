@@ -1,6 +1,6 @@
 class_name BossSaltmill
 extends PursuitBoss
-## 第八章 BOSS·悬浮采盐联合机「盐磨」（镜盐之原守卫）：追击框架能力层——
+## 第八章 BOSS·聚光镜碟「盐磨」（镜盐之原守卫）：追击框架能力层——
 ## 「采盐与地热」。低宽联合机（镜阵翼俯仰真瞄+腹裂地锚口+舷侧盐料斗；锚点账
 ## 见 bake_salt_units.py 头注/提案_v1 §3）：
 ##   间歇泉幕（技能A）：腹口（BayPort）预警 → 裂地镖 5 枚梯次远→近出膛，
@@ -18,7 +18,9 @@ extends PursuitBoss
 ##     开火戏=枪口焰+熔杏爆闪双叠+fire_heavy 专配出膛音（ch2 重弹同款份量）。
 ## 分工账：泉幕=罚站桩与罚直线穿行（离/穿缝/等），灼点=罚匀速与罚慢挪
 ## （变速变向）——全章语言=「变速变向，读线走位」。
-## 走位/贴脸窗/二阶段/失衡全在 PursuitBoss 框架。数值全在 BalanceWorld8.SALTMILL_*。
+## 走位/贴脸窗/二阶段/失衡全在 PursuitBoss 框架；底舱双举升喷口焰（杏金蒸汽，
+## 焰朝下）=节点挂 EnemyThrusterFlame，闪燃/随速拉长在节点脚本，本脚本不碰
+## 喷口 modulate/scale。数值全在 BalanceWorld8.SALTMILL_*。
 
 const ST_GEYSER_WARN := 3
 const ST_GEYSER_FIRE := 4
@@ -44,10 +46,6 @@ var _direct_shoot_t := 0.0
 @onready var _muzzle_warn: ThreatFlash = $Visuals/ArmPivot/Muzzle/ThreatFlash
 @onready var _bay_warn: ThreatFlash = $Visuals/BayPort/ThreatFlash
 @onready var _bay_flash: MuzzleFlash = $Visuals/BayPort/Flash
-@onready var _thrusters: Array[Sprite2D] = [
-	$Visuals/Thruster1 as Sprite2D,
-	$Visuals/Thruster2 as Sprite2D,
-]
 
 
 ## 血条上方显示的机体名。
@@ -68,14 +66,6 @@ func on_spawned() -> void:
 	_darts_launched = 0
 	_burns_launched = 0
 	_wing.modulate = Color.WHITE
-
-
-## 双举升喷口杏金呼吸（联合机无旋翼）；镜阵翼俯仰由基类瞄准层驱动，这里不重复。
-func _tick_visual(_delta: float) -> void:
-	for i in _thrusters.size():
-		var t := _thrusters[i] as Sprite2D
-		t.modulate.a = 0.45 + 0.25 * sin(_bob_t * 11.0 + i * 2.3)
-		t.scale = Vector2.ONE * (0.95 + 0.15 * sin(_bob_t * 8.0 + i * 1.9))
 
 
 ## ---- 技能 A：间歇泉幕 ----

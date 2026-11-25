@@ -1,4 +1,4 @@
-[gd_scene load_steps=27 format=3]
+[gd_scene load_steps=26 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/main.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/world/spawner.gd" id="2"]
@@ -20,7 +20,6 @@
 [ext_resource type="Script" path="res://scripts/world/aerial_fog.gd" id="18"]
 [ext_resource type="Script" path="res://scripts/ui/title_screen.gd" id="19"]
 [ext_resource type="PackedScene" path="res://scenes/units/elite_6.tscn" id="20"]
-[ext_resource type="PackedScene" path="res://scenes/units/boss_6.tscn" id="21"]
 [ext_resource type="Texture2D" path="res://assets/world_6/env_red_ground_top.svg" id="22"]
 [ext_resource type="Texture2D" path="res://assets/world_6/env_red_ground_fill.svg" id="23"]
 [ext_resource type="Texture2D" path="res://assets/world_6/env_red_wheel.svg" id="24"]
@@ -120,7 +119,6 @@ enemy_scene = ExtResource("6")
 drone_scene = ExtResource("16")
 shield_scene = ExtResource("17")
 elite_scene = ExtResource("20")
-boss_scene = ExtResource("21")
 obstacle_scene = ExtResource("7")
 platform_scene = ExtResource("11")
 scaffold_scene = ExtResource("12")

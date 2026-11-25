@@ -20,7 +20,6 @@
 [ext_resource type="Script" uid="uid://r1ik6icfrq8y" path="res://scripts/world/aerial_fog.gd" id="18"]
 [ext_resource type="Script" uid="uid://bupymec0yg7rf" path="res://scripts/ui/title_screen.gd" id="19"]
 [ext_resource type="PackedScene" path="res://scenes/units/elite_4.tscn" id="20"]
-[ext_resource type="PackedScene" path="res://scenes/units/boss_4.tscn" id="21"]
 [ext_resource type="Texture2D" uid="uid://bq3mh14r8byj2" path="res://assets/world_4/env_coral_ground_top.svg" id="22"]
 [ext_resource type="Texture2D" uid="uid://bs8ryu58o4snp" path="res://assets/world_4/env_coral_ground_fill.svg" id="23"]
 [ext_resource type="Texture2D" uid="uid://b0drbns0k8hmb" path="res://assets/world_4/env_coral_ring.svg" id="24"]
@@ -112,7 +111,6 @@ enemy_scene = ExtResource("6")
 drone_scene = ExtResource("16")
 shield_scene = ExtResource("17")
 elite_scene = ExtResource("20")
-boss_scene = ExtResource("21")
 obstacle_scene = ExtResource("7")
 platform_scene = ExtResource("11")
 scaffold_scene = ExtResource("12")

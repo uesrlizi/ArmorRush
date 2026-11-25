@@ -1,39 +1,38 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://btj7jdke8ee6c"]
 
-[ext_resource type="Script" path="res://scripts/world/main.gd" id="1"]
-[ext_resource type="Script" path="res://scripts/world/spawner.gd" id="2"]
-[ext_resource type="Script" path="res://scripts/ui/hud.gd" id="3"]
-[ext_resource type="Script" path="res://scripts/dev/autotest.gd" id="4"]
-[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="5"]
+[ext_resource type="Script" uid="uid://cbatnvdf00rqu" path="res://scripts/world/main.gd" id="1"]
+[ext_resource type="Script" uid="uid://ftv0ednc41bs" path="res://scripts/world/spawner.gd" id="2"]
+[ext_resource type="Script" uid="uid://cyf2wmfuwypif" path="res://scripts/ui/hud.gd" id="3"]
+[ext_resource type="Script" uid="uid://dmacs85fg0ibu" path="res://scripts/dev/autotest.gd" id="4"]
+[ext_resource type="PackedScene" uid="uid://dvl806hn05kp6" path="res://scenes/player/player.tscn" id="5"]
 [ext_resource type="PackedScene" path="res://scenes/units/enemy_3.tscn" id="6"]
 [ext_resource type="PackedScene" path="res://scenes/props/obstacle.tscn" id="7"]
-[ext_resource type="Texture2D" path="res://assets/world_3/env_snow_far.svg" id="8"]
-[ext_resource type="Texture2D" path="res://assets/world_3/env_snow_ground.svg" id="9"]
-[ext_resource type="Script" path="res://scripts/world/world_strip.gd" id="10"]
+[ext_resource type="Texture2D" uid="uid://no73umgwrgei" path="res://assets/world_3/env_snow_far.svg" id="8"]
+[ext_resource type="Texture2D" uid="uid://bqa1bexx0np7" path="res://assets/world_3/env_snow_ground.svg" id="9"]
+[ext_resource type="Script" uid="uid://fml7poeh1ye" path="res://scripts/world/world_strip.gd" id="10"]
 [ext_resource type="PackedScene" path="res://scenes/props/platform_crate.tscn" id="11"]
 [ext_resource type="PackedScene" path="res://scenes/props/scaffold_3.tscn" id="12"]
-[ext_resource type="Script" path="res://scripts/world/terrain.gd" id="13"]
-[ext_resource type="Texture2D" path="res://assets/world_3/env_snow_mid.svg" id="14"]
-[ext_resource type="PackedScene" path="res://scenes/ui/touch_controls.tscn" id="15"]
+[ext_resource type="Script" uid="uid://dlchsc085ikvw" path="res://scripts/world/terrain.gd" id="13"]
+[ext_resource type="Texture2D" uid="uid://cu87pxkclkgfj" path="res://assets/world_3/env_snow_mid.svg" id="14"]
+[ext_resource type="PackedScene" uid="uid://bqttcusu8ah3s" path="res://scenes/ui/touch_controls.tscn" id="15"]
 [ext_resource type="PackedScene" path="res://scenes/units/enemy_drone_3.tscn" id="16"]
 [ext_resource type="PackedScene" path="res://scenes/units/enemy_shield_3.tscn" id="17"]
-[ext_resource type="Script" path="res://scripts/world/aerial_fog.gd" id="18"]
-[ext_resource type="Script" path="res://scripts/ui/title_screen.gd" id="19"]
+[ext_resource type="Script" uid="uid://r1ik6icfrq8y" path="res://scripts/world/aerial_fog.gd" id="18"]
+[ext_resource type="Script" uid="uid://bupymec0yg7rf" path="res://scripts/ui/title_screen.gd" id="19"]
 [ext_resource type="PackedScene" path="res://scenes/units/elite_3.tscn" id="20"]
-[ext_resource type="PackedScene" path="res://scenes/units/boss_3.tscn" id="21"]
-[ext_resource type="Texture2D" path="res://assets/world_3/env_snow_ground_top.svg" id="22"]
-[ext_resource type="Texture2D" path="res://assets/world_3/env_snow_ground_fill.svg" id="23"]
+[ext_resource type="Texture2D" uid="uid://bb3cqrns6xdk4" path="res://assets/world_3/env_snow_ground_top.svg" id="22"]
+[ext_resource type="Texture2D" uid="uid://c3yakdp3cedwa" path="res://assets/world_3/env_snow_ground_fill.svg" id="23"]
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_1"]
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_2"]
 normal = Vector2(0, 1)
 
-[node name="Main" type="Node2D"]
+[node name="Main" type="Node2D" unique_id=1615012438]
 script = ExtResource("1")
 sky_color = Color(0.494, 0.576, 0.643, 1)
 
-[node name="HillsStrip" type="Sprite2D" parent="."]
+[node name="HillsStrip" type="Sprite2D" parent="." unique_id=1380347948]
 texture_repeat = 2
 position = Vector2(8, 80)
 texture = ExtResource("8")
@@ -43,7 +42,7 @@ script = ExtResource("10")
 scroll_scale = 0.9
 tile_width = 1024.0
 
-[node name="MidStrip" type="Sprite2D" parent="."]
+[node name="MidStrip" type="Sprite2D" parent="." unique_id=1359853692]
 texture_repeat = 2
 position = Vector2(0, 440)
 texture = ExtResource("14")
@@ -53,13 +52,13 @@ script = ExtResource("10")
 scroll_scale = 0.55
 tile_width = 2048.0
 
-[node name="AerialFog" type="Sprite2D" parent="."]
+[node name="AerialFog" type="Sprite2D" parent="." unique_id=1845419709]
 script = ExtResource("18")
 color = Color(0.725, 0.788, 0.831, 1)
 
-[node name="BridgePiers" type="Node2D" parent="." groups=["bridge_piers"]]
+[node name="BridgePiers" type="Node2D" parent="." unique_id=943402482 groups=["bridge_piers"]]
 
-[node name="GroundStrip" type="Sprite2D" parent="."]
+[node name="GroundStrip" type="Sprite2D" parent="." unique_id=2144146746]
 texture_repeat = 2
 position = Vector2(0, 904)
 texture = ExtResource("9")
@@ -67,50 +66,51 @@ region_enabled = true
 region_rect = Rect2(0, 0, 6400, 480)
 script = ExtResource("10")
 
-[node name="Terrain" type="Node2D" parent="."]
+[node name="BurrowLayer" type="Node2D" parent="." unique_id=887652340 groups=["burrow_container"]]
+
+[node name="Terrain" type="Node2D" parent="." unique_id=1754092148]
 script = ExtResource("13")
 band_texture = ExtResource("22")
 fill_texture = ExtResource("23")
 seam_color = Color(0.5765, 0.6549, 0.7059, 1)
 detail_color = Color(0.5608, 0.6471, 0.702, 1)
 
-[node name="Ground" type="StaticBody2D" parent="."]
+[node name="Ground" type="StaticBody2D" parent="." unique_id=1964011337]
 position = Vector2(0, 664)
 collision_mask = 0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Ground"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ground" unique_id=1526044655]
 shape = SubResource("WorldBoundaryShape2D_1")
 
-[node name="Ceiling" type="StaticBody2D" parent="."]
+[node name="Ceiling" type="StaticBody2D" parent="." unique_id=808043954]
 position = Vector2(0, -60)
 collision_mask = 0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Ceiling"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ceiling" unique_id=288107665]
 shape = SubResource("WorldBoundaryShape2D_2")
 
-[node name="ScrollObjects" type="Node2D" parent="."]
+[node name="ScrollObjects" type="Node2D" parent="." unique_id=273498700]
 
-[node name="Projectiles" type="Node" parent="." groups=["projectile_container"]]
+[node name="Projectiles" type="Node" parent="." unique_id=1982493198 groups=["projectile_container"]]
 
-[node name="Player" parent="." instance=ExtResource("5")]
+[node name="Player" parent="." unique_id=1328663624 instance=ExtResource("5")]
 position = Vector2(200, 634)
 
-[node name="Spawner" type="Node" parent="."]
+[node name="Spawner" type="Node" parent="." unique_id=496040467]
 script = ExtResource("2")
 enemy_scene = ExtResource("6")
 drone_scene = ExtResource("16")
 shield_scene = ExtResource("17")
 elite_scene = ExtResource("20")
-boss_scene = ExtResource("21")
 obstacle_scene = ExtResource("7")
 platform_scene = ExtResource("11")
 scaffold_scene = ExtResource("12")
 
-[node name="HUD" type="CanvasLayer" parent="."]
+[node name="HUD" type="CanvasLayer" parent="." unique_id=1701258320]
 process_mode = 3
 script = ExtResource("3")
 
-[node name="Root" type="Control" parent="HUD"]
+[node name="Root" type="Control" parent="HUD" unique_id=2061293044]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -119,7 +119,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="ScoreLabel" type="Label" parent="HUD/Root"]
+[node name="ScoreLabel" type="Label" parent="HUD/Root" unique_id=1954226915]
 layout_mode = 0
 offset_left = 37.0
 offset_top = 28.0
@@ -129,7 +129,7 @@ theme_override_colors/font_color = Color(0.13, 0.17, 0.21, 1)
 theme_override_font_sizes/font_size = 30
 text = "得分 0"
 
-[node name="ScoreRule" type="ColorRect" parent="HUD/Root"]
+[node name="ScoreRule" type="ColorRect" parent="HUD/Root" unique_id=611946579]
 layout_mode = 0
 offset_left = 38.0
 offset_top = 78.0
@@ -138,7 +138,7 @@ offset_bottom = 81.0
 mouse_filter = 2
 color = Color(0.13, 0.17, 0.21, 1)
 
-[node name="HelpLabel" type="Label" parent="HUD/Root"]
+[node name="HelpLabel" type="Label" parent="HUD/Root" unique_id=1167658408]
 layout_mode = 0
 offset_left = 28.0
 offset_top = 1026.0
@@ -148,7 +148,7 @@ theme_override_colors/font_color = Color(0.85, 0.82, 0.72, 0.8)
 theme_override_font_sizes/font_size = 17
 text = "A/D 移动 · W 跳跃/按住推进 · S 斩击"
 
-[node name="GameOver" type="VBoxContainer" parent="HUD/Root"]
+[node name="GameOver" type="VBoxContainer" parent="HUD/Root" unique_id=374997149]
 visible = false
 layout_mode = 1
 anchors_preset = 8
@@ -165,34 +165,34 @@ grow_vertical = 2
 theme_override_constants/separation = 12
 alignment = 1
 
-[node name="GameOverTitle" type="Label" parent="HUD/Root/GameOver"]
+[node name="GameOverTitle" type="Label" parent="HUD/Root/GameOver" unique_id=35663325]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.48, 0.14, 0.14, 1)
 theme_override_font_sizes/font_size = 72
 text = "游戏结束"
 horizontal_alignment = 1
 
-[node name="GameOverScore" type="Label" parent="HUD/Root/GameOver"]
+[node name="GameOverScore" type="Label" parent="HUD/Root/GameOver" unique_id=786012293]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.13, 0.17, 0.21, 1)
 theme_override_font_sizes/font_size = 40
 text = "最终得分 0"
 horizontal_alignment = 1
 
-[node name="GameOverHint" type="Label" parent="HUD/Root/GameOver"]
+[node name="GameOverHint" type="Label" parent="HUD/Root/GameOver" unique_id=880801575]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.13, 0.17, 0.21, 0.8)
 theme_override_font_sizes/font_size = 24
 text = "点击屏幕或按任意键重新开始"
 horizontal_alignment = 1
 
-[node name="TouchControls" parent="." instance=ExtResource("15")]
+[node name="TouchControls" parent="." unique_id=290989696 instance=ExtResource("15")]
 
-[node name="TitleScreen" type="CanvasLayer" parent="."]
+[node name="TitleScreen" type="CanvasLayer" parent="." unique_id=1635850092]
 layer = 9
 script = ExtResource("19")
 
-[node name="Root" type="Control" parent="TitleScreen"]
+[node name="Root" type="Control" parent="TitleScreen" unique_id=1823564016]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -201,7 +201,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="Prompt" type="Label" parent="TitleScreen/Root"]
+[node name="Prompt" type="Label" parent="TitleScreen/Root" unique_id=1732889950]
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
@@ -220,5 +220,5 @@ text = "点击屏幕或按任意键开始"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="AutoTest" type="Node" parent="."]
+[node name="AutoTest" type="Node" parent="." unique_id=1050524469]
 script = ExtResource("4")

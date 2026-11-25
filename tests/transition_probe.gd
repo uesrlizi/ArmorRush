@@ -1,10 +1,12 @@
 extends Node
 ## 关卡轮换端到端探针（无头）：洗牌袋纯 API 直测 ×200（首抽必在开局白名单、
-## 局内不重复（一局=普通段+RUSH 段）、相邻永不相同——含跨局连抽 10N 长跑）
+## 普通关局内不重复、相邻永不相同——含跨局连抽 10N 长跑）
 ## → 入口跳板自动抽关 → 首关死一次验"死亡重开=重掷新一局"（白名单首关+清分+
 ## 启动页，非原地复活）→ 真实打完一整局（RUN_NORMAL_LEVELS 普通关 + RUSH
 ## RUN_RUSH_COUNT 台逐台跳场景），逐关验证不变式：落地都在场景池、白名单只锁
-## 首关、局内不重复、相邻不重复、RUSH 段 rush_active、通关原地结算（无末章
+## 首关、普通关局内不重复、RUSH 段 rush_active 且「配的场景=抽定 BOSS 的登记场景、
+## 阵容 BOSS 不重复、落地即战的就是抽定那台」（先抽 BOSS 再配场景，run_loop.md §1；
+## 场景可合法重访——同场景换一台 BOSS）、通关原地结算（无末章
 ## 滚动——局内循环 v2，run_loop.md §1）、分数跨关累计、首关照常带启动页
 ## （入口纯跳板不交接）、后续关交接跳启动页、落地满血（RUSH 击破间探针全程
 ## 无伤=满血账不受 RUSH_NO_HEAL 影响）。
@@ -59,56 +61,65 @@ func _run() -> void:
 
 	# ---- 袋逻辑直测（纯 API，不进场景；局内循环 v2 语义=design/run_loop.md §1）----
 	# 一局 = 首关 +（RUN_NORMAL_LEVELS−1）普通抽 + RUSH 阵容（RUN_RUSH_COUNT 台）
-	# + ""（通关结算原地）。一局看 普通关+RUSH 阵容 台（阵容从没抽到的里挑）；
-	# 局内（=旧「周期」概念）不重复、相邻永不相同——普通段/RUSH 段/两段边界都算。
+	# + ""（通关结算原地）。普通段=洗牌袋照抽（段内不重复、相邻不同）；RUSH=
+	# 先抽 BOSS 再配场景——阵容 BOSS 不重复、每台配的场景是它的登记场景、段内
+	# 场景不重复、相邻不同；场景可与普通段合法重访（同场景换一台 BOSS）。
 	for trial in 200:
-		var seen := {}
+		var normal_seen := {}
 		var prev := RunState.start_run()
 		if not RunState.FIRST_POOL.has(prev):
 			return _fail("start_run 首抽不在白名单: %s" % prev)
-		seen[prev] = true
+		normal_seen[prev] = true
 		for _k in BalanceGlobal.RUN_NORMAL_LEVELS - 1:
 			var s := RunState.draw_next()
 			if s.is_empty():
 				return _fail("普通段提前返回空串（trial %d）" % trial)
 			if s == prev:
 				return _fail("相邻两关相同: %s（trial %d）" % [s, trial])
-			if seen.has(s):
-				return _fail("纯 API 一局内重复抽到 %s（trial %d）" % [s, trial])
-			seen[s] = true
+			if normal_seen.has(s):
+				return _fail("纯 API 普通段重复抽到 %s（trial %d）" % [s, trial])
+			normal_seen[s] = true
 			prev = s
 		# 第 RUN_NORMAL_LEVELS 次抽关即进 RUSH（stage 越过普通关数）：该抽
 		# 返回阵容首台——普通段与 RUSH 段的边界抽。
-		var first_rush := RunState.draw_next()
-		if first_rush.is_empty():
-			return _fail("进 RUSH 的边界抽返回空串（trial %d）" % trial)
-		if not RunState.rush_active:
-			return _fail("普通段抽满未进 RUSH（trial %d）" % trial)
-		if first_rush == prev:
-			return _fail("相邻两关相同: %s（trial %d）" % [first_rush, trial])
-		if seen.has(first_rush):
-			return _fail("纯 API 一局内重复抽到 %s（trial %d）" % [first_rush, trial])
-		seen[first_rush] = true
-		prev = first_rush
-		for _k in BalanceGlobal.RUN_RUSH_COUNT - 1:
+		var rush_seen := {}
+		var boss_seq: Array[String] = [] # 逐台抽定时采集（current_boss 每抽被覆盖，抽完只剩末台）
+		var host_seq: Array[String] = []
+		for _k in BalanceGlobal.RUN_RUSH_COUNT:
 			var s := RunState.draw_next()
 			if s.is_empty():
-				return _fail("RUSH 阵容提前打空（trial %d）" % trial)
-			if s == prev:
-				return _fail("相邻两关相同: %s（trial %d）" % [s, trial])
-			if seen.has(s):
-				return _fail("纯 API 一局内重复抽到 %s（trial %d）" % [s, trial])
-			seen[s] = true
+				return _fail("进 RUSH 的边界抽返回空串/阵容提前打空（trial %d）" % trial)
+			if _k == 0 and not RunState.rush_active:
+				return _fail("普通段抽满未进 RUSH（trial %d）" % trial)
+			if s == prev and RunState.boss_hosts(RunState.current_boss).size() > 1:
+				return _fail("相邻两关相同（非单宿主强制）: %s（trial %d）" % [s, trial])
+			if rush_seen.has(s):
+				return _fail("纯 API RUSH 段内重复配到 %s（trial %d）" % [s, trial])
+			rush_seen[s] = true
+			boss_seq.append(RunState.current_boss)
+			host_seq.append(s)
 			prev = s
+		# 阵容账：BOSS 不重复、每台配的场景是它的登记场景；「没打过的优先」在纯
+		# API 路径没有遭遇抽（_fought 恒空），覆盖不到——真实流程段覆盖。
+		var boss_seen := {}
+		for i in boss_seq.size():
+			var b: String = boss_seq[i]
+			if boss_seen.has(b):
+				return _fail("RUSH 阵容 BOSS 重复: %s（trial %d）" % [b, trial])
+			boss_seen[b] = true
+			if not RunState.boss_hosts(b).has(host_seq[i]):
+				return _fail("RUSH 配的场景不是该 BOSS 的登记场景: %s → %s（trial %d）"
+						% [b, host_seq[i], trial])
 		if not RunState.draw_next().is_empty():
 			return _fail("阵容打空后未返回空串（通关结算信号，trial %d）" % trial)
-		# 一局张数 = 普通关 + RUSH 阵容（阵容=没抽到的里至多 RUN_RUSH_COUNT 台）：
-		# 8 场景池时恰=池−1；池再大（9 起）恰=RUN_NORMAL_LEVELS+RUN_RUSH_COUNT。
-		var expect_run := BalanceGlobal.RUN_NORMAL_LEVELS + mini(BalanceGlobal.RUN_RUSH_COUNT,
-				RunState.SCENES.size() - BalanceGlobal.RUN_NORMAL_LEVELS)
-		if seen.size() != expect_run:
-			return _fail("纯 API 一局落地 %d 张，应=普通关+RUSH 阵容（%d；trial %d）"
-					% [seen.size(), expect_run, trial])
+		# 一局张数 = 普通关（互不重复）+ RUSH 阵容（段内不重复；可与普通段重访）：
+		# 唯一张数 ∈ [普通关+1, 普通关+阵容台数]。
+		var total := normal_seen.size() + rush_seen.size()
+		if total < BalanceGlobal.RUN_NORMAL_LEVELS + 1 \
+				or total > BalanceGlobal.RUN_NORMAL_LEVELS + BalanceGlobal.RUN_RUSH_COUNT:
+			return _fail("纯 API 一局落地 %d 张，应∈[%d, %d]（trial %d）" % [total,
+					BalanceGlobal.RUN_NORMAL_LEVELS + 1,
+					BalanceGlobal.RUN_NORMAL_LEVELS + BalanceGlobal.RUN_RUSH_COUNT, trial])
 	# 长跑连抽压测（跨局边界）：通关空串即开新一局续抽——相邻相同在任何边界
 	# （普通袋尾/RUSH 阵容/新一局首抽）都不允许。start_run 的返回值=新一局
 	# 首关，必须接进比较链（漏了会把「隔一关」误当「相邻」假 FAIL）。
@@ -118,8 +129,8 @@ func _run() -> void:
 		if s2.is_empty():
 			prev2 = RunState.start_run() # 通关=新一局：首抽直接当 prev
 			continue
-		if s2 == prev2:
-			return _fail("长跑连抽相邻相同: %s" % s2)
+		if s2 == prev2 and RunState.boss_hosts(RunState.current_boss).size() > 1:
+			return _fail("长跑连抽相邻相同（非单宿主强制）: %s" % s2)
 		prev2 = s2
 	printerr("[probe] bag sim x200 一局账 + 10N 跨局连抽防相邻 OK (t=%.1fs)" % _elapsed())
 
@@ -173,7 +184,11 @@ func _run() -> void:
 			if scene == null:
 				return # _await_next_scene 已报错
 		if i > 0 and scene.scene_file_path == prev_path:
-			return _fail("相邻两关相同: %s" % scene.scene_file_path)
+			# 相邻重复只在 RUSH 的「单宿主 BOSS 且宿主=上一关」时合法（无处挪）；
+			# 其余相邻重复仍是违规。
+			var forced := i >= BalanceGlobal.RUN_NORMAL_LEVELS 					and RunState.boss_hosts(RunState.current_boss).size() == 1
+			if not forced:
+				return _fail("相邻两关相同: %s" % scene.scene_file_path)
 		_current = scene
 		prev_path = scene.scene_file_path
 		printerr("[probe] landed #%d = %s (t=%.1fs)"
@@ -246,10 +261,29 @@ func _check_landing(i: int, scene: Node, cycle_seen: Dictionary) -> bool:
 	if i >= BalanceGlobal.RUN_NORMAL_LEVELS and not RunState.rush_active:
 		_fail("第 %d 落地应已进 RUSH（rush_active=false）" % (i + 1))
 		return false
-	if cycle_seen.has(path):
-		_fail("同一周期内重复落地 %s（第 %d 关）" % [path, i + 1])
-		return false
-	cycle_seen[path] = true
+	# 局内不重复：普通关照旧（洗牌袋一局内不重复）；RUSH 按 BOSS 抽再配场景——
+	# 场景可合法重访（同场景换一台 BOSS），改断言「配的场景=抽定 BOSS 的登记场景
+	# + 阵容 BOSS 不重复 + 落地即战的就是抽定那台」。
+	if i >= BalanceGlobal.RUN_NORMAL_LEVELS:
+		if not RunState.boss_roster(path).has(RunState.current_boss):
+			_fail("第 %d RUSH 落地场景与抽定 BOSS 不匹配: %s / %s"
+					% [i + 1, path, RunState.current_boss])
+			return false
+		var boss_key := "boss:" + RunState.current_boss
+		if cycle_seen.has(boss_key):
+			_fail("RUSH 阵容 BOSS 重复出场: %s（第 %d 关）" % [RunState.current_boss, i + 1])
+			return false
+		cycle_seen[boss_key] = true
+		var spawned := scene.get_tree().get_first_node_in_group("boss") as Enemy
+		if spawned == null or spawned.scene_file_path != RunState.current_boss:
+			_fail("第 %d RUSH 落地即战的 BOSS 不是抽定那台: %s / %s" % [i + 1,
+					spawned.scene_file_path if spawned != null else "<无>", RunState.current_boss])
+			return false
+	else:
+		if cycle_seen.has(path):
+			_fail("同一周期内重复落地 %s（第 %d 关）" % [path, i + 1])
+			return false
+		cycle_seen[path] = true
 	if i == 0 and not RunState.FIRST_POOL.has(path):
 		_fail("首关不在开局白名单: %s" % path)
 		return false

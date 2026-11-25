@@ -1,6 +1,6 @@
 class_name BossRedwheel
 extends PursuitBoss
-## 第六章 BOSS·斗轮采集舰「赤轮」（赤沙矿区守卫）：追击框架能力层——
+## 第六章 BOSS·斗轮挖掘机「赤轮」（赤沙矿区守卫）：追击框架能力层——
 ## 「矿区电网与输送」。低矮宽驳采集舰（斗轮独立旋转件+背甲双桩炮架+腹舱；
 ## 锚点账见 bake_red_units.py 头注/提案_v1 §3）：
 ##   电网闸（技能A）：背甲炮架（固定射角）预警 → 两枚锚桩落到玩家**当时
@@ -46,10 +46,6 @@ var _direct_shoot_t := 0.0
 @onready var _bay_flash: MuzzleFlash = $Visuals/BayPort/Flash
 @onready var _wheel: Sprite2D = $Visuals/ArmPivot/Wheel
 @onready var _warn: ThreatFlash = $Visuals/ArmPivot/Muzzle/ThreatFlash # 斗轮毂心（不预警，但池化复用要兜底重置）
-@onready var _thrusters: Array[Sprite2D] = [
-	$Visuals/Thruster1 as Sprite2D,
-	$Visuals/Thruster2 as Sprite2D,
-]
 
 
 ## 血条上方显示的机体名。
@@ -79,14 +75,11 @@ func on_spawned() -> void:
 ## 它的出手读法）。方向账：×scale.x 抵消镜像=世界向恒定；取负=世界**逆时针**
 ## ——轮缘上缘永远朝玩家侧（左）运动，抛石才有「轮斗把石头甩出去」的连续读法
 ## （2026-11-03 抛石改外缘切向甩出配套；顺时针时缘上切向朝右=与出手向相反）。
-## + 双举升风扇呼吸 + 背甲炮架/腹舱固定（无俯仰挂件）。
+## + 背甲炮架/腹舱固定（无俯仰挂件）。底盘双火箭焰（矿灯金，2026-11-11 八轮
+## 换装）=节点挂 EnemyThrusterFlame，闪燃/拉长在节点脚本，本脚本不碰焰 modulate/scale。
 func _tick_visual(delta: float) -> void:
 	var spin := 14.0 if (_bstate == ST_DIRECT or _bstate == ST_CHARGE_FIRE) else 5.0
 	_wheel.rotation = fmod(_wheel.rotation - spin * delta * _visuals.scale.x, TAU)
-	for i in _thrusters.size():
-		var t := _thrusters[i] as Sprite2D
-		t.modulate.a = 0.45 + 0.25 * sin(_bob_t * 11.0 + i * 2.3)
-		t.scale = Vector2.ONE * (0.95 + 0.15 * sin(_bob_t * 8.0 + i * 1.9))
 
 
 ## ---- 技能 A：电网闸 ----

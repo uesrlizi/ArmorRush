@@ -9,7 +9,7 @@
   enemy_storm_shield_body.svg  56x52   盾卫换皮「绝缘屏盾卫」
   enemy_storm_elite_body.svg   60x80   精英「架线」放线车（预教跨缆）
   enemy_storm_elite_arm.svg    34x44   精英双管桩炮架（固定射角不俯仰）
-  boss_storm_body.svg          300x180 BOSS「引雷」浮空巡线舰（门型横担）
+  boss_storm_body.svg          300x180 BOSS「引雷」浮空电塔（机体见 boss_forms/）
   boss_storm_arm.svg           96x44   BOSS 前臂绝缘子串（俯仰真瞄，末端放电球=Muzzle，hover 370 时世界 y=370-64=306）
   fx_storm_stake_high.svg      28x118  高缆桩 H=110（双绝缘子盘）锚点=底部接地点 (14,116)
   fx_storm_stake_low.svg       32x48   低缆桩 H=40（短粗）锚点=底部接地点 (16,46)
@@ -244,69 +244,10 @@ def elite_arm():
 
 # ---------------- BOSS「引雷」浮空巡线舰 ----------------
 def boss_body():
-    s = Svg(300, 180)
-    # 船体：门型横担下的检修舱
-    s.poly([(8, 84), (36, 54), (140, 52), (238, 56), (286, 66), (294, 90),
-            (288, 122), (244, 146), (186, 162), (118, 164), (64, 154), (22, 126)], BODY)
-    s.poly([(36, 54), (140, 52), (238, 56), (282, 65), (278, 71), (236, 62),
-            (140, 58), (42, 60)], LIGHT, 0.7)
-    s.poly([(22, 126), (64, 154), (118, 164), (186, 162), (240, 146),
-            (230, 138), (120, 152), (66, 140), (30, 118)], BELLY)
-    s.rect(60, 92, 170, 2, GAP, 0.3)
-    # 门型横担（两立柱+横梁，签名件）
-    s.rect(96, 8, 8, 48, BELLY)                  # 前立柱 x96..104
-    s.rect(196, 8, 8, 50, BELLY)                 # 后立柱
-    s.rect(70, 4, 160, 10, BODY)                 # 横梁 y4..14
-    s.rect(70, 4, 160, 2.5, LIGHT, 0.8)
-    for lx in range(78, 226, 12):                # 桁格
-        s.line(lx, 6.5, lx + 6, 14, GAP, 1.2, 0.6)
-    # 横担两端垂绝缘子串（后端；前端=独立臂件位 ArmPivot 在 (150,26) 中央座）
-    s.line(226, 14, 226, 20, GAP, 1.6)
-    insulator(s, 226, 22, 5, r=5, step=4.5)
-    s.circle(226, 46, 3.2, BELLY)
-    s.line(74, 14, 74, 20, GAP, 1.6)
-    insulator(s, 74, 22, 5, r=5, step=4.5)
-    s.circle(74, 46, 3.2, BELLY)
-    # ArmPivot 枢座 (150,26)：座裙底 54 埋进甲板
-    s.rect(136, 14, 28, 40, BELLY)
-    s.rect(138, 14, 24, 3, LIGHT, 0.7)
-    s.circle(150, 26, 5, GAP)
-    s.circle(172, 36, 1.8, WHITE, 0.9)
-    # 背部 RodPorts 三孔（针露头）
-    for rx, ry in ((206, 52), (230, 56), (254, 60)):
-        s.rect(rx - 7, ry - 2, 14, 8, GAP)
-        s.rect(rx - 4.5, ry, 9, 4, "#0d0a14")
-        s.line(rx, ry + 2, rx, ry - 8, PORCE, 1.6)
-        s.circle(rx, ry - 8.5, 1.6, VIOLET, 0.95)
-    # 腹舱双桩口 BayPort (150,168)
-    s.rect(128, 150, 44, 14, GAP)
-    s.rect(128, 150, 44, 3, LIGHT, 0.5)
-    s.rect(132, 157, 16, 8, "#0d0a14")
-    s.rect(152, 157, 16, 8, "#0d0a14")
-    s.circle(140, 161, 2.2, PORCE, 0.9)
-    s.circle(160, 161, 2.2, PORCE, 0.9)
-    s.circle(150, 146, 1.8, VIOLET, 0.95)
-    # 舷窗带 + 驾驶楼
-    for wx in range(214, 270, 14):
-        s.rect(wx, 78, 7, 6, "#d8c8f0", 0.7)
-    s.poly([(110, 60), (134, 58), (132, 76), (112, 78)], GAP, 0.9)
-    s.poly([(114, 62), (130, 60), (129, 66), (115, 67)], "#d8c8f0", 0.6)
-    glow_dot(s, 200, 4, VIOLET, r=2.2, halos=((5, 0.35), (9, 0.13)))   # 横担顶航标
-    glow_dot(s, 286, 92, VIOLET, r=1.8, halos=((4, 0.35), (8, 0.13)))  # 舷尾航标
-    # 举升喷口位
-    s.rect(98, 148, 24, 10, BELLY)
-    s.rect(198, 142, 24, 10, BELLY)
-    s.ellipse(110, 160, 10, 3, VIOLET, 0.35)
-    s.ellipse(210, 154, 10, 3, VIOLET, 0.35)
-    # 艏锥 + 独眼条带（锚点 y60..66 含 (55,63)）
-    s.poly([(0, 82), (14, 74), (20, 74), (20, 98), (6, 92)], BELLY)
-    s.rect(38, 57, 34, 12, RED, 0.18)
-    s.rect(42, 60, 26, 6, RED, 0.95)
-    # 舷侧闪电纹 + 警示杠
-    s.path("M 150 96 L 168 96 L 160 108 L 184 108", stroke=VIOLET, w=2.2, opacity=0.85)
-    for i, hx in enumerate(range(88, 116, 7)):
-        s.rect(hx, 128, 3, 4, VIOLET if i % 2 == 0 else GAP, 0.8)
-    return s
+    """BOSS 机体已迁至 boss_forms/gen_boss_forms.py（形态重做：各章专属剪影），
+    此处转调，重烘焙不会把旧船形写回。"""
+    from boss_forms.gen_boss_forms import storm_body
+    return storm_body()
 
 
 def boss_arm():

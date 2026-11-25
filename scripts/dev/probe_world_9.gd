@@ -10,7 +10,8 @@ extends Node2D
 ##      满速钻高缆后 t2.45 跳按住 0；
 ##   BR BOSS 引雷针链：针落位/贴地、落地与放电时序、站缝心 0、满速直冲恰 15、
 ##      解一（t2.03 起刹停缝心）0、解二（t1.50 起刹停针列前）0、t2.30 纯跳恰 8、R7 避让；
-##   AL BOSS 断缆甩弧：出膛点=Muzzle、方向恒定、静止恰 12、满速保持 0 且相遇 1.03s±1 帧。
+##   AL BOSS 断缆甩弧：出膛点=Muzzle（天线顶电珠，≈px+1290）、方向恒定、静止恰 12、
+##      满速保持 0 且相遇 1.0s±1 帧。
 ## 探针坑规避：hp=99999；清杂兵跳过 boss 组；BOSS 冻结窗=_bstate=RECOVER+_bt=99；
 ## 按伤害值分辨弹种前已单威胁源；BOSS 构图位逐帧钉在玩家 +1400（防贴脸压招冻结）。
 ## 全过 ALL OK 退出码 0；有 FAIL 退出码 1；看门狗 240s 退出码 2。
@@ -509,13 +510,21 @@ class Runner extends Node:
 			var dmg := hp0 - _hp()
 			Input.action_release("move_right")
 			if mode == "static":
-				_check(origin_ok and absf(from.x - (pxf + 1332.0)) < 3.0 and from.y > 296.0 and from.y < 320.0,
-						"AL2 出膛点 = Muzzle global_position（≈x_p+1332，y≈306 随臂俯仰）",
+				# 天线账：boss 钉 px+1400 + ArmPivot 局部 x(-110)（画布 (40,20) 桅顶电珠）
+				# → x=px+1290；y=hover 370 + 局部 y(-70)=300 静姿（固定天线不俯仰，
+				# 窗 ±10/±14 沿旧窗裕度：悬停浮动 ±6 + 弹簧滞回）
+				_check(origin_ok and absf(from.x - (pxf + 1290.0)) < 3.0 and from.y > 290.0 and from.y < 314.0,
+						"AL2 出膛点 = Muzzle global_position（≈x_p+1290，y≈300 固定天线）",
 						"from=(px+%.1f, %.1f)" % [from.x - pxf, from.y])
 				_check(max_turn < 0.5, "AL1 出手后方向恒定（夹角变化 <0.5°）", "max=%.3f°" % max_turn)
 				_check(dmg == BalanceWorld9.ARC_LASH_DAMAGE, "AL3 静止玩家恰 12", "dmg=%d" % dmg)
 			else:
 				_check(dmg == 0, "AL4 满速保持前跑钻过弹 掉血 0", "dmg=%d" % dmg)
-				_check(absf(meet - 1.03) <= tol, "AL4t 相遇时刻 1.03s ±1 帧", "meet=%.3f" % meet)
+				# 距离账：出膛 px+1290（旧臂账 1332）。水平近似 1290/(600+700)=0.992s；
+				# 计瞄准俯角（muzzle y300→玩家中心 dy≈334）精确解 ≈1.010s——断言取中
+				# 1.0，±1 帧窗两解都含
+				# 弹形改球（判定长度→直径，圆 r13）：钻过靠竖向错开——弹瞄出手位，
+				# x 交越点弹心距玩家中心 ≈150px，与弹径无关，AL4/AL4t 账不变
+				_check(absf(meet - 1.0) <= tol, "AL4t 相遇时刻 1.0s ±1 帧", "meet=%.3f" % meet)
 			await _frames(30)
 			_clear()

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><style>
+body{margin:0;font:12px monospace;color:#ddd}
+.row{display:flex;gap:30px;padding:14px 20px;align-items:center}
+.dark{background:#2b2f38}
+.cell{position:relative;flex:none}
+.cell img{position:absolute;left:0;top:0}
+.lbl{flex:none;color:#9ab}
+</style></head><body>
+<!-- 侧视定案家族对照：boss1 旋翼（现役正解）vs 新风扇/新三叶桨 -->
+<div class="row dark">
+  <div class="cell" style="width:320px;height:22px;zoom:2"><img src="file:///C:/Users/31715/Documents/GodotProject/2d-ac/assets/world_1/boss_rust_rotor.svg"></div>
+  <div class="lbl">boss1 主旋翼 2×<br>横刃条+模糊带（正解）</div>
+  <div class="cell" style="width:56px;height:56px;zoom:2"><img src="file:///C:/Users/31715/Documents/GodotProject/2d-ac/assets/world_1/boss_rust_tailrotor.svg"></div>
+  <div class="lbl">boss1 尾桨 2×<br>正圆三叶（正解）</div>
+</div>
+<div class="row dark" id="r2"></div>
+<div class="row dark" id="r3"></div>
+<script>
+const SVG="file:///C:/Users/31715/Documents/GodotProject/2d-ac/assets/common/";
+// 风扇罩+刃条（±0.05rad 摆的三个相位）
+document.getElementById("r2").innerHTML = [-0.05,0,0.05].map(w=>{
+  const deg=(w*57.3).toFixed(1);
+  return `<div class="cell" style="width:76px;height:28px;zoom:2">`+
+    `<img src="${SVG}fan_housing.svg">`+
+    `<img src="${SVG}fan_bar.svg" style="left:2px;top:8px;transform:rotate(${w}rad);transform-origin:36px 6px"></div>`+
+    `<div class="lbl" style="order:9"></div>`;
+}).join("")+`<div class="lbl">新举升风扇 2×<br>罩+刃边条（摆 ±2.9°）<br>左=下摆/中=静/右=上摆</div>`;
+// 三叶桨整周转相位
+document.getElementById("r3").innerHTML = [0,40,80].map(r=>
+  `<div class="cell" style="width:80px;height:80px;zoom:2"><img src="${SVG}prop_blades.svg" style="transform:rotate(${r}deg)"></div>`
+).join("")+`<div class="lbl">ch9 侧桨 2×<br>正圆三叶整周转<br>（boss1 尾桨家族）</div>`;
+</script></body></html>

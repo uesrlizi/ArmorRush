@@ -6,7 +6,19 @@
 [ext_resource type="Texture2D" uid="uid://d10eqbbrs05b5" path="res://assets/world_3/boss_snow_gun.svg" id="4"]
 [ext_resource type="Script" uid="uid://ddkwn874rndm4" path="res://scripts/units/eye_glow.gd" id="5"]
 [ext_resource type="PackedScene" path="res://scenes/fx/threat_flash.tscn" id="6"]
-[ext_resource type="Texture2D" uid="uid://cssh5mjnems4m" path="res://assets/common/fx_flame.svg" id="7"]
+[ext_resource type="Texture2D" path="res://assets/common/thruster_flame.svg" id="7"]
+[ext_resource type="Script" path="res://scripts/units/enemy_thruster_flame.gd" id="8"]
+
+; 第三章 BOSS·强袭悬空机甲「哨兵」推进件账：底舱双举升喷口（喷口朝下）
+; Thruster1/2。2026-11-11 八轮用户定案：哨兵大多时候倒飞（玩家从右追着打），
+; 尾部平射喷口不合理——改和玩家机甲同款喷口朝下。贴图 assets/common/
+; thruster_flame.svg 40x64 灰度平根锥焰，**原点=焰根**（centered=false+
+; offset(-20,-6)，喷口=画布 (20,6)；枢轴在中心=提速拉长时焰根从喷口里拔出
+; 来），节点=喷口位：局部 (-22,75)/(22,75)=画布 (108,165)/(152,165)∈底舱
+; undercarriage 带（画布 x88..152、下缘至 y178），焰往下烧出体底；modulate
+; 电浆青蓝（world_3 电浆蓝 #48b4ff 族）+ADD 不变；闪燃/随速拉长=节点脚本
+; EnemyThrusterFlame（别再从 boss_sentinel.gd 写喷口 modulate/scale）。
+; 下洗已废（读成拖尾，2026-11-11 八轮否决）。
 
 [sub_resource type="CanvasItemMaterial" id="addmat"]
 blend_mode = 1
@@ -32,18 +44,24 @@ scale = Vector2(1.2, 1.2)
 script = ExtResource("5")
 
 [node name="Thruster1" type="Sprite2D" parent="Visuals" unique_id=1742529144]
-modulate = Color(1, 0.62, 0.28, 0.6)
+modulate = Color(0.28, 0.71, 1, 0.6)
 material = SubResource("addmat")
-position = Vector2(88, -28)
+position = Vector2(-22, 75)
 scale = Vector2(1.1, 1.1)
+centered = false
+offset = Vector2(-20, -6)
 texture = ExtResource("7")
+script = ExtResource("8")
 
 [node name="Thruster2" type="Sprite2D" parent="Visuals" unique_id=616606298]
-modulate = Color(1, 0.62, 0.28, 0.6)
+modulate = Color(0.28, 0.71, 1, 0.6)
 material = SubResource("addmat")
-position = Vector2(88, 0)
+position = Vector2(22, 75)
 scale = Vector2(1.1, 1.1)
+centered = false
+offset = Vector2(-20, -6)
 texture = ExtResource("7")
+script = ExtResource("8")
 
 [node name="ArmPivot" type="Node2D" parent="Visuals" unique_id=69339862]
 position = Vector2(-23, 4)

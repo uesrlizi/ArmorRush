@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://scripts/units/boss_anchor.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/world_7/boss_sea_body.svg" id="2"]
@@ -6,7 +6,8 @@
 [ext_resource type="Texture2D" path="res://assets/world_7/boss_sea_gun.svg" id="4"]
 [ext_resource type="Script" path="res://scripts/units/eye_glow.gd" id="5"]
 [ext_resource type="PackedScene" path="res://scenes/fx/threat_flash.tscn" id="6"]
-[ext_resource type="Texture2D" path="res://assets/common/fx_flame.svg" id="7"]
+[ext_resource type="Texture2D" path="res://assets/common/thruster_flame.svg" id="7"]
+[ext_resource type="Script" path="res://scripts/units/enemy_thruster_flame.gd" id="8"]
 
 ; 第七章 BOSS·打捞巡防舰「沉锚」（BossAnchor，海防与打捞能力套件）：
 ; 独眼条带 y60..66 含 (55,63)（EyeGlow (-95,-27) 沿用）；
@@ -18,8 +19,14 @@
 ; 深弹由此向艉侧抛出）；
 ; TorpedoPort=艏部下管画布 (28,138)→局部 (-122,48)（ThreatFlash=跳弹预警，
 ; 平抛出膛位=鱼雷语汇；v2 发射点改船体下部，技能A 同步压低机体到
-; ANCHOR_SKIP_FIRE_Y）；
-; Thruster1/2=局部 (-40,66)/(60,66)（通用 fx_flame+加色青白，举升喷口呼吸）。
+; ANCHOR_SKIP_FIRE_Y）。
+; 推进件账：船底双举升喷口焰 Thruster1/2——贴图 assets/common/thruster_flame.svg
+; 40x64 灰度平根锥焰，**原点=焰根**（centered=false+offset(-20,-6)，喷口=画布
+; (20,6)；枢轴在中心=提速拉长时焰根从喷口里拔出来），节点=喷口位：局部
+; (-40,66)/(60,66)=画布 (110,156)/(210,156)∈船底喷口位（沿 y146..164 一带），
+; 焰尾悬垂船底下 ~51px；modulate 海喷白青 +ADD 不变；闪燃/随速拉长=节点脚本
+; EnemyThrusterFlame（别再从 boss_anchor.gd 写喷口 modulate/scale）。
+; 下洗已废（读成拖尾，2026-11-11 八轮用户否决）。
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
 size = Vector2(280, 150)
@@ -78,14 +85,20 @@ modulate = Color(0.62, 0.95, 0.92, 0.6)
 material = SubResource("addmat")
 position = Vector2(-40, 66)
 scale = Vector2(1.1, 1.1)
+centered = false
+offset = Vector2(-20, -6)
 texture = ExtResource("7")
+script = ExtResource("8")
 
 [node name="Thruster2" type="Sprite2D" parent="Visuals"]
 modulate = Color(0.62, 0.95, 0.92, 0.6)
 material = SubResource("addmat")
 position = Vector2(60, 66)
 scale = Vector2(1.1, 1.1)
+centered = false
+offset = Vector2(-20, -6)
 texture = ExtResource("7")
+script = ExtResource("8")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_1")

@@ -22,9 +22,12 @@ var _target := 0.0 # 目标强度
 # 外层/中层/热芯色（RGB；透明度按层固定×强度，见 _draw）。热芯 2026-10-19 从近白
 # (1.0,0.96,0.86) 压暖到琥珀：三章冰白天底上白芯直接消失（亮度≈天空），暖芯在深底
 # 三章都保读；形态不动（钦定例外）。
-var _outer := Color(1.0, 0.5, 0.12)
-var _mid := Color(1.0, 0.76, 0.28)
-var _core := Color(1.0, 0.87, 0.52)
+const DEFAULT_OUTER := Color(1.0, 0.5, 0.12)
+const DEFAULT_MID := Color(1.0, 0.76, 0.28)
+const DEFAULT_CORE := Color(1.0, 0.87, 0.52)
+var _outer := DEFAULT_OUTER
+var _mid := DEFAULT_MID
+var _core := DEFAULT_CORE
 
 
 func set_target(level: float) -> void:
@@ -36,6 +39,11 @@ func set_palette(outer: Color, mid: Color, core: Color) -> void:
 	_outer = outer
 	_mid = mid
 	_core = core
+
+
+## 回出厂暖焰（推进槽卸下时；_refresh_mod_visuals 空槽分支调用）。
+func reset_palette() -> void:
+	set_palette(DEFAULT_OUTER, DEFAULT_MID, DEFAULT_CORE)
 
 
 func _process(delta: float) -> void:

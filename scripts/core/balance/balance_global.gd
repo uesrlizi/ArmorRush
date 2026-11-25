@@ -38,11 +38,12 @@ const RUN_LOOP_ENABLED := true        # 总开关：false=旧制无限滚动关�
 const RUN_NORMAL_LEVELS := 4          # 普通关数：洗牌袋照抽；没抽到的场景留作 RUSH 阵容
 const RUN_RUSH_COUNT := 3             # RUSH 连战 BOSS 台数（7 场景池=每局恰好看满 7 台；池更大=从没抽到的里随机挑）
 const RUSH_NO_MOBS := true            # RUSH 无杂兵：小怪/精英全停（障碍照常=跑酷不断）
-const RUSH_HP_DISCOUNT_ON := true     # RUSH BOSS 血量打折（未经精英预教=一阶段整段缺席）
-const RUSH_HP_DISCOUNT := 0.7         # 打折系数 ×全量血（数字待调参）
+const RUSH_HP_DISCOUNT_ON := true     # RUSH BOSS 血量打折（未经精英预教=一阶段整段缺席；2026-11-11 用户定恢复）
+const RUSH_HP_DISCOUNT := 0.7         # 打折系数 ×全量血
 const RUSH_NO_HEAL := true            # RUSH 击破间不回血：血量跨场景携带（满血只给到进 RUSH 为止）
 # ---- 疾驰倍率（design/run_loop.md §2：动态难度=负反馈，不是玩家成长） ----
-# ×1~×5：按对敌输出（防御后实际伤害）涨进度+击杀收头，受击按伤害量扣（不按发数，
+# 五档，计分乘数查 MULT_VALUES 表（×1.0~×3.0，2026-11-09 用户定：原「档号即倍率」
+# ×5 积分太胀；档位照旧 5 档，涨档账/密度乘区/BOSS 触发全不动）：按对敌输出（防御后实际伤害）涨进度+击杀收头，受击按伤害量扣（不按发数，
 # =唯一掉档来源，无停手流失——2026-11-08 用户调向：BOSS 战靠输出爬升、停手不罚）；
 # 进度跨关保持不清（只 start_run 新一局归零）；档位=刷怪密度档（SPAWN_ENEMY_GAP
 # 乘区，打得越好怪越凶，受击掉档=自动退出高密度）+计分乘数（计分用涨前档，见
@@ -51,25 +52,35 @@ const RUSH_NO_HEAL := true            # RUSH 击破间不回血：血量跨场�
 # 反制（威胁擦身结算）随擦弹砍掉降级为结算展示，暂无事件源。失衡不独立涨：失衡期
 # 受伤×1.5 加深会多打出伤害，输出渠道自动兑现打失衡的奖励。
 const MULT_ENABLED := true       # 总开关：false=旧制（计分不乘、密度不动、结算不带受击/倍率行）
-const MULT_MAX := 5              # 档位上限 ×N
+const MULT_MAX := 5              # 档位上限（=MULT_VALUES 表长）
+const MULT_VALUES := [1.0, 1.5, 2.0, 2.5, 3.0] # 每档计分乘数（下标=档位-1；密度/涨档账不查此表）
 const MULT_STEP := 20.0          # 每涨 1 档所需进度
 const MULT_DAMAGE_FACTOR := 0.2  # 输出涨进度=防御后实际伤害×此系数（BOSS 400 实伤=80=+4 档，用户锚点）
 const MULT_KILL_FACTOR := 0.6    # 击杀收头涨进度=基础击杀分×此系数（无人机5→3/步行10→6/盾卫25→15/BOSS 50→30）
 const MULT_HIT_FACTOR := 10.0    # 受击扣进度=伤害量×此系数（严苛档：弹雨 10 伤=-100 清空，1 伤蹭弹=-10 半档）
-const MULT_GAP_STEP := 0.86      # 密度乘区：每档 SPAWN_ENEMY_GAP ×此系数（×5≈0.547=1.8 倍密度，2026-11-08 用户定放缓）
+const MULT_GAP_STEP := 0.86      # 密度乘区：每档 SPAWN_ENEMY_GAP ×此系数（第 5 档≈0.547=1.8 倍密度，2026-11-08 用户定放缓）
 # ---- 难度阶梯（design/run_loop.md §3：关序只管 BOSS 出招密度+体量增长） ----
 # 后摇 ×0.95^(n−1)（下限 0.9=封顶档实际生效，出招密度最高 +11%）、第 4 关起齐射
-# 弹数 +1、BOSS 血量/失衡阈值 ×1.12^(n−1) 封顶 ×1.4（2026-11-08 用户修正：原
-# 「血量一律不加」红线废止——难度梯度不只节奏，体量也涨；杂兵/精英血量仍不加）。
+# 弹数 +1、BOSS 体量两根曲线（2026-11-08 用户修正废止「血量一律不加」红线；
+# 2026-11-10 用户定拉高+拆开，2026-11-11 用户定 ×3.0 偏硬回落 ×2.2——装备期望
+# 输出 ×1.12~×1.24（6 槽 15 成员按掉率 0.5 蒙特卡洛），血量曲线须跑赢它；
+# 失衡不必涨那么多；杂兵/精英血量与失衡账仍一律不加）。
 # 杂兵/精英密度归疾驰倍率，阶梯不碰刷怪流（两旋钮不拧一条流互相污染因果）。
 # 凶度封顶第 4 关档：RUSH 连战（stage=5）与旧制无限滚动都封在 RUN_NORMAL_LEVELS
-# 档（换算入口在 RunState.ladder_* 三方法）。
-const LADDER_ENABLED := true          # 总开关：false=旧制（阶梯三项全不随关序缩放）
+# 档（换算入口在 RunState.ladder_* 四方法）。
+const LADDER_ENABLED := true          # 总开关：false=旧制（阶梯各项全不随关序缩放）
 const LADDER_RECOVER_MULT := 0.95     # 后摇每关缩放系数（BOSS 出招密度渐紧）
 const LADDER_RECOVER_MIN := 0.9       # 后摇缩放下限（封顶后出招节奏封死；0.857 的实际最低点被它接住）
 const LADDER_EXTRA_BULLET_STAGE := 4  # 从这关起齐射类弹数 +1
-const LADDER_GROWTH_MULT := 1.12      # BOSS 血量/失衡阈值每关缩放系数（1.12³=1.405）
-const LADDER_GROWTH_MAX := 1.4        # 体量增长封顶倍率（用户 1.3~1.5 取中；RUSH ×0.7 折扣后 ≈0.98≈原血量）
+# 体量两根曲线拆开：血量 ×1.30/关 封顶 ×2.2（1.30³=2.197≈2.2=第 4 关实际生效值，
+# 逐关 1.30/1.69/2.20）；失衡阈值 ×1.2/关 封顶 ×1.7（1.2³=1.73→截 1.7）——失衡=玩家
+# 爆发窗（枪攒失衡→近战爆发的循环），只温和上涨：血量通胀由失衡窗相对变多对冲，
+# 后期 BOSS 不木桩化（封顶档失衡频率相对 +29%）；若与血量同涨=纯数值通胀=血包。
+# RUSH 血量折扣恢复（RUSH_HP_DISCOUNT_ON=true）：封顶档 2.2×0.7≈1.54×原血。
+const LADDER_GROWTH_MULT := 1.30      # BOSS 血量每关缩放系数
+const LADDER_GROWTH_MAX := 2.2        # 血量封顶倍率（=第 4 关档实际值）
+const LADDER_IMPACT_MULT := 1.2       # BOSS 失衡阈值每关缩放系数
+const LADDER_IMPACT_MAX := 1.7        # 失衡阈值封顶倍率（=第 4 关档实际值）
 # ---- 轻肉鸽装备（design/run_loop.md §4：BOSS 概率爆装备，槽位/成员正本在 balance_mods.gd） ----
 # 掉落源=BOSS 击杀（普通 4+RUSH 3）×爆率=期望 ≈3.5 次/局；同槽位不爆（从未持有槽掷）；
 # 装备芯片=槽位图标×成员色（颜色即预告）；斜抛+渐混吸附一条连续弧不落地=实际必捡
@@ -117,7 +128,7 @@ const COMMS_NOISE_BED_DB := -26.0     # 常驻静噪沙底电平（频道开着�
 # ---- 刷怪间距（按玩家带符号位移累计） ----
 const ELITE_MIN_DISTANCE := 3000.0  # 玩家跑过这段距离后精英才进选怪池
 #const BOSS_SCORE_TRIGGER := 250 
-const BOSS_SCORE_TRIGGER := 50       # 击杀分攒满刷一场 BOSS；打完清零重计
+const BOSS_SCORE_TRIGGER := 200       # 击杀分攒满刷一场 BOSS；打完清零重计
 const SPAWN_ENEMY_GAP_MIN := 1200.0
 const SPAWN_ENEMY_GAP_MAX := 2400.0
 const SPAWN_OBSTACLE_GAP_MIN := 1800.0

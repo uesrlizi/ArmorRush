@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 18" width="80" height="18">
+<!-- 航迹雪痕 80x18：潜行沿途留下的亮色扰动痕（深色走道带上靠亮痕读），自淡。
+生成器=art_proposals/snowfield_ch3/gen_worm.py。 -->
+<defs>
+
+</defs>
+<path d="M 4,13 L 22,8 L 44,14 L 76,9" fill="none" stroke="#b9cdd9" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+<path d="M 4,11 L 22,6 L 44,12 L 76,7" fill="none" stroke="#f7fafb" stroke-width="3.5" stroke-linecap="round"/>
+</svg>

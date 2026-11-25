@@ -2,8 +2,9 @@
 
 [ext_resource type="Script" path="res://scripts/weapons/flare_puff.gd" id="1"]
 ; 井口硫焰扫掠焰团（普攻出手锁定分层火鞭，bullet.gd 直线语法 + 触地闸）。
-; 贴图 fx_sulfur_flare_puff.svg 48x48 锚点中心 (24,24)：白热芯 #c8ecff + 硫焰蓝 #48b4ff
-; + 暗焰边 #1e4a66，普通混合不走 ADD。碰撞=胶囊 32x28（沿 +X）。
+; 贴图 fx_sulfur_flare_puff.svg 30x30 锚点中心 (15,15)，Sprite2D 保持 scale 1
+; （视觉/碰撞分离账：视觉 30，判定胶囊 32x28 不随视觉缩放）：白热芯 #c8ecff
+; + 硫焰蓝 #48b4ff + 暗焰边 #1e4a66，普通混合不走 ADD。碰撞=胶囊 32x28（沿 +X）。
 ; 只扫玩家层（mask 2）：触地由 flare_puff.gd 按弹心过当地地表判（威胁设计 §a 口径），
 ; 胶囊边缘擦地不灭——贴地那根要一路压到玩家 x 才触地。
 [ext_resource type="Texture2D" path="res://assets/world_10/fx_sulfur_flare_puff.svg" id="2"]

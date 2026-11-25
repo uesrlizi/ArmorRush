@@ -108,7 +108,7 @@ func hp_ratio() -> float:
 func _max_hp() -> int:
 	# 难度阶梯体量增长（run_loop.md §3，2026-11-08 用户修正血量红线）：只 BOSS 线
 	# 乘（资格闸门同 _rush_discount 模式）；杂兵/精英血量账不动。RUSH 折扣在
-	# _hp_scale 里已先行，两者叠加 1.4×0.7≈0.98。
+	# _hp_scale 里已先行（2026-11-11 用户定恢复 0.7），封顶档叠加 ≈1.54×原血。
 	var hp := _species_max_hp() * _hp_scale
 	if _ladder_scaling():
 		hp *= RunState.ladder_growth_factor()
@@ -188,9 +188,7 @@ func _physics_process(delta: float) -> void:
 			velocity.y += _gravity() * delta
 			move_and_slide()
 		if _stagger_t <= 0.0:
-			_staggered = false
-			_impact = 0.0
-			_impact_lock_t = _stagger_immunity() # 恢复后进入冲击免疫期（防连续失衡）
+			_end_stagger()
 		return
 	# 悬浮浮动相位（放在玩家索敌之前：浮动不依赖场上有没有玩家）。
 	# y 在移动出口处直赋：舱体+枪臂+碰撞盒整机一起浮，不经物理积分。
@@ -240,14 +238,8 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 	_knockback = move_toward(_knockback, 0.0,
 			BalanceEnemy.ENEMY_KNOCKBACK_DECEL * delta)
-	# 冲击衰减：受击会重置宽限倒计时——持续输出冲击只涨不掉；停手宽限走完才掉
-	if _impact_decay_t > 0.0:
-		_impact_decay_t -= delta
-	else:
-		_impact = move_toward(_impact, 0.0, BalanceCombat.IMPACT_DECAY * delta)
-	# 失衡免疫倒计时：恢复后这段时间攒不了冲击（防连续失衡无限锁死）
-	if _impact_lock_t > 0.0:
-		_impact_lock_t -= delta
+	# 冲击衰减+免疫倒计时（_tick_impact_decay）
+	_tick_impact_decay(delta)
 
 
 ## 玩家已毁（结算后世界不冻结：攻击层与 BOSS 出手都认这道闸，移动层照常=自然待机）。
@@ -320,6 +312,25 @@ func _tick_tilt(delta: float) -> void:
 
 func is_staggered() -> bool:
 	return _staggered
+
+
+## 失衡收尾：清硬直与冲击，进免疫期（防连续失衡无限锁死）。自管主循环的子类
+## （BossWorm）倒数到点调这里，与基类同一份账。
+func _end_stagger() -> void:
+	_staggered = false
+	_impact = 0.0
+	_impact_lock_t = _stagger_immunity()
+
+
+## 冲击衰减：受击会重置宽限倒计时——持续输出冲击只涨不掉；停手宽限走完才掉。
+## 免疫倒计时同走（恢复后这段时间攒不了冲击）。
+func _tick_impact_decay(delta: float) -> void:
+	if _impact_decay_t > 0.0:
+		_impact_decay_t -= delta
+	else:
+		_impact = move_toward(_impact, 0.0, BalanceCombat.IMPACT_DECAY * delta)
+	if _impact_lock_t > 0.0:
+		_impact_lock_t -= delta
 
 
 ## 冲击积累比例 0..1（BOSS 顶部冲击条数据源；免疫期为 0）。
@@ -434,6 +445,23 @@ func apply_knockback(impulse: Vector2) -> void:
 ## 关闭后臂只随朝向镜像（镜像不动竖直轴，朝天仓口仍朝天），rotation 恒回正。
 func _arm_tracks_pitch() -> bool:
 	return true
+
+
+## 索敌点（玩家枪/肩炮/近战/蜂巢导弹共用的「打哪儿」）：默认=本体原点。形态特殊的
+## 单位覆写——钻地体只认露出地面的体节（BossWorm）。
+func aim_point() -> Vector2:
+	return global_position
+
+
+## 此刻能否被索敌（默认恒可）：覆写为假的单位被索敌整体跳过——枪不朝它转、肩炮
+## 不锁定、近战不追（钻地体全埋地下时，见 BossWorm）。
+func is_targetable() -> bool:
+	return true
+
+
+## 任意节点取索敌点：敌人走 aim_point（索敌调用方统一入口），其余节点退回原点。
+static func aim_of(node: Node2D) -> Vector2:
+	return node.aim_point() if node is Enemy else node.global_position
 
 
 func _species_max_hp() -> int:

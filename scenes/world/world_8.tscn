@@ -20,7 +20,6 @@
 [ext_resource type="Script" path="res://scripts/world/aerial_fog.gd" id="18"]
 [ext_resource type="Script" path="res://scripts/ui/title_screen.gd" id="19"]
 [ext_resource type="PackedScene" path="res://scenes/units/elite_8.tscn" id="20"]
-[ext_resource type="PackedScene" path="res://scenes/units/boss_8.tscn" id="21"]
 [ext_resource type="Texture2D" path="res://assets/world_8/env_salt_ground_top.svg" id="22"]
 [ext_resource type="Texture2D" path="res://assets/world_8/env_salt_ground_fill.svg" id="23"]
 [ext_resource type="Texture2D" path="res://assets/world_8/env_salt_harvester.svg" id="24"]
@@ -121,7 +120,6 @@ enemy_scene = ExtResource("6")
 drone_scene = ExtResource("16")
 shield_scene = ExtResource("17")
 elite_scene = ExtResource("20")
-boss_scene = ExtResource("21")
 obstacle_scene = ExtResource("7")
 platform_scene = ExtResource("11")
 scaffold_scene = ExtResource("12")

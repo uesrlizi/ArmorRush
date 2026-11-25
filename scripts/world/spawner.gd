@@ -10,6 +10,7 @@ signal enemy_killed(points: int)
 signal boss_defeated(at: Vector2) # BOSS 被击败（死亡演出即启）：Main 借此排章末转场+落装备（at=击杀点）
 
 @export var obstacles_enabled := true # 障碍生成开关
+@export var mobs_enabled := true      # 杂兵生成开关（小怪+精英一并停；试装场等安全段用，Main 不转发、场景里直接勾）
 @export var crates_enabled := false   # 两种箱子（方块/长条平台）暂禁用，只刷脚手架平台
 @export var elite_enabled := true  # 精英·导弹车生成开关（Main 的内容开关转发）
 @export var boss_enabled := true   # 追击大型机生成开关（Main 的内容开关转发）
@@ -17,7 +18,9 @@ signal boss_defeated(at: Vector2) # BOSS 被击败（死亡演出即启）：Mai
 @export var drone_scene: PackedScene           # 悬浮无人机（更脆、悬空）
 @export var shield_scene: PackedScene          # 盾卫（防御力挡弹，须近战）
 @export var elite_scene: PackedScene           # 精英·导弹车（周期导弹齐射，落点预警）
-@export var boss_scene: PackedScene            # 追击大型机（距离触发的追击段落）
+## BOSS 兜底：只给没登记进 RunState.WORLD_BOSSES 的场景用（试装场等）。在池场景的
+## BOSS 名单正本=登记表（一张场景可登记多台，遭遇触发时随机抽一台），不看这里。
+@export var boss_scene: PackedScene
 @export var obstacle_scene: PackedScene        # 方块箱
 @export var platform_scene: PackedScene        # 长条平台箱（实体障碍）
 @export var scaffold_scene: PackedScene        # 脚手架（单向平台，浮空）
@@ -38,6 +41,7 @@ var _elite_gate_x := 0.0 # 精英门槛用「到过的最远 x」：往左折返
 var _pools := {} # scene_path -> Array[ScrollObject]
 var _stopped := false
 var _active := false # 启动页待机时不刷怪，start() 后才上线
+var _boss_roster: Array[String] = [] # 本场景的 BOSS 名单（场景路径，登记表序；首项=主位）
 
 
 func _ready() -> void:
@@ -48,6 +52,16 @@ func _ready() -> void:
 	_enemy_next_distance = _roll(true)
 	_obstacle_next_distance = _roll(false)
 	_player.died.connect(func() -> void: _stopped = true)
+	# BOSS 名单：登记表优先（以本场景文件路径查），没登记的场景退回场景里摆的 boss_scene
+	_boss_roster = RunState.boss_roster(boss_world_path())
+	if _boss_roster.is_empty() and boss_scene != null:
+		_boss_roster.append(boss_scene.resource_path)
+
+
+## 本场景的文件路径（BOSS 名单的查表键）：owner=场景根节点（嵌在别的场景里实例化时
+## 仍是本场景自己的根），scene_file_path 即它的 tscn 路径。
+func boss_world_path() -> String:
+	return owner.scene_file_path if owner != null else ""
 
 
 ## 进入战斗才调：从这一刻起按位移开始刷（首次间距已掷好，起步留一段空白）。
@@ -57,7 +71,7 @@ func start() -> void:
 	_active = true
 	_last_player_x = _player.global_position.x
 	if RunState.rush_active and boss_enabled:
-		debug_spawn_boss()
+		spawn_run_boss()
 
 
 ## 章末转场窗口：彻底停刷（障碍一并停，画面安静等黑场）。
@@ -78,7 +92,7 @@ func _physics_process(_delta: float) -> void:
 	var boss_here := get_tree().get_first_node_in_group("boss") != null
 	# 杂兵闸：BOSS 遭遇战期间停刷；RUSH 终局（无杂兵细则，run_loop.md §1）
 	# 整场停刷——小怪/精英一并停，障碍照常=跑酷不断。
-	var mobs_allowed := not boss_here \
+	var mobs_allowed := mobs_enabled and not boss_here \
 			and not (BalanceGlobal.RUSH_NO_MOBS and RunState.rush_active)
 	if mobs_allowed:
 		# 遭遇战期间冻结累计：打完不洪泛，刷怪节奏从原地续（同受欠账上限约束）
@@ -103,7 +117,7 @@ func _physics_process(_delta: float) -> void:
 ## 非池化：BOSS 自管死亡演出与 queue_free，这里只管"何时该有一只"。
 
 func _tick_boss(boss_here: bool) -> void:
-	if boss_scene == null or not boss_enabled:
+	if _boss_roster.is_empty() or not boss_enabled:
 		return
 	if boss_here:
 		_boss_engaged = true
@@ -113,17 +127,41 @@ func _tick_boss(boss_here: bool) -> void:
 		_boss_score_accum = 0
 		return
 	if _boss_score_accum >= BalanceGlobal.BOSS_SCORE_TRIGGER:
-		debug_spawn_boss()
+		spawn_run_boss()
 
 
-## BOSS 不走池化 _spawn：位置自己管（悬浮绝对高度 + 画面右缘锚定）。
+## 战斗路径的 BOSS 出场（遭遇触发 / RUSH 落地即战）：RUSH 出 RunState 抽定的那台
+## （take_pending_boss 取即清），普通关在本场景名单里现抽（本局没打过的优先）。
+func spawn_run_boss() -> Node2D:
+	var pending := RunState.take_pending_boss()
+	if pending.is_empty() or not _boss_roster.has(pending):
+		pending = RunState.draw_boss_for_world(boss_world_path())
+	if pending.is_empty():
+		return debug_spawn_boss()
+	return debug_spawn_boss(load(pending) as PackedScene)
+
+
+## BOSS 不走池化 _spawn：位置自己管（悬浮绝对高度 + 画面右缘锚定），入树后各机在
+## on_spawned 里自己落位。scene 省略=出本场景名单的主位（首项）——探针与直开场景
+## 的确定性入口；战斗路径请走 spawn_run_boss。
 ## 返回放宽到 Node2D：章节 BOSS 各是自己的脚本（ch1=Boss 直升机，ch2=BossBarge
-## 驳船），悬浮锚在各自 on_spawned 里落位。
-func debug_spawn_boss() -> Node2D:
-	var boss := boss_scene.instantiate() as Node2D
+## 驳船…）。
+func debug_spawn_boss(scene: PackedScene = null) -> Node2D:
+	if scene == null:
+		if _boss_roster.is_empty():
+			return null
+		scene = load(_boss_roster[0]) as PackedScene
+	var boss := scene.instantiate() as Node2D
 	var x := _right_edge() + 1000.0
 	boss.global_position = Vector2(x, BalanceCombat.BOSS_HOVER_Y)
-	_container.add_child(boss) # 入树即 _ready→on_spawned：亮血条 + WARNING
+	# 钻地体（"burrowers" 组）挂场景的地形后方容器 burrow_container：地下部分被地块盖住；
+	# 场景没给这个容器（预览场）时照旧进 ScrollObjects。
+	var host: Node = _container
+	if boss.is_in_group("burrowers"):
+		var burrow := get_tree().get_first_node_in_group("burrow_container")
+		if burrow != null:
+			host = burrow
+	host.add_child(boss) # 入树即 _ready→on_spawned：亮血条 + WARNING
 	boss.killed.connect(_on_killed)
 	boss.killed.connect(func(_points: int) -> void: boss_defeated.emit(boss.global_position))
 	boss.reset_physics_interpolation()

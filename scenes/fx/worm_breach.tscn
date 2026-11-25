@@ -1,0 +1,174 @@
+[gd_scene load_steps=26 format=3]
+
+[ext_resource type="Script" path="res://scripts/fx/one_shot_fx.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/common/fx_flash.svg" id="2"]
+[ext_resource type="Texture2D" path="res://assets/world_3/fx_worm_chunk.svg" id="3"]
+[ext_resource type="Texture2D" path="res://assets/world_3/fx_worm_puff.png" id="4"]
+
+; 冰钻破土/入地爆雪（一次性，OneShotFx 收尾）：入树即整批出生、播完自清。
+; 四层各管一件事——Flash 白闪（吞掉地面接缝的那一帧）/ Chunks 冰块（体量与方向）/
+; Powder 雪粉团（软边体量）/ Skirt 贴地裙溅（沿地面向两侧铺）。节点本地 -Y=喷向主轴，
+; 调用方转节点（破土=沿航向倾、入地=反弹向上）；scale 调量级（入地/地表代爆 0.55~0.8）。
+; 粒子全 local_coords=false：碎块雪粉留在世界原地（残迹类），不跟爆点走。
+; 冰块寿命压到 0.7s：抛到顶附近缩没（首版 1.0s 掉回地面以下还看得见=碎冰掉穿地面）。
+; 裙溅零重力+强阻尼：沿地面横着铺开停住，不下钻。
+
+[sub_resource type="CanvasItemMaterial" id="addmat"]
+blend_mode = 1
+
+[sub_resource type="Gradient" id="grad_flash"]
+offsets = PackedFloat32Array(0, 0.6, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.8, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture1D" id="gtex_flash"]
+gradient = SubResource("grad_flash")
+
+[sub_resource type="Curve" id="curve_flash"]
+_data = [Vector2(0, 0.5), 0.0, 0.0, 0, 0, Vector2(1, 1.5), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="ctex_flash"]
+curve = SubResource("curve_flash")
+
+[sub_resource type="ParticleProcessMaterial" id="pm_flash"]
+particle_flag_disable_z = true
+gravity = Vector3(0, 0, 0)
+scale_min = 2.6
+scale_max = 2.6
+scale_curve = SubResource("ctex_flash")
+color_ramp = SubResource("gtex_flash")
+
+[sub_resource type="Gradient" id="grad_chunks"]
+offsets = PackedFloat32Array(0, 0.6, 1)
+colors = PackedColorArray(1, 1, 1, 1, 0.94, 0.97, 1, 1, 0.9, 0.95, 1, 0)
+
+[sub_resource type="GradientTexture1D" id="gtex_chunks"]
+gradient = SubResource("grad_chunks")
+
+[sub_resource type="Curve" id="curve_chunks"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.6, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="ctex_chunks"]
+curve = SubResource("curve_chunks")
+
+[sub_resource type="ParticleProcessMaterial" id="pm_chunks"]
+particle_flag_disable_z = true
+direction = Vector3(0, -1, 0)
+spread = 48.0
+initial_velocity_min = 700.0
+initial_velocity_max = 1400.0
+gravity = Vector3(0, 1900, 0)
+angle_min = -180.0
+angle_max = 180.0
+angular_velocity_min = -420.0
+angular_velocity_max = 420.0
+scale_min = 0.8
+scale_max = 1.4
+scale_curve = SubResource("ctex_chunks")
+color_ramp = SubResource("gtex_chunks")
+
+[sub_resource type="Gradient" id="grad_powder"]
+offsets = PackedFloat32Array(0, 0.45, 1)
+colors = PackedColorArray(1, 1, 1, 0.7, 0.97, 0.99, 1, 0.45, 0.9, 0.95, 1, 0)
+
+[sub_resource type="GradientTexture1D" id="gtex_powder"]
+gradient = SubResource("grad_powder")
+
+[sub_resource type="Curve" id="curve_powder"]
+_data = [Vector2(0, 0.7), 0.0, 0.0, 0, 0, Vector2(1, 1.7), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="ctex_powder"]
+curve = SubResource("curve_powder")
+
+[sub_resource type="ParticleProcessMaterial" id="pm_powder"]
+particle_flag_disable_z = true
+direction = Vector3(0, -1, 0)
+spread = 60.0
+initial_velocity_min = 240.0
+initial_velocity_max = 560.0
+gravity = Vector3(0, 260, 0)
+damping_min = 220.0
+damping_max = 420.0
+scale_min = 0.5
+scale_max = 0.8
+scale_curve = SubResource("ctex_powder")
+color_ramp = SubResource("gtex_powder")
+
+[sub_resource type="Gradient" id="grad_skirt"]
+offsets = PackedFloat32Array(0, 0.5, 1)
+colors = PackedColorArray(1, 1, 1, 0.85, 0.96, 0.98, 1, 0.5, 0.88, 0.94, 0.98, 0)
+
+[sub_resource type="GradientTexture1D" id="gtex_skirt"]
+gradient = SubResource("grad_skirt")
+
+[sub_resource type="Curve" id="curve_skirt"]
+_data = [Vector2(0, 0.6), 0.0, 0.0, 0, 0, Vector2(1, 1.5), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="ctex_skirt"]
+curve = SubResource("curve_skirt")
+
+[sub_resource type="ParticleProcessMaterial" id="pm_skirt"]
+particle_flag_disable_z = true
+direction = Vector3(0, -1, 0)
+spread = 90.0
+initial_velocity_min = 480.0
+initial_velocity_max = 920.0
+gravity = Vector3(0, 0, 0)
+damping_min = 450.0
+damping_max = 750.0
+scale_min = 0.35
+scale_max = 0.6
+scale_curve = SubResource("ctex_skirt")
+color_ramp = SubResource("gtex_skirt")
+
+[node name="WormBreach" type="Node2D"]
+script = ExtResource("1")
+lifetime = 1.5
+
+[node name="Flash" type="GPUParticles2D" parent="."]
+material = SubResource("addmat")
+emitting = false
+amount = 1
+lifetime = 0.2
+one_shot = true
+explosiveness = 1.0
+local_coords = false
+texture = ExtResource("2")
+visibility_rect = Rect2(-400, -400, 800, 800)
+process_material = SubResource("pm_flash")
+
+[node name="Chunks" type="GPUParticles2D" parent="."]
+emitting = false
+amount = 26
+lifetime = 0.7
+one_shot = true
+explosiveness = 1.0
+local_coords = false
+texture = ExtResource("3")
+visibility_rect = Rect2(-900, -1000, 1800, 1600)
+process_material = SubResource("pm_chunks")
+
+[node name="Powder" type="GPUParticles2D" parent="."]
+emitting = false
+amount = 30
+lifetime = 1.2
+one_shot = true
+explosiveness = 1.0
+local_coords = false
+texture = ExtResource("4")
+visibility_rect = Rect2(-900, -1000, 1800, 1600)
+process_material = SubResource("pm_powder")
+
+[node name="Skirt" type="GPUParticles2D" parent="."]
+emitting = false
+amount = 16
+lifetime = 0.5
+one_shot = true
+explosiveness = 1.0
+local_coords = false
+texture = ExtResource("4")
+visibility_rect = Rect2(-900, -1000, 1800, 1600)
+process_material = SubResource("pm_skirt")

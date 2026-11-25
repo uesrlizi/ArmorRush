@@ -1,10 +1,11 @@
 [gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/weapons/bullet.gd" id="1"]
-; 断云机鼻曳光机炮的直射弹（bullet.gd 纯换皮：语法/速度/伤害由发射方赋值不变）。
-; 云廊守备曳光语汇：平滑紫白波浪带（fx_dawn_bolt.svg），
-; ADD 混合下白芯提亮。贴图 30x12；碰撞 = 胶囊沿 +X（飞行方向），
-; r2.6×长24 贴合束形（同 plasma_bolt/coral_bolt 规格）。
+; 断云机鼻曳光直射弹（bullet.gd 纯换皮：语法/速度/伤害由发射方赋值不变）。
+; 曳光长条（2026-11-10 用户定：曳光弹=长条/水滴，圆点高速视觉读不到；弹形
+; 禁令只禁波浪线——本弹原版正弦波带即违禁原型，改直带微锥尾）：贴图
+; fx_dawn_bolt.svg 30x12（+X=飞行方向），ADD 混合下白芯提亮。碰撞=胶囊
+; r2.6×h24 沿 +X（同 plasma_bolt/coral_bolt 规格）。
 [ext_resource type="Texture2D" path="res://assets/world_5/fx_dawn_bolt.svg" id="2"]
 
 [sub_resource type="CanvasItemMaterial" id="addmat"]

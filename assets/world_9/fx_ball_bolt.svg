@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" width="28" height="28">
+<!-- 电珠（第九章球状闪电通用件）28x28，锚点中心 (14,14)。三层读色：外晕 #6e52a0 / 中球
+     #c9a6ff / 白热芯 #f0e6ff（R10），高光点偏左上。复用：天线顶（boss_9.tscn scale 0.7）、
+     针链珠（rod_chain.gd 沿针轴 6 珠）、跨缆珠链（live_span.gd 沿缆 11 珠），亮度走 modulate。 -->
+<defs>
+
+</defs>
+<circle cx="14" cy="14" r="13" fill="#6e52a0" opacity="0.14"/>
+<circle cx="14" cy="14" r="9.5" fill="#6e52a0" opacity="0.38"/>
+<circle cx="14" cy="14" r="6.5" fill="#c9a6ff" opacity="0.85"/>
+<circle cx="14" cy="14" r="4.2" fill="#c9a6ff"/>
+<circle cx="14" cy="14" r="2.3" fill="#f0e6ff"/>
+<circle cx="12.8" cy="12.6" r="1.1" fill="#ffffff" opacity="0.9"/>
+</svg>

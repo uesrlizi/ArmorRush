@@ -1,0 +1,58 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/fx/worm_mound.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/world_3/fx_worm_mound.svg" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/fx/threat_flash.tscn" id="3"]
+[ext_resource type="Texture2D" path="res://assets/world_3/fx_worm_puff.png" id="4"]
+
+; 冰钻破土隆起预警（各招共用的破土前摇件）：节点原点钉破土点地表线。
+; Dome 雪丘（锚=底边中点，长高/微颤由 worm_mound.gd 驱动）+ Peak 峰顶标准预警闪光
+; （ThreatFlash：闪光+警告音同拍，固定 0.6s 驻留——破土点就是发射器）+ Seep 预漏雪粉。
+
+[sub_resource type="Gradient" id="grad_seep"]
+offsets = PackedFloat32Array(0, 0.6, 1)
+colors = PackedColorArray(1, 1, 1, 0.6, 1, 1, 1, 0.35, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture1D" id="gtex_seep"]
+gradient = SubResource("grad_seep")
+
+[sub_resource type="Curve" id="curve_seep"]
+_data = [Vector2(0, 0.5), 0.0, 0.0, 0, 0, Vector2(1, 1.2), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="ctex_seep"]
+curve = SubResource("curve_seep")
+
+[sub_resource type="ParticleProcessMaterial" id="pm_seep"]
+particle_flag_disable_z = true
+direction = Vector3(0, -1, 0)
+spread = 26.0
+initial_velocity_min = 60.0
+initial_velocity_max = 170.0
+gravity = Vector3(0, -60, 0)
+scale_min = 0.3
+scale_max = 0.5
+scale_curve = SubResource("ctex_seep")
+color_ramp = SubResource("gtex_seep")
+
+[node name="WormMound" type="Node2D"]
+script = ExtResource("1")
+
+[node name="Dome" type="Sprite2D" parent="."]
+centered = false
+offset = Vector2(-120, -108)
+texture = ExtResource("2")
+
+[node name="Seep" type="GPUParticles2D" parent="."]
+position = Vector2(0, -50)
+amount = 14
+lifetime = 0.7
+local_coords = true
+texture = ExtResource("4")
+visibility_rect = Rect2(-200, -300, 400, 400)
+process_material = SubResource("pm_seep")
+
+[node name="Peak" type="Node2D" parent="."]
+position = Vector2(0, -96)
+
+[node name="ThreatFlash" parent="Peak" instance=ExtResource("3")]

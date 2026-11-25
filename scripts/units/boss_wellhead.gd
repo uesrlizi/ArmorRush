@@ -1,9 +1,10 @@
 class_name BossWellhead
 extends PursuitBoss
-## 第十章 BOSS·井场管线母舰「井口」（硫焰地热田守卫）：追击框架能力层——「井口与硫云」。
+## 第十章 BOSS·自升式钻井平台「井口」（硫焰地热田守卫）：追击框架能力层——「井口与硫云」。
 ## 一座飞着的井场平台（锚点账=bake_sulfur_units.py 头注）：艏部井口喷嘴 NozzlePort
 ## (−146,54)=世界 y424、腹舱钻杆井口 DrillPort (0,78)、艉部排烟囱口 VentPort (96,−44)；
-## 甲板井架吊杆=ArmPivot（敌基类俯仰层驱动，无发光口、不出弹）。
+## 甲板井架吊杆=ArmPivot=静态结构件（覆写 _arm_tracks_pitch()=false，基类俯仰层恒回正、
+## 不做可动瞄准；无发光口、不出弹）。
 ##   井压线（技能A）：DrillPort ThreatFlash 0.6（t=0 同帧采样 lead）→ 钻头出膛 → 纵队
 ##     SulfurVent 3 口（p2 4 口）xk = xv + k·360，xv = px + clamp(vx·2.4, 240, 1440)；
 ##     第 k 口首喷 2.3+0.6k、每口 3 喷；R10 每口独立避让，取消的口留空不重排——
@@ -13,7 +14,8 @@ extends PursuitBoss
 ##     2.4 燃完——罚 tier2 站立与 tier1 起跳；派招闸 R7（带内 tier2 累计 ≥320）+ R16
 ##     （tier2 与受罚区间 I 交集 ≥40），不满足改派 A 且 B 冷却不消耗；
 ##   硫焰扫掠（普攻）：NozzlePort 出手锁定 7 团（p2 8 团）近水平分层火鞭，全部穿过出手瞬间
-##     玩家中心 x、到靶高 h=210..0（down/up 交替），R9 逐发 16px 采样校平（抬 6°×≤2，仍埋哑火）——
+##     玩家中心 x、到靶高 h=210..0（down/up 交替），R9 逐发 16px 采样校平（抬 6°×≤2，仍埋=哑火：
+##     喷嘴口爆一记暗蓝火花+一圈小烟的可见反馈，纯视觉无伤害）——
 ##     读法：出手时人在跑就继续跑，停下/站在出手点=吃。不挂 ThreatFlash。
 ## 走位/贴脸窗/二阶段/失衡全在 PursuitBoss 框架。数值全在 BalanceWorld10。
 
@@ -24,6 +26,7 @@ const ST_CLOUD_FIRE := 6
 const ST_SWEEP := 7
 
 const FLARE_PUFF := preload("res://scenes/weapons/flare_puff.tscn")
+const DUD_SMOKE := preload("res://assets/common/fx_smoke.svg") # 哑火小烟贴图（软边灰团，普通混合）
 
 ## 探针开关（R16）：绕过 B 派招闸，只给 scenes/previews 探针用；常规运行恒为 false。
 var force_cast_b := false
@@ -50,10 +53,6 @@ var sweep_lifts: Array[int] = []         # 探针读数：最近一轮各发抬�
 @onready var _vent_port: Node2D = $Visuals/VentPort
 @onready var _vent_warn: ThreatFlash = $Visuals/VentPort/ThreatFlash
 @onready var _vent_flash: MuzzleFlash = $Visuals/VentPort/Flash
-@onready var _thrusters: Array[Sprite2D] = [
-	$Visuals/Thruster1 as Sprite2D,
-	$Visuals/Thruster2 as Sprite2D,
-]
 
 
 func _display_name() -> String:
@@ -68,19 +67,16 @@ func _hover_anchor_y() -> float:
 	return BalanceWorld10.WELLHEAD_HOVER_Y # 机体 280..460，对最高台阶 536 净空 76
 
 
+## 井架吊杆是结构件不是炮：不做可动瞄准（基类俯仰层恒回正，吊杆只随朝向镜像）。
+func _arm_tracks_pitch() -> bool:
+	return false
+
+
 func on_spawned() -> void:
 	super()
 	_vent_plans.clear()
 	_sweep_plan.clear()
 	_sweep_down = true
-
-
-## 双举升喷口硫焰蓝呼吸；井架吊杆俯仰由基类瞄准层驱动。
-func _tick_visual(_delta: float) -> void:
-	for i in _thrusters.size():
-		var t := _thrusters[i] as Sprite2D
-		t.modulate.a = 0.4 + 0.22 * sin(_bob_t * 11.0 + i * 2.3)
-		t.scale = Vector2.ONE * (0.95 + 0.15 * sin(_bob_t * 8.0 + i * 1.9))
 
 
 func _player_node() -> Player:
@@ -312,6 +308,35 @@ func _fire_puff(dir: Vector2) -> Bullet:
 	return b
 
 
+## 哑火也要给反馈，静默=玩家以为技能坏了：R9 校平后仍埋地的发次不生成弹体，改在
+## 喷嘴口（_sweep_from）爆一记暗蓝灰小火花 + 一圈灰白小烟（读法=弹打在墙上）。
+## 纯视觉件：无碰撞、无伤害、不进任何伤害账（sweep_duds 计数照旧在 _begin_direct）；
+## 探针 _puffs 只数 FlarePuff，不受干扰。先定位后入树（同 boss_conductor 的 FlashBurst
+## 惯例），各自播完自灭、不驻留弹容器。
+func _spawn_sweep_dud() -> void:
+	var container := get_tree().get_first_node_in_group("projectile_container")
+	if container == null:
+		return
+	var bloom := FlashBurst.new()
+	bloom.duration = 0.18
+	bloom.size_scale = 0.45
+	bloom.flash_color = Color(0.42, 0.58, 0.72) # 暗蓝灰小火花（ADD 衰减到白）
+	bloom.position = _sweep_from
+	container.add_child(bloom)
+	var smoke := Sprite2D.new()
+	smoke.texture = DUD_SMOKE
+	smoke.modulate = Color(0.86, 0.88, 0.85, 0.45) # 灰白小烟（普通混合压底色，不 ADD）
+	smoke.scale = Vector2.ONE * 0.35
+	smoke.position = _sweep_from
+	container.add_child(smoke)
+	var tw := smoke.create_tween()
+	tw.set_parallel(true)
+	tw.tween_property(smoke, "scale", Vector2.ONE * 1.1, 0.45) \
+			.from(Vector2.ONE * 0.35).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tw.tween_property(smoke, "modulate:a", 0.0, 0.45).from(0.45)
+	tw.chain().tween_callback(smoke.queue_free)
+
+
 ## ---- 主循环 ----
 
 func _tick_attack(delta: float) -> void:
@@ -355,6 +380,8 @@ func _tick_attack(delta: float) -> void:
 				var d: Vector2 = _sweep_plan[_sweep_fired]["dir"]
 				if d != Vector2.ZERO:
 					_fire_puff(d)
+				else:
+					_spawn_sweep_dud() # 哑火：贴墙弹不出，也在喷嘴口给一记可见反馈
 				_sweep_fired += 1
 			if _bt <= 0.0:
 				_enter_recover(BalanceCombat.BOSS_DIRECT_RECOVER)

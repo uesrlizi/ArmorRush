@@ -4,17 +4,19 @@ extends Node2D
 ## 验 run_loop.md §1 的抽关账（新实例化 RunState 脚本，不碰游戏 autoload）：
 ##   A. start_run：首关∈FIRST_POOL 白名单，关卡/通关/RUSH 记号全归零；
 ##   B. 前 4 次抽关照走洗牌袋：stage 2..4、相邻不撞、无重复；
-##   C. 第 4 关后进 RUSH：stage 钉 5、rush_active、阵容=没抽到的场景里取 3 台、
-##      整局不重复（7 场景池时恰好覆盖全池各一次）；
+##   C. 第 4 关后进 RUSH：stage 钉 5、rush_active、先抽 BOSS 再配场景——阵容 BOSS
+##      不重复且全是本局没打过的、每台配的场景是它的登记场景、阵容内场景不重复；
 ##   D. 阵容逐台弹出（stage 不再涨），打空返回 "" 且 run_complete；
 ##   E. 携带血量取走即清（-1=不携带兜底）；
 ##   F. start_run 重开全归零（通关后再开新一局不残留）；
 ##   G. 疾驰倍率公式（run_loop.md §2）：输出（防御后实伤）涨进度+击杀收头、恰满
 ##      整除进档、一场 BOSS 战 400 实伤=+4 档锚点、受击按伤害量扣（唯一掉档来源，
 ##      无停手流失）、进度跨关保持（只 start_run 归零）、档位封顶、密度乘区、
+##      计分乘数查表（MULT_VALUES ×1.0~×3.0，档位≠乘数）、
 ##      局级统计（最高档/受击数）、冻结闸（autotest/transition_probe 确定性用）；
 ##   H. 难度阶梯（run_loop.md §3）：后摇按关序 ×0.95^(n−1)、第 4 关起齐射 +1、
-##      凶度封顶第 4 关档（RUSH stage=5 与旧制滚动都封 RUN_NORMAL_LEVELS 档）；
+##      凶度封顶第 4 关档（RUSH stage=5 与旧制滚动都封 RUN_NORMAL_LEVELS 档）、
+##      体量两根独立曲线（血量/失衡阈值拆开，2026-11-10 用户定，H6~H9）；
 ##   I. 轻肉鸽装备（run_loop.md §4）：持有表/统一访问器、同槽位不爆（掉落表=未持有
 ##      槽，种子批跑）、全持有空掷、拾取清单文案、start_run 清空、冻结闸不随新局清、
 ##      携带盾量取即清、成员表完整（键全游戏唯一、名字/效果句齐）、机动红线与容量
@@ -61,9 +63,11 @@ class Runner extends Node:
 		var drawn: Array[String] = [first]
 		var ok_seq := true
 		var ok_adj := true
+		rs.draw_boss_for_world(first) # 普通关落地都会遭遇一台 BOSS（记进已打账）
 		for i in 3:
 			var s: String = rs.draw_next()
 			drawn.append(s)
+			rs.draw_boss_for_world(s)
 			if rs.stage != i + 2 or not (s in all) or drawn.count(s) > 1:
 				ok_seq = false
 			if s == drawn[drawn.size() - 2] and drawn.size() >= 2:
@@ -90,28 +94,33 @@ class Runner extends Node:
 		_check(lineup_all.size() == BalanceGlobal.RUN_RUSH_COUNT,
 				"C2 阵容=%d 台" % BalanceGlobal.RUN_RUSH_COUNT,
 				"lineup=%s" % [lineup_all])
-		# 覆盖账（池大小无关）：阵容全是本局没抽到的场景、整局无重复；
-		# 池恰好 = 普通关+阵容台数时（7 场景池）每局看满全池各一次。
-		var seen: Array[String] = drawn.duplicate()
-		seen.append_array(lineup_all)
-		var coverage_ok := true
-		for s in seen:
-			if not (s in all) or seen.count(s) > 1:
+		# 新覆盖账（先抽 BOSS 再配场景）：阵容 BOSS 全是本局没打过的（≤4 关打过 ≤4 台，
+		# 11 台池必有余量）、阵容内 BOSS 不重复、每台配的场景是它的登记场景、阵容内
+		# 场景不重复（场景可与普通关重访=设计允许，同场景换一台 BOSS）。
+		var bosses_all: Array[String] = [rs.current_boss] # 首台的 BOSS 在 current_boss
+		bosses_all.append_array(rs.rush_bosses)
+		var coverage_ok := bosses_all.size() == BalanceGlobal.RUN_RUSH_COUNT
+		var boss_seen := {}
+		var host_seen := {}
+		for i in bosses_all.size():
+			var b: String = bosses_all[i]
+			if boss_seen.has(b) or rs._fought.has(b) or not rs.boss_hosts(b).has(lineup_all[i]):
 				coverage_ok = false
-		for s in lineup_all:
-			if s in drawn:
+			if host_seen.has(lineup_all[i]):
 				coverage_ok = false
-		if all.size() == BalanceGlobal.RUN_NORMAL_LEVELS + BalanceGlobal.RUN_RUSH_COUNT:
-			coverage_ok = coverage_ok and seen.size() == all.size()
-		_check(coverage_ok, "C3 阵容=没抽到的场景、整局不重复（池=%d）" % all.size())
+			boss_seen[b] = true
+			host_seen[lineup_all[i]] = true
+		_check(coverage_ok, "C3 阵容=没打过的 BOSS×登记场景、BOSS 与场景双双不重复（池=%d）" % all.size(),
+				"bosses=%s" % [bosses_all])
 
 		# ---- D. 阵容打空=通关 ----
 		var ok_rush_seq := true
 		for i in lineup_all.size() - 1: # 剩余台数（首台已在 C 弹出）
 			var s: String = rs.draw_next()
-			if rs.stage != BalanceGlobal.RUN_NORMAL_LEVELS + 1 or s != lineup_all[i + 1]:
+			if rs.stage != BalanceGlobal.RUN_NORMAL_LEVELS + 1 or s != lineup_all[i + 1] \
+					or rs.current_boss != bosses_all[i + 1]:
 				ok_rush_seq = false
-		_check(ok_rush_seq, "D1 RUSH 逐台跳场景、关号不涨",
+		_check(ok_rush_seq, "D1 RUSH 逐台跳场景、场景与 BOSS 对应、关号不涨",
 				"stage=%d" % rs.stage)
 		var last: String = rs.draw_next()
 		_check(last.is_empty() and rs.run_complete, "D2 阵容打空返回空串+通关记号")
@@ -129,17 +138,23 @@ class Runner extends Node:
 		# ---- F. 重开归零 ----
 		rs.start_run()
 		_check(rs.stage == 1 and not rs.rush_active and not rs.run_complete
-				and rs.handover_hp == -1 and rs.rush_lineup.is_empty(),
-				"F1 通关后重开不残留（rush/通关/携带全归零）")
+				and rs.handover_hp == -1 and rs.rush_lineup.is_empty()
+				and rs.pending_boss.is_empty() and rs.current_boss.is_empty()
+				and rs.boss_log.is_empty(),
+				"F1 通关后重开不残留（rush/通关/携带/BOSS 账全归零）")
 
 		# ---- G. 疾驰倍率账（run_loop.md §2；数字全读 BalanceGlobal 常量不抄死值）----
-		_check(rs.multiplier() == 1 and is_equal_approx(rs.mult_density_factor(), 1.0),
-				"G1 开局 ×1、密度乘区 1")
+		_check(rs.multiplier() == 1 and is_equal_approx(rs.mult_density_factor(), 1.0)
+				and is_equal_approx(rs.mult_value(), BalanceGlobal.MULT_VALUES[0]),
+				"G1 开局第 1 档（乘数 ×%.1f）、密度乘区 1" % BalanceGlobal.MULT_VALUES[0])
 		rs.mult_add_damage(99)
-		_check(rs.multiplier() == 1, "G2 输出 99→19.8 进度差一格仍 ×1",
+		_check(rs.multiplier() == 1, "G2 输出 99→19.8 进度差一格仍在第 1 档",
 				"progress=%.1f" % rs.mult_progress)
 		rs.mult_add_damage(1)
-		_check(rs.multiplier() == 2, "G3 输出 100→恰满 20 进度整除进 ×2",
+		_check(rs.multiplier() == 2
+				and is_equal_approx(rs.mult_value(), BalanceGlobal.MULT_VALUES[1]),
+				"G3 输出 100→恰满 20 进度整除进第 2 档（乘数 ×%.1f）"
+						% BalanceGlobal.MULT_VALUES[1],
 				"progress=%.1f" % rs.mult_progress)
 		rs.mult_take_hit(2)
 		_check(rs.multiplier() == 1 and rs.hits_taken == 1,
@@ -150,17 +165,24 @@ class Runner extends Node:
 		_check(rs.multiplier() == clampi(1 + boss_tiers, 1, BalanceGlobal.MULT_MAX)
 				and rs.mult_max_run == rs.multiplier(),
 				"G5 无伤一场 BOSS=+%d 档（输出系数锚点）" % boss_tiers,
-				"progress=%.1f ×%d" % [rs.mult_progress, rs.multiplier()])
+				"progress=%.1f 档 %d" % [rs.mult_progress, rs.multiplier()])
 		rs.mult_take_hit(12) # 严苛档：一发重击 12 伤=-120，顶格进度也清空
 		_check(rs.multiplier() == 1 and is_equal_approx(rs.mult_progress, 0.0)
 				and rs.hits_taken == 2, "G6 重击清空（掉档唯一来源=受击）")
 		for _i in 4:
 			rs.mult_add_kill(25) # 击杀收头渠道独立有效：盾卫 15/次 攒 60
-		_check(rs.multiplier() == 4, "G7 击杀收头 4 杀 60 进度=×4",
+		_check(rs.multiplier() == 4
+				and is_equal_approx(rs.mult_value(), BalanceGlobal.MULT_VALUES[3]),
+				"G7 击杀收头 4 杀 60 进度=第 4 档（乘数 ×%.1f）"
+						% BalanceGlobal.MULT_VALUES[3],
 				"progress=%.1f" % rs.mult_progress)
 		rs.mult_add_kill(50)
-		_check(rs.multiplier() == BalanceGlobal.MULT_MAX,
-				"G8 进度封顶、档位止于 ×%d" % BalanceGlobal.MULT_MAX,
+		_check(rs.multiplier() == BalanceGlobal.MULT_MAX
+				and is_equal_approx(rs.mult_value(),
+						BalanceGlobal.MULT_VALUES[BalanceGlobal.MULT_MAX - 1]),
+				"G8 进度封顶、档位止于第 %d 档（乘数 ×%.1f）"
+						% [BalanceGlobal.MULT_MAX,
+						BalanceGlobal.MULT_VALUES[BalanceGlobal.MULT_MAX - 1]],
 				"progress=%.1f" % rs.mult_progress)
 		_check(is_equal_approx(rs.mult_density_factor(),
 				pow(BalanceGlobal.MULT_GAP_STEP, float(BalanceGlobal.MULT_MAX - 1))),
@@ -173,8 +195,9 @@ class Runner extends Node:
 		rs.mult_take_hit(5)
 		_check(is_equal_approx(rs.mult_progress, frozen_progress)
 				and rs.multiplier() == 1
+				and is_equal_approx(rs.mult_value(), 1.0)
 				and is_equal_approx(rs.mult_density_factor(), 1.0),
-				"G11 冻结闸：涨/扣全停、档位恒 ×1、乘区恒 1（autotest 确定性用）")
+				"G11 冻结闸：涨/扣全停、档位恒 1（乘数 ×1.0）、乘区恒 1（autotest 确定性用）")
 		rs.mult_frozen = false
 		rs.start_run()
 		_check(rs.mult_progress == 0.0 and rs.mult_max_run == 1 and rs.hits_taken == 0,
@@ -203,7 +226,7 @@ class Runner extends Node:
 		rs.stage = BalanceGlobal.RUN_NORMAL_LEVELS + 3 # 旧制无限滚动继续涨
 		_check(is_equal_approx(rs.ladder_recover_factor(), stage4),
 				"H5 旧制滚动同封顶（凶度有顶）")
-		# 体量增长账（血量/失衡阈值同系数；实例侧资格闸门=Enemy._ladder_scaling，
+		# 体量增长账（血量/失衡阈值=两根独立曲线；实例侧资格闸门=Enemy._ladder_scaling，
 		# 纯逻辑探针验不到，autotest 真局覆盖）
 		rs.stage = 2
 		var g2: float = rs.ladder_growth_factor()
@@ -213,11 +236,33 @@ class Runner extends Node:
 				and is_equal_approx(g4, minf(pow(BalanceGlobal.LADDER_GROWTH_MULT,
 						float(BalanceGlobal.RUN_NORMAL_LEVELS - 1)),
 						BalanceGlobal.LADDER_GROWTH_MAX)),
-				"H6 体量增长：×1.12/关、封顶 ×%s" % BalanceGlobal.LADDER_GROWTH_MAX,
+				"H6 血量增长：×%s/关、封顶 ×%s" % [BalanceGlobal.LADDER_GROWTH_MULT,
+						BalanceGlobal.LADDER_GROWTH_MAX],
 				"g2=%.3f g4=%.3f" % [g2, g4])
 		rs.stage = BalanceGlobal.RUN_NORMAL_LEVELS + 1
-		_check(is_equal_approx(rs.ladder_growth_factor(), g4),
-				"H7 RUSH 体量同封顶（×0.7 折扣叠加后 ≈0.98 原血量）")
+		if BalanceGlobal.RUSH_HP_DISCOUNT_ON:
+			_check(is_equal_approx(rs.ladder_growth_factor(), g4),
+					"H7 RUSH 血量同封顶（×%s 折扣叠加后=%.2f×原血量）"
+							% [BalanceGlobal.RUSH_HP_DISCOUNT,
+							g4 * BalanceGlobal.RUSH_HP_DISCOUNT])
+		else:
+			_check(is_equal_approx(rs.ladder_growth_factor(), g4),
+					"H7 RUSH 血量同封顶（折扣已关=全额 ×%.2f）" % g4)
+		rs.stage = 2
+		var i2: float = rs.ladder_impact_factor()
+		rs.stage = 4
+		var i4: float = rs.ladder_impact_factor()
+		_check(is_equal_approx(i2, BalanceGlobal.LADDER_IMPACT_MULT)
+				and is_equal_approx(i4, minf(pow(BalanceGlobal.LADDER_IMPACT_MULT,
+						float(BalanceGlobal.RUN_NORMAL_LEVELS - 1)),
+						BalanceGlobal.LADDER_IMPACT_MAX))
+				and i4 < g4, # 失衡阈比血量温和=后期爆发窗相对变多（2026-11-10 拆曲线）
+				"H8 失衡阈值独立曲线：×%s/关封顶 ×%s（比血量温和）" % [
+						BalanceGlobal.LADDER_IMPACT_MULT, BalanceGlobal.LADDER_IMPACT_MAX],
+				"i2=%.3f i4=%.3f" % [i2, i4])
+		rs.stage = BalanceGlobal.RUN_NORMAL_LEVELS + 1
+		_check(is_equal_approx(rs.ladder_impact_factor(), i4),
+				"H9 RUSH 失衡阈同封顶")
 		rs.stage = 1
 
 		# ---- I. 轻肉鸽装备账（run_loop.md §4；成员数值全读 BalanceMods 不抄死值）----

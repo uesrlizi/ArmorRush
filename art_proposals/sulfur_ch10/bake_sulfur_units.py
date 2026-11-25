@@ -9,13 +9,13 @@
   enemy_sulfur_shield_body.svg  56x52   盾卫换皮「防喷闸盾卫」
   enemy_sulfur_elite_body.svg   60x80   精英「窜井」井口封堵车
   enemy_sulfur_elite_arm.svg    34x44   精英钻机架（固定射角不俯仰，钻杆朝 -Y）
-  boss_sulfur_body.svg          300x180 BOSS「井口」井场管线母舰
+  boss_sulfur_body.svg          300x180 BOSS「井口」自升式钻井平台（机体见 boss_forms/）
   boss_sulfur_arm.svg           96x44   BOSS 井架吊杆（俯仰件，无发光口，不出弹）
   fx_sulfur_vent.svg            80x28   硫焰井口底座，锚点=底部接地点 (40,26)
   fx_sulfur_vent_glow.svg       64x20   亮井层（口内蓝焰渐急，代码驱动 alpha），锚点 (32,18)
   fx_sulfur_vent_flame.svg      72x224  井口焰柱 H=220，锚点=底部接地点 (36,222)
   fx_sulfur_drill.svg           32x16   钻头弹（+X=飞行方向），锚点中心 (16,8)
-  fx_sulfur_flare_puff.svg      48x48   普攻蓝白焰团，锚点中心 (24,24)
+  fx_sulfur_flare_puff.svg      30x30   普攻蓝白焰团，锚点中心 (15,15)
   fx_sulfur_gas_shell.svg       24x24   硫气弹（青灰白汽团+蓝火星，无伤弹药读法），锚点中心 (12,12)
   fx_sulfur_cloud.svg           200x84  硫云爆燃带段（硫黄烟墙），画布 y0..84 ↔ 世界 y428..512，锚点左上 (0,0)
   fx_sulfur_cloud_front.svg     40x84   硫云锋线（蓝焰，唯一蓝色件），锚点 (20,42)
@@ -281,78 +281,10 @@ def elite_arm():
 
 # ---------------- BOSS「井口」井场管线母舰 ----------------
 def boss_body():
-    s = Svg(300, 180)
-    # 船体：低宽井场平台
-    s.poly([(8, 84), (36, 54), (140, 52), (238, 56), (286, 66), (294, 90),
-            (288, 122), (244, 146), (186, 162), (118, 164), (64, 154), (22, 126)], BODY)
-    s.poly([(36, 54), (140, 52), (238, 56), (282, 65), (278, 71), (236, 62),
-            (140, 58), (42, 60)], LIGHT, 0.7)
-    s.poly([(22, 126), (64, 154), (118, 164), (186, 162), (240, 146),
-            (230, 138), (120, 152), (66, 140), (30, 118)], BELLY)
-    s.rect(60, 92, 170, 2, GAP, 0.3)
-    # 舷侧集输管线（三根横管 + 法兰，签名件：管线母舰）
-    for py, col in ((104, BELLY), (114, GAP)):
-        s.rect(40, py, 228, 6, col)
-        s.rect(40, py, 228, 1.4, LIGHT, 0.45)
-    for fx_ in range(56, 268, 34):
-        s.rect(fx_, 102, 4, 19, STEEL, 0.85)
-    valve(s, 128, 98, 4)
-    valve(s, 196, 98, 4)
-    # 中央井架（ArmPivot 枢座 (150,26) 坐在井架顶台；座裙底 54 埋进甲板）
-    s.poly([(118, 54), (128, 54), (144, 20), (140, 20)], BELLY)
-    s.poly([(182, 54), (172, 54), (156, 20), (160, 20)], BELLY)
-    for gy, x0, x1 in ((44, 126, 174), (34, 132, 168)):
-        s.rect(x0, gy, x1 - x0, 2.4, GAP)
-    s.line(128, 52, 166, 22, GAP, 1.4, 0.7)
-    s.line(172, 52, 134, 22, GAP, 1.4, 0.7)
-    s.rect(136, 14, 28, 10, BODY)
-    s.rect(138, 14, 24, 3, LIGHT, 0.7)
-    s.circle(150, 26, 5, GAP)
-    # 艉部排烟囱 VentPort (246,46)：烟囱 x236..256 自甲板 58 起到口 40
-    s.rect(236, 40, 20, 20, BELLY)
-    s.rect(236, 40, 20, 2.5, LIGHT, 0.7)
-    s.rect(233, 38, 26, 4, GAP)
-    s.rect(239, 42, 14, 6, VOID)
-    s.ellipse(246, 45, 6, 2.4, BLUE, 0.6)
-    s.ellipse(246, 45, 3, 1.2, BLUE_CORE, 0.9)
-    s.rect(258, 50, 6, 10, BELLY)          # 副烟囱
-    # 腹舱钻杆井口 DrillPort (150,168)
-    s.rect(130, 150, 40, 14, GAP)
-    s.rect(130, 150, 40, 3, LIGHT, 0.5)
-    s.rect(140, 158, 20, 12, BELLY)
-    s.rect(144, 162, 12, 7, VOID)
-    s.poly([(147, 164), (153, 164), (150, 170)], STEEL)      # 钻头尖露头
-    valve(s, 135, 158, 2.6)
-    valve(s, 165, 158, 2.6)
-    pilot(s, 150, 146, 1.4)
-    # 舷窗带 + 驾驶楼
-    for wx in range(206, 262, 14):
-        s.rect(wx, 78, 7, 6, "#e0c8d4", 0.65)
-    s.poly([(80, 60), (106, 58), (104, 78), (82, 80)], GAP, 0.9)
-    s.poly([(84, 62), (102, 60), (101, 66), (85, 67)], "#e0c8d4", 0.6)
-    # 举升喷口位
-    s.rect(98, 148, 24, 10, BELLY)
-    s.rect(198, 142, 24, 10, BELLY)
-    s.ellipse(110, 160, 10, 3, BLUE, 0.35)   # 举升喷口（非出手件，无光晕）
-    s.ellipse(210, 154, 10, 3, BLUE, 0.35)
-    # 艏部井口喷嘴 NozzlePort (4,144)：自艏下颌伸出的粗喷管 + 喇叭口
-    s.poly([(22, 118), (40, 128), (20, 150), (12, 140)], BELLY)       # 管座
-    s.line(30, 128, 14, 144, BODY, 9)
-    s.line(30, 126, 15, 141, LIGHT, 2, 0.6)
-    s.poly([(0, 134), (12, 136), (14, 152), (0, 154)], GAP)          # 喇叭口
-    s.rect(11, 135, 3, 18, STEEL)
-    s.circle(4, 144, 5.5, BLUE, 0.22)
-    s.circle(4, 144, 3.2, BLUE, 0.9)
-    s.circle(4, 144, 1.4, BLUE_CORE)
-    # 艏锥 + 独眼条带（锚点 y60..66 含 (55,63)）
-    s.poly([(0, 82), (14, 74), (20, 74), (20, 98), (6, 92)], BELLY)
-    s.rect(38, 57, 34, 12, RED, 0.18)
-    s.rect(42, 60, 26, 6, RED, 0.95)
-    # 警示杠 + 硫黄结壳
-    for i, hx in enumerate(range(88, 116, 7)):
-        s.rect(hx, 128, 3, 4, STEEL if i % 2 == 0 else GAP, 0.8)
-    sulfur_fleck(s, [(70, 140, 6, 1.8), (180, 150, 7, 1.8), (226, 66, 5, 1.4), (60, 74, 5, 1.4)])
-    return s
+    """BOSS 机体已迁至 boss_forms/gen_boss_forms.py（形态重做：各章专属剪影），
+    此处转调，重烘焙不会把旧船形写回。"""
+    from boss_forms.gen_boss_forms import sulfur_body
+    return sulfur_body()
 
 
 def boss_arm():
@@ -435,13 +367,15 @@ def drill():
 
 
 def flare_puff():
-    """普攻蓝白焰团 48x48，锚点中心 (24,24)：暗焰边 #1e4a66 → 主焰 #48b4ff → 白热芯 #c8ecff。"""
-    s = Svg(48, 48)
-    s.circle(24, 24, 22, BLUE_DK, 0.85)
-    s.poly([(4, 26), (10, 12), (20, 4), (30, 6), (40, 12), (45, 24), (40, 38),
-            (28, 45), (14, 42), (6, 36)], BLUE_DK, 0.6)
-    s.circle(24, 24, 16, BLUE, 0.95)
-    s.circle(27, 22, 8.5, BLUE_CORE)
+    """普攻蓝白焰团 30x30，锚点中心 (15,15)：暗焰边 #1e4a66 → 主焰 #48b4ff → 白热芯 #c8ecff。
+    30 版=48 旧版配方等比缩（×0.625，10 齿焰缘保留、坐标对齐 0.5）：
+    上屏 1:1 视觉 30px（旧 48 偏大），碰撞胶囊另账（flare_puff.tscn，不动）。"""
+    s = Svg(30, 30)
+    s.circle(15, 15, 13.5, BLUE_DK, 0.85)
+    s.poly([(2.5, 16.5), (6.5, 7.5), (12.5, 2.5), (19, 3.5), (25, 7.5), (28, 15),
+            (25, 24), (17.5, 28), (8.5, 26.5), (4, 22.5)], BLUE_DK, 0.6)
+    s.circle(15, 15, 10, BLUE, 0.95)
+    s.circle(17, 13.5, 5.5, BLUE_CORE)
     return s
 
 
@@ -499,7 +433,7 @@ ITEMS = [
     (vent_glow, "fx_sulfur_vent_glow.svg", "亮井层 64x20。锚点画布 (ax,ay)=(32,18)；口内蓝焰渐急由代码驱动，无伤读出层。"),
     (vent_flame, "fx_sulfur_vent_flame.svg", "井口焰柱 72x224。锚点画布 (ax,ay)=(36,222) 底部接地点；焰顶 (36,2)=局部 (0,-220)；焰体宽 64。"),
     (drill, "fx_sulfur_drill.svg", "钻头弹 32x16，锚点中心 (16,8)，+X=飞行方向。"),
-    (flare_puff, "fx_sulfur_flare_puff.svg", "普攻蓝白焰团 48x48，锚点中心 (24,24)；芯 #c8ecff/主焰 #48b4ff/暗焰边 #1e4a66，普通混合不 ADD。"),
+    (flare_puff, "fx_sulfur_flare_puff.svg", "普攻蓝白焰团 30x30，锚点中心 (15,15)；芯 #c8ecff/主焰 #48b4ff/暗焰边 #1e4a66，普通混合不 ADD；上屏 1:1，碰撞胶囊另账（flare_puff.tscn，不动）。"),
     (gas_shell, "fx_sulfur_gas_shell.svg", "硫气弹 24x24，锚点中心 (12,12)；青灰白汽团+蓝火星，弹体无伤。"),
     (cloud, "fx_sulfur_cloud.svg", "硫云爆燃带段 200x84，锚点左上 (0,0)；画布 y0..84 ↔ 世界 y428..512 绝对带，横向平铺；硫褐烟墙 #5a4a18 主体+上下 2px #d8c040 带界亮边。"),
     (cloud_front, "fx_sulfur_cloud_front.svg", "硫云爆燃锋线 40x84，锚点 (20,42)；画布 y0..84 ↔ 世界 y428..512；锋头朝左推进，蓝焰只用于此件。"),

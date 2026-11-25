@@ -89,15 +89,19 @@ func _physics_process(delta: float) -> void:
 ## 预判瞄准：按目标当前速度外推其在子弹飞行时间后的位置。
 ## 目标需暴露 velocity 属性（CharacterBody2D 天生有——玩家与敌人都是）。
 ## （若之后同时存在速度继承与移动目标，实际合速度会偏离弹速，届时在此处用合速度迭代求精。）
-static func aim_point(from: Vector2, target: Node2D, bullet_speed: float) -> Vector2:
+## target_point=从目标的哪个点起算（默认本体原点；形态特殊的敌人传自己的索敌点）。
+static func aim_point(from: Vector2, target: Node2D, bullet_speed: float,
+		target_point := Vector2.INF) -> Vector2:
 	var target_vel := Vector2.ZERO
 	var v: Variant = target.get("velocity")
 	if v is Vector2:
 		target_vel = v
-	var to_target := target.global_position - from
+	if target_point == Vector2.INF:
+		target_point = target.global_position
+	var to_target := target_point - from
 	var t := to_target.length() / bullet_speed
 	t = (to_target + target_vel * t).length() / bullet_speed # 再迭代一次，收敛提前量
-	return target.global_position + target_vel * t
+	return target_point + target_vel * t
 
 
 ## 解开火方向：使「自体速度 × speed + 继承速度」的合速度恰好沿 from→target_point 连线飞行。

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 64" width="40" height="64">
+<!-- 敌方推进焰 40x64，焰朝 +Y，喷口=顶平根 y6；三层等腰锥（玩家焰标准，平根无根尖无马赫环）；颜色=节点 modulate 染；EnemyThrusterFlame（scripts/units/enemy_thruster_flame.gd）驱动闪燃+速度拉长+enabled 开关。 -->
+<defs>
+
+</defs>
+<polygon points="12.5,6 27.5,6 20,58" fill="#9a7345" opacity="0.5"/>
+<polygon points="15.2,6 24.8,6 20,47" fill="#c69459" opacity="0.68"/>
+<polygon points="17.4,6 22.6,6 20,33" fill="#f2b56c" opacity="0.95"/>
+</svg>

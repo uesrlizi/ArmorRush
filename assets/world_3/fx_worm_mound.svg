@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 110" width="240" height="110">
+<!-- 破土隆起 240x110：雪丘（右翼背光）+ 三道裂隙。锚=底边中点 (120,108)，贴地表线摆放；
+峰值在 (120,10)（ThreatFlash 挂点）。生成器=art_proposals/snowfield_ch3/gen_worm.py。 -->
+<defs>
+
+</defs>
+<path d="M 8,108 Q 120,-8 232,108 Z" fill="#f2f8fb"/>
+<path d="M 120,108 Q 190,40 232,108 Z" fill="#cfdfe8"/>
+<path d="M 120,14 L 112,48 L 122,74 L 116,106" fill="none" stroke="#5f6f7a" stroke-width="3"/>
+<path d="M 96,30 L 88,60 L 76,104" fill="none" stroke="#5f6f7a" stroke-width="2.2"/>
+<path d="M 146,32 L 156,66 L 168,104" fill="none" stroke="#5f6f7a" stroke-width="2.2"/>
+</svg>

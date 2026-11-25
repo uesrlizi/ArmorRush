@@ -1,64 +1,62 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 180" width="300" height="180">
-<!-- 第八章 BOSS 悬浮采盐联合机「盐磨」300x180=碰撞体，原点(150,90)，原生朝左。
-能力布挂件：镜阵翼枢座（翼独立件画布 (150,26)=局部 (0,-64)）+ 腹裂地锚口
-（BayPort 画布 (150,168)=局部 (0,78)，裂地镖出膛位）+ 艏部斗轮鼓罩 +
-舷侧盐料斗 + 船底喷口位（画布 (110,156)/(210,156)=通用 fx_flame）。
-沿用锚点：独眼条带 y60..66 含 (55,63)（艏段甲板顶缘 y52..54 包住条带）。
-提案=同目录 提案_v1_镜盐之原.md §3。 -->
+<!-- 第八章 BOSS「盐磨」聚光镜碟 300x180，原点 (150,90)，原生朝左，碰撞体 280x150。ArmPivot (150,26)=碟沿顶镜阵翼枢座；BayPort (150,168)；举升焰 (114,160)/(206,160)=局部 (-36,70)/(56,70)；独眼 焦点接收头 (69,90)=EyeGlow 局部 (-81,0)。生成器 art_proposals/boss_forms/gen_boss_forms.py。 -->
 <defs>
 
 </defs>
-<polygon points="8,84 36,54 140,52 238,56 286,66 294,90 288,122 244,146 186,162 118,164 64,154 22,126" fill="#2e4a42"/>
-<polygon points="36,54 140,52 238,56 282,65 278,71 236,62 140,58 42,60" fill="#4e6a5e" opacity="0.7"/>
-<polygon points="22,126 64,154 118,164 186,162 240,146 230,138 120,152 66,140 30,118" fill="#1e332e"/>
-<rect x="130" y="60" width="2.5" height="96" fill="#142320" opacity="0.3"/>
-<rect x="206" y="62" width="2.5" height="88" fill="#142320" opacity="0.35"/>
-<rect x="60" y="92" width="170" height="2" fill="#142320" opacity="0.3"/>
-<rect x="158" y="74" width="7" height="6" fill="#f0d0a8" opacity="0.75"/>
-<rect x="174" y="74" width="7" height="6" fill="#f0d0a8" opacity="0.75"/>
-<rect x="190" y="74" width="7" height="6" fill="#f0d0a8" opacity="0.75"/>
-<rect x="206" y="74" width="7" height="6" fill="#f0d0a8" opacity="0.75"/>
-<rect x="222" y="74" width="7" height="6" fill="#f0d0a8" opacity="0.75"/>
-<path d="M 30 66 A 30 30 0 0 1 90 66 L 90 84 L 30 84 Z" fill="#2e4a42" opacity="0.95"/>
-<path d="M 36 66 A 24 24 0 0 1 84 66" fill="none" stroke="#4e6a5e" stroke-width="2.4" opacity="0.7"/>
-<line x1="42" y1="62" x2="42" y2="84" stroke="#142320" stroke-width="2.2" opacity="0.5"/>
-<line x1="60" y1="56" x2="60" y2="84" stroke="#142320" stroke-width="2.2" opacity="0.5"/>
-<line x1="78" y1="62" x2="78" y2="84" stroke="#142320" stroke-width="2.2" opacity="0.5"/>
-<circle cx="60" cy="66" r="6" fill="#1e332e"/>
-<circle cx="60" cy="66" r="2.6" fill="#4e6a5e" opacity="0.9"/>
-<rect x="136" y="28" width="28" height="26" fill="#1e332e"/>
-<rect x="138" y="26" width="24" height="3" fill="#4e6a5e" opacity="0.7"/>
-<circle cx="172" cy="36" r="1.8" fill="#f2f0ff" opacity="0.9"/>
+<path d="M 168 16 A 124 74 0 0 1 168 164 Z" fill="#2e4a42"/>
+<path d="M 168 16 A 124 74 0 0 1 286 70" fill="none" stroke="#4e6a5e" stroke-width="3" opacity="0.75"/>
+<path d="M 278 120 A 124 74 0 0 1 168 164 L 168 150 A 110 62 0 0 0 268 116 Z" fill="#1e332e"/>
+<path d="M 168 49.3 A 68.2 40.7 0 0 1 168 130.7" fill="none" stroke="#142320" stroke-width="2" opacity="0.45"/>
+<path d="M 168 30.8 A 99.2 59.2 0 0 1 168 149.2" fill="none" stroke="#142320" stroke-width="2" opacity="0.4"/>
+<line x1="168" y1="90" x2="292" y2="90" stroke="#142320" stroke-width="2" opacity="0.4"/>
+<circle cx="262" cy="42" r="4" fill="#f2789f" opacity="0.35"/>
+<circle cx="262" cy="42" r="8" fill="#f2789f" opacity="0.13"/>
+<circle cx="262" cy="42" r="1.8" fill="#f2789f"/>
+<ellipse cx="168" cy="90" rx="43" ry="77" fill="#1e332e"/>
+<ellipse cx="168" cy="90" rx="40" ry="74" fill="#4e6a5e"/>
+<path d="M 168 36.7 A 28.8 53.3 0 1 0 168 143.3 A 28.8 53.3 0 1 0 168 36.7" fill="none" stroke="#9fc4b8" stroke-width="1.4" opacity="0.9"/>
+<path d="M 168 57.4 A 17.6 32.6 0 1 0 168 122.6 A 17.6 32.6 0 1 0 168 57.4" fill="none" stroke="#9fc4b8" stroke-width="1.4" opacity="0.9"/>
+<line x1="176" y1="90" x2="208" y2="90" stroke="#9fc4b8" stroke-width="1.2" opacity="0.8"/>
+<line x1="173.7" y1="100.5" x2="196.3" y2="142.3" stroke="#9fc4b8" stroke-width="1.2" opacity="0.8"/>
+<line x1="168" y1="104.8" x2="168" y2="164" stroke="#9fc4b8" stroke-width="1.2" opacity="0.8"/>
+<line x1="162.3" y1="100.5" x2="139.7" y2="142.3" stroke="#9fc4b8" stroke-width="1.2" opacity="0.8"/>
+<line x1="160" y1="90" x2="128" y2="90" stroke="#9fc4b8" stroke-width="1.2" opacity="0.8"/>
+<line x1="162.3" y1="79.5" x2="139.7" y2="37.7" stroke="#9fc4b8" stroke-width="1.2" opacity="0.8"/>
+<line x1="168" y1="75.2" x2="168" y2="16" stroke="#9fc4b8" stroke-width="1.2" opacity="0.8"/>
+<line x1="173.7" y1="79.5" x2="196.3" y2="37.7" stroke="#9fc4b8" stroke-width="1.2" opacity="0.8"/>
+<line x1="140" y1="46" x2="164" y2="30" stroke="#c8dcd4" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+<line x1="136" y1="70" x2="176" y2="40" stroke="#c8dcd4" stroke-width="2" stroke-linecap="round" opacity="0.55"/>
+<line x1="176" y1="112" x2="196" y2="96" stroke="#c8dcd4" stroke-width="2.4" stroke-linecap="round" opacity="0.6"/>
+<path d="M 168 16 A 40 74 0 0 0 168 164" fill="none" stroke="#c8dcd4" stroke-width="2" opacity="0.6"/>
+<circle cx="168" cy="90" r="7" fill="#1e332e"/>
+<circle cx="168" cy="90" r="3" fill="#142320"/>
+<line x1="96" y1="84" x2="150" y2="30" stroke="#2e4a42" stroke-width="4.5"/>
+<line x1="98" y1="90" x2="162" y2="90" stroke="#2e4a42" stroke-width="3.5"/>
+<line x1="96" y1="96" x2="140" y2="152" stroke="#2e4a42" stroke-width="4.5"/>
+<line x1="96" y1="84" x2="150" y2="30" stroke="#4e6a5e" stroke-width="1.4" opacity="0.7"/>
+<rect x="138" y="18" width="26" height="18" fill="#1e332e"/>
+<rect x="140" y="16" width="22" height="3" fill="#4e6a5e" opacity="0.7"/>
+<circle cx="170" cy="30" r="1.8" fill="#f2f0ff" opacity="0.9"/>
+<polygon points="108,146 212,146 220,156 206,166 114,166 100,156" fill="#2e4a42"/>
+<polygon points="108,146 212,146 216,151 104,151" fill="#4e6a5e" opacity="0.6"/>
+<rect x="104" y="152" width="20" height="10" fill="#1e332e"/>
+<rect x="196" y="152" width="20" height="10" fill="#1e332e"/>
 <rect x="128" y="150" width="44" height="14" fill="#142320"/>
 <rect x="128" y="150" width="44" height="3" fill="#4e6a5e" opacity="0.5"/>
-<rect x="134" y="158" width="32" height="7" fill="#0d1a15"/>
-<line x1="140" y1="158" x2="140" y2="165" stroke="#1e332e" stroke-width="1.6" opacity="0.9"/>
-<line x1="148" y1="158" x2="148" y2="165" stroke="#1e332e" stroke-width="1.6" opacity="0.9"/>
-<line x1="156" y1="158" x2="156" y2="165" stroke="#1e332e" stroke-width="1.6" opacity="0.9"/>
+<rect x="134" y="158" width="32" height="8" fill="#0d1a15"/>
+<line x1="140" y1="158" x2="140" y2="166" stroke="#1e332e" stroke-width="1.6" opacity="0.9"/>
+<line x1="148" y1="158" x2="148" y2="166" stroke="#1e332e" stroke-width="1.6" opacity="0.9"/>
+<line x1="156" y1="158" x2="156" y2="166" stroke="#1e332e" stroke-width="1.6" opacity="0.9"/>
 <circle cx="150" cy="146" r="1.8" fill="#f2789f" opacity="0.9"/>
-<polygon points="78,48 114,46 112,64 82,66" fill="#142320" opacity="0.9"/>
-<polygon points="84,50 108,48 107,54 86,55" fill="#f0d0a8" opacity="0.6"/>
-<circle cx="96" cy="42" r="5" fill="#f2789f" opacity="0.35"/>
-<circle cx="96" cy="42" r="9" fill="#f2789f" opacity="0.13"/>
-<circle cx="96" cy="42" r="2" fill="#f2789f"/>
-<polygon points="190,96 232,96 226,122 196,122" fill="#1e332e"/>
-<polygon points="196,96 226,96 222,104 200,104" fill="#e8dcc0" opacity="0.85"/>
-<circle cx="211" cy="110" r="1.4" fill="#f2789f" opacity="0.8"/>
-<rect x="98" y="148" width="24" height="10" fill="#1e332e"/>
-<rect x="198" y="142" width="24" height="10" fill="#1e332e"/>
-<polygon points="0,82 14,74 20,74 20,98 6,92" fill="#1e332e"/>
-<line x1="0" y1="82" x2="6" y2="92" stroke="#4e6a5e" stroke-width="2" opacity="0.7"/>
-<rect x="38" y="57" width="34" height="12" fill="#ff4640" opacity="0.18"/>
-<rect x="42" y="60" width="26" height="6" fill="#ff4640" opacity="0.95"/>
-<circle cx="170" cy="100" r="6" fill="#1e332e"/>
-<circle cx="170" cy="100" r="3" fill="#2e4a42"/>
-<line x1="170" y1="106" x2="152" y2="150" stroke="#142320" stroke-width="1.2" opacity="0.75"/>
-<rect x="130" y="80" width="26" height="3" fill="#f2789f" opacity="0.8"/>
-<rect x="88" y="128" width="3" height="4" fill="#d8a021" opacity="0.8"/>
-<rect x="95" y="128" width="3" height="4" fill="#142320" opacity="0.8"/>
-<rect x="102" y="128" width="3" height="4" fill="#d8a021" opacity="0.8"/>
-<rect x="109" y="128" width="3" height="4" fill="#142320" opacity="0.8"/>
-<ellipse cx="100" cy="154.9" rx="10.3" ry="3" fill="#e8dcc0" opacity="0.4"/>
-<ellipse cx="150" cy="143.8" rx="12.2" ry="3" fill="#e8dcc0" opacity="0.4"/>
-<ellipse cx="250" cy="153.1" rx="11.9" ry="3" fill="#e8dcc0" opacity="0.4"/>
+<polygon points="52,80 60,74 94,74 102,82 102,98 94,106 60,106 48,98" fill="#2e4a42"/>
+<polygon points="60,74 94,74 100,80 56,78" fill="#4e6a5e" opacity="0.75"/>
+<polygon points="48,98 102,98 94,106 60,106" fill="#1e332e"/>
+<rect x="52" y="84" width="34" height="12" fill="#ff4640" opacity="0.18"/>
+<rect x="56" y="87" width="26" height="6" fill="#ff4640" opacity="0.95"/>
+<circle cx="104" cy="90" r="9" fill="#f2789f" opacity="0.25"/>
+<circle cx="104" cy="90" r="5" fill="#f2f0ff" opacity="0.95"/>
+<circle cx="104" cy="90" r="2.4" fill="#f2789f" opacity="0.9"/>
+<ellipse cx="236" cy="138" rx="12" ry="3" fill="#e8dcc0" opacity="0.45"/>
+<ellipse cx="206" cy="150" rx="9" ry="2.4" fill="#e8dcc0" opacity="0.45"/>
+<ellipse cx="74" cy="104" rx="8" ry="2" fill="#e8dcc0" opacity="0.45"/>
 </svg>

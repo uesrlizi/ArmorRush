@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/fx/worm_wake_mark.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/world_3/fx_worm_mark.svg" id="2"]
+
+; 冰钻航迹雪痕：潜行沿途留在地表的亮色扰动痕（深色走道带上靠亮痕读），入树即自淡自清。
+
+[node name="WormWakeMark" type="Sprite2D"]
+script = ExtResource("1")
+scale = Vector2(1.4, 1.4)
+texture = ExtResource("2")

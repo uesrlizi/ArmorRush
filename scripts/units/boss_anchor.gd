@@ -19,7 +19,9 @@ extends PursuitBoss
 ##     真瞄即预警。
 ## 分工账：跳弹 hunts 地面站位与顺向跑（跳=反制），涌浪 hunts 低处停留
 ## （上=反制）——两手都把玩家往"上"赶。
-## 走位/贴脸窗/二阶段/失衡全在 PursuitBoss 框架。数值全在 BalanceWorld7.ANCHOR_*。
+## 走位/贴脸窗/二阶段/失衡全在 PursuitBoss 框架；船底双举升喷口焰（海喷白青，
+## 焰朝下）=节点挂 EnemyThrusterFlame，闪燃/随速拉长在节点脚本，本脚本不碰
+## 喷口 modulate/scale。数值全在 BalanceWorld7.ANCHOR_*。
 
 const ST_SKIP_WARN := 3
 const ST_SKIP_FIRE := 4
@@ -41,10 +43,6 @@ var _direct_shoot_t := 0.0
 @onready var _tube_flash: MuzzleFlash = $Visuals/TorpedoPort/Flash
 @onready var _bay_warn: ThreatFlash = $Visuals/BayPort/ThreatFlash
 @onready var _bay_flash: MuzzleFlash = $Visuals/BayPort/Flash
-@onready var _thrusters: Array[Sprite2D] = [
-	$Visuals/Thruster1 as Sprite2D,
-	$Visuals/Thruster2 as Sprite2D,
-]
 
 
 ## 血条上方显示的机体名。
@@ -74,14 +72,6 @@ func on_spawned() -> void:
 	super()
 	_skips_launched = 0
 	_charges_launched = 0
-
-
-## 双举升喷口青白呼吸（打捞舰无旋翼）；艏炮俯仰由基类瞄准层驱动，这里不重复。
-func _tick_visual(_delta: float) -> void:
-	for i in _thrusters.size():
-		var t := _thrusters[i] as Sprite2D
-		t.modulate.a = 0.45 + 0.25 * sin(_bob_t * 11.0 + i * 2.3)
-		t.scale = Vector2.ONE * (0.95 + 0.15 * sin(_bob_t * 8.0 + i * 1.9))
 
 
 ## ---- 技能 A：跳弹齐射 ----

@@ -1,0 +1,78 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/units/boss_worm.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/world_3/boss_snow_worm_tail.svg" id="2"]
+[ext_resource type="Texture2D" path="res://assets/world_3/boss_snow_worm_seg_b.svg" id="3"]
+[ext_resource type="Texture2D" path="res://assets/world_3/boss_snow_worm_seg_a.svg" id="4"]
+[ext_resource type="Texture2D" path="res://assets/world_3/boss_snow_worm_head.svg" id="5"]
+[ext_resource type="Script" path="res://scripts/units/eye_glow.gd" id="6"]
+[ext_resource type="PackedScene" path="res://scenes/fx/muzzle_flash.tscn" id="7"]
+[ext_resource type="PackedScene" path="res://scenes/fx/threat_flash.tscn" id="8"]
+
+; 第三章 BOSS·机械冰蠕「冰钻」（BossWorm，全表首台钻地体）。原点=头心；头的朝向/位置、
+; 体节链位全由脚本每物理帧写（不走 Visuals 镜像层）。贴图与锚点账正本=
+; art_proposals/snowfield_ch3/gen_worm.py 头注：
+;   头 200x160：EyeGlow 画布 (72,43)=局部 (-28,-37)；Muzzle 画布 (140,80)=局部 (40,0)
+;   （ArmPivot 与头同轴同转，基类 $Visuals/ArmPivot/Muzzle 路径照旧）。
+; Visuals 子序=绘制序：尾→节10…节1→头（后画的压前面的：链永远头在最上层）。
+; 体节 A/B 沿链交替（节1=A）。碰撞形状（头+11 节的矩形）由脚本纯代码自建，露出地面才启用。
+; 入组 "burrowers"：Spawner 把它挂进场景的 burrow_container（Terrain 之后画=地下被地块盖住）。
+
+[node name="BossWorm" type="CharacterBody2D" groups=["burrowers"]]
+collision_layer = 4
+collision_mask = 0
+script = ExtResource("1")
+feet_offset = 70.0
+body_size = Vector2(200, 150)
+
+[node name="Visuals" type="Node2D" parent="."]
+
+[node name="Tail" type="Sprite2D" parent="Visuals"]
+texture = ExtResource("2")
+
+[node name="Seg10" type="Sprite2D" parent="Visuals"]
+texture = ExtResource("3")
+
+[node name="Seg9" type="Sprite2D" parent="Visuals"]
+texture = ExtResource("4")
+
+[node name="Seg8" type="Sprite2D" parent="Visuals"]
+texture = ExtResource("3")
+
+[node name="Seg7" type="Sprite2D" parent="Visuals"]
+texture = ExtResource("4")
+
+[node name="Seg6" type="Sprite2D" parent="Visuals"]
+texture = ExtResource("3")
+
+[node name="Seg5" type="Sprite2D" parent="Visuals"]
+texture = ExtResource("4")
+
+[node name="Seg4" type="Sprite2D" parent="Visuals"]
+texture = ExtResource("3")
+
+[node name="Seg3" type="Sprite2D" parent="Visuals"]
+texture = ExtResource("4")
+
+[node name="Seg2" type="Sprite2D" parent="Visuals"]
+texture = ExtResource("3")
+
+[node name="Seg1" type="Sprite2D" parent="Visuals"]
+texture = ExtResource("4")
+
+[node name="Sprite2D" type="Sprite2D" parent="Visuals"]
+texture = ExtResource("5")
+
+[node name="EyeGlow" type="Node2D" parent="Visuals/Sprite2D"]
+position = Vector2(-28, -37)
+scale = Vector2(1.2, 1.2)
+script = ExtResource("6")
+
+[node name="ArmPivot" type="Node2D" parent="Visuals"]
+
+[node name="Muzzle" type="Marker2D" parent="Visuals/ArmPivot"]
+position = Vector2(40, 0)
+
+[node name="Flash" parent="Visuals/ArmPivot/Muzzle" instance=ExtResource("7")]
+
+[node name="ThreatFlash" parent="Visuals/ArmPivot/Muzzle" instance=ExtResource("8")]

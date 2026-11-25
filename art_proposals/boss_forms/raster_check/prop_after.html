@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><style>
+body{margin:0;font:12px monospace;color:#ddd}
+.row{display:flex;gap:26px;padding:16px 20px;align-items:flex-start}
+.dark{background:#2b2f38}.light{background:#c9b8a0}
+.cell{position:relative;width:96px;height:32px;flex:none}
+.cell img{position:absolute;left:0;top:0}
+.cell img.bl{transform-origin:48px 16px}
+.big{zoom:3}
+.lbl{width:110px;flex:none}
+</style></head><body>
+<!-- 修复后：方画布桨叶 + Sweep(0.306) 先转后压，四相位须全程在导管内腔里 -->
+<div class="row dark" id="r1"></div>
+<div class="row light" id="r2"></div>
+<div class="row dark" id="r3"></div>
+<script>
+const SVG = "file:///C:/Users/31715/Documents/GodotProject/2d-ac/assets/common/";
+const SQ = 0.306;
+function fan(rot, zoom){
+  return `<div class="cell${zoom?' big':''}">`+
+    `<img src="${SVG}prop_face.svg">`+
+    `<img class="bl" src="${SVG}prop_blades.svg" `+
+    `style="left:8px;top:-24px;`+
+    `transform:scaleY(${SQ}) rotate(${rot}deg);transform-origin:40px 40px"></div>`;
+}
+const rots=[0,30,60,90];
+for(const [id,zoom] of [["r1",1],["r2",1]]){
+  document.getElementById(id).innerHTML =
+    rots.map(r=>fan(r,false)).join("")+
+    `<div class="lbl">新桨 1×<br>相位 ${rots.join("°/")}<br>scaleY ${SQ}</div>`;
+}
+// 3× 放大：叶形/毂/导管结构检查
+document.getElementById("r3").innerHTML =
+  rots.map(r=>fan(r,true)).join("")+
+  `<div class="lbl">新桨 3×<br>叶形与压扁检查</div>`;
+</script></body></html>

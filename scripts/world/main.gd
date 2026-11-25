@@ -94,11 +94,12 @@ func _enter_combat(handoff := false) -> void:
 
 
 func _on_enemy_killed(points: int) -> void:
-	# 计分唯一公式=击杀分×当时倍率（run_loop.md §2）：用涨前档——这一刀按你正在骑的
-	# 倍率结账，涨档从下一次击杀生效；倍率关=档恒 1，公式退化为旧制加分。
-	var mult := RunState.multiplier()
+	# 计分唯一公式=击杀分×当时档的计分乘数（run_loop.md §2）：用涨前档——这一刀按你
+	# 正在骑的档结账，涨档从下一次击杀生效；倍率关=乘数恒 ×1.0，公式退化为旧制加分。
+	# 乘数带小数（×1.5 档），逐刀取整入账。
+	var mult := RunState.mult_value()
 	RunState.mult_add_kill(points)
-	score += points * mult
+	score += roundi(points * mult)
 	RunState.score = score
 	_hud.set_score(score)
 

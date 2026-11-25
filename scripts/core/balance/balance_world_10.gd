@@ -1,5 +1,5 @@
 class_name BalanceWorld10
-## 第十章（硫焰地热田）调参：井口封堵车「窜井」+ 井场管线母舰「井口」+ 硫焰井口/
+## 第十章（硫焰地热田）调参：井口封堵车「窜井」+ 自升式钻井平台「井口」+ 硫焰井口/
 ## 硫云爆燃/硫焰扫掠——本章数值唯一出处，章设计正本见 design/worlds.md + 威胁设计
 ## art_proposals/sulfur_ch10/威胁设计_ch10.md（§0 唯一参照系、§5 数值表；终审裁定 R1-R17）。
 ## 只在这里改数值，场景和脚本不保存副本，避免“改了没效果”的遮蔽问题。
@@ -46,7 +46,7 @@ const ELITE_FOUNTAIN_ATTACK_RANGE := 2200.0
 const ELITE_FOUNTAIN_VOLLEY_HALF_LIFE := 2.4
 const ELITE_FOUNTAIN_PULSES := 2    # 喷 [2.3,2.75] / 息 [2.75,3.5] / 喷 [3.5,3.95]，3.95 熄
 
-# ---- 第十章 BOSS·井场管线母舰「井口」（300×180 hover 370：船底 460、对最高台阶 536
+# ---- 第十章 BOSS·自升式钻井平台「井口」（300×180 hover 370：船底 460、对最高台阶 536
 # 净空 76）。轮换 A 井压线 → 普攻 → B 硫云爆燃 → 普攻；后摇 A 1.4 / B 1.4 / 普攻
 # BOSS_DIRECT_RECOVER 0.9，p2 ×0.6（框架）。 ----
 const WELLHEAD_HOVER_Y := 370.0

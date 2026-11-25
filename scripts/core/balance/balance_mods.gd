@@ -22,7 +22,7 @@ const TWIN_TRACER_GAP := 14.0        # 双联装两发的垂向错距（px，同
 const SHIELD_RING_ALPHA_MIN := 0.45  # 护盾环残盾时的不透明度（满盾 1.0：盾量即亮度）
 const SHIELD_REFORM_TIME := 0.6      # 复层盾：碎盾后再立的时间（次数账走 shield_charges）
 const MISSILE_STAGGER := 0.12        # 蜂巢齐射的发间错拍（秒，一窝蜂读法）
-const MISSILE_LAUNCH_FAN := 0.30     # 蜂巢齐射相邻两发的出筒张角（弧度，向上扇开）
+const MISSILE_LAUNCH_FAN := 0.30     # 蜂巢齐射相邻两发的出筒张角（弧度，绕炮口方向扇开）
 const RAIL_BOLT_SPEED := 3600.0      # 磁轨弹速（主枪 2400：肉眼读得出是另一门快炮）
 const RAIL_AIM_TOLERANCE := 0.20     # 磁轨开火闸：炮身瞄准与目标方向的容差角（弧度）
 # ---- 槽位（同槽位不爆：掉落时从未持有槽掷） ----
@@ -115,13 +115,16 @@ const MEMBERS := {
 		"ring": Color(0.42, 0.68, 0.98),
 	},
 	# ---- 肩部武器：越肩大件（固定支架+可动轴）；成员身份由弹道/发数承担 ----
+	# ---- 肩部（越肩大件）：2026-11-09 单发化调向——DPS 持平拉高单发降频率
+	# （磁轨 8伤/1.3s→20伤/3.25s=一发秒小怪[杂兵20/无人机10]；蜂巢 6伤/2.4s→12伤/4.8s=频率减半，
+	#   冲击值同步等比：冲击/秒不变）
 	&"shoulder_rack": {
 		"slot": &"shoulder", "label": "蜂巢", "desc": "齐射三枚导弹", "tint": Color(1.0, 0.62, 0.30),
-		"stats": {&"missile_cooldown": 2.4, &"missile_damage": 6.0,
-			&"missile_impact": 3.0, &"missile_shots": 3.0},
+		"stats": {&"missile_cooldown": 4.8, &"missile_damage": 12.0,
+			&"missile_impact": 6.0, &"missile_shots": 3.0},
 	},
 	&"shoulder_rail": {
 		"slot": &"shoulder", "label": "磁轨炮", "desc": "高速磁轨弹", "tint": Color(0.95, 0.95, 0.72),
-		"stats": {&"rail_cooldown": 1.3, &"rail_damage": 8.0, &"rail_impact": 16.0},
+		"stats": {&"rail_cooldown": 3.25, &"rail_damage": 20.0, &"rail_impact": 40.0},
 	},
 }

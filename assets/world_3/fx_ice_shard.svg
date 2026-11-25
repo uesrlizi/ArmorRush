@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 16" width="48" height="16">
+<!-- 冰锥直射弹贴图 48x16（ice_shard.tscn=bullet.gd 纯换皮，+X 弹头）。
+普通混合（不 ADD）：暗描边 #1f2c36 + 钢蓝 #86b4d4 + 白冰芯——亮背景章靠描边剪影读；
+长条形（首版 32x12 在 1600 窗里读成小圆点，高速弹的读法=拉长度）。碰撞=胶囊 r4×长 40。
+生成器=art_proposals/snowfield_ch3/gen_worm.py。 -->
+<defs>
+
+</defs>
+<polygon points="1,8 14,1.5 36,1.5 47,8 36,14.5 14,14.5" fill="#1f2c36"/>
+<polygon points="4,8 15,2.8 35,2.8 44,8 35,13.2 15,13.2" fill="#86b4d4"/>
+<polygon points="8,8 16,4.2 34,4.8 41,8 34,11.2 16,11.8" fill="#f2fbff"/>
+<line x1="16" y1="4.2" x2="20" y2="11.8" stroke="#ffffff" stroke-width="1" opacity="0.5"/>
+<polygon points="2,5 8,6.6 8,9.4 2,11" fill="#dfeaf2" opacity="0.85"/>
+</svg>

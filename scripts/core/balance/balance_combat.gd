@@ -60,7 +60,7 @@ const BOSS_STAGGER_SINK := 26.0      # BOSS 失衡瘫沉幅度（px，瘫而不�
 const BOSS_MAX_HP := 400            # 全 BOSS 统一血量（2026-11-04 用户定：不按章分，取原 ch1 档）
 const BOSS_DEFENSE := 5             # 防御力
 									# 近战绕盾全额（15/25）——强化"枪射攒失衡→近战爆发"的分工
-const BOSS_SCORE := 50
+const BOSS_SCORE := 100
 const BOSS_HOVER_Y := 240.0         # 悬浮基准高度（绝对世界 y，不随地形成跳变）
 const BOSS_BOB_AMPLITUDE := 6.0     # 悬停浮动幅度
 const BOSS_BOB_SPEED := 2.0

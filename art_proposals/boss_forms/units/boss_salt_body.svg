@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 180" width="300" height="180">
+<!-- 第八章 BOSS「盐磨」聚光镜碟 300x180，原点 (150,90)，原生朝左，碰撞体 280x150。ArmPivot (150,26)=碟沿顶镜阵翼枢座；BayPort (150,168)；举升焰 (114,160)/(206,160)=局部 (-36,70)/(56,70)；独眼 焦点接收头 (69,90)=EyeGlow 局部 (-81,0)。生成器 art_proposals/boss_forms/gen_boss_forms.py。 -->
+<defs>
+
+</defs>
+<path d="M 168 16 A 124 74 0 0 1 168 164 Z" fill="#2e4a42"/>
+<path d="M 168 16 A 124 74 0 0 1 286 70" fill="none" stroke="#4e6a5e" stroke-width="3" opacity="0.75"/>
+<path d="M 278 120 A 124 74 0 0 1 168 164 L 168 150 A 110 62 0 0 0 268 116 Z" fill="#1e332e"/>
+<path d="M 168 49.3 A 68.2 40.7 0 0 1 168 130.7" fill="none" stroke="#142320" stroke-width="2" opacity="0.45"/>
+<path d="M 168 30.8 A 99.2 59.2 0 0 1 168 149.2" fill="none" stroke="#142320" stroke-width="2" opacity="0.4"/>
+<line x1="168" y1="90" x2="292" y2="90" stroke="#142320" stroke-width="2" opacity="0.4"/>
+<circle cx="262" cy="42" r="4" fill="#f2789f" opacity="0.35"/>
+<circle cx="262" cy="42" r="8" fill="#f2789f" opacity="0.13"/>
+<circle cx="262" cy="42" r="1.8" fill="#f2789f"/>
+<ellipse cx="168" cy="90" rx="43" ry="77" fill="#1e332e"/>
+<ellipse cx="168" cy="90" rx="40" ry="74" fill="#4e6a5e"/>
+<path d="M 168 36.7 A 28.8 53.3 0 1 0 168 143.3 A 28.8 53.3 0 1 0 168 36.7" fill="none" stroke="#9fc4b8" stroke-width="1.4" opacity="0.9"/>
+<path d="M 168 57.4 A 17.6 32.6 0 1 0 168 122.6 A 17.6 32.6 0 1 0 168 57.4" fill="none" stroke="#9fc4b8" stroke-width="1.4" opacity="0.9"/>
+<line x1="176" y1="90" x2="208" y2="90" stroke="#9fc4b8" stroke-width="1.2" opacity="0.8"/>
+<line x1="173.7" y1="100.5" x2="196.3" y2="142.3" stroke="#9fc4b8" stroke-width="1.2" opacity="0.8"/>
+<line x1="168" y1="104.8" x2="168" y2="164" stroke="#9fc4b8" stroke-width="1.2" opacity="0.8"/>
+<line x1="162.3" y1="100.5" x2="139.7" y2="142.3" stroke="#9fc4b8" stroke-width="1.2" opacity="0.8"/>
+<line x1="160" y1="90" x2="128" y2="90" stroke="#9fc4b8" stroke-width="1.2" opacity="0.8"/>
+<line x1="162.3" y1="79.5" x2="139.7" y2="37.7" stroke="#9fc4b8" stroke-width="1.2" opacity="0.8"/>
+<line x1="168" y1="75.2" x2="168" y2="16" stroke="#9fc4b8" stroke-width="1.2" opacity="0.8"/>
+<line x1="173.7" y1="79.5" x2="196.3" y2="37.7" stroke="#9fc4b8" stroke-width="1.2" opacity="0.8"/>
+<line x1="140" y1="46" x2="164" y2="30" stroke="#c8dcd4" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+<line x1="136" y1="70" x2="176" y2="40" stroke="#c8dcd4" stroke-width="2" stroke-linecap="round" opacity="0.55"/>
+<line x1="176" y1="112" x2="196" y2="96" stroke="#c8dcd4" stroke-width="2.4" stroke-linecap="round" opacity="0.6"/>
+<path d="M 168 16 A 40 74 0 0 0 168 164" fill="none" stroke="#c8dcd4" stroke-width="2" opacity="0.6"/>
+<circle cx="168" cy="90" r="7" fill="#1e332e"/>
+<circle cx="168" cy="90" r="3" fill="#142320"/>
+<line x1="96" y1="84" x2="150" y2="30" stroke="#2e4a42" stroke-width="4.5"/>
+<line x1="98" y1="90" x2="162" y2="90" stroke="#2e4a42" stroke-width="3.5"/>
+<line x1="96" y1="96" x2="140" y2="152" stroke="#2e4a42" stroke-width="4.5"/>
+<line x1="96" y1="84" x2="150" y2="30" stroke="#4e6a5e" stroke-width="1.4" opacity="0.7"/>
+<rect x="138" y="18" width="26" height="18" fill="#1e332e"/>
+<rect x="140" y="16" width="22" height="3" fill="#4e6a5e" opacity="0.7"/>
+<circle cx="170" cy="30" r="1.8" fill="#f2f0ff" opacity="0.9"/>
+<polygon points="108,146 212,146 220,156 206,166 114,166 100,156" fill="#2e4a42"/>
+<polygon points="108,146 212,146 216,151 104,151" fill="#4e6a5e" opacity="0.6"/>
+<rect x="104" y="152" width="20" height="10" fill="#1e332e"/>
+<rect x="196" y="152" width="20" height="10" fill="#1e332e"/>
+<rect x="128" y="150" width="44" height="14" fill="#142320"/>
+<rect x="128" y="150" width="44" height="3" fill="#4e6a5e" opacity="0.5"/>
+<rect x="134" y="158" width="32" height="8" fill="#0d1a15"/>
+<line x1="140" y1="158" x2="140" y2="166" stroke="#1e332e" stroke-width="1.6" opacity="0.9"/>
+<line x1="148" y1="158" x2="148" y2="166" stroke="#1e332e" stroke-width="1.6" opacity="0.9"/>
+<line x1="156" y1="158" x2="156" y2="166" stroke="#1e332e" stroke-width="1.6" opacity="0.9"/>
+<circle cx="150" cy="146" r="1.8" fill="#f2789f" opacity="0.9"/>
+<polygon points="52,80 60,74 94,74 102,82 102,98 94,106 60,106 48,98" fill="#2e4a42"/>
+<polygon points="60,74 94,74 100,80 56,78" fill="#4e6a5e" opacity="0.75"/>
+<polygon points="48,98 102,98 94,106 60,106" fill="#1e332e"/>
+<rect x="52" y="84" width="34" height="12" fill="#ff4640" opacity="0.18"/>
+<rect x="56" y="87" width="26" height="6" fill="#ff4640" opacity="0.95"/>
+<circle cx="104" cy="90" r="9" fill="#f2789f" opacity="0.25"/>
+<circle cx="104" cy="90" r="5" fill="#f2f0ff" opacity="0.95"/>
+<circle cx="104" cy="90" r="2.4" fill="#f2789f" opacity="0.9"/>
+<ellipse cx="236" cy="138" rx="12" ry="3" fill="#e8dcc0" opacity="0.45"/>
+<ellipse cx="206" cy="150" rx="9" ry="2.4" fill="#e8dcc0" opacity="0.45"/>
+<ellipse cx="74" cy="104" rx="8" ry="2" fill="#e8dcc0" opacity="0.45"/>
+</svg>

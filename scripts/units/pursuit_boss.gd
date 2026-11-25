@@ -247,7 +247,7 @@ func _despawn_past_right() -> bool:
 
 
 func _impact_resistance() -> float:
-	return BalanceCombat.IMPACT_RESIST_BOSS * RunState.ladder_growth_factor()
+	return BalanceCombat.IMPACT_RESIST_BOSS * RunState.ladder_impact_factor()
 
 
 func _stagger_time() -> float:

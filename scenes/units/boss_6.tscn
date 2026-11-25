@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://scripts/units/boss_redwheel.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/world_6/boss_red_body.svg" id="2"]
@@ -7,16 +7,23 @@
 [ext_resource type="Script" path="res://scripts/units/eye_glow.gd" id="5"]
 [ext_resource type="PackedScene" path="res://scenes/fx/threat_flash.tscn" id="6"]
 [ext_resource type="Texture2D" path="res://assets/world_6/boss_red_rack.svg" id="7"]
-[ext_resource type="Texture2D" path="res://assets/common/fx_flame.svg" id="8"]
+[ext_resource type="Texture2D" path="res://assets/common/thruster_flame.svg" id="12"]
+[ext_resource type="Script" path="res://scripts/units/enemy_thruster_flame.gd" id="13"]
 
-; 第六章 BOSS·斗轮采集舰「赤轮」（BossRedwheel，矿区电网与输送能力套件）：
-; 独眼条带 y60..66 含 (55,63)（EyeGlow (-95,-27) 沿用）；
+; 第六章 BOSS·斗轮挖掘机「赤轮」（BossRedwheel，矿区电网与输送能力套件）：
+; 机体生成器 art_proposals/boss_forms/gen_boss_forms.py；独眼=斗轮臂驾驶室画布 (95,60)→EyeGlow 局部 (-55,-30)；
 ; ArmPivot=斗轮毂座画布 (44,120)→局部 (-106,30)（固定不俯仰；斗轮=独立旋转件
 ; Wheel，Muzzle=毂心 (0,0)，弹石出膛点）；Rack=背甲炮架画布 (210,38)→局部
 ; (60,-52)（架画布 60x54 枢端 (30,50)→offset(-30,-50)，固定射角，
 ; Muzzle=架局部 (0,-46)=管口 (30,4)，Flash+ThreatFlash=电网闸预警）；
-; BayPort=腹舱口画布 (150,170)→局部 (0,80)（ThreatFlash=凿岩装药预警，装药由此抛出）；
-; Thruster1/2=局部 (-30,64)/(80,64)（通用 fx_flame+加色，金琥珀呼吸）。
+; BayPort=腹舱口画布 (150,170)→局部 (0,80)（ThreatFlash=凿岩装药预警，装药由此抛出）。
+; 推进件账：底盘双火箭焰 Thruster1/2（2026-11-11 八轮用户拍板全表火箭推进，
+; 风扇罩/刃边条装饰件废弃）——贴图 assets/common/thruster_flame.svg 平根锥焰，
+; **原点=焰根**（centered=false+offset(-20,-6)，喷口=画布 (20,6)；枢轴在中心
+; =提速拉长时焰根从喷口里拔出来），节点=喷口位：局部 (-30,59)/(80,59)=画布
+; (120,149)/(230,149)∈船底裙沿风扇座带 (136..150 中心 149)，焰往下烧出裙沿
+; （悬垂 ~14px 账沿用）；modulate 矿灯金 (1,0.75,0.45)+ADD；闪燃/速度拉长=
+; EnemyThrusterFlame（脚本管 modulate/scale，别再从 boss_redwheel.gd 写）。
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
 size = Vector2(280, 150)
@@ -37,7 +44,7 @@ body_size = Vector2(300, 180)
 texture = ExtResource("2")
 
 [node name="EyeGlow" type="Node2D" parent="Visuals/Sprite2D"]
-position = Vector2(-95, -27)
+position = Vector2(-55, -30)
 scale = Vector2(1.2, 1.2)
 script = ExtResource("5")
 
@@ -79,16 +86,22 @@ position = Vector2(0, 80)
 [node name="Thruster1" type="Sprite2D" parent="Visuals"]
 modulate = Color(1, 0.75, 0.45, 0.6)
 material = SubResource("addmat")
-position = Vector2(-30, 64)
+position = Vector2(-30, 59)
 scale = Vector2(1.1, 1.1)
-texture = ExtResource("8")
+centered = false
+offset = Vector2(-20, -6)
+texture = ExtResource("12")
+script = ExtResource("13")
 
 [node name="Thruster2" type="Sprite2D" parent="Visuals"]
 modulate = Color(1, 0.75, 0.45, 0.6)
 material = SubResource("addmat")
-position = Vector2(80, 64)
+position = Vector2(80, 59)
 scale = Vector2(1.1, 1.1)
-texture = ExtResource("8")
+centered = false
+offset = Vector2(-20, -6)
+texture = ExtResource("12")
+script = ExtResource("13")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_1")

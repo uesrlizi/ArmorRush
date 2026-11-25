@@ -406,8 +406,9 @@ func _exit_tree() -> void:
 
 ## 索敌：按「距离 ÷ 朝向权重」打分，分数越低越优先。
 ## 面朝侧权重 1.0，背侧权重减半（等效距离翻倍），形成软性前后优先级而非硬性二选一。
-## 屏幕外的敌人不锁。
-func _acquire_target() -> Node2D:
+## 屏幕外的敌人不锁；此刻不可索敌的敌人（Enemy.is_targetable，如全埋地下的钻地体）
+## 整体跳过。横向账一律读索敌点（Enemy.aim_point，默认=本体原点）。
+func _acquire_target() -> Enemy:
 	var cam := get_viewport().get_camera_2d()
 	var half_w := get_viewport_rect().size.x * 0.5
 	var cam_x := global_position.x
@@ -416,13 +417,13 @@ func _acquire_target() -> Node2D:
 	var lo := cam_x - half_w
 	var hi := cam_x + half_w
 
-	var best: Node2D = null
+	var best: Enemy = null
 	var best_score := INF
 	for node in get_tree().get_nodes_in_group("enemies"):
-		var enemy := node as Node2D
-		if enemy == null:
+		var enemy := node as Enemy
+		if enemy == null or not enemy.is_targetable():
 			continue
-		var ex := enemy.global_position.x
+		var ex := enemy.aim_point().x
 		if ex < lo or ex > hi:
 			continue
 		var dx := ex - global_position.x
@@ -440,7 +441,7 @@ func _update_facing() -> void:
 	var target := _acquire_target()
 	var face_left := search_direction < 0.0
 	if target != null:
-		face_left = target.global_position.x < global_position.x
+		face_left = target.aim_point().x < global_position.x
 	_face_dir = -1.0 if face_left else 1.0
 	# 朝向只翻 Visuals 一层：身体、枪臂、喷口、刃光、滑行火花全体换边。
 	# 挂件位置按「原生朝右」在场景里手摆一次，不再逐节点补镜像/补位移
@@ -457,7 +458,7 @@ func _update_facing() -> void:
 func _update_arm(delta: float) -> void:
 	var target := _acquire_target()
 	if target != null:
-		var to := target.global_position - _arm_pivot.global_position
+		var to := target.aim_point() - _arm_pivot.global_position
 		_gun_pitch = clampf(-rad_to_deg(atan2(to.y, maxf(absf(to.x), 40.0))),
 				-BalanceCombat.GUN_PITCH_MAX_DEG, BalanceCombat.GUN_PITCH_MAX_DEG)
 	else:
@@ -490,7 +491,7 @@ func _aim_at_target() -> bool:
 	var target := _acquire_target()
 	if target == null:
 		return false
-	var to := target.global_position - global_position
+	var to := target.aim_point() - global_position
 	_melee_pitch = clampf(-rad_to_deg(atan2(to.y, maxf(absf(to.x), 40.0))),
 			-BalancePlayer.MELEE_PITCH_MAX_DEG, BalancePlayer.MELEE_PITCH_MAX_DEG)
 	var pitch_rad := deg_to_rad(_melee_pitch)
@@ -513,7 +514,8 @@ func _fire() -> bool:
 	var target := _acquire_target()
 	if target != null:
 		# 预判瞄准（打提前量）+ 按继承速度反解方向，弹道精确穿过预判点。
-		var aim_at := Bullet.aim_point(_muzzle.global_position, target, BalancePlayer.PLAYER_BULLET_SPEED)
+		var aim_at := Bullet.aim_point(_muzzle.global_position, target, BalancePlayer.PLAYER_BULLET_SPEED,
+				target.aim_point())
 		fire_dir = Bullet.solve_fire_direction(
 			_muzzle.global_position, aim_at, BalancePlayer.PLAYER_BULLET_SPEED, velocity)
 	var gun := RunState.mod_member(&"gun")
@@ -554,7 +556,7 @@ func _tick_auto_fire() -> void:
 	if target == null:
 		return
 	var from := _muzzle.global_position
-	var to := target.global_position
+	var to := target.aim_point()
 	if from.distance_to(to) > BalancePlayer.PLAYER_AUTO_FIRE_RANGE:
 		return
 	if _terrain_blocks(from, to):
@@ -566,28 +568,30 @@ func _tick_auto_fire() -> void:
 
 ## 肩部武器（§4 肩部武器槽）：越肩大件自己的枪口出弹，独立冷却；近战禁射硬闸同
 ## 主枪（挥刀滞空硬直里不夹子弹）。
-## 磁轨炮=细长杆弹沿炮身指向直线出膛（转进容差角才发，所见即所射）；
-## 蜂巢=三枚归航小导弹向上扇形出筒、错拍齐射（弹体自转弯，概略指向即可）。
+## 磁轨炮=细长杆弹直线出膛（转进容差角才发）；弹道账与主枪同一套：预判提前点+
+## 按载体速度反解出膛方向，跑动/跳跃不把弹带偏。
+## 蜂巢=三枚小导弹沿炮口直瞄扇形出筒、错拍齐射（出膛即制导，弹体接管）。
 func _tick_pod(target: Node2D) -> void:
 	if not _pod.visible or _pod_timer > 0.0 or _melee_phase != MeleePhase.IDLE:
 		return
 	var member := RunState.mod_member(&"shoulder")
 	var rail := member == &"shoulder_rail"
 	var muzzle := _pod_muzzle_rail if rail else _pod_muzzle_missile
-	if _terrain_blocks(muzzle.global_position, target.global_position):
+	if _terrain_blocks(muzzle.global_position, target.aim_point()):
 		return
 	if rail:
 		# 瞄准闸：炮身没转到位不出膛（避免"炮口还指着天、弹已经横飞"的穿帮）。
 		if absf(wrapf(_pod_pivot.rotation - _pod_aim_angle(target), -PI, PI)) \
 				> BalanceMods.RAIL_AIM_TOLERANCE:
 			return
-		_fire_rail(member)
+		_fire_rail(member, target)
 	else:
 		_fire_missiles(member, target)
 
 
-## 越肩瞄准轴：炮身朝目标方向转（磁轨炮=按弹速打提前量的直线弹道；导弹=概略指向，
-## 归航弹自己转弯）；没目标缓回待机姿态。镜像朝向由 Visuals 承担，to_local 换算。
+## 越肩瞄准轴：炮身朝目标方向转（磁轨炮=按弹速打提前量的直线弹道；导弹=直瞄，
+## 出膛即制导弹体自己接管）；没目标缓回待机姿态。镜像朝向由 Visuals 承担，
+## to_local 换算。
 func _tick_pod_aim(target: Node2D, delta: float) -> void:
 	if not _pod.visible:
 		return
@@ -597,37 +601,43 @@ func _tick_pod_aim(target: Node2D, delta: float) -> void:
 	_pod_pivot.rotation = lerp_angle(_pod_pivot.rotation, desired, 1.0 - exp(-10.0 * delta))
 
 
-## 目标在炮身（PodPivot）本地空间的瞄准角：磁轨炮打直线弹，按弹速预判提前点。
+## 目标在炮身（PodPivot）本地空间的瞄准角：磁轨炮打直线弹，按弹速预判提前点；
+## 蜂巢=直瞄指向（出膛即制导，弹体自己接管）。
 func _pod_aim_angle(target: Node2D) -> float:
-	var aim_at := target.global_position
+	var aim_at := Enemy.aim_of(target) # 索敌点（target 形参是 Node2D，走统一入口）
 	if RunState.mod_member(&"shoulder") == &"shoulder_rail":
-		aim_at = Bullet.aim_point(_pod_pivot.global_position, target, BalanceMods.RAIL_BOLT_SPEED)
+		aim_at = Bullet.aim_point(_pod_pivot.global_position, target, BalanceMods.RAIL_BOLT_SPEED, aim_at)
 	return (_pod.to_local(aim_at) - _pod_pivot.position).angle()
 
 
 ## 磁轨炮：细长杆弹直线出膛，高伤高冲击低射速（越肩大件的重击位）。
-func _fire_rail(member: StringName) -> void:
+## 出膛方向与主枪同一条账（_fire）：预判提前点 + solve_fire_direction 反解——
+## 只沿炮身指向硬出膛会把载体速度全额继承进弹道（跑速 600/弹速 3600≈9.5° 偏角，
+## 中距必偏），反解后继承只影响弹速不影响命中。
+func _fire_rail(member: StringName, target: Node2D) -> void:
 	var container := get_tree().get_first_node_in_group("projectile_container")
 	if container == null:
 		return
 	var tint: Color = BalanceMods.MEMBERS[member]["tint"]
 	var bolt := RAIL_BOLT.instantiate() as Bullet
 	bolt.speed = BalanceMods.RAIL_BOLT_SPEED
-	bolt.damage = int(RunState.mod_stat(&"rail_damage", 8.0))
-	bolt.impact = RunState.mod_stat(&"rail_impact", 16.0)
+	bolt.damage = int(RunState.mod_stat(&"rail_damage", 20.0))
+	bolt.impact = RunState.mod_stat(&"rail_impact", 40.0)
 	bolt.tracer_tint = tint
 	bolt.impact_tint = tint
-	var dir := _pod_pivot.global_transform.x.normalized() # 炮身 +X=弹道（镜像下自动换边）
+	var muzzle_pos := _pod_muzzle_rail.global_position
+	var aim_at := Bullet.aim_point(muzzle_pos, target, BalanceMods.RAIL_BOLT_SPEED, target.aim_point())
+	var dir := Bullet.solve_fire_direction(muzzle_pos, aim_at, BalanceMods.RAIL_BOLT_SPEED, velocity)
 	bolt.setup(dir, velocity)
 	container.add_child(bolt)
 	bolt.global_position = _pod_muzzle_rail.global_position
 	bolt.reset_physics_interpolation() # 先入树后定位：重置插值基点，出膛不拖残影
 	_pod_flash_rail.fire(dir.angle())
-	_pod_timer = RunState.mod_stat(&"rail_cooldown", 1.3)
+	_pod_timer = RunState.mod_stat(&"rail_cooldown", 3.25)
 	Sfx.play(&"fire_player", 1.0)
 
 
-## 蜂巢导弹舱：三枚归航小导弹向上扇形出筒、错拍齐射（一窝蜂读法）。
+## 蜂巢导弹舱：三枚归航小导弹沿炮口方向扇形出筒、错拍齐射（一窝蜂读法）。
 ## 错拍计时器挂树（process_always=false：世界冻结时不出筒）。
 func _fire_missiles(member: StringName, target: Node2D) -> void:
 	var shots := int(RunState.mod_stat(&"missile_shots", 3.0))
@@ -640,11 +650,12 @@ func _fire_missiles(member: StringName, target: Node2D) -> void:
 		else:
 			get_tree().create_timer(delay, false, false, true).timeout.connect(
 				_launch_pod_missile.bind(tint, target, i, shots))
-	_pod_flash_missile.fire(-PI / 2.0) # 出筒向上，枪口焰朝上开
-	_pod_timer = RunState.mod_stat(&"missile_cooldown", 2.4)
+	_pod_flash_missile.fire(_pod_pivot.global_transform.x.angle()) # 枪口焰跟着炮口开
+	_pod_timer = RunState.mod_stat(&"missile_cooldown", 4.8)
 
 
-## 单发导弹出筒：从导弹舱枪口出生，向上扇形张开出筒角（归航交给弹体自己）。
+## 单发导弹出筒：从导弹舱枪口出生，出筒方向跟着炮口直瞄目标，绕炮口扇形张开；
+## 出膛即制导（弹体接管）。
 func _launch_pod_missile(tint: Color, target: Node2D, index: int, shots: int) -> void:
 	if not _pod.visible or _dead:
 		return
@@ -652,12 +663,13 @@ func _launch_pod_missile(tint: Color, target: Node2D, index: int, shots: int) ->
 	if container == null:
 		return
 	var missile := POD_MISSILE.instantiate() as PlayerMissile
-	missile.damage = int(RunState.mod_stat(&"missile_damage", 6.0))
-	missile.impact = RunState.mod_stat(&"missile_impact", 3.0)
+	missile.damage = int(RunState.mod_stat(&"missile_damage", 12.0))
+	missile.impact = RunState.mod_stat(&"missile_impact", 6.0)
 	missile.tracer_tint = tint
-	# 出筒角绕竖直方向扇开；向上发射不受朝向镜像影响。
+	# 错拍逐发出筒时各读当时的炮口指向；global +X 经镜像自动换边。
+	var base_dir := _pod_pivot.global_transform.x.normalized()
 	var fan := (float(index) - float(shots - 1) * 0.5) * BalanceMods.MISSILE_LAUNCH_FAN
-	missile.setup(Vector2.UP.rotated(fan), target if is_instance_valid(target) else null)
+	missile.setup(base_dir.rotated(fan), target if is_instance_valid(target) else null)
 	container.add_child(missile)
 	missile.global_position = _pod_muzzle_missile.global_position
 	missile.reset_physics_interpolation() # 先入树后定位：重置插值基点
@@ -777,7 +789,7 @@ func _target_in_strike_range() -> bool:
 	var target := _acquire_target()
 	if target == null:
 		return false
-	var to := target.global_position - global_position
+	var to := target.aim_point() - global_position
 	return absf(to.x) <= BalancePlayer.MELEE_STRIKE_RANGE \
 			and absf(to.y) <= BalancePlayer.MELEE_STRIKE_RANGE * 0.7
 
@@ -1110,6 +1122,11 @@ func _refresh_mod_visuals() -> void:
 		_thruster.set_palette(flame[0], flame[1], flame[2])
 		_leg_thruster.set_palette(flame[0], flame[1], flame[2])
 		_waist_thruster.set_palette(flame[0], flame[1], flame[2])
+	else:
+		# 卸下回出厂暖焰（试装场卸装备走这里；新场景恢复本就无色可退，等效空操作）
+		_thruster.reset_palette()
+		_leg_thruster.reset_palette()
+		_waist_thruster.reset_palette()
 	var pod_member := RunState.mod_member(&"shoulder")
 	_pod.visible = not pod_member.is_empty()
 	if _pod.visible:
@@ -1120,6 +1137,8 @@ func _refresh_mod_visuals() -> void:
 	var guard := RunState.mod_member(&"shield")
 	if not guard.is_empty():
 		_shield_ring.self_modulate = BalanceMods.MEMBERS[guard]["ring"]
+	else:
+		_shield_ring.self_modulate = Color.WHITE
 	_update_shield_ring()
 
 

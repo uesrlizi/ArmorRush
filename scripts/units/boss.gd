@@ -442,8 +442,9 @@ func _despawn_past_right() -> bool:
 
 ## 失衡（AC6 式冲击/STAGGER）：枪弹持续命中 ≈4s 打满上限即瘫——
 ## 停摆+受伤加深+瘫沉，这就是近战爆发窗（枪射攒失衡→砍的正式循环）。
+## 阈值走失衡专用阶梯曲线（比血量温和，见 RunState.ladder_impact_factor）。
 func _impact_resistance() -> float:
-	return BalanceCombat.IMPACT_RESIST_BOSS * RunState.ladder_growth_factor()
+	return BalanceCombat.IMPACT_RESIST_BOSS * RunState.ladder_impact_factor()
 
 
 func _stagger_time() -> float:

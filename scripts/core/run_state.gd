@@ -8,9 +8,10 @@ extends Node
 ## FIRST_POOL 白名单抽——不在白名单里的场景永远不会当首关）；此后每次通关
 ## draw_next() 从轮换袋抽下一关，袋空整袋重洗——每 N 关全场景恰好各出现
 ## 一次、周期内不重复，且相邻两关永不相同（袋边界抽中上一关即换抽）。
-## 新场景登记进 SCENES 即入池。局内循环 v2（design/run_loop.md §1）：
+## 新场景登记进 SCENES 即入池；BOSS 接线走 WORLD_BOSSES（场景→BOSS 名单，一张场景
+## 可登记多台，遭遇触发时随机抽一台）。局内循环 v2（design/run_loop.md §1）：
 ## 固定 RUN_NORMAL_LEVELS 个普通关 + 第 RUN_NORMAL_LEVELS+1 关 = RUSH 终局
-## （没抽到的场景=连战阵容，逐台跳场景），阵容打空=通关（run_complete，
+## （先抽 BOSS 阵容、再逐台配场景跳过去），阵容打空=通关（run_complete，
 ## draw_next 返回 ""）；总开关 RUN_LOOP_ENABLED=false 时整套退回旧的无限
 ## 滚动关（开关与细则全在 balance_global.gd）。
 
@@ -33,15 +34,44 @@ const FIRST_POOL: Array[String] = [
 	"res://scenes/world/world_2.tscn",
 	"res://scenes/world/world_3.tscn",
 ]
+## 场景 → BOSS 名单（正本）：一张场景可以登记多台，BOSS 遭遇触发时在名单里随机抽
+## 一台——本局已打过的给没打过的让位（同一名单全打过才重抽）。首项=主位：探针与
+## 直开场景的 debug_spawn_boss() 默认出它（各章能力探针按主位写）。
+## RUSH 终局按 BOSS 抽再配场景（design/run_loop.md §1）：阵容=本局没打过的 BOSS 里
+## 随机挑 RUN_RUSH_COUNT 台（不够再用打过的补，阵容内不重复），每台从它的登记场景
+## 里配一张——优先本局没去过的场景，全去过才重访（同场景换一台 BOSS 的重访合法）。
+## 新 BOSS 入池 = 往对应场景的名单里加一行。场景的 BOSS 接线以本表为准，world 场景的
+## Spawner 不再各自保存 boss_scene（那个导出只留给没登记的场景兜底）。
+const WORLD_BOSSES := {
+	"res://scenes/world/world_1.tscn": ["res://scenes/units/boss_1.tscn"],
+	"res://scenes/world/world_2.tscn": ["res://scenes/units/boss_2.tscn"],
+	"res://scenes/world/world_3.tscn": [
+		"res://scenes/units/boss_worm_3.tscn",
+		"res://scenes/units/boss_3.tscn",
+	],
+	"res://scenes/world/world_4.tscn": ["res://scenes/units/boss_4.tscn"],
+	"res://scenes/world/world_5.tscn": ["res://scenes/units/boss_5.tscn"],
+	"res://scenes/world/world_6.tscn": ["res://scenes/units/boss_6.tscn"],
+	"res://scenes/world/world_7.tscn": ["res://scenes/units/boss_7.tscn"],
+	"res://scenes/world/world_8.tscn": ["res://scenes/units/boss_8.tscn"],
+	"res://scenes/world/world_9.tscn": ["res://scenes/units/boss_9.tscn"],
+	"res://scenes/world/world_10.tscn": ["res://scenes/units/boss_10.tscn"],
+}
 
 var score := 0
 var stage := 1 # 本局第几关：start_run 归 1，每次 draw_next 进下一关 +1（直接开某关测试=1）
 var play_time := 0.0 # 本局累计用时（秒，正计时）：Main 只在战斗中累加，跨关延续
 var hold_chapter := false # autotest 置真：击败 BOSS 不切场景（探针需要世界原地活着）
 var rush_active := false # RUSH 终局进行中（=第 5 关）：Spawner 落地即刷 BOSS+停杂兵，BOSS 血量打折
-var rush_lineup: Array[String] = [] # RUSH 连战阵容（本局没抽到的场景）：逐台跳场景，打空=通关
+var rush_lineup: Array[String] = [] # RUSH 连战阵容（逐台跳的场景，与 rush_bosses 一一对应）：打空=通关
+var rush_bosses: Array[String] = [] # RUSH 阵容的 BOSS（场景路径，按出场序）：先抽 BOSS 再配场景
 var rush_total := 0 # RUSH 阵容总台数（进 RUSH 时定）：进度「最终战 n/总」的分母
 var run_complete := false # 通关记号：阵容打空时置真，draw_next 返回 ""，Main 原地出通关结算
+var pending_boss := "" # 抽定待出的 BOSS 场景路径：RUSH 落地场景的 Spawner 取走即出（""=没抽定，落地场景自己现抽）
+var current_boss := "" # 本关出阵的 BOSS 场景路径：RUSH=阵容抽定的那台（配场景时即记）；普通关=遭遇触发现抽后记入
+var boss_log: Array[String] = [] # 本局已遭遇 BOSS 的出场序（路径；探针读，start_run 清）
+var _fought := {}  # 本局已遭遇的 BOSS（路径→true）：抽签时给没打过的让位
+var _visited := {} # 本局已落地的场景（路径→true）：RUSH 配场景优先没去过的
 var handover_hp := -1 # RUSH 击破间不回血：击败时记下的玩家血量，下一台 BOSS 场景取走落地（-1=不携带）
 var handover_shield := -1 # 同上账的护盾镜像（§4）：RUSH 击破间盾不回充，随血量一起跨场景携带（-1=不携带→满盾照旧）
 ## 录制隐藏档（HUD 接 F1/F2，跨章/跨局延续）：0=正常；1=F1 隐顶栏信息 HUD+结算
@@ -116,8 +146,13 @@ func start_run() -> String:
 	play_time = 0.0
 	rush_active = false
 	rush_lineup = []
+	rush_bosses = []
 	rush_total = 0
 	run_complete = false
+	pending_boss = ""
+	current_boss = ""
+	boss_log = []
+	_fought = {}
 	handover_hp = -1
 	handover_shield = -1
 	mult_progress = 0.0
@@ -129,14 +164,15 @@ func start_run() -> String:
 	var first: String = FIRST_POOL[_rng.randi_range(0, FIRST_POOL.size() - 1)]
 	_bag.erase(first)
 	_last = first
+	_visited = {first: true}
 	return first
 
 
 ## 通关转场调用。旧制（RUN_LOOP_ENABLED=false）：关卡数 +1，轮换袋抽下一关
 ## （袋空整袋重洗、相邻防撞）——无限滚动。新制（design/run_loop.md §1）：前
-## RUN_NORMAL_LEVELS 关照旧抽袋；之后进 RUSH 终局——本局没抽到的场景即连战
-## 阵容（多于 RUN_RUSH_COUNT 台时随机留 3 台），stage 钉在 RUSH 关号上逐台
-## 跳场景；阵容打空返回 ""（run_complete 置真）：Main 原地出通关结算。
+## RUN_NORMAL_LEVELS 关照旧抽袋；之后进 RUSH 终局——先抽 BOSS（本局没打过的里随机
+## 挑，见 _enter_rush）再逐台配场景跳过去，stage 钉在 RUSH 关号上；阵容打空返回 ""
+## （run_complete 置真）：Main 原地出通关结算。
 func draw_next() -> String:
 	if not BalanceGlobal.RUN_LOOP_ENABLED:
 		return _draw_next_classic()
@@ -144,11 +180,16 @@ func draw_next() -> String:
 		if rush_lineup.is_empty():
 			run_complete = true
 			return ""
-		return rush_lineup.pop_front()
+		pending_boss = rush_bosses.pop_front()
+		current_boss = pending_boss
+		var next_rush: String = rush_lineup.pop_front()
+		_visited[next_rush] = true
+		_last = next_rush
+		return next_rush
 	stage += 1
 	if stage > BalanceGlobal.RUN_NORMAL_LEVELS:
 		_enter_rush()
-		return rush_lineup.pop_front()
+		return draw_next()
 	return _draw_from_bag()
 
 
@@ -169,22 +210,162 @@ func _draw_from_bag() -> String:
 		idx = (idx + _rng.randi_range(1, _bag.size() - 1)) % _bag.size()
 	var next: String = _bag.pop_at(idx)
 	_last = next
+	_visited[next] = true
 	return next
 
 
-## 进 RUSH 终局：普通抽袋剩下的场景=连战阵容（7 场景池=剩余全部，每局恰好
-## 看满 7 台 BOSS；池变大后从没抽到的里随机留 RUN_RUSH_COUNT 台）。
-## stage 钉在 RUSH 关号（第 RUN_NORMAL_LEVELS+1 关）：三台 BOSS 的跳场景共用
-## 这一个关号，HUD 与结算都报它。
+## 进 RUSH 终局：先抽 BOSS 阵容（本局没打过的 BOSS 里随机挑，多于 RUN_RUSH_COUNT
+## 台才筛；池再大也从没打过的里挑），再给每台配一张它的登记场景。stage 钉在 RUSH
+## 关号（第 RUN_NORMAL_LEVELS+1 关）：几台 BOSS 的跳场景共用这一个关号，HUD 与
+## 结算都报它。
 func _enter_rush() -> void:
 	rush_active = true
 	stage = BalanceGlobal.RUN_NORMAL_LEVELS + 1
-	var pool := _bag.duplicate()
-	while pool.size() > BalanceGlobal.RUN_RUSH_COUNT:
-		pool.pop_at(_rng.randi_range(0, pool.size() - 1))
-	rush_lineup = pool
-	rush_total = pool.size()
+	rush_bosses = _draw_rush_bosses()
+	rush_lineup = _assign_rush_hosts(rush_bosses)
+	rush_total = rush_lineup.size()
 	_bag = [] # 普通袋功成身退：此后只走阵容队列
+
+
+## RUSH 阵容抽签（BOSS 路径，出场序）：没打过的 BOSS 洗牌排前、打过的洗牌垫后，
+## 顺次截 RUN_RUSH_COUNT 台——阵容内不重复；BOSS 总数不够台数时有多少算多少。
+func _draw_rush_bosses() -> Array[String]:
+	var fresh: Array[String] = []
+	var seen: Array[String] = []
+	for boss in all_bosses():
+		if _fought.has(boss):
+			seen.append(boss)
+		else:
+			fresh.append(boss)
+	_shuffle(fresh)
+	_shuffle(seen)
+	var lineup: Array[String] = []
+	var covered := {} # 阵容里已被代表的场景
+	# 两轮挑：先挑「场景还没被阵容代表」的——同一张场景登记的多台不同时进一套阵容
+	# （连战每张图各不相同）；挑不满再用剩下的补位。
+	for strict in 2:
+		for boss: String in fresh + seen:
+			if lineup.size() >= BalanceGlobal.RUN_RUSH_COUNT:
+				break
+			if lineup.has(boss):
+				continue
+			if strict == 0 and not _has_uncovered_host(boss, covered):
+				continue
+			lineup.append(boss)
+			for world in boss_hosts(boss):
+				covered[world] = true
+	return lineup
+
+
+func _has_uncovered_host(boss: String, covered: Dictionary) -> bool:
+	for world in boss_hosts(boss):
+		if not covered.has(world):
+			return true
+	return false
+
+
+## 给阵容里每台 BOSS 配一张场景：可选场景最少的那台先挑（免得先配的把别人唯一的
+## 场景占走）；每台优先配本局还没去过的场景，全去过才重访（至少别跟本阵容前几台
+## 同场景）。返回的场景序与阵容一一对应。
+func _assign_rush_hosts(bosses: Array[String]) -> Array[String]:
+	var hosts: Array[String] = []
+	hosts.resize(bosses.size())
+	var order: Array[int] = []
+	for i in bosses.size():
+		order.append(i)
+	var taken := _visited.duplicate() # 本局去过的场景=软占用；先配走的也算
+	if _last != "":
+		taken[_last] = true # 上一关也算软占用：能避开就不连着打同一张图（单宿主 BOSS 无处挪时例外）
+	order.sort_custom(func(a: int, b: int) -> bool:
+		return _free_hosts(bosses[a], taken).size() < _free_hosts(bosses[b], taken).size())
+	var used := {} # 本阵容里已配走的场景
+	for i in order:
+		var free := _free_hosts(bosses[i], taken)
+		if free.is_empty():
+			free = _free_hosts(bosses[i], used) # 它的场景本局全去过：至少别跟本阵容前几台同场景
+		if free.is_empty():
+			free = boss_hosts(bosses[i]) # 重访合法（同场景换一台 BOSS）
+		hosts[i] = free[_rng.randi_range(0, free.size() - 1)]
+		taken[hosts[i]] = true
+		used[hosts[i]] = true
+	return hosts
+
+
+func _free_hosts(boss: String, taken: Dictionary) -> Array[String]:
+	var out: Array[String] = []
+	for world in boss_hosts(boss):
+		if not taken.has(world):
+			out.append(world)
+	return out
+
+
+func _shuffle(list: Array) -> void:
+	for i in range(list.size() - 1, 0, -1):
+		var j := _rng.randi_range(0, i)
+		var tmp = list[i]
+		list[i] = list[j]
+		list[j] = tmp
+
+
+## ---- BOSS 名单查询与抽签（正本=WORLD_BOSSES） ----
+
+## 某场景登记的 BOSS 名单（路径，按登记序；没登记=空数组）。
+func boss_roster(world: String) -> Array[String]:
+	var out: Array[String] = []
+	if WORLD_BOSSES.has(world):
+		out.assign(WORLD_BOSSES[world])
+	return out
+
+
+## 登记了某台 BOSS 的全部场景（路径，按 SCENES 序；不在场景池的场景不算）。
+func boss_hosts(boss: String) -> Array[String]:
+	var out: Array[String] = []
+	for world in SCENES:
+		if boss_roster(world).has(boss):
+			out.append(world)
+	return out
+
+
+## 全部在池 BOSS（去重，按场景序）。
+func all_bosses() -> Array[String]:
+	var out: Array[String] = []
+	for world in SCENES:
+		for boss in boss_roster(world):
+			if not out.has(boss):
+				out.append(boss)
+	return out
+
+
+## 普通关 BOSS 遭遇触发时现抽：本场景名单里随机一台，本局没打过的优先；名单里
+## 全打过=清账重抽（下一轮又是没打过的优先）。返回 BOSS 场景路径，没登记返回 ""。
+func draw_boss_for_world(world: String) -> String:
+	var roster := boss_roster(world)
+	if roster.is_empty():
+		return ""
+	var fresh: Array[String] = []
+	for boss in roster:
+		if not _fought.has(boss):
+			fresh.append(boss)
+	if fresh.is_empty():
+		fresh = roster.duplicate()
+		for boss in roster:
+			_fought.erase(boss)
+	var boss: String = fresh[_rng.randi_range(0, fresh.size() - 1)]
+	_mark_fought(boss)
+	current_boss = boss
+	return boss
+
+
+## 新落地场景取走抽定的 BOSS（取即清）：RUSH 阵容那台；""=没抽定，场景自己现抽。
+func take_pending_boss() -> String:
+	var value := pending_boss
+	pending_boss = ""
+	return value
+
+
+func _mark_fought(boss: String) -> void:
+	_fought[boss] = true
+	boss_log.append(boss)
 
 
 ## 跑局进度文案（HUD 顶栏与结算共用的唯一出处）：返回 [标签, 读数]。
@@ -223,6 +404,14 @@ func equip(member: StringName) -> StringName:
 	var slot: StringName = BalanceMods.MEMBERS[member]["slot"]
 	mods[slot] = member
 	return slot
+
+
+## 卸下：从持有表去掉槽位，返回卸下的成员（原本就空返回 &""）。正常局没有卸装备
+## 的玩法通道（掉落即装备），试装场循环到空位走这里。
+func unequip(slot: StringName) -> StringName:
+	var member: StringName = mods.get(slot, &"")
+	mods.erase(slot)
+	return member
 
 
 ## 槽位当前装备的成员（未持有返回 &""）。视觉通道换色/换形与肩炮/盾的有无都查它。
@@ -280,14 +469,21 @@ func loot_labels() -> String:
 
 ## ---- 疾驰倍率（design/run_loop.md §2；开关与数字全在 balance_global「疾驰倍率」段） ----
 
-## 当前倍率档 ×1..×MULT_MAX（进度整除换算，恰满一格进档）。倍率关/冻结=恒 1，
-## 计分公式在 Main 里据此退化为旧制。进度=伤害×小数系数的累加，恰满一档时 double
+## 当前档位 1..MULT_MAX（进度整除换算，恰满一格进档）。档位≠计分乘数：乘数查
+## BalanceGlobal.MULT_VALUES 表（见 mult_value）。倍率关/冻结=恒第 1 档，计分公式
+## 在 Main 里据此退化为旧制。进度=伤害×小数系数的累加，恰满一档时 double
 ## 噪声可能落在 19.99…，换算带浮点补偿（窗口 0.01 << 最小进度颗粒 0.2，抬不进假档）。
 func multiplier() -> int:
 	if not BalanceGlobal.MULT_ENABLED or mult_frozen:
 		return 1
 	return clampi(1 + floori((mult_progress + 0.01) / BalanceGlobal.MULT_STEP),
 			1, BalanceGlobal.MULT_MAX)
+
+
+## 当前档位的计分乘数（balance_global「疾驰倍率」MULT_VALUES 表）。倍率关/冻结随
+## multiplier() 恒回第 1 档=×1.0。密度乘区/涨档账按档位走，不查此表。
+func mult_value() -> float:
+	return BalanceGlobal.MULT_VALUES[multiplier() - 1]
 
 
 ## 倍率档→刷怪密度乘区（<1：档越高间距越短怪越密；障碍间距不乘=跑酷节奏不归倍率管）。
@@ -348,13 +544,26 @@ func ladder_bullets_extra() -> int:
 	return 1
 
 
-## BOSS 体量增长系数 ×1.12^(关序−1) 封顶 ×1.4（2026-11-08 用户修正：难度梯度
-## 不只出招密度，血量与失衡阈值也涨）：Enemy._max_hp() 与 Boss/PursuitBoss 的
-## _impact_resistance() 调用；资格闸门=Enemy._ladder_scaling()（只 BOSS 线开，
-## 杂兵/精英血量与失衡账不动）。RUSH 折扣叠加在其后：1.4×0.7≈0.98≈原血量。
+## BOSS 血量增长系数 ×GROWTH_MULT^(关序−1) 封顶 ×GROWTH_MAX（2026-11-11 用户定
+## ×1.30/关封顶 ×2.2——装备期望输出 ×1.12~×1.24，血量须跑赢它）：Enemy._max_hp()
+## 调用；资格闸门=Enemy._ladder_scaling()（只 BOSS 线开，杂兵/精英血量不动）。
+## RUSH 血量折扣恢复（RUSH_HP_DISCOUNT_ON=true）：封顶档 2.2×0.7≈1.54×原血。
 func ladder_growth_factor() -> float:
 	if not BalanceGlobal.LADDER_ENABLED:
 		return 1.0
 	var capped := mini(stage, BalanceGlobal.RUN_NORMAL_LEVELS)
 	return minf(pow(BalanceGlobal.LADDER_GROWTH_MULT, capped - 1),
 			BalanceGlobal.LADDER_GROWTH_MAX)
+
+
+## BOSS 失衡阈值增长系数 ×IMPACT_MULT^(关序−1) 封顶 ×IMPACT_MAX（与血量拆开的
+## 温和曲线，2026-11-10 用户定：失衡不必涨那么多）：Boss/PursuitBoss 的
+## _impact_resistance() 调用。失衡=玩家爆发窗（枪攒失衡→近战爆发），不随血量
+## 同涨——血量把战斗时长拉长时失衡窗相对变多，对冲木桩化（封顶档：血 2.2 倍、
+## 失衡阈 1.7 倍→失衡频率相对 +29%）。
+func ladder_impact_factor() -> float:
+	if not BalanceGlobal.LADDER_ENABLED:
+		return 1.0
+	var capped := mini(stage, BalanceGlobal.RUN_NORMAL_LEVELS)
+	return minf(pow(BalanceGlobal.LADDER_IMPACT_MULT, capped - 1),
+			BalanceGlobal.LADDER_IMPACT_MAX)

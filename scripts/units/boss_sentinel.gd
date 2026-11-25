@@ -15,8 +15,9 @@ extends PursuitBoss
 ##   电浆枪直射（普攻）：右臂重炮真瞄玩家短点放——弹=plasma_bolt.tscn
 ##     （bullet.gd 纯换皮：冰蓝矢形贴图，速度/伤害复用 BOSS_SWEEP_*，直瞄无
 ##     预判语法不变），无重击警告（真瞄即预警）。
-## 走位/贴脸窗/二阶段/失衡全在 PursuitBoss 框架；_tick_visual=背包双喷口推进焰
-## 琥珀脉动（机甲无旋翼，错相呼吸给"悬浮的活"感）。数值全在 BalanceWorld3.SENTINEL_*
+## 走位/贴脸窗/二阶段/失衡全在 PursuitBoss 框架；背包双喷口推进焰（电浆青蓝，
+## 尾部平射）=节点挂 EnemyThrusterFlame，闪燃/随速拉长在节点脚本，本脚本不碰
+## 喷口 modulate/scale。数值全在 BalanceWorld3.SENTINEL_*
 ## /PLASMA_MINE_*。
 
 const ST_RAIN_WARN := 3
@@ -36,10 +37,6 @@ var _direct_shoot_t := 0.0
 @onready var _bay_warn: ThreatFlash = $Visuals/BayPort/ThreatFlash
 @onready var _bay_flash: MuzzleFlash = $Visuals/BayPort/Flash
 @onready var _warn: ThreatFlash = $Visuals/ArmPivot/Muzzle/ThreatFlash # 直瞄枪口（不预警，但池化复用要兜底重置）
-@onready var _thrusters: Array[Sprite2D] = [
-	$Visuals/Thruster1 as Sprite2D,
-	$Visuals/Thruster2 as Sprite2D,
-]
 
 
 ## 血条上方显示的机体名。
@@ -58,15 +55,6 @@ func _hover_anchor_y() -> float:
 func on_spawned() -> void:
 	super()
 	_rain_launched = 0
-
-
-## 背包双喷口推进焰：琥珀错相呼吸（机甲无旋翼；失衡/死亡演出期间也照烧——
-## 悬浮没熄火）。
-func _tick_visual(delta: float) -> void:
-	for i in _thrusters.size():
-		var t := _thrusters[i] as Sprite2D
-		t.modulate.a = 0.55 + 0.25 * sin(_bob_t * 13.0 + i * 2.1)
-		t.scale = Vector2.ONE * (0.9 + 0.15 * sin(_bob_t * 9.0 + i * 1.7))
 
 
 ## ---- 技能 A：电浆弹雨 ----

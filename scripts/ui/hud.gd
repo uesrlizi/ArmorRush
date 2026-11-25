@@ -328,7 +328,7 @@ func _build_result_ui(font: Font) -> void:
 	_result_rule.pivot_offset = Vector2(RESULT_RULE_W * 0.5, 0.0) # 从中心向两侧展开
 	root.add_child(_result_rule)
 
-	# 统计组「得分 1230 · 关卡 3 · 用时 05:32 · 受击 2 · 最高倍率 ×4」：**整行统一 28 号**
+	# 统计组「得分 1230 · 关卡 3 · 用时 05:32 · 受击 2 · 最高倍率 ×3.0」：**整行统一 28 号**
 	# ——大小混排的层级试过两轮都被否（孤位大数字挖豁口/分数时长大关卡小=组间不齐），
 	# 单尺寸从根上消灭大小差；数字满墨、汉字 0.75 档只靠明度分层。同一基线、整行水平
 	# 居中，位置在 show_result 时按实际文本宽度现算。后两组=疾驰倍率的局级回执
@@ -338,7 +338,7 @@ func _build_result_ui(font: Font) -> void:
 	_result_groups = []
 	var specs: Array = [["得分", "0"], ["关卡", "2"], ["用时", "00:00"]]
 	if BalanceGlobal.MULT_ENABLED:
-		specs.append_array([["受击", "0"], ["最高倍率", "×1"]])
+		specs.append_array([["受击", "0"], ["最高倍率", "×1.0"]])
 	if BalanceGlobal.LOOT_ENABLED:
 		specs.append(["拾取", ""])
 	for spec: Array in specs:
@@ -374,8 +374,8 @@ func _build_result_ui(font: Font) -> void:
 ## （标题下落淡入 → 横线自中心展开 → 统计组左到右依次上浮），返回入场
 ## 动画时长——重开提示不随入场出，由 Main 开闸时调 show_restart_hint 同拍点亮
 ## （看见提示=能按，防误触）。progress=RunState.progress_parts()（[标签, 读数]，
-## 「关卡 4/5」/「最终战 2/3」）。hits/mult_max=疾驰倍率局级回执（受击数/最高倍率，
-## run_loop.md §2；倍率关不展示，传什么都行）。
+## 「关卡 4/5」/「最终战 2/3」）。hits/mult_max=疾驰倍率局级回执（受击数/最高档
+## 乘数=查 BalanceGlobal.MULT_VALUES，run_loop.md §2；倍率关不展示，传什么都行）。
 ## cleared=true 为通关结算（RUSH 阵容打空，run_loop.md §1）：换标题，不拍
 ## gameover 音（暂无通关音，宁缺毋滥）。loot=本局拾取清单（RunState.loot_labels()，
 ## run_loop.md §4 结算回执；空串=一件没捡，不建组）。反制数待后续进组。
@@ -398,7 +398,7 @@ func show_result(score: int, progress: PackedStringArray, play_time: float,
 	_result_groups[2][1].text = format_time(play_time)
 	if BalanceGlobal.MULT_ENABLED:
 		_result_groups[3][1].text = str(hits)
-		_result_groups[4][1].text = "×%d" % mult_max
+		_result_groups[4][1].text = "×%.1f" % BalanceGlobal.MULT_VALUES[mult_max - 1]
 	_result_groups.erase(_loot_group) # 拾取组按本局实况入列（重复调用不叠组）
 	if not loot.is_empty() and not _loot_group.is_empty():
 		_loot_group[1].text = loot
@@ -422,7 +422,7 @@ func _result_intro_time() -> float:
 	return 0.3 + 0.08 * (_result_groups.size() - 1) + 0.4
 
 
-## 统计组（得分 1230 · 关卡 3 · 用时 05:32 · 受击 2 · 最高倍率 ×4）整行统一 28 号
+## 统计组（得分 1230 · 关卡 3 · 用时 05:32 · 受击 2 · 最高倍率 ×3.0）整行统一 28 号
 ## （数字满墨、汉字 0.75 档，只靠明度分层），同一基线水平居中。
 ## 组间距 64 > 段内 8：先分组成一张成绩单。
 func _layout_result_units() -> void:
@@ -714,15 +714,16 @@ func set_play_time(seconds: float) -> void:
 	_time_label.text = "用时 " + format_time(seconds)
 
 
-## 倍率档位读数（Main 每帧喂 RunState.multiplier()，跳档才动文本）。涨档闪一下
-## 提注意——档位=刷怪密度档，「怪变凶的因」在这里可见；掉档是负反馈不庆祝，
-## 安静回落。倍率关/Main 没喂过=不亮（空文本）。开场首喂（0→1）不算涨档。
+## 倍率读数（Main 每帧喂 RunState.multiplier() 档位，跳档才动文本；显示值=该档
+## 计分乘数，查 BalanceGlobal.MULT_VALUES）。涨档闪一下提注意——档位=刷怪密度档，
+## 「怪变凶的因」在这里可见；掉档是负反馈不庆祝，安静回落。倍率关/Main 没喂过=
+## 不亮（空文本）。开场首喂（0→1）不算涨档。
 func set_mult(tier: int) -> void:
 	if not BalanceGlobal.MULT_ENABLED or tier == _shown_mult:
 		return
 	var rose := tier > _shown_mult and _shown_mult > 0
 	_shown_mult = tier
-	_mult_label.text = "倍率 ×%d" % tier
+	_mult_label.text = "倍率 ×%.1f" % BalanceGlobal.MULT_VALUES[tier - 1]
 	if rose and _mult_label.visible:
 		if _mult_pop_tween != null:
 			_mult_pop_tween.kill()

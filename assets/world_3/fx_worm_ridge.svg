@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" width="200" height="60">
+<!-- 潜行雪脊 200x60（地表航迹的隆脊）。锚=底边中点 (100,60)。生成器=gen_worm.py。 -->
+<defs>
+
+</defs>
+<path d="M 2,60 Q 50,6 110,12 Q 160,20 198,60 Z" fill="#f2f8fb"/>
+<path d="M 110,12 Q 160,20 198,60 L 110,60 Z" fill="#cfdfe8"/>
+<path d="M 60,22 L 78,58" fill="none" stroke="#b9cdd9" stroke-width="2"/>
+</svg>

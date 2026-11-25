@@ -1,19 +1,22 @@
 class_name BossConductor
 extends PursuitBoss
-## 第九章 BOSS·浮空巡线舰「引雷」（雷暴线场守卫）：追击框架能力层——「架线与引雷」。
-## 门型横担机体（前臂绝缘子串俯仰真瞄=敌基类 ArmPivot 驱动，末端放电球=Muzzle；
-## 腹舱双桩口 BayPort；背部三孔 RodPorts；锚点账=bake_storm_units.py 头注）：
+## 第九章 BOSS·浮空电塔「引雷」（雷暴线场守卫）：追击框架能力层——「布珠与引雷」。
+## 横担桁架机体（前部**固定天线桅**=出弹源：天线不俯仰（覆写 _arm_tracks_pitch=false），
+## 桅顶电珠=Muzzle；腹舱双桩口 BayPort；背部三孔 RodPorts；锚点账=gen_boss_forms.py
+## 头注；座裙双电紫火箭焰，2026-11-11 八轮换装）——攻击全走球状闪电语汇，机体上无电线/绝缘子读法：
 ##   跨缆网（技能A）：BayPort 预警（t=0 同帧采样 lead，R13）→ 跨缆 LiveSpan：p1 一套、
 ##     高/低每轮交替；p2 两段固定先高后低（第二段 x1′=第一段末端+360，带电晚 0.6）——
-##     读法链「先钻，后飞」；
-##   引雷针链（技能B）：RodPorts 逐孔 ThreatFlash → RodChain 出针一列（针1=px+clamp(
-##     vx·1.95,−300,1170)，间距 300）→ 充能 → Muzzle→针1 主弧、针→针跳弧+底爆——
-##     罚跳（弧带 h∈[112,128]）、罚贴针停（底爆 r90）、罚满速直冲（压针2 底爆）；
-##     解=贴地刹进缝或停针列前；
-##   断缆甩弧（普攻=单发点放）：arc_lash.tscn=bullet.gd 纯换皮，朝玩家**出手瞬间**
-##     中心（无预判无逐发跟踪），p2 双发各自重瞄——「罚停留」：满速保持前跑在
-##     ~x_p+615 处从弹线下钻过（R11），静止/刹停吃 12，纯跳可越。不挂 ThreatFlash。
-## 分工账：A 管「读高度」（钻或飞），B 管「读缝」（贴地停进缝/停针列前），普攻把
+##     读法链「先钻，后飞」；落点全放不下先回退采样（玩家当前 x 一组），仍空=整招
+##     取消不亮预警（先检空再预警：空计划亮预警=「看起来没发出来」的根因）；
+##   引雷针链（技能B）：先规划后预警——RodPorts 逐孔 ThreatFlash → RodChain 出珠列
+##     （珠1=px+clamp(vx·1.95,−300,1170)，间距 300）→ 充能 → 天线顶→珠1 主弧、
+##     珠→珠跳弧+底爆——罚跳（弧带 h∈[112,128]）、罚贴珠停（底爆 r90）、罚满速直冲
+##     （压珠2 底爆）；解=贴地刹进缝或停珠列前；规划空同样回退采样、仍空=取消不预警；
+##   断缆甩弧（普攻=单发点放）：arc_lash.tscn=bullet.gd 纯换皮（闪电球贴图），
+##     朝玩家**出手瞬间**中心（无预判无逐发跟踪），出手前天线顶放电一闪（FlashBurst
+##     预备拍，时长=ARC_LASH_DELAY），p2 双发各自重瞄——「罚停留」：满速保持前跑
+##     从弹线下钻过（R11），静止/刹停吃 12，纯跳可越。不挂 ThreatFlash。
+## 分工账：A 管「读高度」（钻或飞），B 管「读缝」（贴地停进缝/停珠列前），普攻把
 ## 停下的人捞出来——两技能把玩家按在贴地层、普攻逼他别停。
 ## 走位/贴脸窗/二阶段/失衡全在 PursuitBoss 框架。数值全在 BalanceWorld9。
 
@@ -41,10 +44,6 @@ var _direct_shoot_t := 0.0
 	$Visuals/RodPort2/ThreatFlash as ThreatFlash,
 	$Visuals/RodPort3/ThreatFlash as ThreatFlash,
 ]
-@onready var _thrusters: Array[Sprite2D] = [
-	$Visuals/Thruster1 as Sprite2D,
-	$Visuals/Thruster2 as Sprite2D,
-]
 
 
 func _display_name() -> String:
@@ -59,31 +58,35 @@ func _hover_anchor_y() -> float:
 	return BalanceWorld9.CONDUCTOR_HOVER_Y # 机体 280..460，对最高台阶 536 净空 76
 
 
+## 固定天线桅：出弹源=桅顶电珠，不做可动瞄准（垂发架先例）——基类瞄准层每帧把
+## ArmPivot 回正，甩弧/针链主弧方向由出手瞬间的 direction_to 现算。
+func _arm_tracks_pitch() -> bool:
+	return false
+
+
 func on_spawned() -> void:
 	super()
 	_span_high_first = true
 	_span_plans.clear()
 
 
-## 双举升喷口装饰紫呼吸；前臂俯仰由基类瞄准层驱动。
-func _tick_visual(_delta: float) -> void:
-	for i in _thrusters.size():
-		var t := _thrusters[i] as Sprite2D
-		t.modulate.a = 0.4 + 0.22 * sin(_bob_t * 11.0 + i * 2.3)
-		t.scale = Vector2.ONE * (0.95 + 0.15 * sin(_bob_t * 8.0 + i * 1.9))
-
-
 ## ---- 技能 A：跨缆网 ----
 
+## 先规划后预警：plans 空（lead+回退两档都放不下）=整招取消直接回后摇，一个预警
+## 都不亮——「亮了预警却什么都不来」会被读成「这招没发出来」，宁不出手。
 func _begin_skill_a() -> void:
+	_plan_spans()
+	if _span_plans.is_empty():
+		_enter_recover(BalanceWorld9.CONDUCTOR_SPAN_RECOVER)
+		return
 	_bstate = ST_SPAN_WARN
 	_bt = BalanceWorld9.LIVE_SPAN_WARN
-	_plan_spans()
 	_bay_warn.warn()
 
 
 ## t=0 采样 lead（R13）+ 规划落位（R6/R7/同台）。p2 第二段从第一段末端 +360 起规划，
-## 放不进就只出第一段；第一段落空则整招只剩预警（照常收势）。
+## 放不进就只出第一段；第一段 lead 位放不下时回退采样（玩家当前 x 居中一组，节奏/
+## 跨度参数不变，只是落点多一档），仍空=返回空 plans 由调用方取消整招。
 func _plan_spans() -> void:
 	_span_plans.clear()
 	var player := get_tree().get_first_node_in_group("player") as Player
@@ -94,9 +97,13 @@ func _plan_spans() -> void:
 			BalanceWorld9.LIVE_SPAN_LEAD_MIN, BalanceWorld9.LIVE_SPAN_LEAD_MAX)
 	var base := player.global_position.x - BalanceWorld9.LIVE_SPAN_LENGTH * 0.5 + lead
 	var first := LiveSpan.plan_x1(get_tree(), terrain, base)
+	var used_base := base
 	if first.is_empty():
-		return
-	first["lead_x1"] = base
+		used_base = player.global_position.x - BalanceWorld9.LIVE_SPAN_LENGTH * 0.5
+		first = LiveSpan.plan_x1(get_tree(), terrain, used_base)
+		if first.is_empty():
+			return
+	first["lead_x1"] = used_base # 实际采用的规划原点（回退档时=玩家当前 x 居中）
 	first["delay"] = float(first["shift"]) / BalanceWorld9.LIVE_SPAN_SHIFT_SPEED
 	if _phase2:
 		first["h"] = BalanceWorld9.LIVE_SPAN_HIGH_H
@@ -161,21 +168,27 @@ func plan_rod_xs(px: float, vx: float) -> Array[float]:
 
 
 func _begin_skill_b() -> void:
-	_bstate = ST_ROD
 	var player := get_tree().get_first_node_in_group("player") as Player
 	var terrain := get_tree().get_first_node_in_group("terrain") as Terrain
 	var container := get_tree().get_first_node_in_group("projectile_container")
+	if player == null or container == null:
+		return
+	# 先规划后预警（顺序是读法命案）：预警亮在前而 xs 空=亮着预警却不来珠列，
+	# 玩家读作「这招没发出来」。xs 空先回退采样（lead 位不行就试玩家当前 x 直落
+	# 一组，节奏/间距参数不变）；仍空=本招取消回 RECOVER，一个预警都不亮。
+	var xs := plan_rod_xs(player.global_position.x, player.velocity.x)
+	if xs.is_empty():
+		xs = plan_rod_xs(player.global_position.x, 0.0)
+	if xs.is_empty():
+		_enter_recover(BalanceWorld9.CONDUCTOR_ROD_RECOVER)
+		return
+	_bstate = ST_ROD
 	var hop := BalanceWorld9.ROD_P2_HOP if _phase2 else BalanceWorld9.ROD_HOP
 	var n := _rod_count()
 	_bt = BalanceWorld9.ROD_WARN + BalanceWorld9.ROD_FLIGHT + BalanceWorld9.ROD_CHARGE \
 			+ hop * (n - 1) + BalanceWorld9.ROD_ARC_LIFE + 0.2 # 全事件链窗口
 	for w in _rod_warns:
-		w.warn() # 逐孔出针前的真实口位预警（R2）
-	if player == null or container == null:
-		return
-	var xs := plan_rod_xs(player.global_position.x, player.velocity.x)
-	if xs.is_empty():
-		return
+		w.warn() # 逐孔出珠前的真实口位预警（R2）
 	var chain := RodChain.new()
 	container.add_child(chain)
 	chain.setup(terrain, _rod_ports, _muzzle, xs, hop)
@@ -187,6 +200,16 @@ func _begin_direct() -> void:
 	_bstate = ST_DIRECT
 	_lash_fired = 0
 	_direct_shoot_t = BalanceWorld9.ARC_LASH_DELAY
+	# 预备拍（ARC_LASH_DELAY 注释的「放电球一闪」）：出手前天线顶电珠先闪一下
+	# （FlashBurst 紫放电语汇，纯视觉零判定；普攻不挂红色 ThreatFlash=换形四家惯例），
+	# 方向仍锁定出手瞬间。
+	var container := get_tree().get_first_node_in_group("projectile_container")
+	if container != null:
+		var spark := FlashBurst.new()
+		spark.flash_color = Color(0.79, 0.65, 1.0)
+		spark.size_scale = 0.45
+		spark.position = _muzzle.global_position
+		container.add_child(spark)
 	_bt = BalanceWorld9.ARC_LASH_DELAY \
 			+ (_lash_count() - 1) * BalanceWorld9.ARC_LASH_TWIN_GAP + 0.2
 
@@ -234,7 +257,7 @@ func _tick_attack(delta: float) -> void:
 				_enter_recover(BalanceCombat.BOSS_DIRECT_RECOVER)
 
 
-## 断缆甩弧单发：放电球真实源点出膛、方向锁定出手瞬间（探针也走这个入口）。
+## 断缆甩弧单发：天线顶电珠真实源点出膛、方向锁定出手瞬间（探针也走这个入口）。
 func fire_lash(dir: Vector2) -> Bullet:
 	var container := get_tree().get_first_node_in_group("projectile_container")
 	if container == null:
@@ -259,13 +282,17 @@ func fire_lash(dir: Vector2) -> Bullet:
 
 
 ## 压招期间断掉的预警，回距重走完整程（预警只认发射器，压掉的半截不算数）。
-## 跨缆预警重走时 lead 一并重采（t=0 原点随预警重开，R13）。
+## 跨缆预警重走时 lead 一并重采（t=0 原点随预警重开，R13）；重采后落点全放不下
+## 则同 _begin_skill_a 取消整招，不亮空预警。
 func _rewarn_after_hold() -> void:
 	match _bstate:
 		ST_SPAN_WARN:
-			_bt = BalanceWorld9.LIVE_SPAN_WARN
 			_plan_spans()
-			_bay_warn.warn()
+			if _span_plans.is_empty():
+				_enter_recover(BalanceWorld9.CONDUCTOR_SPAN_RECOVER)
+			else:
+				_bt = BalanceWorld9.LIVE_SPAN_WARN
+				_bay_warn.warn()
 		_:
 			pass
 

@@ -10,7 +10,8 @@
 [sub_resource type="CanvasItemMaterial" id="addmat"]
 blend_mode = 1
 
-; 碰撞 = 细长杆的内接胶囊（60x6）：磁轨弹全长 48px，胶囊沿 +X 随弹旋转。
+; 碰撞 = 细长杆的内接胶囊（60x6）：磁轨弹沿 +X 随弹旋转；2026-11-09 弹体加粗拉长
+; （sprite 0.5→0.75x1.0=全长 48→72px、宽翻倍，读法更明显），命中判定不跟涨=公平账不变。
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_1"]
 radius = 3.0
 height = 60.0
@@ -24,7 +25,7 @@ max_lifetime = 2.0
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 material = SubResource("addmat")
-scale = Vector2(0.5, 0.5)
+scale = Vector2(0.75, 1.0)
 texture = ExtResource("2")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 24" width="28" height="24">
+<!-- 冰块碎片 28x24（破土/入地喷块粒子）。白冰面+青灰棱面+细描边。
+生成器=art_proposals/snowfield_ch3/gen_worm.py。 -->
+<defs>
+
+</defs>
+<polygon points="2,16 9,3 22,2 26,13 17,22 6,21" fill="#f2f8fb"/>
+<polygon points="9,3 22,2 17,12 8,12" fill="#c3d9e6"/>
+<path d="M 2,16 L 9,3 L 22,2 L 26,13 L 17,22 L 6,21 Z" fill="none" stroke="#9fb8c8" stroke-width="1.2"/>
+</svg>

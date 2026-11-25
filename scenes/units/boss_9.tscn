@@ -1,22 +1,34 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://scripts/units/boss_conductor.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/world_9/boss_storm_body.svg" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/fx/muzzle_flash.tscn" id="3"]
-[ext_resource type="Texture2D" path="res://assets/world_9/boss_storm_arm.svg" id="4"]
+[ext_resource type="Texture2D" path="res://assets/world_9/fx_ball_bolt.svg" id="4"]
 [ext_resource type="Script" path="res://scripts/units/eye_glow.gd" id="5"]
 [ext_resource type="PackedScene" path="res://scenes/fx/threat_flash.tscn" id="6"]
-[ext_resource type="Texture2D" path="res://assets/common/fx_flame.svg" id="7"]
+[ext_resource type="Texture2D" path="res://assets/common/thruster_flame.svg" id="7"]
+[ext_resource type="Script" path="res://scripts/units/enemy_thruster_flame.gd" id="8"]
 
-; 第九章 BOSS·浮空巡线舰「引雷」（BossConductor，架线与引雷能力套件）：
-; 独眼条带 y60..66 含 (55,63)（EyeGlow (-95,-27) 沿用）；
-; ArmPivot=前臂绝缘子串枢画布 (150,26)→局部 (0,-64)（俯仰真瞄=敌基类瞄准层驱动，
-; 同沉锚/盐磨账；臂画布 96x44 枢端 (78,22)→offset(-78,-22)，放电球画布 (10,22)
-; =Muzzle 局部 (-68,0)，hover 370 静姿世界 y=306；普攻甩弧与针链主弧共用源点）；
+; 第九章 BOSS·浮空电塔「引雷」（BossConductor，布珠与引雷能力套件，球状闪电语汇）：
+; 机体生成器 art_proposals/boss_forms/gen_boss_forms.py；画布 300x180 原点 (150,90)，
+; 原生朝左，碰撞体 280x150；独眼条带 y60..66 含 (55,63)=左横担传感舱（EyeGlow (-95,-27)）。
+; 天线账：前部固定天线桅（机体画布：桅 x40、座 (33..47,48..54) 坐传感舱顶、瓷瓶座
+;   y41..46、顶电珠座 (40,20)）→ ArmPivot 局部 (-110,-70)=画布 (40,20)→世界
+;   x=boss.x-110、y=hover 370-70=300（固定天线不俯仰：boss_conductor.gd 覆写
+;   _arm_tracks_pitch=false，基类瞄准层每帧把 ArmPivot 回正）；Muzzle=ArmPivot 原点
+;   (0,0) 对准电珠，甩弧（普攻）与针链主弧共用此源点（探针 AL2 账=px+1290/y≈300）；
+;   电珠本体=Ball（fx_ball_bolt.svg 28x28 三层球，scale 0.7，多处复用同一颗）。
 ; BayPort=腹舱双桩口画布 (150,168)→局部 (0,78)（ThreatFlash=跨缆网预警）；
 ; RodPort1..3=背部三孔画布 (206,52)/(230,56)/(254,60)→局部 (56,-38)/(80,-34)/(104,-30)
-; （各挂 ThreatFlash=出针前逐孔预警，p2 第四针回绕复用 1 号孔）；
-; Thruster1/2=局部 (-40,66)/(60,66)（通用 fx_flame+加色装饰紫，举升喷口呼吸）。
+;   （各挂 ThreatFlash=出珠前逐孔预警，p2 第四针回绕复用 1 号孔）；
+; 推进件账：座裙双火箭焰 Thruster1/2（2026-11-11 八轮用户拍板全表火箭推进，
+;   三叶螺旋桨装饰件废弃）——贴图 assets/common/thruster_flame.svg 平根锥焰，
+;   **原点=焰根**（centered=false+offset(-20,-6)，喷口=画布 (20,6)；枢轴在中
+;   心=提速拉长时焰根从喷口里拔出来），节点=喷口位：局部 (-40,62)/(40,62)=
+;   画布 (110,152)/(190,152)∈举升舱两侧座裙 (98..122)/(178..202,152..162)，
+;   焰穿舱裙往下烧；modulate 电紫焰 (0.58,0.42,0.85)+ADD（章信号紫 #6e52a0
+;   系提亮）；闪燃/速度拉长=EnemyThrusterFlame（脚本管 modulate/scale，别再
+;   从 boss_conductor.gd 写）。下洗已废（读成拖尾，2026-11-11 八轮否决）。
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
 size = Vector2(280, 150)
@@ -42,15 +54,13 @@ scale = Vector2(1.2, 1.2)
 script = ExtResource("5")
 
 [node name="ArmPivot" type="Node2D" parent="Visuals"]
-position = Vector2(0, -64)
+position = Vector2(-110, -70)
 
-[node name="Sprite2D" type="Sprite2D" parent="Visuals/ArmPivot"]
+[node name="Ball" type="Sprite2D" parent="Visuals/ArmPivot"]
+scale = Vector2(0.7, 0.7)
 texture = ExtResource("4")
-centered = false
-offset = Vector2(-78, -22)
 
 [node name="Muzzle" type="Marker2D" parent="Visuals/ArmPivot"]
-position = Vector2(-68, 0)
 
 [node name="Flash" parent="Visuals/ArmPivot/Muzzle" instance=ExtResource("3")]
 
@@ -79,18 +89,24 @@ position = Vector2(104, -30)
 [node name="ThreatFlash" parent="Visuals/RodPort3" instance=ExtResource("6")]
 
 [node name="Thruster1" type="Sprite2D" parent="Visuals"]
-modulate = Color(0.43, 0.32, 0.63, 0.6)
+modulate = Color(0.58, 0.42, 0.85, 0.6)
 material = SubResource("addmat")
-position = Vector2(-40, 66)
+position = Vector2(-40, 62)
 scale = Vector2(1.1, 1.1)
+centered = false
+offset = Vector2(-20, -6)
 texture = ExtResource("7")
+script = ExtResource("8")
 
 [node name="Thruster2" type="Sprite2D" parent="Visuals"]
-modulate = Color(0.43, 0.32, 0.63, 0.6)
+modulate = Color(0.58, 0.42, 0.85, 0.6)
 material = SubResource("addmat")
-position = Vector2(60, 66)
+position = Vector2(40, 62)
 scale = Vector2(1.1, 1.1)
+centered = false
+offset = Vector2(-20, -6)
 texture = ExtResource("7")
+script = ExtResource("8")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_1")

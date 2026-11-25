@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><style>
+body{margin:0;font:12px monospace;color:#ddd}
+.row{display:flex;gap:18px;padding:14px 18px;align-items:flex-start}
+.dark{background:#2b2f38}.light{background:#c9b8a0}
+.cell{position:relative;width:96px;height:32px;transform-origin:center;flex:none}
+.z2{zoom:2}
+.cell img{position:absolute;left:0;top:0}
+.lbl{width:96px;text-align:center;flex:none}
+.bladesonly{position:relative;width:96px;height:96px;zoom:2}
+</style></head><body>
+<!-- 诊断：现役 prop_face+prop_blades 在 PropSpin 屏幕平面旋转下的 4 个相位 -->
+<div class="row dark" id="r1"></div>
+<div class="row light" id="r2"></div>
+<div class="row dark" id="r3"></div>
+<script>
+const SVG = "file:///C:/Users/31715/Documents/GodotProject/2d-ac/assets/common/";
+function cell(rot, zoomed){return `<div class="cell${zoomed?' z2':''}">`+
+ `<img src="${SVG}prop_face.svg">`+
+ `<img src="${SVG}prop_blades.svg" style="transform:rotate(${rot}deg)"></div>`;}
+const rots=[0,30,60,90];
+for(const id of ["r1","r2"]){
+  document.getElementById(id).innerHTML =
+    rots.map(r=>`<div><div class="cell" style="zoom:2"><img src="${SVG}prop_face.svg">`+
+    `<img src="${SVG}prop_blades.svg" style="transform:rotate(${r}deg)"></div></div>`).join("")+
+    `<div style="width:80px">现役组合<br>相位 ${rots.join("°/")}</div>`;
+}
+// 桨叶单体放大（形状检查）：0/45/90
+document.getElementById("r3").innerHTML =
+  rots.map(r=>`<div><div class="bladesonly"><img src="${SVG}prop_blades.svg" style="transform:rotate(${r}deg)"></div></div>`).join("")+
+  `<div style="width:80px">桨叶单体 4×<br>旋转扫出画布=穿帮</div>`;
+</script></body></html>

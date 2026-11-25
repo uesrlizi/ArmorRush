@@ -15,7 +15,7 @@
   fx_dawn_flak.svg            112x14  啸雷弹（曳光矢：白热金主带+暗壳双色，弹体恒亮）
   fx_dawn_flakcore.svg        32x32   引信芯光斑（白热金径向软晕，「何时爆」信息层）
   fx_dawn_flakshard.svg       18x18   弹壳碎片（dawn_burst 崩射身份件，任意角自旋）
-  fx_dawn_bolt.svg            30x12   机鼻曳光矢弹（bullet.gd 纯换皮）
+  fx_dawn_bolt.svg            30x12   机鼻曳光长条（直带微锥尾非波浪；bullet.gd 纯换皮）
 
 锚点账（详见 提案_v1_破晓云廊.md §3；杂兵照 §3 基线逐像素对齐）：
   精英：眼 (19,26.5)=halo r5.3/core r2.4；ArmPivot 画布 (44,12)→局部 (14,-28)，
@@ -421,24 +421,25 @@ def fx_flakshard():
 
 
 def fx_bolt():
-    """机鼻曳光矢弹 30x12（+X=飞行方向）：平滑三层带（外晕/中层/白热芯）
-    ——紫白曳光语汇（云廊守备曳光机炮）。dawn_bolt.tscn=bullet.gd 纯换皮。"""
+    """机鼻曳光长条 30x12（+X=飞行方向）：三层直带微锥尾（外晕/中层/白热芯）
+    ——紫白曳光语汇（云廊守备曳光机炮）。2026-11-10 用户定：曳光弹=长条/水滴
+    （圆点高速视觉读不到）；弹形禁令只禁波浪线（本弹原版正弦波带即违禁原型，
+    改直带+尾端收锥=曳光读法保留、无波）。dawn_bolt.tscn=bullet.gd 纯换皮，
+    判定胶囊 r2.6×h24 沿 +X。"""
     s = Svg(30, 12)
-    import math
-    amp, lam, x0, x1, yc = 1.6, 15.0, 2.0, 28.0, 6.0
-    n = 24
-    xs = [x0 + (x1 - x0) * i / (n - 1) for i in range(n)]
-    ys = [yc + amp * math.sin((x - x0) / lam * 2.0 * math.pi) for x in xs]
+    x0, x1, yc = 2.0, 28.0, 6.0
 
     def ribbon(width, color, opacity):
-        pts = [(x, y - width * 0.5) for x, y in zip(xs, ys)]
-        pts += [(x, y + width * 0.5) for x, y in zip(reversed(xs), reversed(ys))]
+        # 直带 + 尾端（-X 侧）6px 收锥到 55%：曳光读法、无波浪
+        pts = [(x0, yc - width * 0.5 * 0.55)]
+        pts += [(x0 + 6, yc - width * 0.5), (x1, yc - width * 0.5)]
+        pts += [(x1, yc + width * 0.5), (x0 + 6, yc + width * 0.5), (x0, yc + width * 0.5 * 0.55)]
         s.poly(pts, color, opacity)
 
     ribbon(6.0, VIOLET, 0.30)
     ribbon(3.0, VIOLET_HI, 0.9)
     ribbon(1.3, "#ffffff", 1.0)
-    s.circle(x1, ys[-1], 1.5, "#ffffff", 1.0)
+    s.circle(x1, yc, 1.5, "#ffffff", 1.0)
     return s
 
 
@@ -486,6 +487,5 @@ v2：弹体恒亮（轨迹读法），引信读法移交 fx_dawn_flakcore 光斑
 ——啸雷弹引信「何时爆」信息层，alpha+scale 渐急脉冲由代码驱动。""")
     save(fx_flakshard(), "fx_dawn_flakshard.svg", """啸雷弹壳碎片 18x18（dawn_burst 崩射身份件，任意角自旋）：
 暗紫壳+暗紫受光棱+白热金反光小面——高炮弹幕的弹壳崩碎读法。""")
-    save(fx_bolt(), "fx_dawn_bolt.svg", """机鼻曳光矢弹 30x12（+X=飞行方向）：平滑三层带（外晕/中层/白热芯）
-——紫白曳光语汇。dawn_bolt.tscn=bullet.gd 纯换皮。""")
+    save(fx_bolt(), "fx_dawn_bolt.svg", """机鼻曳光长条 30x12（+X=飞行方向）：三层直带微锥尾（外晕/中层/白热芯）——紫白曳光语汇，无波浪（2026-11-10 用户定：曳光弹=长条/水滴，圆点高速读不到；禁令只禁波浪线）。dawn_bolt.tscn=bullet.gd 纯换皮，判定胶囊 r2.6×h24 沿 +X。""")
     print("dawn chapter units baked.")

@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 180" width="300" height="180">
+<!-- 第六章 BOSS「赤轮」斗轮挖掘机 300x180，原点 (150,90)，原生朝左，碰撞体 280x150。Wheel 毂 (44,120)；Rack 枢 (210,38)（座裙顶 38）；BayPort (150,170)；举升焰 (120,154)/(230,154)；独眼 驾驶室 (95,60)=EyeGlow 局部 (-55,-30)。生成器 art_proposals/boss_forms/gen_boss_forms.py。 -->
+<defs>
+
+</defs>
+<line x1="148" y1="54" x2="159" y2="6" stroke="#4e2418" stroke-width="5"/>
+<line x1="176" y1="54" x2="161" y2="6" stroke="#4e2418" stroke-width="5"/>
+<line x1="152" y1="36" x2="170" y2="36" stroke="#33180e" stroke-width="2"/>
+<line x1="155" y1="22" x2="166" y2="22" stroke="#33180e" stroke-width="2"/>
+<circle cx="160" cy="6" r="4" fill="#6e3424"/>
+<circle cx="160" cy="6" r="1.6" fill="#a85a3a"/>
+<line x1="159" y1="7" x2="72" y2="100" stroke="#33180e" stroke-width="1.3" opacity="0.85"/>
+<line x1="161" y1="7" x2="262" y2="24" stroke="#33180e" stroke-width="1.3" opacity="0.85"/>
+<line x1="159" y1="10" x2="72" y2="103" stroke="#33180e" stroke-width="1.3" opacity="0.85"/>
+<line x1="161" y1="10" x2="262" y2="27" stroke="#33180e" stroke-width="1.3" opacity="0.85"/>
+<polygon points="235,61.2 269,41.2 263,30.8 229,50.8" fill="#4e2418"/>
+<line x1="235" y1="61.2" x2="240.3" y2="44.2" stroke="#33180e" stroke-width="1.4"/>
+<line x1="246.4" y1="54.5" x2="251.6" y2="37.5" stroke="#33180e" stroke-width="1.4"/>
+<line x1="257.7" y1="47.8" x2="263" y2="30.8" stroke="#33180e" stroke-width="1.4"/>
+<polygon points="254,22 294,20 296,58 258,62" fill="#4e2418"/>
+<polygon points="254,22 294,20 294,25 255,27" fill="#d98c5e" opacity="0.7"/>
+<rect x="262" y="50" width="3" height="6" fill="#d8a021" opacity="0.85"/>
+<rect x="268" y="50" width="3" height="6" fill="#33180e" opacity="0.85"/>
+<rect x="274" y="50" width="3" height="6" fill="#d8a021" opacity="0.85"/>
+<rect x="280" y="50" width="3" height="6" fill="#33180e" opacity="0.85"/>
+<rect x="286" y="50" width="3" height="6" fill="#d8a021" opacity="0.85"/>
+<polygon points="144,54 232,50 242,60 242,110 146,112 138,100" fill="#6e3424"/>
+<polygon points="144,54 232,50 238,56 146,59" fill="#a85a3a" opacity="0.75"/>
+<polygon points="138,100 242,98 242,110 146,112" fill="#4e2418"/>
+<rect x="178" y="60" width="2.5" height="38" fill="#33180e" opacity="0.35"/>
+<rect x="186" y="70" width="7" height="6" fill="#ffb347" opacity="0.8"/>
+<rect x="199" y="70" width="7" height="6" fill="#ffb347" opacity="0.8"/>
+<rect x="212" y="70" width="7" height="6" fill="#ffb347" opacity="0.8"/>
+<rect x="225" y="70" width="7" height="6" fill="#ffb347" opacity="0.8"/>
+<rect x="150" y="82" width="22" height="3" fill="#ff4640" opacity="0.8"/>
+<rect x="190" y="38" width="40" height="14" fill="#4e2418"/>
+<rect x="192" y="36" width="36" height="3" fill="#a85a3a" opacity="0.7"/>
+<circle cx="236" cy="46" r="2" fill="#f2f0ff" opacity="0.9"/>
+<rect x="140" y="110" width="100" height="12" fill="#33180e"/>
+<rect x="146" y="113" width="5" height="6" fill="#4e2418"/>
+<rect x="156" y="113" width="5" height="6" fill="#4e2418"/>
+<rect x="166" y="113" width="5" height="6" fill="#4e2418"/>
+<rect x="176" y="113" width="5" height="6" fill="#4e2418"/>
+<rect x="186" y="113" width="5" height="6" fill="#4e2418"/>
+<rect x="196" y="113" width="5" height="6" fill="#4e2418"/>
+<rect x="206" y="113" width="5" height="6" fill="#4e2418"/>
+<rect x="216" y="113" width="5" height="6" fill="#4e2418"/>
+<rect x="226" y="113" width="5" height="6" fill="#4e2418"/>
+<polygon points="116,122 246,122 254,136 238,150 122,150 108,136" fill="#6e3424"/>
+<polygon points="116,122 246,122 250,128 112,128" fill="#a85a3a" opacity="0.6"/>
+<polygon points="108,136 254,136 238,150 122,150" fill="#4e2418"/>
+<rect x="184" y="129" width="3" height="4" fill="#d8a021" opacity="0.8"/>
+<rect x="191" y="129" width="3" height="4" fill="#33180e" opacity="0.8"/>
+<rect x="198" y="129" width="3" height="4" fill="#d8a021" opacity="0.8"/>
+<rect x="205" y="129" width="3" height="4" fill="#33180e" opacity="0.8"/>
+<rect x="212" y="129" width="3" height="4" fill="#d8a021" opacity="0.8"/>
+<rect x="219" y="129" width="3" height="4" fill="#33180e" opacity="0.8"/>
+<rect x="108" y="144" width="24" height="10" fill="#4e2418"/>
+<rect x="218" y="144" width="24" height="10" fill="#4e2418"/>
+<rect x="126" y="148" width="48" height="16" fill="#33180e"/>
+<rect x="126" y="148" width="48" height="3" fill="#a85a3a" opacity="0.5"/>
+<rect x="132" y="156" width="36" height="8" fill="#241008"/>
+<circle cx="150" cy="144" r="1.8" fill="#d8a021" opacity="0.9"/>
+<polygon points="47.2,128.4 153.2,88.4 146.8,71.6 40.8,111.6" fill="#4e2418"/>
+<polygon points="47.2,128.4 153.2,88.4 154.6,92 48.6,132" fill="#6e3424"/>
+<polygon points="40.8,111.6 146.8,71.6 145.4,68 39.4,108" fill="#6e3424"/>
+<line x1="47.2" y1="128.4" x2="153.2" y2="88.4" stroke="#a85a3a" stroke-width="1.6" opacity="0.8"/>
+<line x1="47.2" y1="128.4" x2="52.6" y2="107.1" stroke="#6e3424" stroke-width="2.2"/>
+<line x1="59" y1="124" x2="64.4" y2="102.7" stroke="#6e3424" stroke-width="2.2"/>
+<line x1="70.7" y1="119.5" x2="76.2" y2="98.2" stroke="#6e3424" stroke-width="2.2"/>
+<line x1="82.5" y1="115.1" x2="87.9" y2="93.8" stroke="#6e3424" stroke-width="2.2"/>
+<line x1="94.3" y1="110.6" x2="99.7" y2="89.4" stroke="#6e3424" stroke-width="2.2"/>
+<line x1="106.1" y1="106.2" x2="111.5" y2="84.9" stroke="#6e3424" stroke-width="2.2"/>
+<line x1="117.8" y1="101.8" x2="123.3" y2="80.5" stroke="#6e3424" stroke-width="2.2"/>
+<line x1="129.6" y1="97.3" x2="135" y2="76" stroke="#6e3424" stroke-width="2.2"/>
+<line x1="141.4" y1="92.9" x2="146.8" y2="71.6" stroke="#6e3424" stroke-width="2.2"/>
+<line x1="60" y1="106" x2="146" y2="74" stroke="#d98c5e" stroke-width="1.6" opacity="0.7"/>
+<circle cx="44" cy="120" r="9" fill="#4e2418"/>
+<rect x="92" y="72" width="10" height="22" fill="#4e2418"/>
+<polygon points="78,50 116,47 118,74 82,78" fill="#6e3424"/>
+<polygon points="78,50 116,47 116,51 79,54" fill="#a85a3a" opacity="0.8"/>
+<polygon points="78,50 82,78 74,68" fill="#4e2418"/>
+<rect x="78" y="54" width="34" height="12" fill="#ff4640" opacity="0.18"/>
+<rect x="82" y="57" width="26" height="6" fill="#ff4640" opacity="0.95"/>
+<rect x="104" y="64" width="10" height="6" fill="#ffb347" opacity="0.55"/>
+</svg>

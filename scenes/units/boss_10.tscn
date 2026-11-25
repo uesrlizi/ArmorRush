@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://scripts/units/boss_wellhead.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/world_10/boss_sulfur_body.svg" id="2"]
@@ -6,16 +6,26 @@
 [ext_resource type="Texture2D" path="res://assets/world_10/boss_sulfur_arm.svg" id="4"]
 [ext_resource type="Script" path="res://scripts/units/eye_glow.gd" id="5"]
 [ext_resource type="PackedScene" path="res://scenes/fx/threat_flash.tscn" id="6"]
-[ext_resource type="Texture2D" path="res://assets/common/fx_flame.svg" id="7"]
+[ext_resource type="Texture2D" path="res://assets/common/thruster_flame.svg" id="7"]
+[ext_resource type="Script" path="res://scripts/units/enemy_thruster_flame.gd" id="8"]
 
-; 第十章 BOSS·井场管线母舰「井口」（BossWellhead，井口与硫云能力套件）：
-; 独眼条带 y60..66 含 (55,63)（EyeGlow (-95,-27) 沿用）；
-; ArmPivot=井架吊杆枢画布 (150,26)→局部 (0,-64)（俯仰件=敌基类瞄准层驱动，无发光口、
-; 不出弹；臂画布 96x44 枢端 (78,22)→offset(-78,-22)，吊钩座 Muzzle 局部 (-68,0)）；
+; 第十章 BOSS·自升式钻井平台「井口」（BossWellhead，井口与硫云能力套件）：
+; 机体生成器 art_proposals/boss_forms/gen_boss_forms.py；独眼条带 y60..66 含 (55,63)=生活楼前脸（EyeGlow (-95,-27)）；
+; ArmPivot=井架吊杆枢画布 (150,26)→局部 (0,-64)（静态结构件：boss_wellhead.gd 覆写
+; _arm_tracks_pitch()=false，基类俯仰层恒回正、不做可动瞄准；无发光口、不出弹；
+; 臂画布 96x44 枢端 (78,22)→offset(-78,-22)，吊钩座 Muzzle 局部 (-68,0) 仅占位）；
 ; NozzlePort=艏部井口喷嘴画布 (4,144)→局部 (-146,54)，hover 370 世界 y=424（普攻唯一出弹口）；
 ; DrillPort=腹舱钻杆井口画布 (150,168)→局部 (0,78)（ThreatFlash=井压线预警）；
 ; VentPort=艉部排烟囱口画布 (246,46)→局部 (96,-44)（ThreatFlash=硫云爆燃预警）；
-; Thruster1/2=举升喷口画布 (110,156)/(210,156)→局部 (-40,66)/(60,66)（通用 fx_flame+加色硫焰蓝）。
+; Thruster1/2=甲板底举升喷口：喷口座画布 (98..122,134..146)/(198..222,134..146)，座底=局部 y56。
+; 贴图 assets/common/thruster_flame.svg 40x64 灰度平根锥焰（焰朝 +Y、喷口=画布顶
+; 平根 y6），**原点=焰根**（centered=false+offset(-20,-6)；枢轴在中心=提速拉长
+; 时焰根从喷口里拔出来），节点=喷口位：局部 (-40,53)/(60,53)=画布 (110,143)/
+; (210,143)∈喷口座带（缩进座底 ~3px，焰从喷口座里伸出来）、焰尾=局部 53.2+52×1.1
+; ≈y110、焰幅 15×1.1=16.5（座宽 24，锥焰比座窄=喷口读法）；色=modulate
+; 硫焰蓝 (0.28,0.71,1,0.6)+ADD 不变，闪燃/速度拉长=EnemyThrusterFlame（脚本管
+; 本节点 modulate/scale，别再从 BOSS 脚本写）。下洗已废（读成拖尾，2026-11-11
+; 八轮用户否决）。
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
 size = Vector2(280, 150)
@@ -77,16 +87,22 @@ position = Vector2(96, -44)
 [node name="Thruster1" type="Sprite2D" parent="Visuals"]
 modulate = Color(0.28, 0.71, 1, 0.6)
 material = SubResource("addmat")
-position = Vector2(-40, 66)
+position = Vector2(-40, 53)
 scale = Vector2(1.1, 1.1)
+centered = false
+offset = Vector2(-20, -6)
 texture = ExtResource("7")
+script = ExtResource("8")
 
 [node name="Thruster2" type="Sprite2D" parent="Visuals"]
 modulate = Color(0.28, 0.71, 1, 0.6)
 material = SubResource("addmat")
-position = Vector2(60, 66)
+position = Vector2(60, 53)
 scale = Vector2(1.1, 1.1)
+centered = false
+offset = Vector2(-20, -6)
 texture = ExtResource("7")
+script = ExtResource("8")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_1")

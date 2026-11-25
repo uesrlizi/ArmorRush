@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 160" width="200" height="160">
+<!-- 机械冰蠕「冰钻」钻头头部 200x160，原点=头心 (100,80)，原生朝 +X（节点按航向转）。
+构型=隧道掘进机刀盘：颈环(0..26)+机壳(24..124)+口部发射器(118..142)+截锥刀盘(126..198)+先导钻尖。
+锚点：EyeGlow 画布 (72,43)=局部 (-28,-37)；Muzzle 画布 (140,80)=局部 (40,0)（ArmPivot 同轴随头转）。
+碰撞=头心矩形 176x124（Node2D CollisionShape，露出地面才启用）。色板=第三章冷蓝灰族。
+生成器=art_proposals/snowfield_ch3/gen_worm.py（改图改脚本别手改）。 -->
+<defs>
+
+</defs>
+<rect x="0" y="16" width="26" height="128" rx="6" fill="#161c21"/>
+<circle cx="13" cy="34" r="3" fill="#aab8c2" opacity="0.85"/>
+<circle cx="13" cy="126" r="3" fill="#aab8c2" opacity="0.85"/>
+<rect x="8" y="46" width="24" height="7" fill="#aab8c2"/>
+<rect x="8" y="107" width="24" height="7" fill="#aab8c2"/>
+<rect x="8" y="49" width="24" height="1.5" fill="#161c21" opacity="0.5"/>
+<rect x="8" y="110" width="24" height="1.5" fill="#161c21" opacity="0.5"/>
+<polygon points="24,10 112,18 124,34 124,126 112,142 24,150" fill="#39444d"/>
+<polygon points="24,10 112,18 120,30 24,24" fill="#5d6c76" opacity="0.9"/>
+<polygon points="24,132 124,126 112,142 24,150" fill="#2a333a"/>
+<polygon points="30,8 58,10 54,17 84,14 104,20 112,26 24,22" fill="#e8eff3" opacity="0.95"/>
+<line x1="62" y1="24" x2="62" y2="134" stroke="#161c21" stroke-width="1.5" opacity="0.45"/>
+<line x1="96" y1="20" x2="96" y2="132" stroke="#161c21" stroke-width="1.5" opacity="0.45"/>
+<rect x="52" y="34" width="40" height="18" fill="#161c21"/>
+<rect x="54" y="36" width="36" height="2" fill="#aab8c2" opacity="0.4"/>
+<rect x="58" y="40" width="28" height="6" fill="#e23d3d"/>
+<rect x="34" y="66" width="22" height="6" fill="#161c21"/>
+<rect x="37" y="68" width="16" height="2" fill="#7fd0ff" opacity="0.85"/>
+<rect x="34" y="80" width="22" height="6" fill="#161c21"/>
+<rect x="37" y="82" width="16" height="2" fill="#7fd0ff" opacity="0.85"/>
+<rect x="34" y="94" width="22" height="6" fill="#161c21"/>
+<rect x="37" y="96" width="16" height="2" fill="#7fd0ff" opacity="0.85"/>
+<polygon points="118,48 142,56 142,104 118,112" fill="#161c21"/>
+<ellipse cx="132" cy="80" rx="5" ry="20" fill="#7fd0ff" opacity="0.5"/>
+<polygon points="120,50 128,50 124,58" fill="#aab8c2"/>
+<polygon points="120,110 128,110 124,102" fill="#aab8c2"/>
+<polygon points="130,53 138,53 134,61" fill="#aab8c2"/>
+<polygon points="130,107 138,107 134,99" fill="#aab8c2"/>
+<polygon points="126,28 166,52 188,68 198,80 188,92 166,108 126,132" fill="#2a333a"/>
+<polygon points="126,28 166,52 162,60 126,40" fill="#5d6c76" opacity="0.7"/>
+<path d="M 136,38 L 151,80 L 136,122" fill="none" stroke="#aab8c2" stroke-width="5.5" stroke-linecap="round"/>
+<path d="M 141,41 L 156,80 L 141,119" fill="none" stroke="#161c21" stroke-width="2" opacity="0.6"/>
+<path d="M 152,46 L 167,80 L 152,114" fill="none" stroke="#aab8c2" stroke-width="5.5" stroke-linecap="round"/>
+<path d="M 157,49 L 172,80 L 157,111" fill="none" stroke="#161c21" stroke-width="2" opacity="0.6"/>
+<path d="M 168,56 L 183,80 L 168,104" fill="none" stroke="#aab8c2" stroke-width="5.5" stroke-linecap="round"/>
+<path d="M 173,59 L 188,80 L 173,101" fill="none" stroke="#161c21" stroke-width="2" opacity="0.6"/>
+<polygon points="186,70 200,80 186,90" fill="#aab8c2"/>
+<line x1="190" y1="80" x2="199" y2="80" stroke="#161c21" stroke-width="1.2"/>
+<circle cx="196" cy="80" r="2.2" fill="#e23d3d"/>
+</svg>

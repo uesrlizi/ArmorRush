@@ -7,7 +7,8 @@ extends PursuitBoss
 ##     FlakShell 定距空爆弹（出膛瞬间按玩家**当时位置**定距：引信=炮口距/
 ##     弹速，爆点=发射时玩家所在点——**停=吃/动=免**，与 ch4 重弹 lead 惩罚
 ##     互为镜像；精英「响哨」已预教；3 发/p2+1 弹串追赶读法）；
-##   俯冲突袭（技能B）：**首次机体冲撞**——机鼻（Nose）预警+尾焰增亮 0.6s
+##   俯冲突袭（技能B）：**首次机体冲撞**——机鼻（Nose）预警+尾焰点火
+##     （平时熄火飘行；前摇即开、拉起/锁定失败即熄，增推 boost 随状态）
 ##     → 锁定出手点（玩家当时 x、当地地表−120）→ 2100px/s 直线通场扫地面
 ##     通道（过冲 500px 后拉起返锚）。通场带覆盖 [地表−210, 地表−30]：
 ##     站立=被撞、纯跳 apex −127=被撞（压"跳过一切"）、推进 ≥204px 或横移
@@ -15,7 +16,7 @@ extends PursuitBoss
 ##     分工账：啸雷 hunts 空中与驻停，俯冲 hunts 地面通道——玩家被迫两头
 ##     换层（提案 §2）。
 ##   机鼻曳光（普攻直射）：机鼻炮座真瞄玩家短点放——弹=dawn_bolt.tscn
-##     （bullet.gd 纯换皮紫白曳光矢，速度/伤害复用 BOSS_SWEEP_*，直瞄无
+##     （bullet.gd 纯换皮紫白曳光长条，速度/伤害复用 BOSS_SWEEP_*，直瞄无
 ##     预判语法不变），真瞄即预警。
 ## 走位/贴脸窗/二阶段/失衡全在 PursuitBoss 框架（俯冲态接管运动出口，
 ## 拉起后还给弹簧）。数值全在 BalanceWorld5.INTERCEPTOR_*/FLAK_SHELL_*。
@@ -46,9 +47,9 @@ var _dive_hit := false
 @onready var _flak_warn: ThreatFlash = $Visuals/Cannon/Muzzle/ThreatFlash
 @onready var _nose_warn: ThreatFlash = $Visuals/Nose/ThreatFlash
 @onready var _warn: ThreatFlash = $Visuals/ArmPivot/Muzzle/ThreatFlash # 直射枪口（不预警，但池化复用要兜底重置）
-@onready var _thrusters: Array[Sprite2D] = [
-	$Visuals/Thruster1 as Sprite2D,
-	$Visuals/Thruster2 as Sprite2D,
+@onready var _thrusters: Array[EnemyThrusterFlame] = [
+	$Visuals/Thruster1 as EnemyThrusterFlame,
+	$Visuals/Thruster2 as EnemyThrusterFlame,
 ]
 
 
@@ -71,18 +72,17 @@ func on_spawned() -> void:
 	_dive_hit = false
 
 
-## 双发尾焰：金琥珀错相呼吸（截击机无旋翼）；预警/俯冲期过烧增亮=俯冲的
-## 第二重预警读法（机鼻闪光之外的引擎语言）。失衡/死亡演出期间也照烧。
+## 双发尾焰：金琥珀（截击机无旋翼）；闪燃/随速拉长=节点 EnemyThrusterFlame，
+## 本脚本只设 boost 增推——预警期半推、俯冲满推=俯冲的第二重预警读法（机鼻
+## 闪光之外的引擎语言）。失衡/死亡演出期间也照烧。
 func _tick_visual(delta: float) -> void:
-	var burn := 1.0
+	var boost := 0.0
 	if _bstate == ST_DIVE_WARN:
-		burn = 1.6
+		boost = 0.5
 	elif _bstate == ST_DIVE:
-		burn = 2.0
-	for i in _thrusters.size():
-		var t := _thrusters[i] as Sprite2D
-		t.modulate.a = minf((0.5 + 0.25 * sin(_bob_t * 13.0 + i * 2.1)) * burn, 1.0)
-		t.scale = Vector2.ONE * minf((0.9 + 0.15 * sin(_bob_t * 9.0 + i * 1.7)) * burn, 2.2)
+		boost = 1.0
+	for t in _thrusters:
+		t.boost = boost
 	# 背部啸雷炮塔俯仰跟随（真瞄读法；塔身独件双管朝天画，转角补 90°）
 	var player := get_tree().get_first_node_in_group("player") as Player
 	if player != null:
@@ -131,7 +131,10 @@ func _begin_skill_b() -> void:
 	_bstate = ST_DIVE_WARN
 	_bt = BalanceWorld5.INTERCEPTOR_DIVE_WARN
 	_dive_hit = false
-	_nose_warn.warn() # 预警统一入口：机鼻闪光 + 警告音（尾焰增亮在 _tick_visual）
+	_nose_warn.warn() # 预警统一入口：机鼻闪光 + 警告音
+	for t in _thrusters:
+		t.enabled = true # 尾焰点火：平时熄火飘行（倒飞为主喷口朝后不合理），
+		# 前摇即开=冲撞的第二重预警读法；拉起/锁定失败熄火（_end_dive/_lock_dive）
 
 
 ## 出手锁定：预警结束瞬间读定出手点（玩家当时 x、当地地表−CLEAR）——
@@ -140,6 +143,8 @@ func _lock_dive() -> void:
 	var player := get_tree().get_first_node_in_group("player") as Player
 	var terrain := get_tree().get_first_node_in_group("terrain") as Terrain
 	if player == null or terrain == null:
+		for t in _thrusters:
+			t.enabled = false # 锁定失败直接回后摇：尾焰熄火
 		_enter_recover(BalanceWorld5.INTERCEPTOR_DIVE_RECOVER)
 		return
 	var target := Vector2(player.global_position.x,
@@ -175,6 +180,8 @@ func _end_dive() -> void:
 	_vel = Vector2.ZERO
 	_control_vx = 0.0
 	velocity = Vector2.ZERO
+	for t in _thrusters:
+		t.enabled = false # 熄火回飘行
 	_enter_recover(BalanceWorld5.INTERCEPTOR_DIVE_RECOVER)
 
 
@@ -257,7 +264,7 @@ func _tick_attack(delta: float) -> void:
 				_enter_recover(BalanceCombat.BOSS_DIRECT_RECOVER)
 
 
-## 直瞄单发：曳光矢弹真从机鼻炮口出膛、朝玩家当前位置（无预判）；弹是
+## 直瞄单发：曳光长条弹真从机鼻炮口出膛、朝玩家当前位置（无预判）；弹是
 ## bullet.gd 纯换皮（速度/伤害复用 BOSS_SWEEP_*），命中迸溅染紫白。
 func _fire_direct_shot(dir: Vector2) -> void:
 	var container := get_tree().get_first_node_in_group("projectile_container")

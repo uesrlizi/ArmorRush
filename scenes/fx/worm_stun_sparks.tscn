@@ -1,0 +1,45 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/common/fx_spark.svg" id="1"]
+
+; 冰钻失衡瘫地的漏电火花（常驻件，挂在头位、local_coords=true 跟头走）：青白短路火星
+; 连续迸溅——「击穿/失控」读法。BossWorm 瘫地期入树、入地前撤。
+
+[sub_resource type="CanvasItemMaterial" id="addmat"]
+blend_mode = 1
+
+[sub_resource type="Gradient" id="grad_stun"]
+offsets = PackedFloat32Array(0, 0.3, 1)
+colors = PackedColorArray(0.65, 0.9, 1, 1, 1, 1, 1, 1, 0.5, 0.8, 1, 0)
+
+[sub_resource type="GradientTexture1D" id="gtex_stun"]
+gradient = SubResource("grad_stun")
+
+[sub_resource type="Curve" id="curve_stun"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="ctex_stun"]
+curve = SubResource("curve_stun")
+
+[sub_resource type="ParticleProcessMaterial" id="pm_stun"]
+particle_flag_disable_z = true
+spread = 180.0
+initial_velocity_min = 260.0
+initial_velocity_max = 620.0
+gravity = Vector3(0, 700, 0)
+angle_min = -180.0
+angle_max = 180.0
+scale_min = 0.5
+scale_max = 0.9
+scale_curve = SubResource("ctex_stun")
+color_ramp = SubResource("gtex_stun")
+
+[node name="WormStunSparks" type="GPUParticles2D"]
+material = SubResource("addmat")
+amount = 24
+lifetime = 0.35
+local_coords = true
+texture = ExtResource("1")
+visibility_rect = Rect2(-200, -200, 400, 400)
+process_material = SubResource("pm_stun")

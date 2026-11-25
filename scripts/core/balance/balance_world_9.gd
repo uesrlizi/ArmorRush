@@ -1,5 +1,5 @@
 class_name BalanceWorld9
-## 第九章（雷暴线场）调参：放线车「架线」+ 浮空巡线舰「引雷」+ 跨缆/引雷针链/
+## 第九章（雷暴线场）调参：放线车「架线」+ 浮空电塔「引雷」+ 跨缆/引雷针链/
 ## 断缆甩弧——本章数值唯一出处，章设计正本见 design/worlds.md + 威胁设计
 ## art_proposals/storm_ch9/威胁设计_ch9.md（§0 唯一参照系、§5 数值表；终审 R1-R16 裁定）。
 ## 只在这里改数值，场景和脚本不保存副本，避免“改了没效果”的遮蔽问题。
@@ -49,7 +49,7 @@ const ELITE_STRINGER_SCORE := 60
 const ELITE_STRINGER_ATTACK_RANGE := 2200.0
 const ELITE_STRINGER_VOLLEY_HALF_LIFE := 2.4 # 同八章精英泊松节奏（叠套由冷却闸压住）
 
-# ---- 第九章 BOSS·浮空巡线舰「引雷」（300×180 门型横担机体 hover 370：船底 460、
+# ---- 第九章 BOSS·浮空电塔「引雷」（300×180 门型横担机体 hover 370：船底 460、
 # 对最高台阶 536 净空 76，同驳船/哨兵/…/盐磨档）。轮换 A 跨缆网 → 普攻 → B 引雷针链
 # → 普攻；后摇 A 1.3 / B 1.4 / 普攻 BOSS_DIRECT_RECOVER 0.9，p2 ×0.6（框架）。 ----
 const CONDUCTOR_HOVER_Y := 370.0
@@ -93,8 +93,8 @@ const ROD_SCAFFOLD_PAD := 110.0     # R7：各针 ±110 不得与 floating obsta
 const CONDUCTOR_ROD_RECOVER := 1.4
 
 # ---- 断缆甩弧 ArcLash（第九章 BOSS 普攻：arc_lash.tscn=bullet.gd 纯换皮直线弹） ----
-# R11 几何：出膛点=Muzzle global_position（悬浮静姿 ≈ (x_p+1332, 306)），瞄出手
-# 瞬间玩家中心（无预判无逐发跟踪）。满速保持：相对速度 ≈600+700=1300，t≈1.025s
+# R11 几何：出膛点=Muzzle global_position（悬浮静姿 ≈ (x_p+1290, 300)，2026-11-10 出弹源挪前部固定天线），瞄出手
+# 瞬间玩家中心（无预判无逐发跟踪）。满速保持：相对速度 ≈600+700=1300，t≈1.01s
 # 在 x_p+615 相遇，弹线该处高出玩家中心 ~92 > 37 → 保持前跑可钻过弹；弹线在
 # x_p−200 扎地埋掉；静止/刹停=吃 12；纯跳可越（h≥37 窗 0.625s > 扫过 0.24s）。
 # 读法=「罚停留」。p2 双发各自重瞄。普攻不挂 ThreatFlash（换形四家惯例）。

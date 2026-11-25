@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://scripts/units/boss_interceptor.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/world_5/boss_dawn_body.svg" id="2"]
@@ -7,7 +7,8 @@
 [ext_resource type="Script" path="res://scripts/units/eye_glow.gd" id="5"]
 [ext_resource type="PackedScene" path="res://scenes/fx/threat_flash.tscn" id="6"]
 [ext_resource type="Texture2D" path="res://assets/world_5/boss_dawn_cannon.svg" id="7"]
-[ext_resource type="Texture2D" path="res://assets/common/fx_flame.svg" id="8"]
+[ext_resource type="Texture2D" path="res://assets/common/thruster_flame.svg" id="8"]
+[ext_resource type="Script" path="res://scripts/units/enemy_thruster_flame.gd" id="9"]
 
 ; 第五章 BOSS·高空截击机「断云」（BossInterceptor，防空截击能力套件）：
 ; 独眼条带 y60..66 含 (55,63)（EyeGlow (-95,-27) 沿用）；
@@ -15,8 +16,17 @@
 ; （臂画布 44x18 枢端 (34,9)），Muzzle=臂局部 (-24,0)=管口 (10,9)；
 ; Cannon=背炮塔画布 (150,34)→局部 (0,-56)（塔身独件俯仰跟随，
 ; Muzzle 局部 (0,-16)=管口白热尖，Flash+ThreatFlash）；Nose=机鼻画布
-; (14,84)→局部 (-136,-6)（俯冲预警 ThreatFlash）；Thruster1/2=局部
-; (136,-4)/(136,16)（通用 fx_flame+加色，金琥珀脉动）；无旋翼。
+; (14,84)→局部 (-136,-6)（俯冲预警 ThreatFlash）；无旋翼。
+; 推进件账：尾部双发短舱尾焰 Thruster1/2——贴图 assets/common/thruster_flame.svg
+; 40x64 灰度平根锥焰，**原点=焰根**（centered=false+offset(-20,-6)，喷口=画布
+; (20,6)；枢轴在中心=提速拉长时焰根从喷口里拔出来），节点=喷口位：局部
+; (136,-4)/(136,16)=画布 (286,86)/(286,106)（尾喷口）；焰朝机体后方 +X：
+; rotation=-90°（绕喷口摆，转 +90° 会把焰身打进机身，勿改）；
+; modulate 金琥珀 +ADD 不变。**平时熄火（enabled=false，2026-11-11 八轮用户
+; 定案：截击机倒飞为主，巡航喷尾焰不合理，也不追求更多「合理」）——仅俯冲
+; 突袭喷火：前摇即开/_end_dive 与锁定失败即熄（boss_interceptor.gd 三处接线），
+; 俯冲增推=脚本设 boost**；闪燃/随速拉长=节点脚本 EnemyThrusterFlame
+; （别再从 boss_interceptor.gd 写喷口 modulate/scale/rotation）。
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
 size = Vector2(280, 150)
@@ -75,17 +85,27 @@ position = Vector2(-24, 0)
 [node name="ThreatFlash" parent="Visuals/ArmPivot/Muzzle" instance=ExtResource("6")]
 
 [node name="Thruster1" type="Sprite2D" parent="Visuals"]
+script = ExtResource("9")
 modulate = Color(1, 0.72, 0.4, 0.6)
 material = SubResource("addmat")
+enabled = false
 position = Vector2(136, -4)
+rotation = -1.5707964
 scale = Vector2(1.1, 1.1)
+centered = false
+offset = Vector2(-20, -6)
 texture = ExtResource("8")
 
 [node name="Thruster2" type="Sprite2D" parent="Visuals"]
+script = ExtResource("9")
 modulate = Color(1, 0.72, 0.4, 0.6)
 material = SubResource("addmat")
+enabled = false
 position = Vector2(136, 16)
+rotation = -1.5707964
 scale = Vector2(1.1, 1.1)
+centered = false
+offset = Vector2(-20, -6)
 texture = ExtResource("8")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]

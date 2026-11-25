@@ -1,10 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
-<!-- 普攻蓝白焰团 48x48，锚点中心 (24,24)；芯 #c8ecff/主焰 #48b4ff/暗焰边 #1e4a66，普通混合不 ADD。 -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" width="30" height="30">
+<!-- 普攻蓝白焰团 30x30，锚点中心 (15,15)；芯 #c8ecff/主焰 #48b4ff/暗焰边 #1e4a66，普通混合不 ADD；上屏 1:1，碰撞胶囊另账（flare_puff.tscn，不动）。 -->
 <defs>
 
 </defs>
-<circle cx="24" cy="24" r="22" fill="#1e4a66" opacity="0.85"/>
-<polygon points="4,26 10,12 20,4 30,6 40,12 45,24 40,38 28,45 14,42 6,36" fill="#1e4a66" opacity="0.6"/>
-<circle cx="24" cy="24" r="16" fill="#48b4ff" opacity="0.95"/>
-<circle cx="27" cy="22" r="8.5" fill="#c8ecff"/>
+<circle cx="15" cy="15" r="13.5" fill="#1e4a66" opacity="0.85"/>
+<polygon points="2.5,16.5 6.5,7.5 12.5,2.5 19,3.5 25,7.5 28,15 25,24 17.5,28 8.5,26.5 4,22.5" fill="#1e4a66" opacity="0.6"/>
+<circle cx="15" cy="15" r="10" fill="#48b4ff" opacity="0.95"/>
+<circle cx="17" cy="13.5" r="5.5" fill="#c8ecff"/>
 </svg>

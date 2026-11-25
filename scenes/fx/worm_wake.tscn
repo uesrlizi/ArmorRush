@@ -1,0 +1,99 @@
+[gd_scene load_steps=15 format=3]
+
+[ext_resource type="Script" path="res://scripts/fx/worm_wake.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/world_3/fx_worm_shadow.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/world_3/fx_worm_ridge.svg" id="3"]
+[ext_resource type="Texture2D" path="res://assets/world_3/fx_worm_puff.png" id="4"]
+[ext_resource type="Texture2D" path="res://assets/world_3/fx_worm_chunk.svg" id="5"]
+
+; 冰钻潜行航迹（常驻件，节点原点钉在头正上方的地表线）：冰下黑影 Shadow + 雪脊 Ridge +
+; 喷雪两层（Grains 雪粒=方向与速度 / Spray 雪粉=软边体量）。全普通混合（亮背景章不 ADD）。
+; 粒子 local_coords=true——航迹跟着头走，留原地会读成拖尾。读数强度/朝向由 worm_wake.gd
+; set_wake() 驱动，视觉参数在这里手调。
+
+[sub_resource type="Gradient" id="grad_spray"]
+offsets = PackedFloat32Array(0, 0.45, 1)
+colors = PackedColorArray(1, 1, 1, 0.55, 0.97, 0.99, 1, 0.32, 0.9, 0.95, 1, 0)
+
+[sub_resource type="GradientTexture1D" id="gtex_spray"]
+gradient = SubResource("grad_spray")
+
+[sub_resource type="Curve" id="curve_spray"]
+_data = [Vector2(0, 0.6), 0.0, 0.0, 0, 0, Vector2(0.4, 1), 0.0, 0.0, 0, 0, Vector2(1, 1.4), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="ctex_spray"]
+curve = SubResource("curve_spray")
+
+[sub_resource type="ParticleProcessMaterial" id="pm_spray"]
+particle_flag_disable_z = true
+direction = Vector3(0, -1, 0)
+spread = 30.0
+initial_velocity_min = 220.0
+initial_velocity_max = 520.0
+gravity = Vector3(0, 500, 0)
+scale_min = 0.3
+scale_max = 0.55
+scale_curve = SubResource("ctex_spray")
+color_ramp = SubResource("gtex_spray")
+
+[sub_resource type="Gradient" id="grad_grains"]
+offsets = PackedFloat32Array(0, 0.5, 1)
+colors = PackedColorArray(1, 1, 1, 0.95, 1, 1, 1, 0.85, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture1D" id="gtex_grains"]
+gradient = SubResource("grad_grains")
+
+[sub_resource type="Curve" id="curve_grains"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.6, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="ctex_grains"]
+curve = SubResource("curve_grains")
+
+[sub_resource type="ParticleProcessMaterial" id="pm_grains"]
+particle_flag_disable_z = true
+direction = Vector3(0, -1, 0)
+spread = 34.0
+initial_velocity_min = 380.0
+initial_velocity_max = 760.0
+gravity = Vector3(0, 1600, 0)
+angle_min = -180.0
+angle_max = 180.0
+angular_velocity_min = -500.0
+angular_velocity_max = 500.0
+scale_min = 0.28
+scale_max = 0.5
+scale_curve = SubResource("ctex_grains")
+color_ramp = SubResource("gtex_grains")
+
+[node name="WormWake" type="Node2D"]
+script = ExtResource("1")
+
+[node name="Shadow" type="Sprite2D" parent="."]
+position = Vector2(0, 78)
+scale = Vector2(1.5, 0.6)
+texture = ExtResource("2")
+
+[node name="Ridge" type="Sprite2D" parent="."]
+centered = false
+offset = Vector2(-100, -60)
+texture = ExtResource("3")
+
+[node name="Spray" type="GPUParticles2D" parent="."]
+emitting = false
+amount = 30
+lifetime = 0.5
+local_coords = true
+texture = ExtResource("4")
+visibility_rect = Rect2(-200, -300, 400, 400)
+process_material = SubResource("pm_spray")
+
+[node name="Grains" type="GPUParticles2D" parent="."]
+emitting = false
+amount = 26
+lifetime = 0.42
+local_coords = true
+texture = ExtResource("5")
+visibility_rect = Rect2(-200, -300, 400, 400)
+process_material = SubResource("pm_grains")

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 170" width="100" height="170">
+<!-- 机械冰蠕「冰钻」尾节 100x170，原点 (50,85)。宽端（套环）在 +X 接末节，
+向 −X 收成尾锥，钢尖 (2,85)；双稳定鳍；红尾灯 (28,85)。生成器=gen_worm.py。 -->
+<defs>
+
+</defs>
+<polygon points="2,85 32,52 94,44 98,58 98,112 94,126 32,118" fill="#39444d"/>
+<polygon points="32,52 94,44 94,58 38,64" fill="#5d6c76" opacity="0.8"/>
+<polygon points="32,118 94,126 98,112 38,106" fill="#2a333a" opacity="0.9"/>
+<polygon points="38,50 84,46 83,53 42,58" fill="#e8eff3" opacity="0.8"/>
+<line x1="62" y1="48" x2="62" y2="122" stroke="#161c21" stroke-width="1.5" opacity="0.4"/>
+<rect x="92" y="50" width="8" height="70" fill="#161c21"/>
+<polygon points="24,60 12,36 28,46 38,54" fill="#2a333a"/>
+<polygon points="24,110 12,134 28,124 38,116" fill="#2a333a"/>
+<rect x="44" y="72" width="10" height="4" fill="#161c21"/>
+<rect x="46" y="73" width="6" height="2" fill="#7fd0ff" opacity="0.8"/>
+<rect x="44" y="94" width="10" height="4" fill="#161c21"/>
+<rect x="46" y="95" width="6" height="2" fill="#7fd0ff" opacity="0.8"/>
+<polygon points="2,85 22,76 22,94" fill="#aab8c2"/>
+<line x1="5" y1="85" x2="21" y2="85" stroke="#161c21" stroke-width="1.2"/>
+<circle cx="28" cy="85" r="3.5" fill="#e23d3d"/>
+</svg>
